@@ -79,3 +79,43 @@ test('nested action', () => {
     },
   })
 })
+
+test('async action', async () => {
+  // arrange
+  const model = {
+    session: {
+      user: undefined,
+      loginSucceeded: (state, payload) => {
+        state.user = payload
+      },
+      login: async (state, data, actions) => {
+        state.foo = 'bar' // should be noop
+        expect(data).toEqual({
+          username: 'bob',
+          password: 'foo',
+        })
+        state.qux = 'quux' // should be noop
+        const user = await Promise.resolve({ name: 'bob' })
+        actions.loginSucceeded(user)
+      },
+    },
+  }
+
+  // act
+  const { store, actions } = easyPeasy(model)
+
+  // act
+  await actions.session.login({
+    username: 'bob',
+    password: 'foo',
+  })
+
+  // assert
+  expect(store.getState()).toEqual({
+    session: {
+      user: {
+        name: 'bob',
+      },
+    },
+  })
+})
