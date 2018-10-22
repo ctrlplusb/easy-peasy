@@ -32,7 +32,9 @@ const extractInitialState = current =>
     }
   }, {})
 
-const easyPeasy = model => {
+const easyPeasy = (model, options = {}) => {
+  const { devTools = false } = options
+
   const definition = {
     ...model,
     logFullState: state => {
@@ -152,8 +154,10 @@ const easyPeasy = model => {
   const store = createStore(
     extractReducer(actionHandlers, []),
     initialState,
-    window.__REDUX_DEVTOOLS_EXTENSION__ &&
-      window.__REDUX_DEVTOOLS_EXTENSION__(),
+    devTools
+      ? window.__REDUX_DEVTOOLS_EXTENSION__ &&
+        window.__REDUX_DEVTOOLS_EXTENSION__()
+      : undefined,
   )
 
   // attach the actions to dispatch

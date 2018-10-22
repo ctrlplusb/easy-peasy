@@ -162,8 +162,22 @@ test('redux dev tools enabled', () => {
   window.__REDUX_DEVTOOLS_EXTENSION__ = jest.fn()
 
   // act
-  easyPeasy(model)
+  easyPeasy(model, {
+    devTools: true,
+  })
 
   // assert
   expect(window.__REDUX_DEVTOOLS_EXTENSION__).toHaveBeenCalledTimes(1)
+})
+
+test('redux dev tools disabled by default', () => {
+  // arrange
+  const model = {}
+  window.__REDUX_DEVTOOLS_EXTENSION__ = jest.fn()
+
+  // act
+  easyPeasy(model)
+
+  // assert
+  expect(window.__REDUX_DEVTOOLS_EXTENSION__).not.toHaveBeenCalled()
 })
