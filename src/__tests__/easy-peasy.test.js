@@ -155,3 +155,15 @@ test('state with no actions', () => {
     },
   })
 })
+
+test('redux dev tools enabled', () => {
+  // arrange
+  const model = {}
+  window.__REDUX_DEVTOOLS_EXTENSION__ = jest.fn()
+
+  // act
+  easyPeasy(model)
+
+  // assert
+  expect(window.__REDUX_DEVTOOLS_EXTENSION__).toHaveBeenCalledTimes(1)
+})

@@ -149,7 +149,12 @@ const easyPeasy = model => {
     )
   }
 
-  const store = createStore(extractReducer(actionHandlers, []), initialState)
+  const store = createStore(
+    extractReducer(actionHandlers, []),
+    initialState,
+    window.__REDUX_DEVTOOLS_EXTENSION__ &&
+      window.__REDUX_DEVTOOLS_EXTENSION__(),
+  )
 
   // attach the actions to dispatch
   Object.keys(actions).forEach(key => {
