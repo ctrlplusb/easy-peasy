@@ -72,7 +72,7 @@ const store = easyPeasy(model, {
 })
 ```
 
-## Usage with React
+## Usage with React
 
 To use `easy-peasy` with React simply leverage the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
 
