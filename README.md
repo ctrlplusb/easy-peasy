@@ -29,12 +29,9 @@ store.getState();
 
 ## Features
 
-  - Easily mutate state
+  - Easy to use
+  - Supports async actions
   - Redux dev tools integration
-  - Async actions
-  - React support (coming soon)
-  - Schema validation (coming soon)
-  - Test data generation (coming soon)
 
 ## TOCs
 
@@ -60,3 +57,4 @@ yarn add easy-peasy
 
 ## Core Concepts
 
+Todo

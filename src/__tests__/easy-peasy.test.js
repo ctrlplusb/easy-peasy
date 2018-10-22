@@ -24,7 +24,7 @@ test('basic features', () => {
   })
 
   // act
-  store.actions.session.login({
+  store.dispatch.session.login({
     name: 'bob',
   })
 
@@ -67,7 +67,7 @@ test('nested action', () => {
   })
 
   // act
-  store.actions.session.settings.setFavouriteColor('blue')
+  store.dispatch.session.settings.setFavouriteColor('blue')
 
   // assert
   expect(store.getState()).toEqual({
@@ -88,7 +88,7 @@ test('async action', async () => {
       loginSucceeded: (state, payload) => {
         state.user = payload
       },
-      login: async (state, data, actions) => {
+      login: async (state, data, { dispatchLocal }) => {
         state.foo = 'bar' // should be noop
         expect(data).toEqual({
           username: 'bob',
@@ -96,7 +96,7 @@ test('async action', async () => {
         })
         state.qux = 'quux' // should be noop
         const user = await Promise.resolve({ name: 'bob' })
-        actions.loginSucceeded(user)
+        dispatchLocal.loginSucceeded(user)
       },
     },
   }
@@ -105,7 +105,7 @@ test('async action', async () => {
   const store = easyPeasy(model)
 
   // act
-  await store.actions.session.login({
+  await store.dispatch.session.login({
     username: 'bob',
     password: 'foo',
   })
@@ -139,7 +139,7 @@ test('state with no actions', () => {
   const store = easyPeasy(model)
 
   // act
-  store.actions.session.login({
+  store.dispatch.session.login({
     name: 'bob',
   })
 
