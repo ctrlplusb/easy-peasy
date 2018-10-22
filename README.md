@@ -56,6 +56,12 @@ npm install easy-peasy
 
 Todo
 
+## Options
+
+ - `devTools` (Boolean, default=false)
+
+   Enable support for the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). Highly recommended for development.
+
 ## Usage with React
 
 To use `easy-peasy` with React simply leverage the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
