@@ -6,10 +6,11 @@ const packageJson = require('./package.json')
 process.env.BABEL_ENV = 'production'
 
 module.exports = {
+  external: ['immer', 'redux'],
   input: 'src/index.js',
   output: {
     file: `dist/${packageJson.name}.js`,
-    format: 'umd',
+    format: 'cjs',
     sourcemap: true,
     name: changeCase
       .titleCase(packageJson.name.replace(/-/g, ' '))

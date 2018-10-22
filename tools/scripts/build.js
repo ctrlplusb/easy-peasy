@@ -14,7 +14,6 @@ const nodeEnv = Object.assign({}, process.env, {
   NODE_ENV: 'production',
 })
 
-exec('npx rollup -c rollup-min.config.js', nodeEnv)
 exec('npx rollup -c rollup.config.js', nodeEnv)
 
 function fileGZipSize(path) {
@@ -26,5 +25,5 @@ function fileGZipSize(path) {
 }
 
 console.log(
-  `\ngzipped, the build is ${fileGZipSize(`dist/${packageJson.name}.min.js`)}`,
+  `\ngzipped, the build is ${fileGZipSize(`dist/${packageJson.name}.js`)}`,
 )
