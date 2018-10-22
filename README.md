@@ -30,11 +30,11 @@ store.getState();
 
 ## Features
 
-  - Easy to use
-  - Supports async actions
-  - Redux dev tools integration
-  - Simple mutable API, but it's all immutable Redux under the hood
-  - Outputs a Redux store, fully supporting packages like `react-redux`
+  - Quick to set up and use
+  - Mutate your state using simple mutations
+  - Supports async actions for data fetching
+  - Redux Dev Tools Extension support - see state changes for each action, debugging, etc
+  - Outputs a Redux store, allowing easy integration with frameworks like React (via `react-redux`)
 
 ## TOCs
 
