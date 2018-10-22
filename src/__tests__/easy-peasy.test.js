@@ -14,7 +14,7 @@ test('basic features', () => {
   }
 
   // act
-  const { store, actions } = easyPeasy(model)
+  const store = easyPeasy(model)
 
   // assert
   expect(store.getState()).toEqual({
@@ -24,7 +24,7 @@ test('basic features', () => {
   })
 
   // act
-  actions.session.login({
+  store.actions.session.login({
     name: 'bob',
   })
 
@@ -54,7 +54,7 @@ test('nested action', () => {
   }
 
   // act
-  const { store, actions } = easyPeasy(model)
+  const store = easyPeasy(model)
 
   // assert
   expect(store.getState()).toEqual({
@@ -67,7 +67,7 @@ test('nested action', () => {
   })
 
   // act
-  actions.session.settings.setFavouriteColor('blue')
+  store.actions.session.settings.setFavouriteColor('blue')
 
   // assert
   expect(store.getState()).toEqual({
@@ -102,10 +102,10 @@ test('async action', async () => {
   }
 
   // act
-  const { store, actions } = easyPeasy(model)
+  const store = easyPeasy(model)
 
   // act
-  await actions.session.login({
+  await store.actions.session.login({
     username: 'bob',
     password: 'foo',
   })
@@ -116,6 +116,42 @@ test('async action', async () => {
       user: {
         name: 'bob',
       },
+    },
+  })
+})
+
+test('state with no actions', () => {
+  // arrange
+  const model = {
+    session: {
+      user: undefined,
+      login: (state, user) => {
+        state.user = user
+      },
+    },
+    // No associated actions here
+    todos: {
+      foo: [],
+    },
+  }
+
+  // act
+  const store = easyPeasy(model)
+
+  // act
+  store.actions.session.login({
+    name: 'bob',
+  })
+
+  // assert
+  expect(store.getState()).toEqual({
+    session: {
+      user: {
+        name: 'bob',
+      },
+    },
+    todos: {
+      foo: [],
     },
   })
 })

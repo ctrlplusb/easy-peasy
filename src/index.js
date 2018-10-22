@@ -32,7 +32,15 @@ const extractInitialState = current =>
     }
   }, {})
 
-const easyPeasy = model => {
+const easyPeasy = modelSource => {
+  const model = {
+    ...modelSource,
+    logFullState: state => {
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(state, null, 2))
+    },
+  }
+
   const references = {}
 
   const extractActionHandlers = (current, path) =>
@@ -147,7 +155,7 @@ const easyPeasy = model => {
   references.dispatch = store.dispatch
 
   return {
-    store,
+    getState: store.getState,
     actions,
   }
 }
