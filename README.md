@@ -58,9 +58,19 @@ Todo
 
 ## Options
 
+You can pass the following options to `easy-peasy`:
+
  - `devTools` (Boolean, default=false)
 
    Enable support for the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). Highly recommended for development.
+
+Example Usage
+
+```javascript
+const store = easyPeasy(model, {
+  devTools: true
+})
+```
 
 ## Usage with React
 
