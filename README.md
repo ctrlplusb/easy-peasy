@@ -1,7 +1,7 @@
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
 </p>
-<p align='center'>Easy peasy state management</p>
+<p align='center'>Easy peasy redux-powered state management</p>
 
 [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
 [![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
@@ -9,9 +9,9 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 ```javascript
-import easyPeasy from 'easy-peasy';
+import { createStore } from 'easy-peasy';
 
-const store = easyPeasy({
+const store = createStore({
   count: 1,
   inc: (state) => {
     state.count++
@@ -56,6 +56,31 @@ npm install easy-peasy
 
 Todo
 
+## Asynchronous Actions (Handling Effects)
+
+In order to do data fetching etc you can make use of the `effect` util to declare your action as being effectful.
+
+Asynchronous actions cannot update state directly, however, they can dispatch standard actions in order to do so.
+
+```javascript
+import { effect } from 'easy-peasy';
+
+const blog = {
+  posts: {},
+  fetchedPost: (state, post) => {
+    state.posts[post.id] = post;
+  },
+  // Surround your action with the effect util
+  //           👇
+  fetchPost: effect(async (dispatch, payload) => {
+    const response = await fetch(`/api/posts/${payload.id}`)
+    const post = await response.json();
+    // 👇 dispatch the result in order to update state
+    dispatch.blog.fetchedPost(post);
+  })
+};
+```
+
 ## Options
 
 You can pass the following options to `easy-peasy`:
@@ -87,17 +112,22 @@ npm install react-redux
 ```javascript
 import React from 'react';
 import { render } from 'react-dom';
-import easyPeasy from 'easy-peasy';
+import { createStore } from 'easy-peasy';
 import { Provider } from 'react-redux';
 import model from './model';
 import TodoList from './components/TodoList';
 
 // 👇 create your store
-const store = easyPeasy(model);
+const store = createStore({
+  todos: {},
+  addTodo: (state, text) => {
+    // implementation...
+  }
+});
 
 function App() {
   return (
-    // 👇 pass it to the Provider
+    // 👇 then pass it to the Provider
     <Provider store={store}>
       <TodoList />
     </Provider>
@@ -113,26 +143,27 @@ render(<App />, document.querySelector('#app'));
 import React, { Component } from 'react';
 import { connect } from 'redux';
 
-// When we connect the component, the dispatch will be attached with all the
-// available actions bound to it.
-//                            👇
+
 function TodoList({ todos, dispatch }) {
+  //                        👆
+  // When we connect the component, the dispatch will be attached with all the
+  // available actions bound to it.
   return (
     <div>
       {todos.map(({id, text }) => <Todo key={id} text={text} />)}
-      {/* Over here we pass down the action 👇 */}
-      <AddTodo onSubmit={dispatch.todos.addTodo} />
+      {/* Access actions via the dispatch 👇 */}
+      <AddTodo onSubmit={dispatch.addTodo} />
     </div>
   )
 }
 
-// 👇 Bind to your required state to your component
+// 👇 Map to your required state to your component via `connect`
 export default connect(state => ({
   todos: state.todos
 }))(EditTodo)
 ```
 
-## Prior art
+## Prior art
 
 This library was massively inspired by the following two awesome projects:
 
