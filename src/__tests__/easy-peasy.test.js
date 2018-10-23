@@ -215,21 +215,21 @@ test('state with no actions', () => {
   })
 })
 
-test('redux dev tools enabled', () => {
+test('redux dev tools disabled', () => {
   // arrange
   const model = { foo: 'bar' }
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
 
   // act
   createStore(model, {
-    devTools: true,
+    devTools: false,
   })
 
   // assert
-  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
+  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled()
 })
 
-test('redux dev tools disabled by default', () => {
+test('redux dev tools enabled by default', () => {
   // arrange
   const model = { foo: 'bar' }
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
@@ -238,5 +238,5 @@ test('redux dev tools disabled by default', () => {
   createStore(model)
 
   // assert
-  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled()
+  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
 })

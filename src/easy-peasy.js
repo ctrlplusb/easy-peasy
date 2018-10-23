@@ -34,7 +34,7 @@ export const effect = fn => {
 }
 
 export const createStore = (model, options = {}) => {
-  const { devTools = false } = options
+  const { devTools = true } = options
 
   const definition = {
     ...model,
