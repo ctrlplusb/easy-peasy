@@ -85,7 +85,7 @@ test('nested action', () => {
 
 test('redux thunk configured', async () => {
   // arrange
-  const model = {}
+  const model = { foo: 'bar' }
   const store = createStore(model)
   const action = payload => () => Promise.resolve(payload)
 
@@ -208,7 +208,7 @@ test('state with no actions', () => {
 
 test('redux dev tools enabled', () => {
   // arrange
-  const model = {}
+  const model = { foo: 'bar' }
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
 
   // act
@@ -222,7 +222,7 @@ test('redux dev tools enabled', () => {
 
 test('redux dev tools disabled by default', () => {
   // arrange
-  const model = {}
+  const model = { foo: 'bar' }
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
 
   // act

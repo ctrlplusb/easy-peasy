@@ -67,6 +67,7 @@
     "prettier": "^1.14.3",
     "prettier-eslint": "^8.8.2",
     "pretty-bytes": "^5.1.0",
+    "pretty-format": "^23.6.0",
     "ramda": "^0.25.0",
     "readline-sync": "^1.4.7",
     "rimraf": "^2.6.2",

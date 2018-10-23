@@ -31,7 +31,7 @@ store.getState();
 ## Features
 
   - Quick to set up and use
-  - Mutate your state using simple mutations
+  - Modify your state using simple mutations
   - Supports async actions for data fetching
   - Redux Dev Tools Extension support - see state changes for each action, debugging, etc
   - Outputs a Redux store, allowing easy integration with frameworks like React (via `react-redux`)
@@ -41,6 +41,10 @@ store.getState();
   - [Introduction](#introduction)
   - [Installation](#installation)
   - [Core Concepts](#core-concepts)
+  - [Asynchronous Actions (Handling Effects)](#asynchronous-actions-handling-effects)
+  - [Options](#options)
+  - [Usage with React](#usage-with-react)
+  - [Prior Art](#prior-art)
 
 ## Introduction
 
@@ -174,3 +178,7 @@ This library was massively inspired by the following two awesome projects:
  - [react-easy-state](https://github.com/solkimicreb/react-easy-state)
 
    Simple React state management. Made with ❤️ and ES6 Proxies.
+
+ - [mobx-state-tree](https://github.com/mobxjs/mobx-state-tree)
+
+   Model Driven State Management

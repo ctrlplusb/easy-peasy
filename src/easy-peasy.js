@@ -1,42 +1,29 @@
 import {
   applyMiddleware,
-  combineReducers,
   compose,
   createStore as reduxCreateStore,
 } from 'redux'
-import produce, { applyPatches } from 'immer'
+import produce from 'immer'
 import thunk from 'redux-thunk'
 
-const get = (path, target) => path.reduce((acc, cur) => acc[cur], target)
+const isObject = x => typeof x === 'object' && !Array.isArray(x)
 
-const isPromise = x => typeof x === 'object' && typeof x.then === 'function'
+const get = (path, target) =>
+  path.reduce(
+    (acc, cur) => (isObject(acc) === 'object' ? acc[cur] : undefined),
+    target,
+  )
 
-const hasNestedAction = current =>
-  Object.keys(current).reduce((acc, key) => {
-    const value = current[key]
-    if (typeof value === 'function') {
-      return true
+const set = (path, target, value) => {
+  path.reduce((acc, cur, idx) => {
+    if (idx + 1 === path.length) {
+      acc[cur] = value
+    } else {
+      acc[cur] = acc[cur] || {}
     }
-    if (typeof value === 'object' && !Array.isArray(value)) {
-      return acc || hasNestedAction(value)
-    }
-    return acc
-  }, false)
-
-const extractInitialState = current =>
-  Object.keys(current).reduce((innerAcc, key) => {
-    const value = current[key]
-    if (typeof value === 'function') {
-      return innerAcc
-    }
-    return {
-      ...innerAcc,
-      [key]:
-        typeof value === 'object' && !Array.isArray(value)
-          ? extractInitialState(value)
-          : value,
-    }
-  }, {})
+    return acc[cur]
+  }, target)
+}
 
 const effectSymbol = Symbol('effect')
 
@@ -58,22 +45,31 @@ export const createStore = (model, options = {}) => {
   }
 
   const references = {}
+  const initialState = {}
+  const actionEffects = {}
+  const actionReducers = {}
+  const actionCreators = {}
 
-  const extractHandlers = (current, path) =>
-    Object.keys(current).reduce((innerAcc, key) => {
+  const extract = (current, parentPath) =>
+    Object.keys(current).forEach(key => {
       const value = current[key]
+      const path = [...parentPath, key]
       if (typeof value === 'function') {
-        let handler
         if (value[effectSymbol]) {
-          // Effect
-          handler = payload =>
+          // Effect Action
+          const action = payload =>
             value(references.dispatch, payload, {
               getState: references.getState,
             })
-          handler[effectSymbol] = true
+          set(path, actionEffects, action)
+
+          // Effect Action Creator
+          set(path, actionCreators, payload =>
+            references.dispatch(() => action(payload)),
+          )
         } else {
-          // Reducer
-          handler = (state, payload) =>
+          // Reducer Action
+          const action = (state, payload) =>
             produce(state, draft =>
               value(draft, payload, {
                 dispatch: references.dispatch,
@@ -81,96 +77,66 @@ export const createStore = (model, options = {}) => {
                 getState: references.getState,
               }),
             )
-        }
-        handler.handlerName = `${path.join('.')}.${key}`
-        return { ...innerAcc, [key]: handler }
-      }
-      if (typeof value === 'object' && !Array.isArray(value)) {
-        const actions = extractHandlers(value, [...path, key])
-        if (hasNestedAction(actions)) {
-          return { ...innerAcc, [key]: actions }
-        }
-      }
-      return innerAcc
-    }, {})
+          action.actionName = path.join('.')
+          set(path, actionReducers, action)
 
-  const produceActionCreators = current =>
-    Object.keys(current).reduce((innerAcc, key) => {
-      const value = current[key]
-      if (typeof value === 'function') {
-        let action
-        if (value[effectSymbol]) {
-          action = payload => references.dispatch(() => value(payload))
-        } else {
-          action = payload =>
+          // Reducer Action Creator
+          set(path, actionCreators, payload =>
             references.dispatch({
-              type: value.handlerName,
+              type: action.actionName,
               payload,
-            })
+            }),
+          )
         }
-        return { ...innerAcc, [key]: action }
+      } else if (isObject(value)) {
+        extract(value, path)
+      } else {
+        // State
+        set(path, initialState, value)
       }
-      if (typeof value === 'object' && !Array.isArray(value)) {
-        return { ...innerAcc, [key]: produceActionCreators(value) }
-      }
-      return innerAcc
-    }, {})
+    })
 
-  const initialState = extractInitialState(definition)
-  const handlers = extractHandlers(definition, [])
-  const actionCreators = produceActionCreators(handlers)
+  extract(definition, [])
 
   const createReducers = (current, path) => {
-    const handlersAtPath = Object.keys(current).reduce((acc, key) => {
+    const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
       const value = current[key]
       if (typeof value === 'function' && !value[effectSymbol]) {
         return [...acc, value]
       }
       return acc
     }, [])
-    const stateAtPath = Object.keys(current).reduce((acc, key) => {
-      const value = current[key]
-      if (typeof value === 'object' && !Array.isArray(value)) {
-        return [...acc, key]
+    const stateAtPath = Object.keys(current).reduce(
+      (acc, key) => (isObject(current[key]) ? [...acc, key] : acc),
+      [],
+    )
+    const nestedReducers = stateAtPath.map(key => [
+      key,
+      createReducers(current[key], [...path, key]),
+    ])
+    const defaultState = get(path, initialState)
+    return (state = defaultState, action) => {
+      const actionReducer = actionReducersAtPath.find(
+        x => x.actionName === action.type,
+      )
+      if (actionReducer) {
+        return actionReducer(state, action.payload)
       }
-      return acc
-    }, [])
-    if (handlersAtPath.length > 0) {
-      const nestedReducers = stateAtPath.map(key => [
-        key,
-        createReducers(current[key], [...path, key]),
-      ])
-      const defaultState = get(path, initialState)
-      return (state = defaultState, action) => {
-        const handler = handlersAtPath.find(x => x.handlerName === action.type)
-        if (handler) {
-          return handler(state, action.payload)
-        }
-        for (let i = 0; i < nestedReducers.length; i += 1) {
-          const [key, reducer] = nestedReducers[i]
-          const newState = reducer(state[key], action)
-          if (state[key] !== newState) {
-            return {
-              ...state,
-              [key]: newState,
-            }
+      for (let i = 0; i < nestedReducers.length; i += 1) {
+        const [key, reducer] = nestedReducers[i]
+        const newState = reducer(state[key], action)
+        if (state[key] !== newState) {
+          return {
+            ...state,
+            [key]: newState,
           }
         }
-        return state
       }
+      return state
     }
-    return combineReducers(
-      stateAtPath.reduce(
-        (acc, key) => ({
-          ...acc,
-          [key]: createReducers(current[key], [...path, key]),
-        }),
-        {},
-      ),
-    )
   }
 
-  const reducers = createReducers(handlers, [])
+  const reducers = createReducers(actionReducers, [])
 
   const composeEnhancers =
     devTools && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
