@@ -31,24 +31,29 @@ store.getState();
 ## Features
 
   - Quick to set up and use
-  - Modify your state using simple mutations
-  - Supports async actions for data fetching
-  - Redux Dev Tools Extension support - see state changes for each action, debugging, etc
-  - Outputs a Redux store, allowing easy integration with frameworks like React (via `react-redux`)
+  - Modify your state using simple mutations (which are converted to immutable operations under the hood)
+  - Supports async actions to support needs such as data fetching
+  - Full Redux Dev Tools Extension interop - see state changes for each action, debugging, etc
+  - Outputs a Redux store, allowing easy integration with frameworks like React (e.g. via the `react-redux` package)
 
 ## TOCs
 
   - [Introduction](#introduction)
   - [Installation](#installation)
-  - [Core Concepts](#core-concepts)
+  - [Tutorial](#tutorial)
   - [Asynchronous Actions (Handling Effects)](#asynchronous-actions-handling-effects)
-  - [Options](#options)
+  - [Config](#config)
   - [Usage with React](#usage-with-react)
+  - [API](#api)
+    - [createStore](#createstore)
+    - [effect](#effect)
+    - [Action](#action)
+    - [Effect Action](#effect-action)
   - [Prior Art](#prior-art)
 
 ## Introduction
 
-Coming soon to a codebase near you.
+Easy Peasy helps you to avoid all the boilerplate that is typical of a Redux implementation without losing the benefits of the Redux architecture and access to the wide set of tooling that is available to it.
 
 ## Installation
 
@@ -56,7 +61,7 @@ Coming soon to a codebase near you.
 npm install easy-peasy
 ```
 
-## Core Concepts
+## Tutorial
 
 Todo
 
@@ -85,9 +90,9 @@ const blog = {
 };
 ```
 
-## Options
+## Config
 
-You can pass the following options to `easy-peasy`:
+You can pass the following configuration options to `createStore`:
 
  - `devTools` (Boolean, default=false)
 
@@ -166,6 +171,22 @@ export default connect(state => ({
   todos: state.todos
 }))(EditTodo)
 ```
+
+## API
+
+Below is an overview of the API exposed by Easy Peasy.
+
+### createStore
+
+TODO
+
+### Action
+
+TODO
+
+### Effect Action
+
+TODO
 
 ## Prior art
 
