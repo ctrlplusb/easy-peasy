@@ -136,6 +136,15 @@ test('async action', async () => {
   })
 })
 
+test('async action is always promise chainable', done => {
+  // arrange
+  const model = { doSomething: effect(() => undefined) }
+  const store = createStore(model)
+
+  // act
+  store.dispatch.doSomething().then(done)
+})
+
 test('dispatch another branch action', async () => {
   // arrange
   const model = {
