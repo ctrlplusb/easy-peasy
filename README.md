@@ -33,7 +33,7 @@ store.getState();
   - Quick to set up, easy to use
   - Modify your state by simply mutating it
   - Execute async actions for data fetching
-  - Supoorts the Redux Dev Tools Extension
+  - Supports the Redux Dev Tools Extension
   - Supports multiple frameworks (e.g. React via `react-redux`)
 
 ## TOCs
