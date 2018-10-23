@@ -1,4 +1,3 @@
-const flow = require('rollup-plugin-flow')
 const babel = require('rollup-plugin-babel')
 const changeCase = require('change-case')
 const packageJson = require('./package.json')
@@ -17,7 +16,6 @@ module.exports = {
       .replace(/ /g, ''),
   },
   plugins: [
-    flow({ all: true }),
     babel({
       babelrc: false,
       exclude: 'node_modules/**',
