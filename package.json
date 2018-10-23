@@ -1,7 +1,7 @@
 {
   "name": "easy-peasy",
-  "version": "0.2.0",
-  "description": "Easy peasy state management",
+  "version": "0.3.0",
+  "description": "Easy peasy redux-powered state management",
   "license": "MIT",
   "main": "dist/easy-peasy.js",
   "files": [
@@ -14,7 +14,9 @@
   "homepage": "https://github.com/ctrlplusb/easy-peasy#readme",
   "author": "Sean Matheson <sean@ctrlplusb.com>",
   "keywords": [
-    "library"
+    "react",
+    "redux",
+    "state"
   ],
   "scripts": {
     "build": "node ./tools/scripts/build.js",
