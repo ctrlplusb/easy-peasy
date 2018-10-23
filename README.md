@@ -45,9 +45,9 @@ store.getState();
   - [Config](#config)
   - [Usage with React](#usage-with-react)
   - [API](#api)
-    - [createStore(model, config)](#createstore-model-config)
+    - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
-    - [effect(action)](#effect-action)
+    - [effect(action)](#effectaction)
   - [Prior Art](#prior-art)
 
 ## Introduction
