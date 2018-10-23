@@ -41,7 +41,12 @@ store.getState();
   - [Introduction](#introduction)
   - [Installation](#installation)
   - [Tutorial](#tutorial)
-  - [Asynchronous Actions (Handling Effects)](#asynchronous-actions-handling-effects)
+    - [Setting up your store](#setting-up-your-store)
+    - [Accessing state](#accessing-state)
+    - [Modifying state via actions](#modifying-state-via-actions)
+    - [Dispatching actions](#dispatching-actions)
+    - [Asynchronous actions](#asynchronous-actions)
+    - [Final notes](#final-notes)
   - [Config](#config)
   - [Usage with React](#usage-with-react)
   - [API](#api)
@@ -62,32 +67,103 @@ npm install easy-peasy
 
 ## Tutorial
 
-Todo
+### Setting up your store
 
-## Asynchronous Actions (Handling Effects)
+Easy peasy allows you to define your entire Redux store as a simple object structure.
 
-In order to do data fetching etc you can make use of the `effect` util to declare your action as being effectful.
+```javascript
+import { createStore } from 'easy-peasy';
 
-Asynchronous actions cannot update state directly, however, they can dispatch standard actions in order to do so.
+const store = createStore({
+  todos: {
+    items: [],
+  },
+  session: {
+    user: undefined,
+    preferences: {
+      favouriteColor: '#000'
+    }
+  }
+});
+```
+
+### Accessing state
+
+You can now access your state via the store:
+
+```javascript
+console.log(store.getState().session.preferences.favouriteColor);
+// #000
+```
+
+### Modifying state via actions
+
+In order to create actions to mutate your state you simply define them within the appropriate part of your model:
+
+```javascript
+const store = createStore({
+  todos: {
+    items: [],
+    addTodo: (state, payload) => {
+      state.items.push(payload)
+    }
+  }
+});
+```
+
+The action handler will receive as it's first parameter the state that it is related to, in this case it would get `{ items: [] }`. It will also receive any payload that was provided when the action was dispatched.
+
+You can then mutate the state parameter directly as required. Don't worry under the hood this is all converted into the immutable operations that Redux loves, but we take away the mental overhead and diligence required to maintain this.
+
+### Dispatching actions
+
+These actions will be bound against the Redux store's dispatch, with a path matching as it was defined in your model. You can then call an action providing any payload parameter you may require:
+
+```javascript
+store.dispatch.todos.addTodo('Install easy-peasy');
+
+console.log(store.getState().todos.items);
+// ['Install easy-peasy']
+```
+
+### Asynchronous Actions
+
+If you want to do asynchronous work within your actions, like fetching data from the server, then use the `effect` helper to declare an action as being effectful.
 
 ```javascript
 import { effect } from 'easy-peasy';
 
-const blog = {
-  posts: {},
-  fetchedPost: (state, post) => {
-    state.posts[post.id] = post;
-  },
-  // Surround your action with the effect util
-  //           👇
-  fetchPost: effect(async (dispatch, payload) => {
-    const response = await fetch(`/api/posts/${payload.id}`)
-    const post = await response.json();
-    // 👇 dispatch the result in order to update state
-    dispatch.blog.fetchedPost(post);
-  })
-};
+const store = createStore({
+  todos: {
+    items: [],
+    saveTodo: effect(async (dispatch, payload) => {
+      const saved = await todoService.save(payload);
+      dispatch.todos.todoSaved(saved);
+    }),
+    todoSaved: (state, payload) => {
+      state.items.push(payload)
+    }
+  }
+});
 ```
+
+An effect action will receive the Redux store dispatch and allows you to use async/await or Promises. You can't modify the state in an effectful action, however, you can dispatch other actions in order to do so.
+
+You dispatch an effectful action in the same manner, and can even Promise chain on it if you like:
+
+```javascript
+store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
+  console.log('Todo saved');
+})
+```
+
+Easy peasy.
+
+### Final notes
+
+Remember, you can dispatch actions across any part of your model, and your model can be as deep and complex as you like.
+
+Be sure to see the section on [Usage with React](#usage-with-react) if React is your bag.
 
 ## Config
 
