@@ -122,26 +122,19 @@ npm install react-redux
 import React from 'react';
 import { render } from 'react-dom';
 import { createStore } from 'easy-peasy';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux'; // 👈 import the provider
 import model from './model';
 import TodoList from './components/TodoList';
 
-// 👇 create your store
-const store = createStore({
-  todos: {},
-  addTodo: (state, text) => {
-    // implementation...
-  }
-});
+// 👇 then create your store
+const store = createStore(model);
 
-function App() {
-  return (
-    // 👇 then pass it to the Provider
-    <Provider store={store}>
-      <TodoList />
-    </Provider>
-  )
-}
+const App = () => (
+  // 👇 then pass it to the Provider
+  <Provider store={store}>
+    <TodoList />
+  </Provider>
+)
 
 render(<App />, document.querySelector('#app'));
 ```
@@ -150,47 +143,170 @@ render(<App />, document.querySelector('#app'));
 
 ```javascript
 import React, { Component } from 'react';
-import { connect } from 'redux';
+import { connect } from 'react-redux'; // 👈 import the connect
 
-
-function TodoList({ todos, dispatch }) {
-  //                        👆
-  // When we connect the component, the dispatch will be attached with all the
-  // available actions bound to it.
+function TodoList({ todos, addTodo }) {
   return (
     <div>
       {todos.map(({id, text }) => <Todo key={id} text={text} />)}
-      {/* Access actions via the dispatch 👇 */}
-      <AddTodo onSubmit={dispatch.addTodo} />
+      <AddTodo onSubmit={addTodo} />
     </div>
   )
 }
 
-// 👇 Map to your required state to your component via `connect`
-export default connect(state => ({
-  todos: state.todos
-}))(EditTodo)
+export default connect(
+  // 👇 Map to your required state
+  state => ({ todos: state.todos.items }
+  // 👇 Map your required actions
+  dispatch => ({ addTodo: dispatch.todos.addTodo })
+)(EditTodo)
 ```
 
-## API
+## API
 
 Below is an overview of the API exposed by Easy Peasy.
 
-### createStore
+### createStore(model, config)
 
-TODO
+Creates a Redux store based on the given model. The model must be an object and can be any depth. It also accepts an optional configuration parameter for customisations.
 
-### Action
+#### Arguments
 
-TODO
+  - `model` (Object, required)
 
-### Effect Action
+    Your model representing your state tree, and optionally containing action functions.
 
-TODO
+  - `config` (Object, not required)
+
+    Provides custom configuration options for your store. It supports the following options:
+
+    - `devTool` (bool, not required, default=false)
+
+       Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+
+#### Example
+
+```javascript
+import { createStore } from 'easy-peasy';
+
+const store = createStore({
+  todos: {
+    items: [],
+    addTodo: (state, text) => {
+      state.items.push(text)
+    }
+  },
+  session: {
+    user: undefined,
+  }
+})
+```
+
+### action
+
+A function assigned to your model will be considered an action, which can be be used to dispatch updates to your store.
+
+The action will have access to the part of the state tree where it was defined.
+
+It has the following arguments:
+
+  - `state` (Object, required)
+
+    The part of the state tree that the action is against. You can mutate this state value directly as required by the action. Under the hood we convert these mutations into an update against the Redux store.
+
+  - `payload` (Any)
+
+    The payload, if any, that was provided to the action.
+
+When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
+
+#### Example
+
+```javascript
+import { createStore } from 'easy-peasy';
+
+const store = createStore({
+  todos: {
+    items: [],
+    add: (state, payload) => {
+      state.items.push(payload)
+    }
+  },
+  user: {
+    preferences: {
+      backgroundColor: '#000',
+      changeBackgroundColor: (state, payload) => {
+        state.backgroundColor = payload;
+      }
+    }
+  }
+});
+
+store.dispatch.todos.add('Install easy-peasy');
+
+store.dispatch.user.preferences.changeBackgroundColor('#FFF');
+```
+
+### effect(action)
+
+Declares an action on your model as being effectful. i.e. has asynchronous flow.
+
+#### Arguments
+
+  - action (Function, required)
+
+    The action function to execute the effects. It can be asynchronous, e.g. return a Promise or use async/await. Effectful actions cannot modify state, however, they can dispatch other actions providing fetched data for example in order to update the state.
+
+    It accepts the following arguments:
+
+    - `dispatch` (required)
+
+      The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
+
+    - `payload` (Any, not required)
+
+      The payload, if any, that was provided to the action.
+
+    - `additional` (Object, required)
+
+      An object containing additional helpers for the action when required. It has the following properties:
+
+      - `getState` (Function, required)
+
+        When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
+
+When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
+
+#### Example
+
+```javascript
+import { createStore, effect } from 'easy-peasy';
+
+const store = createStore({
+  session: {
+    user: undefined,
+    login: effect(async (dispatch, payload) => {
+      const user = await loginService(payload)
+      dispatch.session.loginSucceeded(user)
+    }),
+    loginSucceeded: (state, payload) => {
+      state.user = payload
+    }
+  }
+});
+
+// 👇 you can dispatch and await on the effectful actions
+await store.dispatch.session.login({
+  username: 'foo',
+  password: 'bar'
+});
+
+console.log('Logged in');
+```
 
 ## Prior art
 
-This library was massively inspired by the following two awesome projects:
+This library was massively inspired by the following awesome projects. I tried to take the best bits I liked about them all and create this package. Huge love to all contributors involved in the below.
 
  - [rematch](https://github.com/rematch/rematch)
 
