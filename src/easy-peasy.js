@@ -65,7 +65,7 @@ export const createStore = (model, options = {}) => {
 
           // Effect Action Creator
           set(path, actionCreators, payload =>
-            references.dispatch(() => action(payload)),
+            references.dispatch(() => Promise.resolve(action(payload))),
           )
         } else {
           // Reducer Action
