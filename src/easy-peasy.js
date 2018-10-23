@@ -1,5 +1,11 @@
-import { combineReducers, createStore } from 'redux'
+import {
+  applyMiddleware,
+  combineReducers,
+  compose,
+  createStore as reduxCreateStore,
+} from 'redux'
 import produce, { applyPatches } from 'immer'
+import thunk from 'redux-thunk'
 
 const get = (path, target) => path.reduce((acc, cur) => acc[cur], target)
 
@@ -32,7 +38,15 @@ const extractInitialState = current =>
     }
   }, {})
 
-const easyPeasy = (model, options = {}) => {
+const effectSymbol = Symbol('effect')
+
+export const effect = fn => {
+  // eslint-disable-next-line no-param-reassign
+  fn[effectSymbol] = true
+  return fn
+}
+
+export const createStore = (model, options = {}) => {
   const { devTools = false } = options
 
   const definition = {
@@ -45,34 +59,48 @@ const easyPeasy = (model, options = {}) => {
 
   const references = {}
 
-  const extractActionHandlers = (current, path) =>
+  const extractHandlers = (current, path) =>
     Object.keys(current).reduce((innerAcc, key) => {
       const value = current[key]
       if (typeof value === 'function') {
-        const handler = (state, payload) => {
-          const inverseChanges = []
-          let inverse = false
-          const newState = produce(
-            state,
-            draft => {
-              const handlerResult = value(draft, payload, {
-                dispatch: references.dispatch,
-                dispatchLocal: get(path, references.dispatch),
-                getState: references.getState,
-              })
-              inverse = isPromise(handlerResult)
-            },
-            (_, inversePatches) => {
-              inverseChanges.push(...inversePatches)
-            },
-          )
-          return inverse ? applyPatches(newState, inverseChanges) : newState
+        let handler
+
+        if (value[effectSymbol]) {
+          // Effect
+          handler = payload =>
+            value(references.dispatch, payload, {
+              getState: references.getState,
+            })
+          handler[effectSymbol] = true
+        } else {
+          // Action
+          handler = (state, payload) => {
+            const inverseChanges = []
+            let inverse = false
+            const newState = produce(
+              state,
+              draft => {
+                const handlerResult = value(draft, payload, {
+                  dispatch: references.dispatch,
+                  dispatchLocal: get(path, references.dispatch),
+                  getState: references.getState,
+                })
+                inverse = isPromise(handlerResult)
+              },
+              (_, inversePatches) => {
+                inverseChanges.push(...inversePatches)
+              },
+            )
+            return inverse && inverseChanges.length > 0
+              ? applyPatches(newState, inverseChanges)
+              : newState
+          }
         }
         handler.actionName = `${path.join('.')}.${key}`
         return { ...innerAcc, [key]: handler }
       }
       if (typeof value === 'object' && !Array.isArray(value)) {
-        const actions = extractActionHandlers(value, [...path, key])
+        const actions = extractHandlers(value, [...path, key])
         if (hasNestedAction(actions)) {
           return { ...innerAcc, [key]: actions }
         }
@@ -84,11 +112,16 @@ const easyPeasy = (model, options = {}) => {
     Object.keys(current).reduce((innerAcc, key) => {
       const value = current[key]
       if (typeof value === 'function') {
-        const action = payload =>
-          references.dispatch({
-            type: value.actionName,
-            payload,
-          })
+        let action
+        if (value[effectSymbol]) {
+          action = payload => references.dispatch(() => value(payload))
+        } else {
+          action = payload =>
+            references.dispatch({
+              type: value.actionName,
+              payload,
+            })
+        }
         return { ...innerAcc, [key]: action }
       }
       if (typeof value === 'object' && !Array.isArray(value)) {
@@ -98,13 +131,13 @@ const easyPeasy = (model, options = {}) => {
     }, {})
 
   const initialState = extractInitialState(definition)
-  const actionHandlers = extractActionHandlers(definition, [])
-  const actions = extractActions(actionHandlers)
+  const handlers = extractHandlers(definition, [])
+  const actions = extractActions(handlers)
 
   const extractReducer = (current, path) => {
     const handlersAtPath = Object.keys(current).reduce((acc, key) => {
       const value = current[key]
-      if (typeof value === 'function') {
+      if (typeof value === 'function' && !value[effectSymbol]) {
         return [...acc, value]
       }
       return acc
@@ -151,13 +184,17 @@ const easyPeasy = (model, options = {}) => {
     )
   }
 
-  const store = createStore(
-    extractReducer(actionHandlers, []),
+  const composeEnhancers =
+    devTools && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      : compose
+
+  const reducers = extractReducer(handlers, [])
+
+  const store = reduxCreateStore(
+    reducers,
     initialState,
-    devTools
-      ? window.__REDUX_DEVTOOLS_EXTENSION__ &&
-        window.__REDUX_DEVTOOLS_EXTENSION__()
-      : undefined,
+    composeEnhancers(applyMiddleware(thunk)),
   )
 
   // attach the actions to dispatch
@@ -170,5 +207,3 @@ const easyPeasy = (model, options = {}) => {
 
   return store
 }
-
-export default easyPeasy

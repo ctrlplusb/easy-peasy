@@ -1,6 +1,9 @@
 /* eslint-disable no-param-reassign */
 
-import easyPeasy from '../index'
+import { createStore, effect } from '../index'
+
+const resolveAfter = (data, ms) =>
+  new Promise(resolve => setTimeout(() => resolve(data), ms))
 
 test('basic features', () => {
   // arrange
@@ -14,7 +17,7 @@ test('basic features', () => {
   }
 
   // act
-  const store = easyPeasy(model)
+  const store = createStore(model)
 
   // assert
   expect(store.getState()).toEqual({
@@ -54,7 +57,7 @@ test('nested action', () => {
   }
 
   // act
-  const store = easyPeasy(model)
+  const store = createStore(model)
 
   // assert
   expect(store.getState()).toEqual({
@@ -80,6 +83,19 @@ test('nested action', () => {
   })
 })
 
+test('redux thunk configured', async () => {
+  // arrange
+  const model = {}
+  const store = createStore(model)
+  const action = payload => () => Promise.resolve(payload)
+
+  // act
+  const result = await store.dispatch(action('foo'))
+
+  // assert
+  expect(result).toBe('foo')
+})
+
 test('async action', async () => {
   // arrange
   const model = {
@@ -88,34 +104,68 @@ test('async action', async () => {
       loginSucceeded: (state, payload) => {
         state.user = payload
       },
-      login: async (state, data, { dispatchLocal }) => {
-        state.foo = 'bar' // should be noop
-        expect(data).toEqual({
+      login: effect(async (dispatch, payload) => {
+        expect(payload).toEqual({
           username: 'bob',
           password: 'foo',
         })
-        state.qux = 'quux' // should be noop
-        const user = await Promise.resolve({ name: 'bob' })
-        dispatchLocal.loginSucceeded(user)
-      },
+        const user = await resolveAfter({ name: 'bob' }, 15)
+        dispatch.session.loginSucceeded(user)
+        return 'resolved'
+      }),
     },
   }
 
   // act
-  const store = easyPeasy(model)
+  const store = createStore(model)
 
   // act
-  await store.dispatch.session.login({
+  const result = await store.dispatch.session.login({
     username: 'bob',
     password: 'foo',
   })
 
   // assert
+  expect(result).toBe('resolved')
   expect(store.getState()).toEqual({
     session: {
       user: {
         name: 'bob',
       },
+    },
+  })
+})
+
+test('dispatch another branch action', async () => {
+  // arrange
+  const model = {
+    session: {
+      user: undefined,
+      login: effect(dispatch => {
+        dispatch.stats.incrementLoginAttempts()
+      }),
+    },
+    stats: {
+      loginAttempts: 0,
+      incrementLoginAttempts: state => {
+        state.loginAttempts += 1
+      },
+    },
+  }
+
+  // act
+  const store = createStore(model)
+
+  // act
+  await store.dispatch.session.login()
+
+  // assert
+  expect(store.getState()).toEqual({
+    session: {
+      user: undefined,
+    },
+    stats: {
+      loginAttempts: 1,
     },
   })
 })
@@ -136,7 +186,7 @@ test('state with no actions', () => {
   }
 
   // act
-  const store = easyPeasy(model)
+  const store = createStore(model)
 
   // act
   store.dispatch.session.login({
@@ -159,25 +209,25 @@ test('state with no actions', () => {
 test('redux dev tools enabled', () => {
   // arrange
   const model = {}
-  window.__REDUX_DEVTOOLS_EXTENSION__ = jest.fn()
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
 
   // act
-  easyPeasy(model, {
+  createStore(model, {
     devTools: true,
   })
 
   // assert
-  expect(window.__REDUX_DEVTOOLS_EXTENSION__).toHaveBeenCalledTimes(1)
+  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
 })
 
 test('redux dev tools disabled by default', () => {
   // arrange
   const model = {}
-  window.__REDUX_DEVTOOLS_EXTENSION__ = jest.fn()
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
 
   // act
-  easyPeasy(model)
+  createStore(model)
 
   // assert
-  expect(window.__REDUX_DEVTOOLS_EXTENSION__).not.toHaveBeenCalled()
+  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled()
 })
