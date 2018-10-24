@@ -9,6 +9,29 @@ beforeEach(() => {
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = undefined
 })
 
+test('empty object in state', () => {
+  // arrange
+  const model = {
+    todos: {
+      items: {},
+      foo: [],
+    },
+    bar: null,
+  }
+
+  // act
+  const store = createStore(model)
+
+  // assert
+  expect(store.getState()).toEqual({
+    todos: {
+      items: {},
+      foo: [],
+    },
+    bar: null,
+  })
+})
+
 test('basic features', () => {
   // arrange
   const model = {
@@ -274,7 +297,7 @@ test('supports initial state', () => {
     foo: {
       bar: {
         stuff: [3, 4],
-        invalid: 'qux',
+        other: 'qux',
       },
     },
   }
@@ -287,6 +310,7 @@ test('supports initial state', () => {
     foo: {
       bar: {
         stuff: [3, 4],
+        other: 'qux',
       },
       color: 'red',
     },
