@@ -5,6 +5,10 @@ import { createStore, effect } from '../index'
 const resolveAfter = (data, ms) =>
   new Promise(resolve => setTimeout(() => resolve(data), ms))
 
+beforeEach(() => {
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = undefined
+})
+
 test('basic features', () => {
   // arrange
   const model = {
@@ -239,4 +243,18 @@ test('redux dev tools enabled by default', () => {
 
   // assert
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
+})
+
+test('allows custom middleware', done => {
+  // arrange
+  const customMiddleware = () => next => action => {
+    // assert
+    expect(action.type).toBe('logFullState')
+    next(action)
+    done()
+  }
+
+  // act
+  const store = createStore({}, { middleware: [customMiddleware] })
+  store.dispatch.logFullState()
 })
