@@ -6,7 +6,7 @@ import {
 import produce from 'immer'
 import thunk from 'redux-thunk'
 
-const isObject = x => typeof x === 'object' && !Array.isArray(x)
+const isObject = x => x && typeof x === 'object' && !Array.isArray(x)
 
 const get = (path, target) =>
   path.reduce((acc, cur) => (isObject(acc) ? acc[cur] : undefined), target)
@@ -85,7 +85,7 @@ export const createStore = (model, options = {}) => {
             }),
           )
         }
-      } else if (isObject(value)) {
+      } else if (isObject(value) && Object.keys(value).length > 1) {
         extract(value, path)
       } else {
         // State
@@ -116,8 +116,7 @@ export const createStore = (model, options = {}) => {
       key,
       createReducers(current[key], [...path, key]),
     ])
-    const defaultState = get(path, defaultState)
-    return (state = defaultState, action) => {
+    return (state = get(path, defaultState), action) => {
       const actionReducer = actionReducersAtPath.find(
         x => x.actionName === action.type,
       )
