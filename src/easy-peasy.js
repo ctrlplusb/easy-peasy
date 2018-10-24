@@ -9,10 +9,7 @@ import thunk from 'redux-thunk'
 const isObject = x => typeof x === 'object' && !Array.isArray(x)
 
 const get = (path, target) =>
-  path.reduce(
-    (acc, cur) => (isObject(acc) === 'object' ? acc[cur] : undefined),
-    target,
-  )
+  path.reduce((acc, cur) => (isObject(acc) ? acc[cur] : undefined), target)
 
 const set = (path, target, value) => {
   path.reduce((acc, cur, idx) => {
@@ -34,7 +31,7 @@ export const effect = fn => {
 }
 
 export const createStore = (model, options = {}) => {
-  const { devTools = true, middleware = [] } = options
+  const { devTools = true, middleware = [], initialState = {} } = options
 
   const definition = {
     ...model,
@@ -45,7 +42,7 @@ export const createStore = (model, options = {}) => {
   }
 
   const references = {}
-  const initialState = {}
+  const defaultState = {}
   const actionEffects = {}
   const actionReducers = {}
   const actionCreators = {}
@@ -92,7 +89,12 @@ export const createStore = (model, options = {}) => {
         extract(value, path)
       } else {
         // State
-        set(path, initialState, value)
+        const initialParentRef = get(parentPath, initialState)
+        if (initialParentRef && key in initialParentRef) {
+          set(path, defaultState, initialParentRef[key])
+        } else {
+          set(path, defaultState, value)
+        }
       }
     })
 
@@ -114,7 +116,7 @@ export const createStore = (model, options = {}) => {
       key,
       createReducers(current[key], [...path, key]),
     ])
-    const defaultState = get(path, initialState)
+    const defaultState = get(path, defaultState)
     return (state = defaultState, action) => {
       const actionReducer = actionReducersAtPath.find(
         x => x.actionName === action.type,
@@ -145,7 +147,7 @@ export const createStore = (model, options = {}) => {
 
   const store = reduxCreateStore(
     reducers,
-    initialState,
+    defaultState,
     composeEnhancers(applyMiddleware(thunk, ...middleware)),
   )
 

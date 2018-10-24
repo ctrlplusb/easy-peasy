@@ -27,10 +27,10 @@ store.getState();
 ## Features
 
   - Quick to set up, easy to use
+  - Update your state via mutations within your actions
+  - Async actions supports remote data fetching/persisting
   - Idiomatic Redux under the hood
   - Outputs a standard Redux store
-  - Modify your state by simply mutating it in your actions
-  - Execute async actions for remote data fetching/persisting
   - Supports the Redux Dev Tools Extension
   - Supports multiple frameworks (e.g. React via `react-redux`)
 
@@ -266,6 +266,10 @@ Creates a Redux store based on the given model. The model must be an object and 
     - `devTool` (bool, not required, default=false)
 
        Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+
+    - `initialState` (Object, not required, default=undefined)
+
+      Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
 
     - `middleware` (Array, not required, default=[])
 
