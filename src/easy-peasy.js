@@ -34,7 +34,7 @@ export const effect = fn => {
 }
 
 export const createStore = (model, options = {}) => {
-  const { devTools = true } = options
+  const { devTools = true, middleware = [] } = options
 
   const definition = {
     ...model,
@@ -146,7 +146,7 @@ export const createStore = (model, options = {}) => {
   const store = reduxCreateStore(
     reducers,
     initialState,
-    composeEnhancers(applyMiddleware(thunk)),
+    composeEnhancers(applyMiddleware(thunk, ...middleware)),
   )
 
   // attach the action creators to dispatch

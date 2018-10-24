@@ -284,6 +284,10 @@ Creates a Redux store based on the given model. The model must be an object and 
 
        Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
+    - `middleware` (Array, not required, default=[])
+
+      Any additional middleware you would like to attach to your Redux store.
+
 #### Example
 
 ```javascript
