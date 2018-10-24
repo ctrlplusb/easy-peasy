@@ -40,6 +40,8 @@ store.getState();
 
   - [Introduction](#introduction)
   - [Installation](#installation)
+  - [Examples](#examples)
+    - [React Todo List](#react-todo-list)
   - [Tutorial](#tutorial)
     - [Setting up your store](#setting-up-your-store)
     - [Accessing state](#accessing-state)
@@ -66,6 +68,14 @@ Easy Peasy outputs a Redux store, which means you can easily use it with framewo
 ```bash
 npm install easy-peasy
 ```
+
+## Examples
+
+### React Todo List
+
+A simple/naive implementation of a todo list.
+
+https://codesandbox.io/s/7k62z0qyoq
 
 ## Tutorial
 
