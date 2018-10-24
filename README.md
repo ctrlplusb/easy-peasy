@@ -183,9 +183,9 @@ This was just a brief overview of how to create and interact with an Easy Peasy 
 
 You can pass the following configuration options to `createStore`:
 
- - `devTools` (Boolean, default=false)
+ - `devTools` (Boolean, default=true)
 
-   Enable support for the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). Highly recommended for development.
+   Enable or disable support for the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
 Example Usage
 
