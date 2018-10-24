@@ -258,3 +258,38 @@ test('allows custom middleware', done => {
   const store = createStore({}, { middleware: [customMiddleware] })
   store.dispatch.logFullState()
 })
+
+test('supports initial state', () => {
+  // arrange
+  const model = {
+    foo: {
+      bar: {
+        stuff: [1, 2],
+      },
+      color: 'red',
+    },
+    baz: 'bob',
+  }
+  const initialState = {
+    foo: {
+      bar: {
+        stuff: [3, 4],
+        invalid: 'qux',
+      },
+    },
+  }
+
+  // act
+  const store = createStore(model, { initialState })
+
+  // assert
+  expect(store.getState()).toEqual({
+    foo: {
+      bar: {
+        stuff: [3, 4],
+      },
+      color: 'red',
+    },
+    baz: 'bob',
+  })
+})
