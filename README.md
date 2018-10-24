@@ -21,18 +21,16 @@ const store = createStore({
 store.dispatch.inc();
 
 store.getState();
-/*
-{
-  count: 2
-}
-*/
+// { count: 2 }
 ```
 
 ## Features
 
   - Quick to set up, easy to use
-  - Modify your state by simply mutating it
-  - Execute async actions for data fetching
+  - Idiomatic Redux under the hood
+  - Outputs a standard Redux store
+  - Modify your state by simply mutating it in your actions
+  - Execute async actions for remote data fetching/persisting
   - Supports the Redux Dev Tools Extension
   - Supports multiple frameworks (e.g. React via `react-redux`)
 
