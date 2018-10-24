@@ -9,6 +9,15 @@ beforeEach(() => {
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = undefined
 })
 
+const trackActionsMiddleware = () => {
+  const middleware = () => next => action => {
+    middleware.actions.push(action)
+    return next(action)
+  }
+  middleware.actions = []
+  return middleware
+}
+
 test('empty object in state', () => {
   // arrange
   const model = {
@@ -297,7 +306,7 @@ test('supports initial state', () => {
     foo: {
       bar: {
         stuff: [3, 4],
-        other: 'qux',
+        invalid: 'qux',
       },
     },
   }
@@ -310,10 +319,27 @@ test('supports initial state', () => {
     foo: {
       bar: {
         stuff: [3, 4],
-        other: 'qux',
       },
       color: 'red',
     },
     baz: 'bob',
   })
+})
+
+test('dispatches an action to represent the start of an effect', () => {
+  // arrange
+  const model = {
+    foo: {
+      doSomething: effect(() => undefined),
+    },
+  }
+  const trackActions = trackActionsMiddleware()
+  const store = createStore(model, { middleware: [trackActions] })
+  const payload = 'hello'
+
+  // act
+  store.dispatch.foo.doSomething(payload)
+
+  // assert
+  expect(trackActions.actions).toEqual([{ type: 'foo.doSomething', payload }])
 })

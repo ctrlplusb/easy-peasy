@@ -52,12 +52,20 @@ export const createStore = (model, options = {}) => {
       const value = current[key]
       const path = [...parentPath, key]
       if (typeof value === 'function') {
+        const actionName = path.join('.')
+
         if (value[effectSymbol]) {
           // Effect Action
-          const action = payload =>
-            value(references.dispatch, payload, {
+          const action = payload => {
+            references.dispatch({
+              type: actionName,
+              payload,
+            })
+            return value(references.dispatch, payload, {
               getState: references.getState,
             })
+          }
+          action.actionName = actionName
           set(path, actionEffects, action)
 
           // Effect Action Creator
@@ -74,7 +82,7 @@ export const createStore = (model, options = {}) => {
                 getState: references.getState,
               }),
             )
-          action.actionName = path.join('.')
+          action.actionName = actionName
           set(path, actionReducers, action)
 
           // Reducer Action Creator
@@ -85,7 +93,7 @@ export const createStore = (model, options = {}) => {
             }),
           )
         }
-      } else if (isObject(value) && Object.keys(value).length > 1) {
+      } else if (isObject(value) && Object.keys(value).length > 0) {
         extract(value, path)
       } else {
         // State
