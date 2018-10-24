@@ -128,21 +128,21 @@ const store = createStore({
 });
 ```
 
-The action will receive as it's first parameter the state that relates to. So in our example our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that was provided when the action was dispatched.
+The action will receive as it's first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that was provided when the action was dispatched.
 
-> Notice how you mutate the state parameter directly. Yep, you no longer have to worry about returning new object instances to maintain Redux's immutable model - we abstract all of that away for you. You just mutate the state to whatever you need it to be and we will take care of the rest.
+> Notice how you mutate the state parameter directly. Yep, you no longer have to worry about returning new object instances to maintain Redux's immutability model - we abstract all of that away for you. You just mutate the state to whatever you need it to be and we will take care of the rest.
 
 ### Dispatching actions
 
-Easy Peasy will bind your actions against the store's `dispatch` using a path that matches the actions path in your model. Execute them providing any payload they may require.
+Easy Peasy will bind your actions against the store's `dispatch` using a path that matches where the action lives within your model. You can dispatch your actions, providing any payload that they may require.
 
 ```javascript
 store.dispatch.todos.addTodo('Install easy-peasy');
-//            |------------|
+//            |-------------|
 //                  |-- path matches our model (todos.addTodo)
 ```
 
-Check your state and you should see the update values.
+Check your state and you should see that it is updated.
 
 ```javascript
 store.getState().todos.items;
@@ -151,7 +151,7 @@ store.getState().todos.items;
 
 ### Creating an `effect` action
 
-If you wish to do things like data fetching then you can use our `effect` helper to declare an effectful action.
+If you wish to do things like remote data fetching/persisting you can use the `effect` helper to declare an effectful action.
 
 ```javascript
 import { effect } from 'easy-peasy'; // 👈 import then helper
@@ -162,6 +162,7 @@ const store = createStore({
 
     //          👇 then surround an action with it
     saveTodo: effect(async (dispatch, payload) => {
+      //                      👆 the action receives dispatch
       const saved = await todoService.save(payload);
       dispatch.todos.todoSaved(saved);
     }),
@@ -173,11 +174,11 @@ const store = createStore({
 });
 ```
 
-You can't modify the state in an `effect` action, however, the `effect` action is provided `dispatch`, allowing you dispatch other standard actions in order to update state where required.  Feel free to use async/await or Promises to help with your async flow.
+You can't modify the state in an `effect` action, however, the `effect` action is provided `dispatch`, allowing you dispatch actions to update state where required.  Feel free to use async/await or Promises to help with your async flow.
 
 ### Dispatching an `effect` action
 
-You dispatch an effectful action in the same manner as standard actions, but an `effect` action always returns a Promise allowing you to chain something to occur after the `effect` action has completed.
+You dispatch an effectful action in the same manner as a normal action. However, an `effect` action always returns a Promise allowing you to chain commands to execute after the `effect` action has completed.
 
 ```javascript
 store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
@@ -187,7 +188,9 @@ store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
 
 ### Final notes
 
-This was just a brief overview of how to create and interact with an Easy Peasy store. We recommend that you read the section on [Usage with React](#usage-with-react) to see how to effectively use this library in the context of React.
+This was just a brief overview of how to create and interact with an Easy Peasy store. We recommend that you read the section on [Usage with React](#usage-with-react) to see how to effectively use this library in the context of React.  Also be sure to check out and tinker with our [examples](#examples).
+
+Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to help visualise actions and state updates. 👍
 
 ## Config
 
