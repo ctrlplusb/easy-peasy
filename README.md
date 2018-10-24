@@ -47,7 +47,6 @@ store.getState();
     - [Dispatching actions](#dispatching-actions)
     - [Asynchronous actions](#asynchronous-actions)
     - [Final notes](#final-notes)
-  - [Config](#config)
   - [Usage with React](#usage-with-react)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
@@ -189,22 +188,6 @@ store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
 This was just a brief overview of how to create and interact with an Easy Peasy store. We recommend that you read the section on [Usage with React](#usage-with-react) to see how to effectively use this library in the context of React.  Also be sure to check out and tinker with our [examples](#examples).
 
 Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to help visualise actions and state updates. 👍
-
-## Config
-
-You can pass the following configuration options to `createStore`:
-
- - `devTools` (Boolean, default=true)
-
-   Enable or disable support for the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
-
-Example Usage
-
-```javascript
-const store = easyPeasy(model, {
-  devTools: true
-})
-```
 
 ## Usage with React
 
