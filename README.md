@@ -1,7 +1,7 @@
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
 </p>
-<p align='center'>Easy peasy redux-powered state management</p>
+<p align='center'>Easy peasy state for React</p>
 
 [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
 [![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
@@ -9,7 +9,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 ```javascript
-import { createStore } from 'easy-peasy';
+import { EasyPeasyProvider, createStore, useStore, useAction } from 'easy-peasy';
 
 const store = createStore({
   count: 1,
@@ -18,10 +18,17 @@ const store = createStore({
   }
 });
 
-store.dispatch.inc();
+const Counter = () => {
+  const count = useStore(state => state.count)
+  const inc = useAction(actions => actions.inc)
+  return (<button onClick={inc}>{count}</button)
+}
 
-store.getState();
-// { count: 2 }
+const App = () => (
+  <EasyPeasyProvider store={store}>
+    <Counter />
+  </EasyPeasyProvider>
+)
 ```
 
 ## Features
@@ -502,7 +509,7 @@ const totalPriceSelector = select(state =>
   state.products.reduce((acc, cur) => acc + cur.price, 0),
 )
 
-const finalPriceSelector = select(
+const netPriceSelector = select(
   state => state.totalPrice * ((100 - state.discount) / 100),
   [totalPriceSelector] // 👈 declare that this selector depends on totalPrice
 )
@@ -511,7 +518,7 @@ const store = createStore({
   discount: 25,
   products: [{ name: 'Shoes', price: 160 }, { name: 'Hat', price: 40 }],
   totalPrice: totalPriceSelector,
-  finalPrice: finalPriceSelector
+  netPrice: netPriceSelector // price after discount applied
 });
 ```
 

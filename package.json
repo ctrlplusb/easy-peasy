@@ -1,7 +1,7 @@
 {
   "name": "easy-peasy",
-  "version": "0.9.1",
-  "description": "Easy peasy redux-powered state management",
+  "version": "0.10.0-alpha.0",
+  "description": "Easy peasy state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.js",
   "files": [
@@ -28,9 +28,12 @@
     "test:coverage": "npm run test -- --coverage",
     "test:coverage:deploy": "npm run test:coverage && codecov"
   },
-  "peerDependencies": {},
+  "peerDependencies": {
+    "prop-types": "^15.6.2",
+    "react": "16.7.0-alpha.0"
+  },
   "dependencies": {
-    "immer": "^1.7.2",
+    "immer": "^1.7.3",
     "memoize-one": "^4.0.2",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0"
@@ -68,13 +71,16 @@
     "prettier-eslint": "^8.8.2",
     "pretty-bytes": "^5.1.0",
     "pretty-format": "^23.6.0",
+    "prop-types": "^15.6.2",
     "ramda": "^0.25.0",
+    "react": "16.7.0-alpha.0",
+    "react-dom": "16.7.0-alpha.0",
+    "react-testing-library": "^5.2.3",
     "readline-sync": "^1.4.7",
     "rimraf": "^2.6.2",
     "rollup": "^0.66.6",
     "rollup-plugin-babel": "^4.0.3",
-    "rollup-plugin-uglify": "^6.0.0",
-    "sinon": "^7.0.0"
+    "rollup-plugin-uglify": "^6.0.0"
   },
   "jest": {
     "collectCoverageFrom": [
