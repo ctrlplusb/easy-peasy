@@ -107,7 +107,7 @@ npm install easy-peasy
 
 A simple/naive implementation of a todo list.
 
-https://codesandbox.io/s/7k62z0qyoq
+https://codesandbox.io/s/woyn8xqk15
 
 ---
 
