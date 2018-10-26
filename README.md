@@ -59,17 +59,23 @@ store.getState();
     - [select(selector)](#select)
   - [Prior Art](#prior-art)
 
+---
+
 ## Introduction
 
 Easy Peasy gives you the power of Redux and its tooling whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a simple model (object) to describe your state and it's actions.
 
 Easy Peasy outputs a Redux store, which means you can integrate with frameworks like React. Read the [integration docs](#integration-with-frameworks) below.
 
+---
+
 ## Installation
 
 ```bash
 npm install easy-peasy
 ```
+
+---
 
 ## Examples
 
@@ -78,6 +84,8 @@ npm install easy-peasy
 A simple/naive implementation of a todo list.
 
 https://codesandbox.io/s/7k62z0qyoq
+
+---
 
 ## Tutorial
 
@@ -227,6 +235,8 @@ This was just a brief overview of how to create and interact with an Easy Peasy 
 
 Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to help visualise actions and state updates. 👍
 
+---
+
 ## Integration with Frameworks
 
 Below showcases how simple it is to integrate Easy Peasy with existing frameworks.
@@ -288,6 +298,8 @@ export default connect(
   dispatch => ({ addTodo: dispatch.todos.addTodo })
 )(EditTodo)
 ```
+
+---
 
 ## API
 
@@ -476,6 +488,8 @@ const store = createStore({
 // 👇 access the derived state as you would normal state
 store.getState().shoppingBasket.totalPrice
 ```
+
+---
 
 ## Prior art
 
