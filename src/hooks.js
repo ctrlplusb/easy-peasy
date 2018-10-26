@@ -4,17 +4,14 @@ import EasyPeasyContext from './context'
 export function useStore(mapState) {
   const store = useContext(EasyPeasyContext)
   const [state, setState] = useState(mapState(store.getState()))
-  const [subscribed, setSubscribed] = useState(false)
-  useEffect(() => {
-    if (subscribed) return undefined
-    setSubscribed(true)
-    return store.subscribe(() => {
+  useEffect(() =>
+    store.subscribe(() => {
       const newState = mapState(store.getState())
       if (newState !== state) {
         setState(newState)
       }
-    })
-  })
+    }),
+  )
   return state
 }
 
