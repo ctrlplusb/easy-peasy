@@ -1,3 +1,5 @@
+> Note: this library depends on React's Hooks feature currently available in v16.7.0-alpha of React
+
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
 </p>
