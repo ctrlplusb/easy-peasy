@@ -1,6 +1,17 @@
 /* eslint-disable no-param-reassign */
 
-import { createStore, effect, select } from '../index'
+import 'jest-dom/extend-expect'
+import React from 'react'
+import { render, cleanup } from 'react-testing-library'
+
+import {
+  StoreProvider,
+  createStore,
+  effect,
+  select,
+  useStore,
+  useAction,
+} from '../index'
 
 const resolveAfter = (data, ms) =>
   new Promise(resolve => setTimeout(() => resolve(data), ms))
@@ -8,6 +19,8 @@ const resolveAfter = (data, ms) =>
 beforeEach(() => {
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = undefined
 })
+
+afterEach(cleanup)
 
 const trackActionsMiddleware = () => {
   const middleware = () => next => action => {
@@ -18,6 +31,34 @@ const trackActionsMiddleware = () => {
   return middleware
 }
 
+test('react', () => {
+  // arrange
+  const store = createStore({
+    count: 1,
+    inc: state => {
+      state.count += 1
+    },
+  })
+  function Counter() {
+    const count = useStore(state => state.count)
+    const inc = useAction(actions => actions.inc)
+    return (
+      <button data-testid="count" type="button" onClick={inc}>
+        {count}
+      </button>
+    )
+  }
+  // act
+  const { getByTestId } = render(
+    <StoreProvider store={store}>
+      <Counter />
+    </StoreProvider>,
+  )
+  // assert
+  const countButton = getByTestId('count')
+  expect(countButton.firstChild.nodeValue).toBe('1')
+})
+
 test('empty object in state', () => {
   // arrange
   const model = {
@@ -27,10 +68,8 @@ test('empty object in state', () => {
     },
     bar: null,
   }
-
   // act
   const store = createStore(model)
-
   // assert
   expect(store.getState()).toEqual({
     todos: {
@@ -40,7 +79,6 @@ test('empty object in state', () => {
     bar: null,
   })
 })
-
 test('basic features', () => {
   // arrange
   const model = {
@@ -51,22 +89,18 @@ test('basic features', () => {
       },
     },
   }
-
   // act
   const store = createStore(model)
-
   // assert
   expect(store.getState()).toEqual({
     session: {
       user: undefined,
     },
   })
-
   // act
   store.dispatch.session.login({
     name: 'bob',
   })
-
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -76,7 +110,6 @@ test('basic features', () => {
     },
   })
 })
-
 test('nested action', () => {
   // arrange
   const model = {
@@ -91,10 +124,8 @@ test('nested action', () => {
       login: () => undefined,
     },
   }
-
   // act
   const store = createStore(model)
-
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -104,10 +135,8 @@ test('nested action', () => {
       },
     },
   })
-
   // act
   store.dispatch.session.settings.setFavouriteColor('blue')
-
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -118,7 +147,6 @@ test('nested action', () => {
     },
   })
 })
-
 test('root action', () => {
   // arrange
   const store = createStore({
@@ -129,28 +157,22 @@ test('root action', () => {
       state.todos.items[2] = { text: 'bar' }
     },
   })
-
   // act
   store.dispatch.doSomething()
-
   // assert
   const actual = store.getState().todos.items
   expect(actual).toEqual({ 1: { text: 'foo' }, 2: { text: 'bar' } })
 })
-
 test('redux thunk configured', async () => {
   // arrange
   const model = { foo: 'bar' }
   const store = createStore(model)
   const action = payload => () => Promise.resolve(payload)
-
   // act
   const result = await store.dispatch(action('foo'))
-
   // assert
   expect(result).toBe('foo')
 })
-
 test('async action', async () => {
   // arrange
   const model = {
@@ -170,16 +192,13 @@ test('async action', async () => {
       }),
     },
   }
-
   // act
   const store = createStore(model)
-
   // act
   const result = await store.dispatch.session.login({
     username: 'bob',
     password: 'foo',
   })
-
   // assert
   expect(result).toBe('resolved')
   expect(store.getState()).toEqual({
@@ -190,16 +209,13 @@ test('async action', async () => {
     },
   })
 })
-
 test('async action is always promise chainable', done => {
   // arrange
   const model = { doSomething: effect(() => undefined) }
   const store = createStore(model)
-
   // act
   store.dispatch.doSomething().then(done)
 })
-
 test('dispatch another branch action', async () => {
   // arrange
   const model = {
@@ -216,13 +232,10 @@ test('dispatch another branch action', async () => {
       },
     },
   }
-
   // act
   const store = createStore(model)
-
   // act
   await store.dispatch.session.login()
-
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -233,7 +246,6 @@ test('dispatch another branch action', async () => {
     },
   })
 })
-
 test('state with no actions', () => {
   // arrange
   const model = {
@@ -248,15 +260,12 @@ test('state with no actions', () => {
       foo: [],
     },
   }
-
   // act
   const store = createStore(model)
-
   // act
   store.dispatch.session.login({
     name: 'bob',
   })
-
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -269,33 +278,26 @@ test('state with no actions', () => {
     },
   })
 })
-
 test('redux dev tools disabled', () => {
   // arrange
   const model = { foo: 'bar' }
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
-
   // act
   createStore(model, {
     devTools: false,
   })
-
   // assert
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled()
 })
-
 test('redux dev tools enabled by default', () => {
   // arrange
   const model = { foo: 'bar' }
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
-
   // act
   createStore(model)
-
   // assert
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
 })
-
 test('allows custom middleware', done => {
   // arrange
   const customMiddleware = () => next => action => {
@@ -304,12 +306,10 @@ test('allows custom middleware', done => {
     next(action)
     done()
   }
-
   // act
   const store = createStore({}, { middleware: [customMiddleware] })
   store.dispatch.logFullState()
 })
-
 test('supports initial state', () => {
   // arrange
   const model = {
@@ -329,10 +329,8 @@ test('supports initial state', () => {
       },
     },
   }
-
   // act
   const store = createStore(model, { initialState })
-
   // assert
   expect(store.getState()).toEqual({
     foo: {
@@ -344,7 +342,6 @@ test('supports initial state', () => {
     baz: 'bob',
   })
 })
-
 test('dispatches an action to represent the start of an effect', () => {
   // arrange
   const model = {
@@ -355,16 +352,13 @@ test('dispatches an action to represent the start of an effect', () => {
   const trackActions = trackActionsMiddleware()
   const store = createStore(model, { middleware: [trackActions] })
   const payload = 'hello'
-
   // act
   store.dispatch.foo.doSomething(payload)
-
   // assert
   expect(trackActions.actions).toEqual([
     { type: '@effect.foo.doSomething', payload },
   ])
 })
-
 describe('select', () => {
   test('is run for initialisation of store', () => {
     // arrange
@@ -372,19 +366,16 @@ describe('select', () => {
     selector.mockImplementation(state =>
       Object.keys(state.items).map(key => state.items[key]),
     )
-
     // act
     const store = createStore({
       items: { 1: { text: 'foo' } },
       itemList: select(selector),
     })
-
     // assert
     const actual = store.getState().itemList
     expect(actual).toEqual([{ text: 'foo' }])
     expect(selector).toHaveBeenCalledTimes(1)
   })
-
   test('executes one only if state does not change', () => {
     // arrange
     const selector = jest.fn()
@@ -396,16 +387,13 @@ describe('select', () => {
       itemList: select(selector),
       doNothing: () => undefined,
     })
-
     // act
     store.dispatch.doNothing()
-
     // assert
     const actual = store.getState().itemList
     expect(actual).toEqual([{ text: 'foo' }])
     expect(selector).toHaveBeenCalledTimes(1)
   })
-
   test('executes again if state does change', () => {
     // arrange
     const selector = jest.fn()
@@ -419,16 +407,13 @@ describe('select', () => {
         state.items[2] = { text: 'bar' }
       },
     })
-
     // act
     store.dispatch.doSomething()
-
     // assert
     const actual = store.getState().itemList
     expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
     expect(selector).toHaveBeenCalledTimes(2)
   })
-
   test('executes if parent action changes associated state', () => {
     // arrange
     const selector = jest.fn()
@@ -444,16 +429,13 @@ describe('select', () => {
         state.todos.items[2] = { text: 'bar' }
       },
     })
-
     // act
     store.dispatch.doSomething()
-
     // assert
     const actual = store.getState().todos.itemList
     expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
     expect(selector).toHaveBeenCalledTimes(2)
   })
-
   test('root select', () => {
     // arrange
     const selector = jest.fn()
@@ -469,16 +451,13 @@ describe('select', () => {
         state.todos.items[2] = { text: 'bar' }
       },
     })
-
     // act
     store.dispatch.doSomething()
-
     // assert
     const actual = store.getState().itemList
     expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
     expect(selector).toHaveBeenCalledTimes(2)
   })
-
   test('composed selectors', () => {
     // arrange
     const totalPriceSelector = select(state =>
@@ -500,23 +479,17 @@ describe('select', () => {
         state.discount = payload
       },
     })
-
     // assert
     expect(store.getState().finalPrice).toBe(150)
-
     // act
     store.dispatch.addProduct({ name: 'Socks', price: 100 })
-
     // assert
     expect(store.getState().finalPrice).toBe(225)
-
     // act
     store.dispatch.changeDiscount(50)
-
     // assert
     expect(store.getState().finalPrice).toBe(150)
   })
-
   test('composed selectors in reverse decleration', () => {
     // arrange
     const totalPriceSelector = select(state =>
@@ -532,7 +505,6 @@ describe('select', () => {
       finalPrice: finalPriceSelector,
       totalPrice: totalPriceSelector,
     })
-
     // assert
     expect(store.getState().finalPrice).toBe(150)
   })

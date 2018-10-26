@@ -5,7 +5,14 @@ const packageJson = require('./package.json')
 process.env.BABEL_ENV = 'production'
 
 module.exports = {
-  external: ['immer', 'memoize-one', 'redux', 'redux-thunk'],
+  external: [
+    'immer',
+    'memoize-one',
+    'prop-types',
+    'react',
+    'redux',
+    'redux-thunk',
+  ],
   input: 'src/index.js',
   output: {
     file: `dist/${packageJson.name}.js`,
