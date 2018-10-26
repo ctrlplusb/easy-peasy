@@ -9,7 +9,7 @@ export function useStore(mapState) {
     if (subscribed) return undefined
     setSubscribed(true)
     return store.subscribe(() => {
-      const newState = setState(mapState(store.getState()))
+      const newState = mapState(store.getState())
       if (newState !== state) {
         setState(newState)
       }
