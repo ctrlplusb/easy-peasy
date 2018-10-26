@@ -3,8 +3,12 @@ import {
   compose,
   createStore as reduxCreateStore,
 } from 'redux'
+import memoizeOne from 'memoize-one'
 import produce from 'immer'
 import thunk from 'redux-thunk'
+
+const effectSymbol = Symbol('effect')
+const selectSymbol = Symbol('select')
 
 const isObject = x => x && typeof x === 'object' && !Array.isArray(x)
 
@@ -22,12 +26,16 @@ const set = (path, target, value) => {
   }, target)
 }
 
-const effectSymbol = Symbol('effect')
-
 export const effect = fn => {
   // eslint-disable-next-line no-param-reassign
   fn[effectSymbol] = true
   return fn
+}
+
+export const select = fn => {
+  const selector = memoizeOne(state => fn(state))
+  selector[selectSymbol] = true
+  return selector
 }
 
 export const createStore = (model, options = {}) => {
@@ -44,8 +52,9 @@ export const createStore = (model, options = {}) => {
   const references = {}
   const defaultState = {}
   const actionEffects = {}
-  const actionReducers = {}
   const actionCreators = {}
+  const actionReducers = {}
+  const selectorReducers = []
 
   const extract = (current, parentPath) =>
     Object.keys(current).forEach(key => {
@@ -54,7 +63,10 @@ export const createStore = (model, options = {}) => {
       if (typeof value === 'function') {
         const actionName = path.join('.')
 
-        if (value[effectSymbol]) {
+        if (value[selectSymbol]) {
+          // skip
+          selectorReducers.push([parentPath, key, value])
+        } else if (value[effectSymbol]) {
           // Effect Action
           const action = payload => {
             references.dispatch({
@@ -124,7 +136,7 @@ export const createStore = (model, options = {}) => {
       key,
       createReducers(current[key], [...path, key]),
     ])
-    return (state = get(path, defaultState), action) => {
+    const reducerForActions = (state = get(path, defaultState), action) => {
       const actionReducer = actionReducersAtPath.find(
         x => x.actionName === action.type,
       )
@@ -143,6 +155,29 @@ export const createStore = (model, options = {}) => {
       }
       return state
     }
+    let isInitial = true
+    return selectorReducers.length
+      ? (state, action) => {
+          const stateAfterActions = reducerForActions(state, action)
+          if (state !== stateAfterActions || isInitial) {
+            const stateAfterSelectors = selectorReducers.reduce(
+              (acc, [parentPath, key, selector]) =>
+                produce(acc, draft => {
+                  // eslint-disable-next-line no-param-reassign
+                  const target =
+                    parentPath.length > 0 ? get(parentPath, draft) : draft
+                  if (target) {
+                    target[key] = selector(target)
+                  }
+                }),
+              stateAfterActions,
+            )
+            isInitial = false
+            return stateAfterSelectors
+          }
+          return stateAfterActions
+        }
+      : reducerForActions
   }
 
   const reducers = createReducers(actionReducers, [])

@@ -27,11 +27,12 @@ store.getState();
 ## Features
 
   - Quick to set up, easy to use
-  - Update your state via mutations within your actions
-  - Async actions supports remote data fetching/persisting
+  - Update state via simple mutations (thanks [`immer`](https://github.com/mweststrate/immer))
+  - Derived state
+  - Async actions for remote data fetching/persisting
+  - Redux Dev Tools Extension
   - Idiomatic Redux under the hood
   - Outputs a standard Redux store
-  - Supports the Redux Dev Tools Extension
   - Supports multiple frameworks (e.g. React via `react-redux`)
 
 ## TOCs
@@ -46,12 +47,15 @@ store.getState();
     - [Modifying state via actions](#modifying-state-via-actions)
     - [Dispatching actions](#dispatching-actions)
     - [Asynchronous actions](#asynchronous-actions)
+    - [Deriving state](#deriving-state)
+    - [Accessing Derived State](#accessing-derived-state)
     - [Final notes](#final-notes)
   - [Usage with React](#usage-with-react)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
     - [effect(action)](#effectaction)
+    - [select(selector)](#select)
   - [Prior Art](#prior-art)
 
 ## Introduction
@@ -182,6 +186,39 @@ store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
   console.log('Todo saved');
 })
 ```
+
+### Deriving state
+
+If you have state that can be derived from state then you can use the [`select`](#select(selector)) helper. Simply attach it to any part of your model.
+
+```javascript
+import { select } from 'easy-peasy'; // 👈 import then helper
+
+const store = createStore({
+  shoppingBasket: {
+    products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
+    totalPrice: select(state =>
+      state.products.reduce((acc, cur) => acc + cur.price, 0)
+    )
+  }
+}
+```
+
+The derived data will be cached and will only be recalculated when the associated state changes.
+
+This can be really helpful to avoid unnecessary re-renders in your react components, especially when you do things like converting an object map to an array in your `connect`. Typically people would use [`reselect`](https://github.com/reduxjs/reselect) to alleviate this issue, however, with Easy Peasy it's this feature is baked right in.
+
+You can attach selectors to any part of your state. Similar to actions they will receive the local state that they are attached to and can access all the state down that branch of state.
+
+### Accessing Derived State
+
+It's as simple as a standard get state call.
+
+```javascript
+store.getState().shoppingBasket.totalPrice
+```
+
+> Note! See how we don't call the derived state as a function. You access it as a simple property.
 
 ### Final notes
 
@@ -371,11 +408,12 @@ When your model is processed by Easy Peasy to create your store all of your acti
 #### Example
 
 ```javascript
-import { createStore, effect } from 'easy-peasy';
+import { createStore, effect } from 'easy-peasy'; // 👈 import then helper
 
 const store = createStore({
   session: {
     user: undefined,
+    // 👇 define your effectful action
     login: effect(async (dispatch, payload) => {
       const user = await loginService(payload)
       dispatch.session.loginSucceeded(user)
@@ -387,12 +425,49 @@ const store = createStore({
 });
 
 // 👇 you can dispatch and await on the effectful actions
-await store.dispatch.session.login({
+store.dispatch.session.login({
   username: 'foo',
   password: 'bar'
-});
+})
+// 👇 effectful actions _always_ return a Promise
+.then(() => console.log('Logged in'));
 
-console.log('Logged in');
+```
+
+### select(selector)
+
+Declares a section of state that is derived via the given selector function.
+
+#### Arguments
+
+  - selector (Function, required)
+
+    The selector function responsible for resolving the derived state. It will be provided the following arguments:
+
+    - `state` (Object, required)
+
+      The local part of state that the `select` property was attached to.
+
+Select's have their outputs cached to avoid unnecessary work, and will be executed
+any time their local state changes.
+
+#### Example
+
+```javascript
+import { select } from 'easy-peasy'; // 👈 import then helper
+
+const store = createStore({
+  shoppingBasket: {
+    products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
+    // 👇 define your derived state
+    totalPrice: select(state =>
+      state.products.reduce((acc, cur) => acc + cur.price, 0)
+    )
+  }
+}
+
+// 👇 access the derived state as you would normal state
+store.getState().shoppingBasket.totalPrice
 ```
 
 ## Prior art

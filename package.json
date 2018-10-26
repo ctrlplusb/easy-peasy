@@ -31,6 +31,7 @@
   "peerDependencies": {},
   "dependencies": {
     "immer": "^1.7.2",
+    "memoize-one": "^4.0.2",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0"
   },

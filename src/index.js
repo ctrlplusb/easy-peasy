@@ -1,3 +1,3 @@
-import { createStore, effect } from './easy-peasy'
+import { createStore, effect, select } from './easy-peasy'
 
-export { createStore, effect }
+export { createStore, effect, select }

@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import { createStore, effect } from '../index'
+import { createStore, effect, select } from '../index'
 
 const resolveAfter = (data, ms) =>
   new Promise(resolve => setTimeout(() => resolve(data), ms))
@@ -117,6 +117,25 @@ test('nested action', () => {
       },
     },
   })
+})
+
+test('root action', () => {
+  // arrange
+  const store = createStore({
+    todos: {
+      items: { 1: { text: 'foo' } },
+    },
+    doSomething: state => {
+      state.todos.items[2] = { text: 'bar' }
+    },
+  })
+
+  // act
+  store.dispatch.doSomething()
+
+  // assert
+  const actual = store.getState().todos.items
+  expect(actual).toEqual({ 1: { text: 'foo' }, 2: { text: 'bar' } })
 })
 
 test('redux thunk configured', async () => {
@@ -342,4 +361,119 @@ test('dispatches an action to represent the start of an effect', () => {
 
   // assert
   expect(trackActions.actions).toEqual([{ type: 'foo.doSomething', payload }])
+})
+
+describe('select', () => {
+  test('is run for initialisation of store', () => {
+    // arrange
+    const selector = jest.fn()
+    selector.mockImplementation(state =>
+      Object.keys(state.items).map(key => state.items[key]),
+    )
+
+    // act
+    const store = createStore({
+      items: { 1: { text: 'foo' } },
+      itemList: select(selector),
+    })
+
+    // assert
+    const actual = store.getState().itemList
+    expect(actual).toEqual([{ text: 'foo' }])
+    expect(selector).toHaveBeenCalledTimes(1)
+  })
+
+  test('executes one only if state does not change', () => {
+    // arrange
+    const selector = jest.fn()
+    selector.mockImplementation(state =>
+      Object.keys(state.items).map(key => state.items[key]),
+    )
+    const store = createStore({
+      items: { 1: { text: 'foo' } },
+      itemList: select(selector),
+      doNothing: () => undefined,
+    })
+
+    // act
+    store.dispatch.doNothing()
+
+    // assert
+    const actual = store.getState().itemList
+    expect(actual).toEqual([{ text: 'foo' }])
+    expect(selector).toHaveBeenCalledTimes(1)
+  })
+
+  test('executes again if state does change', () => {
+    // arrange
+    const selector = jest.fn()
+    selector.mockImplementation(state =>
+      Object.keys(state.items).map(key => state.items[key]),
+    )
+    const store = createStore({
+      items: { 1: { text: 'foo' } },
+      itemList: select(selector),
+      doSomething: state => {
+        state.items[2] = { text: 'bar' }
+      },
+    })
+
+    // act
+    store.dispatch.doSomething()
+
+    // assert
+    const actual = store.getState().itemList
+    expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
+    expect(selector).toHaveBeenCalledTimes(2)
+  })
+
+  test('executes if parent action changes associated state', () => {
+    // arrange
+    const selector = jest.fn()
+    selector.mockImplementation(state =>
+      Object.keys(state.items).map(key => state.items[key]),
+    )
+    const store = createStore({
+      todos: {
+        items: { 1: { text: 'foo' } },
+        itemList: select(selector),
+      },
+      doSomething: state => {
+        state.todos.items[2] = { text: 'bar' }
+      },
+    })
+
+    // act
+    store.dispatch.doSomething()
+
+    // assert
+    const actual = store.getState().todos.itemList
+    expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
+    expect(selector).toHaveBeenCalledTimes(2)
+  })
+
+  test('root select', () => {
+    // arrange
+    const selector = jest.fn()
+    selector.mockImplementation(state =>
+      Object.keys(state.todos.items).map(key => state.todos.items[key]),
+    )
+    const store = createStore({
+      todos: {
+        items: { 1: { text: 'foo' } },
+      },
+      itemList: select(selector),
+      doSomething: state => {
+        state.todos.items[2] = { text: 'bar' }
+      },
+    })
+
+    // act
+    store.dispatch.doSomething()
+
+    // assert
+    const actual = store.getState().itemList
+    expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
+    expect(selector).toHaveBeenCalledTimes(2)
+  })
 })
