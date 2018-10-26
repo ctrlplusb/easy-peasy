@@ -65,14 +65,13 @@ export const createStore = (model, options = {}) => {
       const value = current[key]
       const path = [...parentPath, key]
       if (typeof value === 'function') {
-        const actionName = path.join('.')
-
         if (value[selectSymbol]) {
           // skip
           value[selectStateSymbol] = { parentPath, key, executed: false }
           selectorReducers.push(value)
         } else if (value[effectSymbol]) {
           // Effect Action
+          const actionName = `@effect.${path.join('.')}`
           const action = payload => {
             references.dispatch({
               type: actionName,
@@ -91,6 +90,7 @@ export const createStore = (model, options = {}) => {
           )
         } else {
           // Reducer Action
+          const actionName = `@action.${path.join('.')}`
           const action = (state, payload) =>
             produce(state, draft =>
               value(draft, payload, {

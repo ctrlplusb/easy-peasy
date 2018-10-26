@@ -300,7 +300,7 @@ test('allows custom middleware', done => {
   // arrange
   const customMiddleware = () => next => action => {
     // assert
-    expect(action.type).toBe('logFullState')
+    expect(action.type).toBe('@action.logFullState')
     next(action)
     done()
   }
@@ -360,7 +360,9 @@ test('dispatches an action to represent the start of an effect', () => {
   store.dispatch.foo.doSomething(payload)
 
   // assert
-  expect(trackActions.actions).toEqual([{ type: 'foo.doSomething', payload }])
+  expect(trackActions.actions).toEqual([
+    { type: '@effect.foo.doSomething', payload },
+  ])
 })
 
 describe('select', () => {
