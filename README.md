@@ -9,25 +9,34 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 ```javascript
-import { EasyPeasyProvider, createStore, useStore, useAction } from 'easy-peasy';
+import { StoreProvider, createStore, useStore, useAction } from 'easy-peasy';
 
-const store = createStore({
-  count: 1,
-  inc: (state) => {
-    state.count++
+const model = {
+  todos: {
+    items: ['Install easy-peasy', 'Build app', 'Profit'],
+    add: (state, payload) => {
+      state.items.push(payload)
+    }
   }
-});
-
-const Counter = () => {
-  const count = useStore(state => state.count)
-  const inc = useAction(actions => actions.inc)
-  return (<button onClick={inc}>{count}</button)
 }
 
+const TodoList = () => {
+  const todos = useStore(state => state.todos.items)
+  const add = useAction(actions => actions.todos.add)
+  return (
+    <div>
+      {todos.map((todo, idx) => <div key={idx}>{todo.text}</div>)}
+      <AddTodo onAdd={add} />
+    </div>
+  )
+}
+
+const store = createStore(model);
+
 const App = () => (
-  <EasyPeasyProvider store={store}>
-    <Counter />
-  </EasyPeasyProvider>
+  <StoreProvider store={store}>
+    <TodoList />
+  </StoreProvider>
 )
 ```
 
@@ -37,10 +46,11 @@ const App = () => (
   - Update state via simple mutations (thanks [`immer`](https://github.com/mweststrate/immer))
   - Derived state
   - Async actions for remote data fetching/persisting
-  - Redux Dev Tools Extension
-  - Idiomatic Redux under the hood
-  - Outputs a standard Redux store
-  - Supports multiple frameworks (e.g. React via `react-redux`)
+  - Provides [React Hooks](https://reactjs.org/docs/hooks-intro.html) to interact with the store 😎
+  - Powered by Redux
+  - Add custom Redux middleware
+  - Supports Redux Dev Tools
+  - Outputs a standard Redux store for easy integration
 
 ## TOCs
 
@@ -50,20 +60,27 @@ const App = () => (
     - [React Todo List](#react-todo-list)
   - [Tutorial](#tutorial)
     - [Setting up your store](#setting-up-your-store)
-    - [Accessing state](#accessing-state)
+    - [Accessing state directly via the store](#accessing-state-directly-via-the-store)
     - [Modifying state via actions](#modifying-state-via-actions)
-    - [Dispatching actions](#dispatching-actions)
-    - [Asynchronous actions](#asynchronous-actions)
+    - [Dispatching actions directly via the store](#dispatching-actions-directly-via-the-store)
+    - [Creating an `effect` action](#creating-an-effect-action)
+    - [Dispatching an `effect` action directly via the store](#dispatching-an-effect-action-directly-via-the-store)
     - [Deriving state](#deriving-state)
-    - [Accessing Derived State](#accessing-derived-state)
+    - [Accessing Derived State directly via the store](#accessing-derived-state)
     - [Final notes](#final-notes)
-  - [Integration with Frameworks](#integration-with-frameworks)
-    - [Usage with React](#usage-with-react)
+  - [Usage with React](#usage-with-react)
+    - [Wrap your app with StoreProvider](#wrap-your-app-with-storeprovider)
+    - [Consuming state in your Components](#consuming-state-in-your-components)
+    - [Firing actions in your Components](#firing-actions-in-your-components)
+    - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
     - [effect(action)](#effectaction)
-    - [select(selector)](#select)
+    - [select(selector)](#selectselector)
+    - [StoreProvider](#storeprovider)
+    - [useStore](#useStore)
+    - [useAction](#useAction)
   - [Prior Art](#prior-art)
 
 ---
@@ -94,7 +111,9 @@ https://codesandbox.io/s/7k62z0qyoq
 
 ---
 
-## Tutorial
+## Core Concepts
+
+The below will introduce you step by step to all the core concepts of Easy Peasy. At first we will interact with the store directly (remember we output a standard Redux store). After you gain this understanding we show you how to integrate Easy Peasy into your React application.
 
 ### Setting up your store
 
@@ -108,7 +127,7 @@ const model = {
 };
 ```
 
-Then you simply pass your model to `createStore`.
+Then you provide your model to `createStore`.
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -116,21 +135,19 @@ import { createStore } from 'easy-peasy';
 const store = createStore(model);
 ```
 
-You now have a full featured Redux store. 😎
+You will now have a [Redux store](https://redux.js.org/api/store). 👍
 
-### Accessing state
+### Accessing state directly via the store
 
-To access state you use the standard mechanism provided by the Redux store.
+You can access your store's state using the `getState` API of the store.
 
 ```javascript
 store.getState().todos.items;
 ```
 
-Typically you wouldn't access state like this though, and would utilise a Redux package appropriate for your framework. See our docs on [how to use the store with React](#usage-with-react).
-
 ### Modifying state via actions
 
-In order to mutate your state add an action to your model. Easy peasy will automagically map these actions so that you can dispatch them from your app.
+In order to mutate your state you need to define an action against your model.
 
 ```javascript
 const store = createStore({
@@ -138,20 +155,21 @@ const store = createStore({
     items: [],
     // 👇 our action
     addTodo: (state, payload) => {
-      // 👇 we just mutate the state directly. rad.
+      //    Mutate the state directly. Under the hood we convert this to an
+      //    an immutable update in the store, but at least you don't need to
+      //    worry about being careful to return new instances etc. This also
+      // 👇 makes it easy to update deeply nested items.
       state.items.push(payload)
     }
   }
 });
 ```
 
-The action will receive as it's first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that was provided when the action was dispatched.
+The action will receive as it's first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that may have been provided when the action was triggered.
 
-> Notice how you mutate the state parameter directly. Yep, you no longer have to worry about returning new object instances to maintain Redux's immutability model - we abstract all of that away for you. You just mutate the state to whatever you need it to be and we will take care of the rest.
+### Dispatching actions directly via the store
 
-### Dispatching actions
-
-Easy Peasy will bind your actions against the store's `dispatch` using a path that matches where the action lives within your model. You can dispatch your actions, providing any payload that they may require.
+Easy Peasy will bind your actions against the store's `dispatch` using a path that matches where the action lives within your model. You can dispatch your actions directly via the store, providing any payload that they may require.
 
 ```javascript
 store.dispatch.todos.addTodo('Install easy-peasy');
@@ -168,20 +186,23 @@ store.getState().todos.items;
 
 ### Creating an `effect` action
 
-If you wish to do things like remote data fetching/persisting you can use the `effect` helper to declare an effectful action.
+If you wish to perform side effects, such as fetching or persisting from your server then you can use the `effect` helper to declare an effectful action.
 
 ```javascript
-import { effect } from 'easy-peasy'; // 👈 import then helper
+import { effect } from 'easy-peasy'; // 👈 import the helper
 
 const store = createStore({
   todos: {
     items: [],
 
-    //          👇 then surround an action with it
-    saveTodo: effect(async (dispatch, payload) => {
-      //                      👆 the action receives dispatch
+    //          👇 define an action surrounding it with the helper
+    saveTodo: effect(async (actions, payload) => {
+      //                      👆
+      // Notice that an effect will receive the actions allowing you to dispatch
+      // other actions after you have performed your side effect.
       const saved = await todoService.save(payload);
-      dispatch.todos.todoSaved(saved);
+      // 👇 Now we dispatch an action to add the saved item to our state
+      actions.todos.todoSaved(saved);
     }),
 
     todoSaved: (state, payload) => {
@@ -191,9 +212,9 @@ const store = createStore({
 });
 ```
 
-You can't modify the state in an `effect` action, however, the `effect` action is provided `dispatch`, allowing you dispatch actions to update state where required.  Feel free to use async/await or Promises to help with your async flow.
+As you can see in the example above you can't modify the state directly within an `effect` action, however, the `effect` action is provided `actions`, allowing you dispatch actions to update the state where required.
 
-### Dispatching an `effect` action
+### Dispatching an `effect` action directly via the store
 
 You dispatch an effectful action in the same manner as a normal action. However, an `effect` action always returns a Promise allowing you to chain commands to execute after the `effect` action has completed.
 
@@ -226,9 +247,9 @@ This can be really helpful to avoid unnecessary re-renders in your react compone
 
 You can attach selectors to any part of your state. Similar to actions they will receive the local state that they are attached to and can access all the state down that branch of state.
 
-### Accessing Derived State
+### Accessing Derived State directly via the store
 
-It's as simple as a standard get state call.
+You can access derived state as though it were a standard piece of state.
 
 ```javascript
 store.getState().shoppingBasket.totalPrice
@@ -238,21 +259,71 @@ store.getState().shoppingBasket.totalPrice
 
 ### Final notes
 
-This was just a brief overview of how to create and interact with an Easy Peasy store. We recommend that you read the section on [Usage with React](#usage-with-react) to see how to effectively use this library in the context of React.  Also be sure to check out and tinker with our [examples](#examples).
+Now that you have gained an understanding of the store we suggest you read the section on [Usage with React](#usage-with-react) to learn how to use Easy Peasy in your React apps.
 
-Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to help visualise actions and state updates. 👍
+Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to visualise your actions firing along with the associated state updates. 👍
 
 ---
 
-## Integration with Frameworks
+## Usage with React
 
-Below showcases how simple it is to integrate Easy Peasy with existing frameworks.
+### Wrap your app with StoreProvider
 
-> Note: React is only shown at the moment, but hopefully will receive some pull requests to show off some others. 😘
+Firstly we will need to create your store and wrap your application with the `StoreProvider`.
 
-### Usage with React
+```javascript
+import { StoreProvider, createStore } from 'easy-peasy';
+import model from './model'
 
-To use `easy-peasy` with React simply leverage the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
+const store = createStore(model);
+
+const App = () => (
+  <StoreProvider store={store}>
+    <TodoList />
+  </StoreProvider>
+)
+```
+
+### Consuming state in your Components
+
+In order to use state within your components you can use the `useStore` hook.
+
+```javascript
+import { useStore } from 'easy-peasy';
+
+const TodoList = () => {
+  const todos = useStore(state => state.todos.items);
+  return (
+    <div>
+      {todos.map((todo, idx) => <div key={idx}>{todo.text}</div>)}
+    </div>
+  );
+};
+```
+
+### Firing actions in your Components
+
+In order to fire actions in your components you can use the `useAction` hook.
+
+```javascript
+import { useState } from 'react';
+import { useAction } from 'easy-peasy';
+
+const AddTodo = () => {
+  const [text, setText] = useState('');
+  const addTodo = useAction(actions => actions.todos.add);
+  return (
+    <div>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={() => addTodo(text)}>Add</button>
+    </div>
+  );
+};
+```
+
+### Alternative usage via react-redux
+
+As Easy Peasy outputs a standard Redux store it is entirely possible to use Easy Peasy with the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
 
 #### First, install the `react-redux` package
 
@@ -521,6 +592,85 @@ const store = createStore({
   netPrice: netPriceSelector // price after discount applied
 });
 ```
+
+### StoreProvider
+
+Initialises your React application with the store so that your components will be able to consume and interact with the state via the `useStore` and `useAction` hooks.
+
+#### Example
+
+```javascript
+import { StoreProvider, createStore } from 'easy-peasy';
+import model from './model'
+
+const store = createStore(model);
+
+const App = () => (
+  <StoreProvider store={store}>
+    <TodoList />
+  </StoreProvider>
+)
+```
+
+### useStore
+
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state. You need to provide it with a function which is used to resolved the piece of state that your component requires.
+
+#### Example
+
+```javascript
+import { useStore } from 'easy-peasy';
+
+const TodoList = () => {
+  const todos = useStore(state => state.todos.items);
+  return (
+    <div>
+      {todos.map((todo, idx) => <div key={idx}>{todo.text}</div>)}
+    </div>
+  );
+};
+```
+
+If you wish to access multiple pieces of state in the same component you can make multiple calls to `useStore`.
+
+```javascript
+import { useStore } from 'easy-peasy';
+
+const BasketTotal = () => {
+  const totalPrice = useStore(state => state.basket.totalPrice);
+  const netPrice = useStore(state => state.basket.netPrice);
+  return (
+    <div>
+      <div>Total: {totalPrice}</div>
+      <div>Net: {netPrice}</div>
+    </div>
+  );
+};
+```
+
+### useAction
+
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions. You need to provide it with a function which is used to resolved the action that your component requires.
+
+#### Example
+
+```javascript
+import { useState } from 'react';
+import { useAction } from 'easy-peasy';
+
+const AddTodo = () => {
+  const [text, setText] = useState('');
+  const addTodo = useAction(actions => actions.todos.add);
+  return (
+    <div>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={() => addTodo(text)}>Add</button>
+    </div>
+  );
+};
+```
+
+If you wish to access multiple actions in the same component you can make multiple calls to `useAction`.
 
 ---
 

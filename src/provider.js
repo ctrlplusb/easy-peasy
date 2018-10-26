@@ -1,16 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import EasyPeasyContext from './context'
+import StoreContext from './context'
 
-const EasyPeasyProvider = ({ children, store }) => (
-  <EasyPeasyContext.Provider value={store}>
-    {children}
-  </EasyPeasyContext.Provider>
+const StoreProvider = ({ children, store }) => (
+  <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
 )
 
-EasyPeasyProvider.propTypes = {
+StoreProvider.propTypes = {
   children: PropTypes.node.isRequired,
   store: PropTypes.object.isRequired,
 }
 
-export default EasyPeasyProvider
+export default StoreProvider

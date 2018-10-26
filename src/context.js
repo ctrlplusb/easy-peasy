@@ -1,5 +1,5 @@
 import { createContext } from 'react'
 
-const EasyPeasyContext = createContext()
+const StoreContext = createContext()
 
-export default EasyPeasyContext
+export default StoreContext
