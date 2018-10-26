@@ -467,6 +467,10 @@ Declares a section of state that is derived via the given selector function.
 
       The local part of state that the `select` property was attached to.
 
+  - dependencies (Array, not required)
+
+    If this selector depends on other selectors your need to pass these selectors in here to indicate that is the case. Under the hood we will ensure the correct execution order.
+
 Select's have their outputs cached to avoid unnecessary work, and will be executed
 any time their local state changes.
 
@@ -483,10 +487,32 @@ const store = createStore({
       state.products.reduce((acc, cur) => acc + cur.price, 0)
     )
   }
-}
+};
 
 // 👇 access the derived state as you would normal state
-store.getState().shoppingBasket.totalPrice
+store.getState().shoppingBasket.totalPrice;
+```
+
+#### Example with Dependencies
+
+```javascript
+import { select } from 'easy-peasy';
+
+const totalPriceSelector = select(state =>
+  state.products.reduce((acc, cur) => acc + cur.price, 0),
+)
+
+const finalPriceSelector = select(
+  state => state.totalPrice * ((100 - state.discount) / 100),
+  [totalPriceSelector] // 👈 declare that this selector depends on totalPrice
+)
+
+const store = createStore({
+  discount: 25,
+  products: [{ name: 'Shoes', price: 160 }, { name: 'Hat', price: 40 }],
+  totalPrice: totalPriceSelector,
+  finalPrice: finalPriceSelector
+});
 ```
 
 ---

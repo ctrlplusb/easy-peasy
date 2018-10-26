@@ -9,6 +9,8 @@ import thunk from 'redux-thunk'
 
 const effectSymbol = Symbol('effect')
 const selectSymbol = Symbol('select')
+const selectDependeciesSymbol = Symbol('selectDependencies')
+const selectStateSymbol = Symbol('selectState')
 
 const isObject = x => x && typeof x === 'object' && !Array.isArray(x)
 
@@ -32,9 +34,11 @@ export const effect = fn => {
   return fn
 }
 
-export const select = fn => {
+export const select = (fn, dependencies) => {
   const selector = memoizeOne(state => fn(state))
   selector[selectSymbol] = true
+  selector[selectDependeciesSymbol] = dependencies
+  selector[selectStateSymbol] = {}
   return selector
 }
 
@@ -65,7 +69,8 @@ export const createStore = (model, options = {}) => {
 
         if (value[selectSymbol]) {
           // skip
-          selectorReducers.push([parentPath, key, value])
+          value[selectStateSymbol] = { parentPath, key, executed: false }
+          selectorReducers.push(value)
         } else if (value[effectSymbol]) {
           // Effect Action
           const action = payload => {
@@ -156,23 +161,38 @@ export const createStore = (model, options = {}) => {
       return state
     }
     let isInitial = true
+    const runSelectorReducer = (state, selector) => {
+      const { parentPath, key, executed } = selector[selectStateSymbol]
+      if (executed) {
+        return state
+      }
+      const dependencies = selector[selectDependeciesSymbol]
+      const newState = produce(
+        dependencies ? dependencies.reduce(runSelectorReducer, state) : state,
+        draft => {
+          // eslint-disable-next-line no-param-reassign
+          const target = parentPath.length > 0 ? get(parentPath, draft) : draft
+          if (target) {
+            target[key] = selector(target)
+          }
+        },
+      )
+      // eslint-disable-next-line no-param-reassign
+      selector[selectStateSymbol].executed = true
+      return newState
+    }
+    const runSelectors = state =>
+      selectorReducers.reduce(runSelectorReducer, state)
     return selectorReducers.length
       ? (state, action) => {
           const stateAfterActions = reducerForActions(state, action)
           if (state !== stateAfterActions || isInitial) {
-            const stateAfterSelectors = selectorReducers.reduce(
-              (acc, [parentPath, key, selector]) =>
-                produce(acc, draft => {
-                  // eslint-disable-next-line no-param-reassign
-                  const target =
-                    parentPath.length > 0 ? get(parentPath, draft) : draft
-                  if (target) {
-                    target[key] = selector(target)
-                  }
-                }),
-              stateAfterActions,
-            )
+            const stateAfterSelectors = runSelectors(stateAfterActions)
             isInitial = false
+            selectorReducers.forEach(selector => {
+              // eslint-disable-next-line no-param-reassign
+              selector[selectStateSymbol].executed = false
+            })
             return stateAfterSelectors
           }
           return stateAfterActions

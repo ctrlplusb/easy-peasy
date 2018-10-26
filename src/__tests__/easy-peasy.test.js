@@ -476,4 +476,62 @@ describe('select', () => {
     expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
     expect(selector).toHaveBeenCalledTimes(2)
   })
+
+  test('composed selectors', () => {
+    // arrange
+    const totalPriceSelector = select(state =>
+      state.products.reduce((acc, cur) => acc + cur.price, 0),
+    )
+    const finalPriceSelector = select(
+      state => state.totalPrice * ((100 - state.discount) / 100),
+      [totalPriceSelector],
+    )
+    const store = createStore({
+      discount: 25,
+      products: [{ name: 'Shoes', price: 160 }, { name: 'Hat', price: 40 }],
+      totalPrice: totalPriceSelector,
+      finalPrice: finalPriceSelector,
+      addProduct: (state, payload) => {
+        state.products.push(payload)
+      },
+      changeDiscount: (state, payload) => {
+        state.discount = payload
+      },
+    })
+
+    // assert
+    expect(store.getState().finalPrice).toBe(150)
+
+    // act
+    store.dispatch.addProduct({ name: 'Socks', price: 100 })
+
+    // assert
+    expect(store.getState().finalPrice).toBe(225)
+
+    // act
+    store.dispatch.changeDiscount(50)
+
+    // assert
+    expect(store.getState().finalPrice).toBe(150)
+  })
+
+  test('composed selectors in reverse decleration', () => {
+    // arrange
+    const totalPriceSelector = select(state =>
+      state.products.reduce((acc, cur) => acc + cur.price, 0),
+    )
+    const finalPriceSelector = select(
+      state => state.totalPrice * ((100 - state.discount) / 100),
+      [totalPriceSelector],
+    )
+    const store = createStore({
+      discount: 25,
+      products: [{ name: 'Shoes', price: 160 }, { name: 'Hat', price: 40 }],
+      finalPrice: finalPriceSelector,
+      totalPrice: totalPriceSelector,
+    })
+
+    // assert
+    expect(store.getState().finalPrice).toBe(150)
+  })
 })
