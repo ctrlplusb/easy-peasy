@@ -50,7 +50,8 @@ store.getState();
     - [Deriving state](#deriving-state)
     - [Accessing Derived State](#accessing-derived-state)
     - [Final notes](#final-notes)
-  - [Usage with React](#usage-with-react)
+  - [Integration with Frameworks](#integration-with-frameworks)
+    - [Usage with React](#usage-with-react)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
@@ -62,7 +63,7 @@ store.getState();
 
 Easy Peasy gives you the power of Redux and its tooling whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a simple model (object) to describe your state and it's actions.
 
-Easy Peasy outputs a Redux store, which means you can easily use it with frameworks like React. Read the integration docs below.
+Easy Peasy outputs a Redux store, which means you can integrate with frameworks like React. Read the [integration docs](#integration-with-frameworks) below.
 
 ## Installation
 
@@ -226,17 +227,23 @@ This was just a brief overview of how to create and interact with an Easy Peasy 
 
 Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to help visualise actions and state updates. 👍
 
-## Usage with React
+## Integration with Frameworks
+
+Below showcases how simple it is to integrate Easy Peasy with existing frameworks.
+
+> Note: React is only shown at the moment, but hopefully will receive some pull requests to show off some others. 😘
+
+### Usage with React
 
 To use `easy-peasy` with React simply leverage the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
 
-### First, install the `react-redux` package
+#### First, install the `react-redux` package
 
 ```bash
 npm install react-redux
 ```
 
-### Then wrap your app with the `Provider`
+#### Then wrap your app with the `Provider`
 
 ```javascript
 import React from 'react';
