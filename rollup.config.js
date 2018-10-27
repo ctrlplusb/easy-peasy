@@ -12,6 +12,7 @@ module.exports = {
     'react',
     'redux',
     'redux-thunk',
+    'shallowequal',
   ],
   input: 'src/index.js',
   output: {

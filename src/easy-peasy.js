@@ -6,13 +6,12 @@ import {
 import memoizeOne from 'memoize-one'
 import produce from 'immer'
 import thunk from 'redux-thunk'
+import { isObject } from './lib'
 
 const effectSymbol = Symbol('effect')
 const selectSymbol = Symbol('select')
 const selectDependeciesSymbol = Symbol('selectDependencies')
 const selectStateSymbol = Symbol('selectState')
-
-const isObject = x => x && typeof x === 'object' && !Array.isArray(x)
 
 const get = (path, target) =>
   path.reduce((acc, cur) => (isObject(acc) ? acc[cur] : undefined), target)
