@@ -5,12 +5,10 @@
 </p>
 <p align='center'>Easy peasy state for React</p>
 
-<p align='center'>
-  [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
-  [![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
-  [![Travis](https://img.shields.io/travis/ctrlplusb/easy-peasy.svg?style=flat-square)](https://travis-ci.org/ctrlplusb/easy-peasy)
-  [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
-</p>
+[![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
+[![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
+[![Travis](https://img.shields.io/travis/ctrlplusb/easy-peasy.svg?style=flat-square)](https://travis-ci.org/ctrlplusb/easy-peasy)
+[![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 ```javascript
 import { StoreProvider, createStore, useStore, useAction } from 'easy-peasy';
@@ -56,9 +54,11 @@ const App = () => (
   - Supports Redux Dev Tools
   - Outputs a standard Redux store for easy integration
 
+<p>&nbsp;</p>
 <p align='center'>
-  <img src='https://i.imgur.com/2vFSy1y.png' />
+  <img src='https://i.imgur.com/2vFSy1y.png' width='360' />
 </p>
+<p>&nbsp;</p>
 
 ## TOCs
 
