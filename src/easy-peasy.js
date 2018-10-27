@@ -73,10 +73,12 @@ export const createStore = (model, options = {}) => {
           // Effect Action
           const actionName = `@effect.${path.join('.')}`
           const action = payload => {
-            references.dispatch({
-              type: actionName,
-              payload,
-            })
+            if (devTools) {
+              references.dispatch({
+                type: actionName,
+                payload,
+              })
+            }
             return value(references.dispatch, payload, {
               getState: references.getState,
             })
