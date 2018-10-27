@@ -3,7 +3,7 @@
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
 </p>
-<p align='center'>Easy peasy state for React</p>
+<p align='center'>Easy peasy global state for React</p>
 
 [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
 [![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
