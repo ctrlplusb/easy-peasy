@@ -13,16 +13,28 @@
 ```javascript
 import { StoreProvider, createStore, useStore, useAction } from 'easy-peasy';
 
-const model = {
+// 👇 create your store
+const store = createStore({
   todos: {
     items: ['Install easy-peasy', 'Build app', 'Profit'],
+    // 👇 define actions
     add: (state, payload) => {
-      state.items.push(payload)
+      state.items.push(payload) // 👈 you mutate state to update (we convert
+                                //    to immutable updates)
     }
   }
-}
+});
 
-const TodoList = () => {
+const App = () => (
+  // 👇 surround your app with the provider to expose the store to your app
+  <StoreProvider store={store}>
+    <TodoList />
+  </StoreProvider>
+)
+
+function TodoList() {
+  // 👇 use hooks to get state or actions. you component will automatically
+  //    receive updated state
   const todos = useStore(state => state.todos.items)
   const add = useAction(actions => actions.todos.add)
   return (
@@ -32,14 +44,6 @@ const TodoList = () => {
     </div>
   )
 }
-
-const store = createStore(model);
-
-const App = () => (
-  <StoreProvider store={store}>
-    <TodoList />
-  </StoreProvider>
-)
 ```
 
 ## Features
