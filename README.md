@@ -1,3 +1,5 @@
+> Note: this package depends on the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature of React. Currently available via 16.7.0-alpha.0 of React.
+
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
 </p>
@@ -95,9 +97,20 @@ Easy Peasy outputs a Redux store, which means you can integrate with frameworks 
 
 ## Installation
 
+Firsly, ensure you have the correct versions of React (i.e. a version that supports Hooks) installed.
+
+```bash
+npm install react@16.7.0-alpha.0
+npm install react-dom@16.7.0-alpha.0
+```
+
+Then install Easy Peasy.
+
 ```bash
 npm install easy-peasy
 ```
+
+Ok, thats it. No more "extra" dependencies for boosted features. It's an all-in-one package. Easy peasy.
 
 ---
 
