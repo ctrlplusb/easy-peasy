@@ -5,10 +5,9 @@ import { isObject } from './lib'
 
 export function useStore(mapState) {
   const store = useContext(EasyPeasyContext)
-  const localState = useState(mapState(store.getState()))
+  const [state, setState] = useState(mapState(store.getState()))
   useEffect(() =>
     store.subscribe(() => {
-      const [state, setState] = localState
       const newState = mapState(store.getState())
       if (
         newState === state ||
@@ -20,7 +19,7 @@ export function useStore(mapState) {
       setState(newState)
     }),
   )
-  return localState[0]
+  return state
 }
 export function useAction(mapActions) {
   const store = useContext(EasyPeasyContext)
