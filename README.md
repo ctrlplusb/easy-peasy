@@ -70,7 +70,7 @@ function TodoList() {
   - [Installation](#installation)
   - [Examples](#examples)
     - [React Todo List](#react-todo-list)
-  - [Tutorial](#tutorial)
+  - [Core Concepts](#core-concepts)
     - [Setting up your store](#setting-up-your-store)
     - [Accessing state directly via the store](#accessing-state-directly-via-the-store)
     - [Modifying state via actions](#modifying-state-via-actions)
@@ -136,7 +136,7 @@ https://codesandbox.io/s/woyn8xqk15
 
 ## Core Concepts
 
-The below will introduce you step by step to all the core concepts of Easy Peasy. At first we will interact with the store directly (remember we output a standard Redux store). After you gain this understanding we show you how to integrate Easy Peasy into your React application.
+The below will introduce you step by step to the core concepts of Easy Peasy. At first we will interact with the store directly (remember we output a standard Redux store). In the following section we shall then integrate Easy Peasy into a React application.
 
 ### Setting up your store
 
@@ -192,7 +192,7 @@ The action will receive as it's first parameter the slice of the state that it w
 
 ### Dispatching actions directly via the store
 
-Easy Peasy will bind your actions against the store's `dispatch` using a path that matches where the action lives within your model. You can dispatch your actions directly via the store, providing any payload that they may require.
+Easy Peasy will bind your actions against the store's `dispatch` using a path that matches where the action was defined against your model. You can dispatch your actions directly via the store, providing any payload that they may require.
 
 ```javascript
 store.dispatch.todos.addTodo('Install easy-peasy');
@@ -209,7 +209,7 @@ store.getState().todos.items;
 
 ### Creating an `effect` action
 
-If you wish to perform side effects, such as fetching or persisting from your server then you can use the `effect` helper to declare an effectful action.
+If you wish to perform side effects, such as fetching or persisting data from your server then you can use the `effect` helper to declare an effectful action.
 
 ```javascript
 import { effect } from 'easy-peasy'; // 👈 import the helper
@@ -377,7 +377,7 @@ const App = () => (
 render(<App />, document.querySelector('#app'));
 ```
 
-### Finally, use `connect` against your components
+#### Finally, use `connect` against your components
 
 ```javascript
 import React, { Component } from 'react';
@@ -635,9 +635,46 @@ const App = () => (
 )
 ```
 
-### useStore
+### useStore(mapState)
 
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state. You need to provide it with a function which is used to resolved the piece of state that your component requires.
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state.
+
+#### Arguments
+
+You need to provide it with a function which is used to resolved the piece of state that your component requires. The function will receive the store's state and requires you to return back the piece of state you require.
+
+You can either return a single value of state, or if you like an object containing multiple mappings of state (which is similar to the `connect` from `react-redux`).
+
+For example, single piece of state:
+
+```javascript
+const age = useStore(state => state.user.age)
+```
+
+Or, multiple pieces of state via an object:
+
+```javascript
+const { age, theme } = useStore(state => ({
+  age: state.user.age,
+  theme: state.preferences.theme
+}));
+```
+
+#### A word of caution
+
+Please be careful in the manner that you map the state. Under the hood we use equality checking (===), similar to `react-redux` to determine if the mapped state has changed. If the equality check fails then your component will be "notified" of the change, receiving the updated state.
+
+For example, wrapping your mapped state in an array is a bad idea as every time we tried to map your state a new array instance would be created and therefore the equality check would always break.
+
+```javascript
+//                              BAD IDEA
+//                              👇
+const state = useStore(state => [state.user.name, state.user.age])
+```
+
+The only exception to the rule above is the case where you return an object against which you map multiple pieces of state. In this case we fall back to a shallow equality check between the old and new states before notifying your component of the changed state.
+
+So, rule of thumb is to never dervive new values/state within your mapState function. Remember you can leverage the (`select`)(#selectselector) helper against your store to help with derived state.
 
 #### Example
 
