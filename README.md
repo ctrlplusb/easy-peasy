@@ -60,7 +60,7 @@ function TodoList() {
 
 <p>&nbsp;</p>
 <p align='center'>
-  <img src='https://i.imgur.com/2vFSy1y.png' width='360' />
+  <img src='https://i.imgur.com/2vFSy1y.png' width='500' />
 </p>
 <p>&nbsp;</p>
 
