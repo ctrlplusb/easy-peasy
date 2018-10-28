@@ -1,9 +1,11 @@
 > Note: this package depends on the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature of React. Currently available via 16.7.0-alpha.0 of React.
 
+<p>&nbsp;</p>
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
 </p>
 <p align='center'>Easy peasy global state for React</p>
+<p>&nbsp;</p>
 
 [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
 [![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
@@ -99,9 +101,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux and its tooling whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a simple model (object) to describe your state and it's actions.
-
-Easy Peasy outputs a Redux store, which means you can integrate with frameworks like React. Read the [integration docs](#integration-with-frameworks) below.
+Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a simple model (object) to describe your state and it's actions. Batteries are included - you don't need to do any additional configuration or installation to support derived state, side effects, or integration with your React components. In terms of integration with React we are leveraging the cutting edge [Hooks](https://reactjs.org/docs/hooks-intro.html) feature. It's a game changer, and we highly recommend you give it a go.
 
 ---
 
