@@ -97,11 +97,15 @@ function TodoList() {
     - [useAction(mapAction)](#useactionmapaction)
   - [Prior Art](#prior-art)
 
+<p>&nbsp;</p>
+
 ---
 
 ## Introduction
 
 Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a simple model (object) to describe your state and it's actions. Batteries are included - you don't need to do any additional configuration or installation to support derived state, side effects, or integration with your React components. In terms of integration with React we are leveraging the cutting edge [Hooks](https://reactjs.org/docs/hooks-intro.html) feature. It's a game changer, and we highly recommend you give it a go.
+
+<p>&nbsp;</p>
 
 ---
 
@@ -122,6 +126,8 @@ npm install easy-peasy
 
 Ok, thats it. No more "extra" dependencies for boosted features. It's an all-in-one package. Easy peasy.
 
+<p>&nbsp;</p>
+
 ---
 
 ## Examples
@@ -131,6 +137,8 @@ Ok, thats it. No more "extra" dependencies for boosted features. It's an all-in-
 A simple/naive implementation of a todo list.
 
 https://codesandbox.io/s/woyn8xqk15
+
+<p>&nbsp;</p>
 
 ---
 
@@ -286,6 +294,8 @@ Now that you have gained an understanding of the store we suggest you read the s
 
 Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to visualise your actions firing along with the associated state updates. 👍
 
+<p>&nbsp;</p>
+
 ---
 
 ## Usage with React
@@ -407,6 +417,8 @@ export default connect(
   dispatch => ({ addTodo: dispatch.todos.addTodo })
 )(EditTodo)
 ```
+
+<p>&nbsp;</p>
 
 ---
 
@@ -808,6 +820,8 @@ const EditTodo = ({ todo }) => {
   );
 };
 ```
+
+<p>&nbsp;</p>
 
 ---
 
