@@ -36,7 +36,7 @@ function TodoList() {
   // 👇 use hooks to get state or actions. you component will automatically
   //    receive updated state
   const todos = useStore(state => state.todos.items)
-  const add = useAction(actions => actions.todos.add)
+  const add = useAction(dispatch => dispatch.todos.add)
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo.text}</div>)}
@@ -77,7 +77,7 @@ function TodoList() {
     - [Dispatching actions directly via the store](#dispatching-actions-directly-via-the-store)
     - [Creating an `effect` action](#creating-an-effect-action)
     - [Dispatching an `effect` action directly via the store](#dispatching-an-effect-action-directly-via-the-store)
-    - [Deriving state](#deriving-state)
+    - [Deriving state via `select`](#deriving-state-via-select)
     - [Accessing Derived State directly via the store](#accessing-derived-state)
     - [Final notes](#final-notes)
   - [Usage with React](#usage-with-react)
@@ -91,8 +91,8 @@ function TodoList() {
     - [effect(action)](#effectaction)
     - [select(selector)](#selectselector)
     - [StoreProvider](#storeprovider)
-    - [useStore](#useStore)
-    - [useAction](#useAction)
+    - [useStore(mapState)](#usestoremapstate)
+    - [useAction(mapAction)](#useactionmapaction)
   - [Prior Art](#prior-art)
 
 ---
@@ -247,9 +247,9 @@ store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
 })
 ```
 
-### Deriving state
+### Deriving state via `select`
 
-If you have state that can be derived from state then you can use the [`select`](#select(selector)) helper. Simply attach it to any part of your model.
+If you have state that can be derived from state then you can use the [`select`](#selectselector) helper. Simply attach it to any part of your model.
 
 ```javascript
 import { select } from 'easy-peasy'; // 👈 import then helper
@@ -290,6 +290,10 @@ Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.c
 
 ## Usage with React
 
+With the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature introduced in React v16.7.0 it's never been easier to provide a mechanism to interact with global state in your components. We have provided two hooks, allowing you to access the state and actions from your store.
+
+If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples). Hooks are truly game changing and will simplify your components dramatically.
+
 ### Wrap your app with StoreProvider
 
 Firstly we will need to create your store and wrap your application with the `StoreProvider`.
@@ -309,7 +313,7 @@ const App = () => (
 
 ### Consuming state in your Components
 
-In order to use state within your components you can use the `useStore` hook.
+To access state within your components you can use the `useStore` hook.
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -323,6 +327,8 @@ const TodoList = () => {
   );
 };
 ```
+
+It's almost too easy that it doesn't require much explanation. We do however recommend that you read the API docs for the [`useStore` hook](#usestoremapstate) to gain a full understanding of the behaviours and pitfalls of the hook.
 
 ### Firing actions in your Components
 
@@ -343,6 +349,8 @@ const AddTodo = () => {
   );
 };
 ```
+
+For more on how you can use this hook please ready the API docs for the [`useAction` hook](#useactionmapaction).
 
 ### Alternative usage via react-redux
 
@@ -641,42 +649,17 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
 
 #### Arguments
 
-You need to provide it with a function which is used to resolved the piece of state that your component requires. The function will receive the store's state and requires you to return back the piece of state you require.
+  - `mapState` (Function, required)
 
-You can either return a single value of state, or if you like an object containing multiple mappings of state (which is similar to the `connect` from `react-redux`).
+    The function that is used to resolved the piece of state that your component requires. The function will receive the following arguments:
 
-For example, single piece of state:
+    - `state` (Object, required)
 
-```javascript
-const age = useStore(state => state.user.age)
-```
+      The root state of your store.
 
-Or, multiple pieces of state via an object:
+Your `mapState` can either resolve a single piece of state. If you wish to resolve multiple pieces of state then you can either call `useStore` multiple times, or if you like resolve an object within your `mapState` where each property of the object is a resolved piece of state (similar to the `connect` from `react-redux`). The examples will illustrate the various forms.
 
-```javascript
-const { age, theme } = useStore(state => ({
-  age: state.user.age,
-  theme: state.preferences.theme
-}));
-```
-
-#### A word of caution
-
-Please be careful in the manner that you map the state. Under the hood we use equality checking (===), similar to `react-redux` to determine if the mapped state has changed. If the equality check fails then your component will be "notified" of the change, receiving the updated state.
-
-For example, wrapping your mapped state in an array is a bad idea as every time we tried to map your state a new array instance would be created and therefore the equality check would always break.
-
-```javascript
-//                              BAD IDEA
-//                              👇
-const state = useStore(state => [state.user.name, state.user.age])
-```
-
-The only exception to the rule above is the case where you return an object against which you map multiple pieces of state. In this case we fall back to a shallow equality check between the old and new states before notifying your component of the changed state.
-
-So, rule of thumb is to never dervive new values/state within your mapState function. Remember you can leverage the (`select`)(#selectselector) helper against your store to help with derived state.
-
-#### Example
+#### Example
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -691,7 +674,7 @@ const TodoList = () => {
 };
 ```
 
-If you wish to access multiple pieces of state in the same component you can make multiple calls to `useStore`.
+#### Example resolving multiple values
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -708,9 +691,83 @@ const BasketTotal = () => {
 };
 ```
 
-### useAction
+#### Example resolving multiple values via an object result
 
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions. You need to provide it with a function which is used to resolved the action that your component requires.
+```javascript
+import { useStore } from 'easy-peasy';
+
+const BasketTotal = () => {
+  const { totalPrice, netPrice } = useStore(state => ({
+    totalPrice: state.basket.totalPrice,
+    netPrice: state.basket.netPrice
+  }));
+  return (
+    <div>
+      <div>Total: {totalPrice}</div>
+      <div>Net: {netPrice}</div>
+    </div>
+  );
+};
+```
+
+#### A word of caution
+
+Please be careful in the manner that you resolve values from your `mapToState`. To optimise the rendering performance of your components we use equality checking (===) to determine if the mapped state has changed.
+
+When an action changes the piece of state your `mapState` is resolving the equality check will break, which will cause your component to re-render with the new state.
+
+Therefore deriving state within your `mapState` in a manner that will always produce a new value (for e.g. an array) is an anti-pattern as it will break our equality checks.
+
+```javascript
+// ❗️ Using .map will produce a new array instance every time mapState is called
+//                                                     👇
+const productNames = useStore(state => state.products.map(x => x.name))
+```
+
+You have two options to solve the above.
+
+Firstly, you could just return the products and then do the `.map` outside of your `mapState`:
+
+```javascript
+const products = useStore(state => state.products)
+const productNames = products.map(x => x.name)
+```
+
+Alternatively you could use the [`select`](#selectselector) helper to define derived state against your model itself.
+
+```javascript
+import { select, createStore } from 'easy-peasy';
+
+const createStore = ({
+  products: [{ name: 'Boots' }],
+  productNames: select(state => state.products.map(x => x.name))
+});
+```
+
+Note, the same rule applies when you are using the object result form of `mapState`:
+
+```javascript
+const { productNames, total } = useStore(state => ({
+  productNames: state.products.map(x => x.name), // ❗️ new array every time
+  total: state.basket.total
+}));
+```
+
+### useAction(mapAction)
+
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions.
+
+#### Arguments
+
+  - `mapAction` (Function, required)
+
+    The function that is used to resolved the action that your component requires. The function will receive the following arguments:
+
+    - `dispatch` (Object, required)
+
+      The `dispatch` of your store, which has all the actions mapped against it.
+
+Your `mapAction` can either resolve a single action. If you wish to resolve multiple actions then you can either call `useAction` multiple times, or if you like resolve an object within your `mapAction` where each property of the object is a resolved action. The examples below will illustrate these options.
 
 #### Example
 
@@ -730,7 +787,27 @@ const AddTodo = () => {
 };
 ```
 
-If you wish to access multiple actions in the same component you can make multiple calls to `useAction`.
+#### Example resolving multiple actions via an object map
+
+```javascript
+import { useState } from 'react';
+import { useAction } from 'easy-peasy';
+
+const EditTodo = ({ todo }) => {
+  const [text, setText] = useState(todo.text);
+  const { saveTodo, removeTodo } = useAction(actions => ({
+    saveTodo: actions.todos.save,
+    removeTodo: actions.todo.toggle
+  }));
+  return (
+    <div>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={() => saveTodo(todo.id)}>Save</button>
+      <button onClick={() => removeTodo(todo.id)}>Remove</button>
+    </div>
+  );
+};
+```
 
 ---
 
