@@ -204,7 +204,9 @@ export const createStore = (model, options = {}) => {
   const reducers = createReducers(actionReducers, [])
 
   const composeEnhancers =
-    devTools && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+    devTools &&
+    typeof window !== 'undefined' &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       : compose
 
