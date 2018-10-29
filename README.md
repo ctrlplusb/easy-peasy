@@ -15,7 +15,7 @@
 ```javascript
 import { StoreProvider, createStore, useStore, useAction } from 'easy-peasy';
 
-// 👇 create your store
+// 👇 create your store by providing your model
 const store = createStore({
   todos: {
     items: ['Install easy-peasy', 'Build app', 'Profit'],
@@ -35,8 +35,8 @@ const App = () => (
 )
 
 function TodoList() {
-  // 👇 use hooks to get state or actions. you component will automatically
-  //    receive updated state
+  // 👇 use hooks to get state or actions. your component will receive
+  //    updated state automatically
   const todos = useStore(state => state.todos.items)
   const add = useAction(dispatch => dispatch.todos.add)
   return (
@@ -56,9 +56,8 @@ function TodoList() {
   - Async actions for remote data fetching/persisting
   - Provides [React Hooks](https://reactjs.org/docs/hooks-intro.html) to interact with the store 😎
   - Powered by Redux
-  - Add custom Redux middleware
+  - Supports custom Redux middleware
   - Supports Redux Dev Tools
-  - Outputs a standard Redux store for easy integration
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -103,7 +102,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a simple model (object) to describe your state and it's actions. Batteries are included - you don't need to do any additional configuration or installation to support derived state, side effects, or integration with your React components. In terms of integration with React we are leveraging the cutting edge [Hooks](https://reactjs.org/docs/hooks-intro.html) feature. It's a game changer, and we highly recommend you give it a go.
+Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and it's actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with your React components. In terms of integration with React we are leveraging the cutting edge [Hooks](https://reactjs.org/docs/hooks-intro.html) feature. It's a game changer, and we highly recommend you give it a go.
 
 <p>&nbsp;</p>
 
@@ -124,7 +123,7 @@ Then install Easy Peasy.
 npm install easy-peasy
 ```
 
-Ok, thats it. No more "extra" dependencies for boosted features. It's an all-in-one package. Easy peasy.
+You're off to the races.
 
 <p>&nbsp;</p>
 
@@ -134,7 +133,7 @@ Ok, thats it. No more "extra" dependencies for boosted features. It's an all-in-
 
 ### React Todo List
 
-A simple/naive implementation of a todo list.
+A simple implementation of a todo list that utilises a mock service to illustrate data fetching/persisting via effect actions. A fully stateful app with no class components. Hot dang hooks are awesome.
 
 https://codesandbox.io/s/woyn8xqk15
 
@@ -144,11 +143,11 @@ https://codesandbox.io/s/woyn8xqk15
 
 ## Core Concepts
 
-The below will introduce you step by step to the core concepts of Easy Peasy. At first we will interact with the store directly (remember we output a standard Redux store). In the following section we shall then integrate Easy Peasy into a React application.
+The below will introduce you to the core concepts of Easy Peasy. At first we will interact with the store directly (we output a standard Redux store). In the following section we shall then cover how to use [Easy Peasy within a React application](#usage-with-react).
 
 ### Setting up your store
 
-Firstly you need to define your model. This represents the structure of your Redux store along with the default values. It can be as deep and complex as you like.
+Firstly you need to define your model. This represents the structure of your Redux store along with the default values. It can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
 
 ```javascript
 const model = {
