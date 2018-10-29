@@ -79,6 +79,7 @@ test('empty object in state', () => {
     bar: null,
   })
 })
+
 test('basic features', () => {
   // arrange
   const model = {
@@ -110,6 +111,7 @@ test('basic features', () => {
     },
   })
 })
+
 test('nested action', () => {
   // arrange
   const model = {
@@ -147,6 +149,7 @@ test('nested action', () => {
     },
   })
 })
+
 test('root action', () => {
   // arrange
   const store = createStore({
@@ -163,6 +166,7 @@ test('root action', () => {
   const actual = store.getState().todos.items
   expect(actual).toEqual({ 1: { text: 'foo' }, 2: { text: 'bar' } })
 })
+
 test('redux thunk configured', async () => {
   // arrange
   const model = { foo: 'bar' }
@@ -173,6 +177,7 @@ test('redux thunk configured', async () => {
   // assert
   expect(result).toBe('foo')
 })
+
 test('async action', async () => {
   // arrange
   const model = {
@@ -209,6 +214,7 @@ test('async action', async () => {
     },
   })
 })
+
 test('async action is always promise chainable', done => {
   // arrange
   const model = { doSomething: effect(() => undefined) }
@@ -216,6 +222,7 @@ test('async action is always promise chainable', done => {
   // act
   store.dispatch.doSomething().then(done)
 })
+
 test('dispatch another branch action', async () => {
   // arrange
   const model = {
@@ -246,6 +253,7 @@ test('dispatch another branch action', async () => {
     },
   })
 })
+
 test('state with no actions', () => {
   // arrange
   const model = {
@@ -278,6 +286,7 @@ test('state with no actions', () => {
     },
   })
 })
+
 test('redux dev tools disabled', () => {
   // arrange
   const model = { foo: 'bar' }
@@ -289,6 +298,7 @@ test('redux dev tools disabled', () => {
   // assert
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled()
 })
+
 test('redux dev tools enabled by default', () => {
   // arrange
   const model = { foo: 'bar' }
@@ -298,6 +308,7 @@ test('redux dev tools enabled by default', () => {
   // assert
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
 })
+
 test('allows custom middleware', done => {
   // arrange
   const customMiddleware = () => next => action => {
@@ -310,6 +321,7 @@ test('allows custom middleware', done => {
   const store = createStore({}, { middleware: [customMiddleware] })
   store.dispatch.logFullState()
 })
+
 test('supports initial state', () => {
   // arrange
   const model = {
@@ -342,6 +354,7 @@ test('supports initial state', () => {
     baz: 'bob',
   })
 })
+
 test('dispatches an action to represent the start of an effect', () => {
   // arrange
   const model = {
@@ -359,6 +372,7 @@ test('dispatches an action to represent the start of an effect', () => {
     { type: '@effect.foo.doSomething', payload },
   ])
 })
+
 describe('select', () => {
   test('is run for initialisation of store', () => {
     // arrange
@@ -394,6 +408,7 @@ describe('select', () => {
     expect(actual).toEqual([{ text: 'foo' }])
     expect(selector).toHaveBeenCalledTimes(1)
   })
+
   test('executes again if state does change', () => {
     // arrange
     const selector = jest.fn()
@@ -414,6 +429,7 @@ describe('select', () => {
     expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
     expect(selector).toHaveBeenCalledTimes(2)
   })
+
   test('executes if parent action changes associated state', () => {
     // arrange
     const selector = jest.fn()
@@ -436,6 +452,7 @@ describe('select', () => {
     expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
     expect(selector).toHaveBeenCalledTimes(2)
   })
+
   test('root select', () => {
     // arrange
     const selector = jest.fn()
@@ -458,6 +475,7 @@ describe('select', () => {
     expect(actual).toEqual([{ text: 'foo' }, { text: 'bar' }])
     expect(selector).toHaveBeenCalledTimes(2)
   })
+
   test('composed selectors', () => {
     // arrange
     const totalPriceSelector = select(state =>
@@ -490,6 +508,7 @@ describe('select', () => {
     // assert
     expect(store.getState().finalPrice).toBe(150)
   })
+
   test('composed selectors in reverse decleration', () => {
     // arrange
     const totalPriceSelector = select(state =>
@@ -508,4 +527,37 @@ describe('select', () => {
     // assert
     expect(store.getState().finalPrice).toBe(150)
   })
+})
+
+test('complex configuration', async () => {
+  const wrappedEffect = fn =>
+    effect(async (dispatch, payload, additional) => {
+      try {
+        return await fn(dispatch, payload, additional)
+      } catch (err) {
+        dispatch.error.unexpectedError(err)
+        return undefined
+      }
+    })
+
+  const store = createStore({
+    error: {
+      hasError: select(state => !!state.message),
+      message: undefined,
+    },
+    session: {
+      isInitialised: false,
+      initialised: state => {
+        state.isInitialised = true
+      },
+      initialise: wrappedEffect(async dispatch => {
+        dispatch.session.initialised()
+        return 'done'
+      }),
+    },
+  })
+
+  const result = await store.dispatch.session.initialise()
+  expect(store.getState().session.isInitialised).toBe(true)
+  expect(result).toBe('done')
 })
