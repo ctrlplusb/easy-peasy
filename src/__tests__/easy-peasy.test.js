@@ -355,7 +355,7 @@ test('supports initial state', () => {
   })
 })
 
-test('dispatches an action to represent the start of an effect', () => {
+test('dispatches an action to represent the start of an effect', async () => {
   // arrange
   const model = {
     foo: {
@@ -366,7 +366,7 @@ test('dispatches an action to represent the start of an effect', () => {
   const store = createStore(model, { middleware: [trackActions] })
   const payload = 'hello'
   // act
-  store.dispatch.foo.doSomething(payload)
+  await store.dispatch.foo.doSomething(payload)
   // assert
   expect(trackActions.actions).toEqual([
     { type: '@effect.foo.doSomething', payload },
