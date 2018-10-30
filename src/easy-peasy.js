@@ -27,6 +27,8 @@ const set = (path, target, value) => {
   }, target)
 }
 
+const tick = () => new Promise(resolve => setTimeout(resolve))
+
 export const effect = fn => {
   // eslint-disable-next-line no-param-reassign
   fn[effectSymbol] = true
@@ -87,7 +89,7 @@ export const createStore = (model, options = {}) => {
 
           // Effect Action Creator
           set(path, actionCreators, payload =>
-            references.dispatch(() => Promise.resolve(action(payload))),
+            references.dispatch(() => tick().then(() => action(payload))),
           )
         } else {
           // Reducer Action
