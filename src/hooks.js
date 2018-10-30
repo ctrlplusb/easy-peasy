@@ -6,18 +6,22 @@ import { isObject } from './lib'
 export function useStore(mapState) {
   const store = useContext(EasyPeasyContext)
   const [state, setState] = useState(mapState(store.getState()))
-  useEffect(() =>
-    store.subscribe(() => {
-      const newState = mapState(store.getState())
-      if (
-        newState === state ||
-        (isObject(newState) && isObject(state) && shallowEqual(newState, state))
-      ) {
-        // Do nothing
-        return
-      }
-      setState(newState)
-    }),
+  useEffect(
+    () =>
+      store.subscribe(() => {
+        const newState = mapState(store.getState())
+        if (
+          newState === state ||
+          (isObject(newState) &&
+            isObject(state) &&
+            shallowEqual(newState, state))
+        ) {
+          // Do nothing
+          return
+        }
+        setState(newState)
+      }),
+    [],
   )
   return state
 }
