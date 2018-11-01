@@ -2,7 +2,7 @@
 
 import 'jest-dom/extend-expect'
 import React from 'react'
-import { render, cleanup } from 'react-testing-library'
+import { render, cleanup, fireEvent } from 'react-testing-library'
 
 import {
   StoreProvider,
@@ -31,32 +31,247 @@ const trackActionsMiddleware = () => {
   return middleware
 }
 
-test('react', () => {
-  // arrange
-  const store = createStore({
-    count: 1,
-    inc: state => {
-      state.count += 1
-    },
-  })
-  function Counter() {
-    const count = useStore(state => state.count)
-    const inc = useAction(actions => actions.inc)
-    return (
-      <button data-testid="count" type="button" onClick={inc}>
-        {count}
-      </button>
+describe('react', () => {
+  test('store subscribe is only called once', () => {
+    // arrange
+    const store = createStore({
+      count: 1,
+      inc: state => {
+        state.count += 1
+      },
+    })
+    jest.spyOn(store, 'subscribe')
+    const renderSpy = jest.fn()
+    function Counter() {
+      const count = useStore(state => state.count)
+      renderSpy()
+      return <span data-testid="count">{count}</span>
+    }
+    const app = (
+      <StoreProvider store={store}>
+        <Counter />
+      </StoreProvider>
     )
-  }
-  // act
-  const { getByTestId } = render(
-    <StoreProvider store={store}>
-      <Counter />
-    </StoreProvider>,
-  )
-  // assert
-  const countButton = getByTestId('count')
-  expect(countButton.firstChild.nodeValue).toBe('1')
+
+    // act
+    render(app)
+
+    // assert
+    expect(renderSpy).toBeCalledTimes(1)
+    expect(store.subscribe).toBeCalledTimes(1)
+
+    // act
+    store.dispatch.inc()
+
+    // assert
+    expect(renderSpy).toBeCalledTimes(2)
+    expect(store.subscribe).toBeCalledTimes(1)
+  })
+
+  test('store is unsubscribed on unmount', () => {
+    // arrange
+    const store = createStore({
+      count: 1,
+      inc: state => {
+        state.count += 1
+      },
+    })
+    const unsubscribeSpy = jest.fn()
+    store.subscribe = () => unsubscribeSpy
+    function Counter() {
+      const count = useStore(state => state.count)
+      return <span data-testid="count">{count}</span>
+    }
+    const app = (
+      <StoreProvider store={store}>
+        <Counter />
+      </StoreProvider>
+    )
+
+    // act
+    const { unmount } = render(app)
+
+    // assert
+    expect(unsubscribeSpy).toBeCalledTimes(0)
+
+    // act
+    store.dispatch.inc()
+
+    // assert
+    expect(unsubscribeSpy).toBeCalledTimes(0)
+
+    // act
+    unmount()
+
+    // assert
+    expect(unsubscribeSpy).toBeCalledTimes(1)
+  })
+
+  describe('direct form', () => {
+    test('component updates with state change', async () => {
+      // arrange
+      const store = createStore({
+        count: 1,
+        inc: state => {
+          state.count += 1
+        },
+      })
+      const renderSpy = jest.fn()
+      function Counter() {
+        const count = useStore(state => state.count)
+        const inc = useAction(actions => actions.inc)
+        renderSpy()
+        return (
+          <button data-testid="count" type="button" onClick={inc}>
+            {count}
+          </button>
+        )
+      }
+
+      const app = (
+        <StoreProvider store={store}>
+          <Counter />
+        </StoreProvider>
+      )
+
+      // act
+      const { getByTestId } = render(app)
+
+      // assert
+      const countButton = getByTestId('count')
+      expect(countButton.firstChild.textContent).toBe('1')
+      expect(renderSpy).toHaveBeenCalledTimes(1)
+
+      // act
+      fireEvent.click(countButton)
+
+      // assert
+      expect(countButton.firstChild.textContent).toBe('2')
+      expect(renderSpy).toHaveBeenCalledTimes(2)
+    })
+
+    test('component only updates with state change', async () => {
+      // arrange
+      const store = createStore({
+        count: 1,
+        somethingElse: null,
+        updateSomethingElse: (state, payload) => {
+          state.somethingElse = payload
+        },
+      })
+      const renderSpy = jest.fn()
+      function Counter() {
+        const count = useStore(state => state.count)
+        renderSpy()
+        return <span data-testid="count">{count}</span>
+      }
+      const app = (
+        <StoreProvider store={store}>
+          <Counter />
+        </StoreProvider>
+      )
+
+      // act
+      const { getByTestId } = render(app)
+
+      // assert
+      const countButton = getByTestId('count')
+      expect(countButton.firstChild.textContent).toBe('1')
+      expect(renderSpy).toHaveBeenCalledTimes(1)
+
+      // act
+      store.dispatch.updateSomethingElse('foo')
+
+      // assert
+      expect(countButton.firstChild.textContent).toBe('1')
+      expect(renderSpy).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('object form', () => {
+    test('component updates with state change', async () => {
+      // arrange
+      const store = createStore({
+        count: 1,
+        inc: state => {
+          state.count += 1
+        },
+      })
+      const renderSpy = jest.fn()
+      function Counter() {
+        const { count } = useStore(state => ({
+          count: state.count,
+        }))
+        const inc = useAction(actions => actions.inc)
+        renderSpy()
+        return (
+          <button data-testid="count" type="button" onClick={inc}>
+            {count}
+          </button>
+        )
+      }
+
+      const app = (
+        <StoreProvider store={store}>
+          <Counter />
+        </StoreProvider>
+      )
+
+      // act
+      const { getByTestId } = render(app)
+
+      // assert
+      const countButton = getByTestId('count')
+      expect(countButton.firstChild.textContent).toBe('1')
+      expect(renderSpy).toHaveBeenCalledTimes(1)
+
+      // act
+      fireEvent.click(countButton)
+
+      // assert
+      expect(countButton.firstChild.textContent).toBe('2')
+      expect(renderSpy).toHaveBeenCalledTimes(2)
+    })
+
+    test('component only updates with state change', async () => {
+      // arrange
+      const store = createStore({
+        count: 1,
+        somethingElse: null,
+        updateSomethingElse: (state, payload) => {
+          state.somethingElse = payload
+        },
+      })
+      const renderSpy = jest.fn()
+      function Counter() {
+        const { count } = useStore(state => ({
+          count: state.count,
+        }))
+        renderSpy()
+        return <span data-testid="count">{count}</span>
+      }
+      const app = (
+        <StoreProvider store={store}>
+          <Counter />
+        </StoreProvider>
+      )
+
+      // act
+      const { getByTestId } = render(app)
+
+      // assert
+      const countButton = getByTestId('count')
+      expect(countButton.firstChild.textContent).toBe('1')
+      expect(renderSpy).toHaveBeenCalledTimes(1)
+
+      // act
+      store.dispatch.updateSomethingElse('foo')
+
+      // assert
+      expect(countButton.firstChild.textContent).toBe('1')
+      expect(renderSpy).toHaveBeenCalledTimes(1)
+    })
+  })
 })
 
 test('empty object in state', () => {
