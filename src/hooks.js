@@ -6,23 +6,23 @@ import { isObject } from './lib'
 export function useStore(mapState) {
   const store = useContext(EasyPeasyContext)
   const [state, setState] = useState(mapState(store.getState()))
-  useLayoutEffect(
-    () =>
-      store.subscribe(() => {
-        const newState = mapState(store.getState())
-        if (
-          newState === state ||
-          (isObject(newState) &&
-            isObject(state) &&
-            shallowEqual(newState, state))
-        ) {
-          // Do nothing
-          return
-        }
-        setState(newState)
-      }),
-    [],
-  )
+  useLayoutEffect(() => {
+    let stateCache = state
+    return store.subscribe(() => {
+      const newState = mapState(store.getState())
+      if (
+        newState === stateCache ||
+        (isObject(newState) &&
+          isObject(stateCache) &&
+          shallowEqual(newState, stateCache))
+      ) {
+        // Do nothing
+        return
+      }
+      stateCache = newState
+      setState(newState)
+    })
+  }, [])
   return state
 }
 export function useAction(mapActions) {
