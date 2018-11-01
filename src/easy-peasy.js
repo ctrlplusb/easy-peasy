@@ -89,7 +89,7 @@ export const createStore = (model, options = {}) => {
 
           // Effect Action Creator
           set(path, actionCreators, payload =>
-            references.dispatch(() => tick().then(() => action(payload))),
+            tick().then(() => references.dispatch(() => action(payload))),
           )
         } else {
           // Reducer Action
