@@ -226,13 +226,13 @@ const store = createStore({
     items: [],
 
     //          👇 define an action surrounding it with the helper
-    saveTodo: effect(async (actions, payload, getState) => {
+    saveTodo: effect(async (dispatch, payload, getState) => {
       //                      👆
       // Notice that an effect will receive the actions allowing you to dispatch
       // other actions after you have performed your side effect.
       const saved = await todoService.save(payload);
       // 👇 Now we dispatch an action to add the saved item to our state
-      actions.todos.todoSaved(saved);
+      dispatch.todos.todoSaved(saved);
     }),
 
     todoSaved: (state, payload) => {
@@ -242,7 +242,7 @@ const store = createStore({
 });
 ```
 
-As you can see in the example above you can't modify the state directly within an `effect` action, however, the `effect` action is provided `actions`, allowing you dispatch actions to update the state where required.
+As you can see in the example above you can't modify the state directly within an `effect` action, however, the `effect` action is provided `dispatch`, allowing you dispatch actions to update the state where required.
 
 ### Dispatching an `effect` action directly via the store
 
@@ -349,7 +349,7 @@ import { useAction } from 'easy-peasy';
 
 const AddTodo = () => {
   const [text, setText] = useState('');
-  const addTodo = useAction(actions => actions.todos.add);
+  const addTodo = useAction(dispatch => dispatch.todos.add);
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -839,7 +839,7 @@ import { useAction } from 'easy-peasy';
 
 const AddTodo = () => {
   const [text, setText] = useState('');
-  const addTodo = useAction(actions => actions.todos.add);
+  const addTodo = useAction(dispatch => dispatch.todos.add);
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -857,9 +857,9 @@ import { useAction } from 'easy-peasy';
 
 const EditTodo = ({ todo }) => {
   const [text, setText] = useState(todo.text);
-  const { saveTodo, removeTodo } = useAction(actions => ({
-    saveTodo: actions.todos.save,
-    removeTodo: actions.todo.toggle
+  const { saveTodo, removeTodo } = useAction(dispatch => ({
+    saveTodo: dispatch.todos.save,
+    removeTodo: dispatch.todo.toggle
   }));
   return (
     <div>
