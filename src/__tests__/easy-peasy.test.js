@@ -274,126 +274,260 @@ describe('react', () => {
   })
 })
 
-test('empty object in state', () => {
-  // arrange
-  const model = {
-    todos: {
-      items: {},
-      foo: [],
-    },
-    bar: null,
-  }
-  // act
-  const store = createStore(model)
-  // assert
-  expect(store.getState()).toEqual({
-    todos: {
-      items: {},
-      foo: [],
-    },
-    bar: null,
-  })
-})
-
-test('basic features', () => {
-  // arrange
-  const model = {
-    session: {
-      user: undefined,
-      login: (state, user) => {
-        state.user = user
+describe('store', () => {
+  test('empty object in state', () => {
+    // arrange
+    const model = {
+      todos: {
+        items: {},
+        foo: [],
       },
-    },
-  }
-  // act
-  const store = createStore(model)
-  // assert
-  expect(store.getState()).toEqual({
-    session: {
-      user: undefined,
-    },
-  })
-  // act
-  store.dispatch.session.login({
-    name: 'bob',
-  })
-  // assert
-  expect(store.getState()).toEqual({
-    session: {
-      user: {
-        name: 'bob',
+      bar: null,
+    }
+    // act
+    const store = createStore(model)
+    // assert
+    expect(store.getState()).toEqual({
+      todos: {
+        items: {},
+        foo: [],
       },
-    },
+      bar: null,
+    })
   })
-})
 
-test('nested action', () => {
-  // arrange
-  const model = {
-    session: {
-      user: undefined,
-      settings: {
-        favouriteColor: 'red',
-        setFavouriteColor: (state, color) => {
-          state.favouriteColor = color
+  test('basic features', () => {
+    // arrange
+    const model = {
+      session: {
+        user: undefined,
+        login: (state, user) => {
+          state.user = user
         },
       },
-      login: () => undefined,
-    },
-  }
-  // act
-  const store = createStore(model)
-  // assert
-  expect(store.getState()).toEqual({
-    session: {
-      user: undefined,
-      settings: {
-        favouriteColor: 'red',
+    }
+    // act
+    const store = createStore(model)
+    // assert
+    expect(store.getState()).toEqual({
+      session: {
+        user: undefined,
       },
-    },
+    })
+    // act
+    store.dispatch.session.login({
+      name: 'bob',
+    })
+    // assert
+    expect(store.getState()).toEqual({
+      session: {
+        user: {
+          name: 'bob',
+        },
+      },
+    })
   })
-  // act
-  store.dispatch.session.settings.setFavouriteColor('blue')
-  // assert
-  expect(store.getState()).toEqual({
-    session: {
-      user: undefined,
-      settings: {
-        favouriteColor: 'blue',
+
+  test('nested action', () => {
+    // arrange
+    const model = {
+      session: {
+        user: undefined,
+        settings: {
+          favouriteColor: 'red',
+          setFavouriteColor: (state, color) => {
+            state.favouriteColor = color
+          },
+        },
+        login: () => undefined,
       },
-    },
+    }
+    // act
+    const store = createStore(model)
+    // assert
+    expect(store.getState()).toEqual({
+      session: {
+        user: undefined,
+        settings: {
+          favouriteColor: 'red',
+        },
+      },
+    })
+    // act
+    store.dispatch.session.settings.setFavouriteColor('blue')
+    // assert
+    expect(store.getState()).toEqual({
+      session: {
+        user: undefined,
+        settings: {
+          favouriteColor: 'blue',
+        },
+      },
+    })
+  })
+
+  test('root action', () => {
+    // arrange
+    const store = createStore({
+      todos: {
+        items: { 1: { text: 'foo' } },
+      },
+      doSomething: state => {
+        state.todos.items[2] = { text: 'bar' }
+      },
+    })
+    // act
+    store.dispatch.doSomething()
+    // assert
+    const actual = store.getState().todos.items
+    expect(actual).toEqual({ 1: { text: 'foo' }, 2: { text: 'bar' } })
+  })
+
+  test('state with no actions', () => {
+    // arrange
+    const model = {
+      session: {
+        user: undefined,
+        login: (state, user) => {
+          state.user = user
+        },
+      },
+      // No associated actions here
+      todos: {
+        foo: [],
+      },
+    }
+    // act
+    const store = createStore(model)
+    // act
+    store.dispatch.session.login({
+      name: 'bob',
+    })
+    // assert
+    expect(store.getState()).toEqual({
+      session: {
+        user: {
+          name: 'bob',
+        },
+      },
+      todos: {
+        foo: [],
+      },
+    })
+  })
+
+  test('allows custom middleware', done => {
+    // arrange
+    const customMiddleware = () => next => action => {
+      // assert
+      expect(action.type).toBe('@action.logFullState')
+      next(action)
+      done()
+    }
+    // act
+    const store = createStore({}, { middleware: [customMiddleware] })
+    store.dispatch.logFullState()
+  })
+
+  test('supports initial state', () => {
+    // arrange
+    const model = {
+      foo: {
+        bar: {
+          stuff: [1, 2],
+        },
+        color: 'red',
+      },
+      baz: 'bob',
+    }
+    const initialState = {
+      foo: {
+        bar: {
+          stuff: [3, 4],
+          invalid: 'qux',
+        },
+      },
+    }
+    // act
+    const store = createStore(model, { initialState })
+    // assert
+    expect(store.getState()).toEqual({
+      foo: {
+        bar: {
+          stuff: [3, 4],
+        },
+        color: 'red',
+      },
+      baz: 'bob',
+    })
+  })
+
+  test('complex configuration', async () => {
+    const wrappedEffect = fn =>
+      effect(async (dispatch, payload, additional) => {
+        try {
+          return await fn(dispatch, payload, additional)
+        } catch (err) {
+          dispatch.error.unexpectedError(err)
+          return undefined
+        }
+      })
+
+    const store = createStore({
+      error: {
+        hasError: select(state => !!state.message),
+        message: undefined,
+      },
+      session: {
+        isInitialised: false,
+        initialised: state => {
+          state.isInitialised = true
+        },
+        initialise: wrappedEffect(async dispatch => {
+          dispatch.session.initialised()
+          return 'done'
+        }),
+      },
+    })
+
+    const result = await store.dispatch.session.initialise()
+    expect(store.getState().session.isInitialised).toBe(true)
+    expect(result).toBe('done')
   })
 })
 
-test('root action', () => {
-  // arrange
-  const store = createStore({
-    todos: {
-      items: { 1: { text: 'foo' } },
-    },
-    doSomething: state => {
-      state.todos.items[2] = { text: 'bar' }
-    },
+describe('internals', () => {
+  test('redux thunk configured', async () => {
+    // arrange
+    const model = { foo: 'bar' }
+    const store = createStore(model)
+    const action = payload => () => Promise.resolve(payload)
+    // act
+    const result = await store.dispatch(action('foo'))
+    // assert
+    expect(result).toBe('foo')
   })
-  // act
-  store.dispatch.doSomething()
-  // assert
-  const actual = store.getState().todos.items
-  expect(actual).toEqual({ 1: { text: 'foo' }, 2: { text: 'bar' } })
-})
-
-test('redux thunk configured', async () => {
-  // arrange
-  const model = { foo: 'bar' }
-  const store = createStore(model)
-  const action = payload => () => Promise.resolve(payload)
-  // act
-  const result = await store.dispatch(action('foo'))
-  // assert
-  expect(result).toBe('foo')
 })
 
 describe('effects', () => {
+  test('dispatches an action to represent the start of an effect', async () => {
+    // arrange
+    const model = {
+      foo: {
+        doSomething: effect(() => undefined),
+      },
+    }
+    const trackActions = trackActionsMiddleware()
+    const store = createStore(model, { middleware: [trackActions] })
+    const payload = 'hello'
+    // act
+    await store.dispatch.foo.doSomething(payload)
+    // assert
+    expect(trackActions.actions).toEqual([
+      { type: '@effect.foo.doSomething', payload },
+    ])
+  })
+
   test('async action', async () => {
     // arrange
     const model = {
@@ -499,123 +633,28 @@ describe('effects', () => {
   })
 })
 
-test('state with no actions', () => {
-  // arrange
-  const model = {
-    session: {
-      user: undefined,
-      login: (state, user) => {
-        state.user = user
-      },
-    },
-    // No associated actions here
-    todos: {
-      foo: [],
-    },
-  }
-  // act
-  const store = createStore(model)
-  // act
-  store.dispatch.session.login({
-    name: 'bob',
-  })
-  // assert
-  expect(store.getState()).toEqual({
-    session: {
-      user: {
-        name: 'bob',
-      },
-    },
-    todos: {
-      foo: [],
-    },
-  })
-})
-
-test('redux dev tools disabled', () => {
-  // arrange
-  const model = { foo: 'bar' }
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
-  // act
-  createStore(model, {
-    devTools: false,
-  })
-  // assert
-  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled()
-})
-
-test('redux dev tools enabled by default', () => {
-  // arrange
-  const model = { foo: 'bar' }
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
-  // act
-  createStore(model)
-  // assert
-  expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
-})
-
-test('allows custom middleware', done => {
-  // arrange
-  const customMiddleware = () => next => action => {
+describe('dev tools', () => {
+  test('redux dev tools disabled', () => {
+    // arrange
+    const model = { foo: 'bar' }
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
+    // act
+    createStore(model, {
+      devTools: false,
+    })
     // assert
-    expect(action.type).toBe('@action.logFullState')
-    next(action)
-    done()
-  }
-  // act
-  const store = createStore({}, { middleware: [customMiddleware] })
-  store.dispatch.logFullState()
-})
-
-test('supports initial state', () => {
-  // arrange
-  const model = {
-    foo: {
-      bar: {
-        stuff: [1, 2],
-      },
-      color: 'red',
-    },
-    baz: 'bob',
-  }
-  const initialState = {
-    foo: {
-      bar: {
-        stuff: [3, 4],
-        invalid: 'qux',
-      },
-    },
-  }
-  // act
-  const store = createStore(model, { initialState })
-  // assert
-  expect(store.getState()).toEqual({
-    foo: {
-      bar: {
-        stuff: [3, 4],
-      },
-      color: 'red',
-    },
-    baz: 'bob',
+    expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled()
   })
-})
 
-test('dispatches an action to represent the start of an effect', async () => {
-  // arrange
-  const model = {
-    foo: {
-      doSomething: effect(() => undefined),
-    },
-  }
-  const trackActions = trackActionsMiddleware()
-  const store = createStore(model, { middleware: [trackActions] })
-  const payload = 'hello'
-  // act
-  await store.dispatch.foo.doSomething(payload)
-  // assert
-  expect(trackActions.actions).toEqual([
-    { type: '@effect.foo.doSomething', payload },
-  ])
+  test('redux dev tools enabled by default', () => {
+    // arrange
+    const model = { foo: 'bar' }
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn()
+    // act
+    createStore(model)
+    // assert
+    expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('select', () => {
@@ -772,39 +811,6 @@ describe('select', () => {
     // assert
     expect(store.getState().finalPrice).toBe(150)
   })
-})
-
-test('complex configuration', async () => {
-  const wrappedEffect = fn =>
-    effect(async (dispatch, payload, additional) => {
-      try {
-        return await fn(dispatch, payload, additional)
-      } catch (err) {
-        dispatch.error.unexpectedError(err)
-        return undefined
-      }
-    })
-
-  const store = createStore({
-    error: {
-      hasError: select(state => !!state.message),
-      message: undefined,
-    },
-    session: {
-      isInitialised: false,
-      initialised: state => {
-        state.isInitialised = true
-      },
-      initialise: wrappedEffect(async dispatch => {
-        dispatch.session.initialised()
-        return 'done'
-      }),
-    },
-  })
-
-  const result = await store.dispatch.session.initialise()
-  expect(store.getState().session.isInitialised).toBe(true)
-  expect(result).toBe('done')
 })
 
 describe('dependency injection', () => {
