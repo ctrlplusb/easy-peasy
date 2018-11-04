@@ -44,7 +44,12 @@ export const select = (fn, dependencies) => {
 }
 
 export const createStore = (model, options = {}) => {
-  const { devTools = true, middleware = [], initialState = {} } = options
+  const {
+    devTools = true,
+    middleware = [],
+    initialState = {},
+    injections,
+  } = options
 
   const definition = {
     ...model,
@@ -80,9 +85,14 @@ export const createStore = (model, options = {}) => {
                 payload,
               })
             }
-            return value(references.dispatch, payload, {
-              getState: references.getState,
-            })
+            return value(
+              references.dispatch,
+              payload,
+              {
+                getState: references.getState,
+              },
+              injections,
+            )
           }
           action.actionName = actionName
           set(path, actionEffects, action)
