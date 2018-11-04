@@ -226,7 +226,7 @@ const store = createStore({
     items: [],
 
     //          👇 define an action surrounding it with the helper
-    saveTodo: effect(async (actions, payload) => {
+    saveTodo: effect(async (actions, payload, getState) => {
       //                      👆
       // Notice that an effect will receive the actions allowing you to dispatch
       // other actions after you have performed your side effect.
@@ -447,6 +447,10 @@ Creates a Redux store based on the given model. The model must be an object and 
 
       Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
 
+    - `injections` (Any, not required, default=undefined)
+
+      Any dependencies you would like to inject, making them available to your effect actions. They will become available as the 4th parameter to the effect handler. See the [effect](#effectaction) docs for more.
+
     - `middleware` (Array, not required, default=[])
 
       Any additional middleware you would like to attach to your Redux store.
@@ -534,13 +538,13 @@ Declares an action on your model as being effectful. i.e. has asynchronous flow.
 
       The payload, if any, that was provided to the action.
 
-    - `additional` (Object, required)
+    - `getState` (Function, required)
 
-      An object containing additional helpers for the action when required. It has the following properties:
+      When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
 
-      - `getState` (Function, required)
+    - `injections` (Any, not required, default=undefined)
 
-        When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
+      Any depenencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
 
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
 
@@ -571,6 +575,53 @@ store.dispatch.session.login({
 // 👇 effectful actions _always_ return a Promise
 .then(() => console.log('Logged in'));
 
+```
+
+#### Example accessing State via the getState parameter
+
+```javascript
+import { createStore, effect } from 'easy-peasy';
+
+const store = createStore({
+  foo: 'bar',
+  // getState allows you to gain access to the  store's state
+  //                                               👇
+  doSomething: effect(async (dispatch, payload, getState, injections) => {
+    // Calling it exposes the root state of your store. i.e. the full
+    // store state 👇
+    console.log(getState())
+    // { foo: 'bar' }
+  }),
+});
+
+store.dispatch.doSomething()
+```
+
+
+#### Example with Dependency Injection
+
+```javascript
+import { createStore, effect } from 'easy-peasy';
+import api from './api' // 👈 a dependency we want to inject
+
+const store = createStore(
+  {
+    foo: 'bar',
+    //                              injections are exposed here 👇
+    doSomething: effect(async (dispatch, payload, getState, injections) => {
+      const { api } = injections
+      await api.foo()
+    }),
+  },
+  {
+    // 👇 specify the injections parameter when creating your store
+    injections: {
+      api,
+    }
+  }
+);
+
+store.dispatch.doSomething()
 ```
 
 ### select(selector)
