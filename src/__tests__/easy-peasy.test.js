@@ -393,79 +393,109 @@ test('redux thunk configured', async () => {
   expect(result).toBe('foo')
 })
 
-test('async action', async () => {
-  // arrange
-  const model = {
-    session: {
-      user: undefined,
-      loginSucceeded: (state, payload) => {
-        state.user = payload
+describe('effects', () => {
+  test('async action', async () => {
+    // arrange
+    const model = {
+      session: {
+        user: undefined,
+        loginSucceeded: (state, payload) => {
+          state.user = payload
+        },
+        login: effect(async (dispatch, payload) => {
+          expect(payload).toEqual({
+            username: 'bob',
+            password: 'foo',
+          })
+          const user = await resolveAfter({ name: 'bob' }, 15)
+          dispatch.session.loginSucceeded(user)
+          return 'resolved'
+        }),
       },
-      login: effect(async (dispatch, payload) => {
-        expect(payload).toEqual({
-          username: 'bob',
-          password: 'foo',
-        })
-        const user = await resolveAfter({ name: 'bob' }, 15)
-        dispatch.session.loginSucceeded(user)
-        return 'resolved'
-      }),
-    },
-  }
-  // act
-  const store = createStore(model)
-  // act
-  const result = await store.dispatch.session.login({
-    username: 'bob',
-    password: 'foo',
+    }
+    // act
+    const store = createStore(model)
+    // act
+    const result = await store.dispatch.session.login({
+      username: 'bob',
+      password: 'foo',
+    })
+    // assert
+    expect(result).toBe('resolved')
+    expect(store.getState()).toEqual({
+      session: {
+        user: {
+          name: 'bob',
+        },
+      },
+    })
   })
-  // assert
-  expect(result).toBe('resolved')
-  expect(store.getState()).toEqual({
-    session: {
-      user: {
-        name: 'bob',
-      },
-    },
+
+  test('action is always promise chainable', done => {
+    // arrange
+    const model = { doSomething: effect(() => undefined) }
+    const store = createStore(model)
+    // act
+    store.dispatch.doSomething().then(done)
   })
-})
 
-test('async action is always promise chainable', done => {
-  // arrange
-  const model = { doSomething: effect(() => undefined) }
-  const store = createStore(model)
-  // act
-  store.dispatch.doSomething().then(done)
-})
-
-test('dispatch another branch action', async () => {
-  // arrange
-  const model = {
-    session: {
-      user: undefined,
-      login: effect(dispatch => {
-        dispatch.stats.incrementLoginAttempts()
-      }),
-    },
-    stats: {
-      loginAttempts: 0,
-      incrementLoginAttempts: state => {
-        state.loginAttempts += 1
+  test('dispatch another branch action', async () => {
+    // arrange
+    const model = {
+      session: {
+        user: undefined,
+        login: effect(dispatch => {
+          dispatch.stats.incrementLoginAttempts()
+        }),
       },
-    },
-  }
-  // act
-  const store = createStore(model)
-  // act
-  await store.dispatch.session.login()
-  // assert
-  expect(store.getState()).toEqual({
-    session: {
-      user: undefined,
-    },
-    stats: {
-      loginAttempts: 1,
-    },
+      stats: {
+        loginAttempts: 0,
+        incrementLoginAttempts: state => {
+          state.loginAttempts += 1
+        },
+      },
+    }
+    // act
+    const store = createStore(model)
+    // act
+    await store.dispatch.session.login()
+    // assert
+    expect(store.getState()).toEqual({
+      session: {
+        user: undefined,
+      },
+      stats: {
+        loginAttempts: 1,
+      },
+    })
+  })
+
+  test('getState is exposed', async () => {
+    // arrange
+    const store = createStore({
+      count: 1,
+      doSomething: effect((dispatch, payload, getState) => {
+        // assert
+        expect(getState()).toEqual({ count: 1 })
+      }),
+    })
+
+    // act
+    await store.dispatch.doSomething()
+  })
+
+  test('deprecated getState is exposed', async () => {
+    // arrange
+    const store = createStore({
+      count: 1,
+      doSomething: effect((dispatch, payload, { getState }) => {
+        // assert
+        expect(getState()).toEqual({ count: 1 })
+      }),
+    })
+
+    // act
+    await store.dispatch.doSomething()
   })
 })
 
