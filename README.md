@@ -94,6 +94,7 @@ function TodoList() {
     - [StoreProvider](#storeprovider)
     - [useStore(mapState)](#usestoremapstate)
     - [useAction(mapAction)](#useactionmapaction)
+    - [subscribe](#subscribe)
   - [Prior Art](#prior-art)
 
 <p>&nbsp;</p>
@@ -818,6 +819,30 @@ const EditTodo = ({ todo }) => {
     </div>
   );
 };
+```
+
+### subscribe
+
+A Redux subscribe method allowing you to subscribe to state change.
+
+#### Example
+
+```javascript
+import { createStore } from 'easy-peasy';
+
+const store = createStore({
+  todos: {
+    items: [],
+    add: (state, payload) => {
+      state.items.push(payload)
+    }
+  }
+})
+
+store.subscribe(() => {
+  const state = store.getState();
+  // saveStateToLocalStorage(state)
+});
 ```
 
 <p>&nbsp;</p>
