@@ -776,3 +776,28 @@ test('complex configuration', async () => {
   expect(store.getState().session.isInitialised).toBe(true)
   expect(result).toBe('done')
 })
+
+describe('dependency injection', () => {
+  test('exposes dependencies to effect actions', async () => {
+    // arrange
+    const injection = jest.fn()
+    const store = createStore(
+      {
+        doSomething: effect((dispatch, payload, getState, injections) => {
+          injections.injection()
+        }),
+      },
+      {
+        injections: {
+          injection,
+        },
+      },
+    )
+
+    // act
+    await store.dispatch.doSomething()
+
+    // assert
+    expect(injection).toHaveBeenCalledTimes(1)
+  })
+})
