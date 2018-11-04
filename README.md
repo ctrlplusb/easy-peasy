@@ -94,6 +94,7 @@ function TodoList() {
     - [StoreProvider](#storeprovider)
     - [useStore(mapState)](#usestoremapstate)
     - [useAction(mapAction)](#useactionmapaction)
+    - [subscribe](#subscribe)
   - [Prior Art](#prior-art)
 
 <p>&nbsp;</p>
@@ -798,27 +799,30 @@ const AddTodo = () => {
 };
 ```
 
-#### Example resolving multiple actions via an object map
+### subscribe
+
+A Redux subscribe method allowing you to subscribe to state change.
+
+#### Example
 
 ```javascript
-import { useState } from 'react';
-import { useAction } from 'easy-peasy';
+import { createStore } from 'easy-peasy';
 
-const EditTodo = ({ todo }) => {
-  const [text, setText] = useState(todo.text);
-  const { saveTodo, removeTodo } = useAction(actions => ({
-    saveTodo: actions.todos.save,
-    removeTodo: actions.todo.toggle
-  }));
-  return (
-    <div>
-      <input value={text} onChange={(e) => setText(e.target.value)} />
-      <button onClick={() => saveTodo(todo.id)}>Save</button>
-      <button onClick={() => removeTodo(todo.id)}>Remove</button>
-    </div>
-  );
-};
+const store = createStore({
+  todos: {
+    items: [],
+    add: (state, payload) => {
+      state.items.push(payload)
+    }
+  }
+})
+
+store.subscribe(() => {
+  const state = store.getState();
+  // saveStateToLocalStorage(state)
+});
 ```
+
 
 <p>&nbsp;</p>
 
