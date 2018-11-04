@@ -29,6 +29,9 @@ const set = (path, target, value) => {
 
 const tick = () => new Promise(resolve => setTimeout(resolve))
 
+const startsWith = (target, search) =>
+  target.substr(0, search.length) === search
+
 export const effect = fn => {
   // eslint-disable-next-line no-param-reassign
   fn[effectSymbol] = true
@@ -153,6 +156,17 @@ export const createStore = (model, options = {}) => {
       createReducers(current[key], [...path, key]),
     ])
     const reducerForActions = (state = get(path, defaultState), action) => {
+      // short circuit effects as they are noop in reducers
+      if (startsWith(action.type, '@effect.')) {
+        return state
+      }
+      // short circuit actions if they aren't a match on current path
+      if (
+        path.length > 0 &&
+        !startsWith(action.type, `@action.${path.join('.')}`)
+      ) {
+        return state
+      }
       const actionReducer = actionReducersAtPath.find(
         x => x.actionName === action.type,
       )
