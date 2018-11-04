@@ -88,9 +88,7 @@ export const createStore = (model, options = {}) => {
             return value(
               references.dispatch,
               payload,
-              {
-                getState: references.getState,
-              },
+              references.getState,
               injections,
             )
           }
@@ -235,6 +233,7 @@ export const createStore = (model, options = {}) => {
 
   references.dispatch = store.dispatch
   references.getState = store.getState
+  references.getState.getState = store.getState
 
   return store
 }
