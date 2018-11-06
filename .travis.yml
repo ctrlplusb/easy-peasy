@@ -5,12 +5,15 @@ cache:
   directories:
     - node_modules
 node_js:
-- '8'
+  - 'node'
+  - '10'
+  - '8'
+  - '6'
 script:
 # Unfortunately flow falls over when a dep exists in peer deps and others. :(
 # @see https://github.com/flowtype/flow-typed/issues/528
 #- yarn run flow:defs
-- npm run test
+- yarn run test
 after_success:
 # Deploy code coverage report to codecov.io
-- npm run test:coverage:deploy
+- yarn run test:coverage:deploy
