@@ -54,7 +54,10 @@ describe('react', () => {
     )
 
     // act
-    render(app)
+    const { rerender } = render(app)
+
+    // this triggers the effect to fire
+    rerender(app)
 
     // assert
     expect(renderSpy).toBeCalledTimes(1)
@@ -135,7 +138,10 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId } = render(app)
+      const { getByTestId, rerender } = render(app)
+
+      // this triggers the effect to fire
+      rerender(app)
 
       // assert
       const countButton = getByTestId('count')
@@ -218,7 +224,10 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId } = render(app)
+      const { getByTestId, rerender } = render(app)
+
+      // this triggers the effect to fire
+      rerender(app)
 
       // assert
       const countButton = getByTestId('count')

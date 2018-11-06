@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 import shallowEqual from 'shallowequal'
 import EasyPeasyContext from './context'
 import { isObject } from './lib'
@@ -6,7 +6,7 @@ import { isObject } from './lib'
 export function useStore(mapState) {
   const store = useContext(EasyPeasyContext)
   const [state, setState] = useState(mapState(store.getState()))
-  useLayoutEffect(() => {
+  useEffect(() => {
     let stateCache = state
     return store.subscribe(() => {
       const newState = mapState(store.getState())
