@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react'
 import shallowEqual from 'shallowequal'
 import EasyPeasyContext from './context'
-import { isObject } from './lib'
+import { isStateObject } from './lib'
 
 export function useStore(mapState) {
   const store = useContext(EasyPeasyContext)
@@ -12,8 +12,8 @@ export function useStore(mapState) {
       const newState = mapState(store.getState())
       if (
         newState === stateCache ||
-        (isObject(newState) &&
-          isObject(stateCache) &&
+        (isStateObject(newState) &&
+          isStateObject(stateCache) &&
           shallowEqual(newState, stateCache))
       ) {
         // Do nothing

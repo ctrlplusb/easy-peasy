@@ -6,7 +6,7 @@ import {
 import memoizeOne from 'memoize-one'
 import produce from 'immer'
 import thunk from 'redux-thunk'
-import { isObject } from './lib'
+import { isStateObject } from './lib'
 
 const effectSymbol = Symbol('effect')
 const selectSymbol = Symbol('select')
@@ -14,7 +14,7 @@ const selectDependeciesSymbol = Symbol('selectDependencies')
 const selectStateSymbol = Symbol('selectState')
 
 const get = (path, target) =>
-  path.reduce((acc, cur) => (isObject(acc) ? acc[cur] : undefined), target)
+  path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
 
 const set = (path, target, value) => {
   path.reduce((acc, cur, idx) => {
@@ -124,7 +124,7 @@ export const createStore = (model, options = {}) => {
             }),
           )
         }
-      } else if (isObject(value) && Object.keys(value).length > 0) {
+      } else if (isStateObject(value) && Object.keys(value).length > 0) {
         extract(value, path)
       } else {
         // State
@@ -148,7 +148,7 @@ export const createStore = (model, options = {}) => {
       return acc
     }, [])
     const stateAtPath = Object.keys(current).reduce(
-      (acc, key) => (isObject(current[key]) ? [...acc, key] : acc),
+      (acc, key) => (isStateObject(current[key]) ? [...acc, key] : acc),
       [],
     )
     const nestedReducers = stateAtPath.map(key => [
