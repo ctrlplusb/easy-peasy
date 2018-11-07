@@ -48,7 +48,7 @@ export const select = (fn, dependencies) => {
 
 export const createStore = (model, options = {}) => {
   const {
-    devTools = true,
+    devTools = process.env.NODE_ENV !== 'production',
     middleware = [],
     initialState = {},
     injections,
