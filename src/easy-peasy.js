@@ -1,6 +1,6 @@
 import {
   applyMiddleware,
-  compose,
+  compose as reduxCompose,
   createStore as reduxCreateStore,
 } from 'redux'
 import memoizeOne from 'memoize-one'
@@ -52,6 +52,7 @@ export const createStore = (model, options = {}) => {
     middleware = [],
     initialState = {},
     injections,
+    compose,
   } = options
 
   const definition = {
@@ -228,11 +229,12 @@ export const createStore = (model, options = {}) => {
   const reducers = createReducers(actionReducers, [])
 
   const composeEnhancers =
-    devTools &&
+    compose ||
+    (devTools &&
     typeof window !== 'undefined' &&
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      : compose
+      : reduxCompose)
 
   const store = reduxCreateStore(
     reducers,

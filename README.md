@@ -94,6 +94,7 @@ function TodoList() {
     - [StoreProvider](#storeprovider)
     - [useStore(mapState)](#usestoremapstate)
     - [useAction(mapAction)](#useactionmapaction)
+  - [Remote Redux Dev Tools in React Native](#remote-redux-dev-tools-in-react-native)
   - [Prior Art](#prior-art)
 
 <p>&nbsp;</p>
@@ -546,6 +547,10 @@ Declares an action on your model as being effectful. i.e. has asynchronous flow.
 
       Any depenencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
 
+    - `compose` (Function, not required, default=undefined)
+
+      Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux or Redux Dev Tools.
+
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
 
 #### Example
@@ -870,6 +875,31 @@ const EditTodo = ({ todo }) => {
   );
 };
 ```
+
+<p>&nbsp;</p>
+
+----
+
+## Remote Redux Dev Tools in React Native
+
+React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
+
+To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
+
+```javascript
+import { createStore } from 'easy-peasy';
+import { composeWithDevTools } from 'remote-redux-devtools';
+import model from './model';
+
+const store = createStore(model, {
+  config: {
+    compose: composeWithDevTools({ realtime: true }),
+  }
+);
+```
+
+See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
+
 
 <p>&nbsp;</p>
 
