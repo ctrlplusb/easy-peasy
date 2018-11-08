@@ -8,10 +8,10 @@ import produce from 'immer'
 import thunk from 'redux-thunk'
 import { isStateObject } from './lib'
 
-const effectSymbol = Symbol('effect')
-const selectSymbol = Symbol('select')
-const selectDependeciesSymbol = Symbol('selectDependencies')
-const selectStateSymbol = Symbol('selectState')
+const effectSymbol = '__effect__'
+const selectSymbol = '__select__'
+const selectDependeciesSymbol = '__selectDependencies__'
+const selectStateSymbol = '__selectState__'
 
 const get = (path, target) =>
   path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
