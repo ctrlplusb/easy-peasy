@@ -17,7 +17,6 @@ const baseConfig = {
   external: [
     'immer',
     'memoize-one',
-    'prop-types',
     'react',
     'redux',
     'redux-thunk',
@@ -48,7 +47,7 @@ const baseConfig = {
 
 const commonUMD = config =>
   produce(config, draft => {
-    draft.external.splice(draft.external.indexOf('shallowequal'))
+    draft.external.splice(draft.external.indexOf('shallowequal'), 1)
     draft.output.format = 'umd'
     draft.output.globals = {
       'memoize-one': 'memoizeOne',
