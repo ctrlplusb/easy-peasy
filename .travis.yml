@@ -8,7 +8,6 @@ node_js:
   - 'node'
   - '10'
   - '8'
-  - '6'
 script:
 # Unfortunately flow falls over when a dep exists in peer deps and others. :(
 # @see https://github.com/flowtype/flow-typed/issues/528
