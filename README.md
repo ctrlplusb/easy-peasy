@@ -469,8 +469,12 @@ Creates a Redux store based on the given model. The model must be an object and 
   - `config` (Object, not required)
 
     Provides custom configuration options for your store. It supports the following options:
+    
+    - `compose` (Function, not required, default=undefined)
 
-    - `devTools` (bool, not required, default=true if NODE_ENV !== 'production')
+       Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux or Redux Dev Tools. This is especially useful in the context of React Native and other environments. See the Usage with React Native notes.
+
+    - `devTools` (bool, not required, default=true)
 
        Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
@@ -485,10 +489,6 @@ Creates a Redux store based on the given model. The model must be an object and 
     - `middleware` (Array, not required, default=[])
 
       Any additional middleware you would like to attach to your Redux store.
-
-    - `compose` (Function, not required, default=undefined)
-
-      Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux or Redux Dev Tools.
 
 #### Example
 
