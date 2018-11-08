@@ -440,7 +440,7 @@ Creates a Redux store based on the given model. The model must be an object and 
 
     Provides custom configuration options for your store. It supports the following options:
 
-    - `devTool` (bool, not required, default=false)
+    - `devTools` (bool, not required, default=true if NODE_ENV !== 'production')
 
        Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
