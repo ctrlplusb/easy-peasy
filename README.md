@@ -86,6 +86,9 @@ function TodoList() {
     - [Consuming state in your Components](#consuming-state-in-your-components)
     - [Firing actions in your Components](#firing-actions-in-your-components)
     - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
+  - [Usage with React Native](#usage-with-react-native)
+    - [Polyfilling Symbol](#polyfilling-symbol)
+    - [Remote Redux Dev Tools](#remote-redux-dev-tools)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
@@ -94,7 +97,6 @@ function TodoList() {
     - [StoreProvider](#storeprovider)
     - [useStore(mapState)](#usestoremapstate)
     - [useAction(mapAction)](#useactionmapaction)
-  - [Remote Redux Dev Tools in React Native](#remote-redux-dev-tools-in-react-native)
   - [Prior Art](#prior-art)
 
 <p>&nbsp;</p>
@@ -417,6 +419,57 @@ export default connect(
   dispatch => ({ addTodo: dispatch.todos.addTodo })
 )(EditTodo)
 ```
+
+<p>&nbsp;</p>
+
+---
+
+## Usage with React Native
+
+Easy Peasy is platform agnostic but makes use of language constructs and features that may not be available in all environments.
+
+### Polyfilling Symbol
+
+React Native lacks support for JavaScript [Symbols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) in some operating environments -  [https://github.com/facebook/react-native/issues/4676](https://github.com/facebook/react-native/issues/4676). This will lead to a runtime _"Can't find variable: Symbol"_ error when you use Easy Peasy in these environments.
+
+To resolve this error, you will need to add a polyfill for Symbols. Some popular choices are:
+
+- [https://github.com/medikoo/es6-symbol](https://github.com/medikoo/es6-symbol)
+
+  Add the library and insert `import 'es6-symbol/implement';` as the first line in your app's entry point.
+
+- ```
+  import 'core-js/es6/map'
+  import 'core-js/es6/symbol'
+  import 'core-js/fn/symbol/iterator'
+  ```
+
+  Also at the top of your app's entry point. See [this](https://github.com/facebook/react-native/issues/15902#issuecomment-359302520), [this](https://github.com/facebook/react-native/issues/4676#issuecomment-340290485) and [this](https://github.com/facebook/react-native/issues/4676#issuecomment-352815780) comments for more details.
+
+- [https://babeljs.io/docs/en/babel-polyfill](https://babeljs.io/docs/en/babel-polyfill)
+
+  Although this will polyfill more than just Symbol.
+
+### Remote Redux Dev Tools
+
+React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
+
+To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
+
+```javascript
+import { createStore } from 'easy-peasy';
+import { composeWithDevTools } from 'remote-redux-devtools';
+import model from './model';
+
+const store = createStore(model, {
+  config: {
+    compose: composeWithDevTools({ realtime: true }),
+  }
+);
+```
+
+See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
+
 
 <p>&nbsp;</p>
 
@@ -879,31 +932,6 @@ const EditTodo = ({ todo }) => {
 <p>&nbsp;</p>
 
 ----
-
-## Remote Redux Dev Tools in React Native
-
-React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
-
-To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
-
-```javascript
-import { createStore } from 'easy-peasy';
-import { composeWithDevTools } from 'remote-redux-devtools';
-import model from './model';
-
-const store = createStore(model, {
-  config: {
-    compose: composeWithDevTools({ realtime: true }),
-  }
-);
-```
-
-See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
-
-
-<p>&nbsp;</p>
-
----
 
 ## Prior art
 
