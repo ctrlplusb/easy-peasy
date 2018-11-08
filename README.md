@@ -509,6 +509,10 @@ Creates a Redux store based on the given model. The model must be an object and 
 
       Any additional middleware you would like to attach to your Redux store.
 
+    - `compose` (Function, not required, default=undefined)
+
+      Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux or Redux Dev Tools.
+
 #### Example
 
 ```javascript
@@ -599,10 +603,6 @@ Declares an action on your model as being effectful. i.e. has asynchronous flow.
     - `injections` (Any, not required, default=undefined)
 
       Any depenencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
-
-    - `compose` (Function, not required, default=undefined)
-
-      Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux or Redux Dev Tools.
 
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
 
