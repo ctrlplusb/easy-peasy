@@ -6,6 +6,9 @@ const changeCase = require('change-case')
 const produce = require('immer').default
 const replace = require('rollup-plugin-replace')
 const fileSize = require('rollup-plugin-filesize')
+const resolve = require('rollup-plugin-node-resolve')
+const commonjs = require('rollup-plugin-commonjs')
+
 const packageJson = require('./package.json')
 
 process.env.BABEL_ENV = 'production'
@@ -37,6 +40,7 @@ const baseConfig = {
         '@babel/plugin-syntax-import-meta',
         ['@babel/plugin-proposal-class-properties', { loose: false }],
         '@babel/plugin-proposal-json-strings',
+        ['transform-react-remove-prop-types', { removeImport: true }],
       ],
     }),
   ],
@@ -44,20 +48,19 @@ const baseConfig = {
 
 const commonUMD = config =>
   produce(config, draft => {
+    draft.external.splice(draft.external.indexOf('shallowequal'))
     draft.output.format = 'umd'
     draft.output.globals = {
       'memoize-one': 'memoizeOne',
-      'prop-types': 'PropTypes',
-      'redux-thunk': 'thunk',
-      immer: 'produce',
+      'redux-thunk': 'ReduxThunk',
+      immer: 'immer',
       react: 'React',
-      redux: 'redux',
-      shallowequal: 'shallowEqual',
+      redux: 'Redux',
     }
     draft.output.name = changeCase
       .titleCase(packageJson.name.replace(/-/g, ' '))
       .replace(/ /g, '')
-    draft.plugins.push(fileSize())
+    draft.plugins.push(fileSize(), resolve(), commonjs())
   })
 
 module.exports = [
