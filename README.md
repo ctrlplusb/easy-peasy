@@ -430,7 +430,7 @@ Easy Peasy is platform agnostic but makes use of language constructs and feature
 
 ### Polyfilling Symbol
 
-React Native lacks support for JavaScript [Symbols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) in some operating environments -  [https://github.com/facebook/react-native/issues/4676](https://github.com/facebook/react-native/issues/4676). This will lead to a runtime _"Can't find variable: Symbol"_ error when you use Easy Peasy in these environments.
+React Native lacks support for JavaScript [Symbols](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol) in some operating environments - [https://github.com/facebook/react-native/issues/4676](https://github.com/facebook/react-native/issues/4676). This will lead to a runtime _"Can't find variable: Symbol"_ error when you add Easy Peasy.
 
 To resolve this error, you will need to add a polyfill for Symbols. Some popular choices are:
 
