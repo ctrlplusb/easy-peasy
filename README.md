@@ -41,7 +41,7 @@ function TodoList() {
   const add = useAction(dispatch => dispatch.todos.add)
   return (
     <div>
-      {todos.map((todo, idx) => <div key={idx}>{todo.text}</div>)}
+      {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
       <AddTodo onAdd={add} />
     </div>
   )
