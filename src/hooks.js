@@ -20,7 +20,7 @@ export function useStore(mapState) {
         return
       }
       stateCache = newState
-      setState(newState)
+      setTimeout(() => setState(newState))
     })
   }, [])
   return state
