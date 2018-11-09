@@ -74,7 +74,7 @@ describe('react', () => {
     expect(store.subscribe).toBeCalledTimes(1)
   })
 
-  test('store is unsubscribed on unmount', () => {
+  test('store is unsubscribed on unmount', async () => {
     // arrange
     const store = createStore({
       count: 1,
@@ -102,6 +102,9 @@ describe('react', () => {
 
     // act
     store.dispatch.inc()
+
+    // wait for data update to propagate
+    await resolveAfter(null, 1)
 
     // assert
     expect(unsubscribeSpy).toBeCalledTimes(0)
@@ -154,7 +157,7 @@ describe('react', () => {
       // act
       fireEvent.click(countButton)
 
-      // wait for data update to propagation
+      // wait for data update to propagate
       await resolveAfter(null, 1)
 
       // assert
@@ -184,7 +187,10 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId } = render(app)
+      const { getByTestId, rerender } = render(app)
+
+      // this triggers the effect to fire
+      rerender(app)
 
       // assert
       const countButton = getByTestId('count')
@@ -193,6 +199,9 @@ describe('react', () => {
 
       // act
       store.dispatch.updateSomethingElse('foo')
+
+      // wait for data update to propagate
+      await resolveAfter(null, 1)
 
       // assert
       expect(countButton.firstChild.textContent).toBe('1')
@@ -243,7 +252,7 @@ describe('react', () => {
       // act
       fireEvent.click(countButton)
 
-      // wait for data update to propagation
+      // wait for data update to propagate
       await resolveAfter(null, 1)
 
       // assert
@@ -275,7 +284,10 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId } = render(app)
+      const { getByTestId, rerender } = render(app)
+
+      // this triggers the effect to fire
+      rerender(app)
 
       // assert
       const countButton = getByTestId('count')
@@ -284,6 +296,9 @@ describe('react', () => {
 
       // act
       store.dispatch.updateSomethingElse('foo')
+
+      // wait for data update to propagate
+      await resolveAfter(null, 10)
 
       // assert
       expect(countButton.firstChild.textContent).toBe('1')
