@@ -32,7 +32,7 @@ const trackActionsMiddleware = () => {
 }
 
 describe('react', () => {
-  test('store subscribe is only called once', () => {
+  test('store subscribe is only called once', async () => {
     // arrange
     const store = createStore({
       count: 1,
@@ -65,6 +65,9 @@ describe('react', () => {
 
     // act
     store.dispatch.inc()
+
+    // wait for data update to propagation
+    await resolveAfter(null, 1)
 
     // assert
     expect(renderSpy).toBeCalledTimes(2)
@@ -151,6 +154,9 @@ describe('react', () => {
       // act
       fireEvent.click(countButton)
 
+      // wait for data update to propagation
+      await resolveAfter(null, 1)
+
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
       expect(renderSpy).toHaveBeenCalledTimes(2)
@@ -236,6 +242,9 @@ describe('react', () => {
 
       // act
       fireEvent.click(countButton)
+
+      // wait for data update to propagation
+      await resolveAfter(null, 1)
 
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
