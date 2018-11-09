@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext, useRef } from 'react'
 import shallowEqual from 'shallowequal'
 import EasyPeasyContext from './context'
 import { isStateObject } from './lib'
@@ -6,23 +6,27 @@ import { isStateObject } from './lib'
 export function useStore(mapState) {
   const store = useContext(EasyPeasyContext)
   const [state, setState] = useState(mapState(store.getState()))
-  useEffect(() => {
-    let stateCache = state
-    return store.subscribe(() => {
-      const newState = mapState(store.getState())
-      if (
-        newState === stateCache ||
-        (isStateObject(newState) &&
-          isStateObject(stateCache) &&
-          shallowEqual(newState, stateCache))
-      ) {
-        // Do nothing
-        return
-      }
-      stateCache = newState
-      setTimeout(() => setState(newState))
-    })
-  }, [])
+  // As our effect only fires on mount and unmount it won't have the state
+  // changes visible to it, therefore we use a mutable ref to track this.
+  const stateRef = useRef(state)
+  useEffect(
+    () =>
+      store.subscribe(() => {
+        const newState = mapState(store.getState())
+        if (
+          newState === stateRef.current ||
+          (isStateObject(newState) &&
+            isStateObject(stateRef.current) &&
+            shallowEqual(newState, stateRef.current))
+        ) {
+          // Do nothing
+          return
+        }
+        stateRef.current = newState
+        setTimeout(() => setState(newState))
+      }),
+    [],
+  )
   return state
 }
 export function useAction(mapActions) {
