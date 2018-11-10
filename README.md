@@ -94,7 +94,7 @@ function TodoList() {
     - [effect(action)](#effectaction)
     - [select(selector)](#selectselector)
     - [StoreProvider](#storeprovider)
-    - [useStore(mapState)](#usestoremapstate)
+    - [useStore(mapState, dependencies)](#usestoremapstate-dependencies)
     - [useAction(mapAction)](#useactionmapaction)
   - [Prior Art](#prior-art)
 
