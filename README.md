@@ -341,6 +341,25 @@ const TodoList = () => {
 
 It's almost too easy that it doesn't require much explanation. We do however recommend that you read the API docs for the [`useStore` hook](#usestoremapstate) to gain a full understanding of the behaviours and pitfalls of the hook.
 
+In the case that your `useStore` implementation depends on a property/external value then you will need to provide the respective property/properties as the second argument to the `usStore`, similar to the `useEfect` hook. The `useStore` hook will ensure to recalculate the mapped state if any of the external values change.
+
+```javascript
+import { useStore } from 'easy-peasy';
+
+const Product = ({ id }) => {
+  const product = useStore(
+    state => state.products[id], // 👈 we are using an "external" value - id
+    [id] // 👈 so we pass it in so our useStore knows when to re-execute the mapState
+  );
+  return (
+    <div>
+      <h1>{product.title}</h1>
+      <p>{product.description}</p>
+    </div>
+  );
+};
+```
+
 ### Firing actions in your Components
 
 In order to fire actions in your components you can use the `useAction` hook.
@@ -469,7 +488,7 @@ Creates a Redux store based on the given model. The model must be an object and 
   - `config` (Object, not required)
 
     Provides custom configuration options for your store. It supports the following options:
-    
+
     - `compose` (Function, not required, default=undefined)
 
        Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux or Redux Dev Tools. This is especially useful in the context of React Native and other environments. See the Usage with React Native notes.
@@ -740,7 +759,7 @@ const App = () => (
 )
 ```
 
-### useStore(mapState)
+### useStore(mapState, externals)
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state.
 
@@ -753,6 +772,10 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
     - `state` (Object, required)
 
       The root state of your store.
+
+  - `externals` (Array of any, not required)
+
+    If your `useStore` function depends on an external value (for example a property of your component), then you should provide the respective value within this argument so that the `useStore` knows to remap your state when the respective externals change in value.
 
 Your `mapState` can either resolve a single piece of state. If you wish to resolve multiple pieces of state then you can either call `useStore` multiple times, or if you like resolve an object within your `mapState` where each property of the object is a resolved piece of state (similar to the `connect` from `react-redux`). The examples will illustrate the various forms.
 
