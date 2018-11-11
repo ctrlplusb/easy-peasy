@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+/* eslint-disable react/prop-types */
 
 import 'jest-dom/extend-expect'
 import React from 'react'
@@ -32,7 +33,61 @@ const trackActionsMiddleware = () => {
 }
 
 describe('react', () => {
-  test('store subscribe is only called once', async () => {
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  test('maps state when prop dependency changes', async () => {
+    // arrange
+    const store = createStore({
+      values: {
+        1: 'foo',
+        2: 'bar',
+      },
+    })
+    function Values({ id }) {
+      const value = useStore(state => state.values[id], [id])
+      return <span data-testid="value">{value}</span>
+    }
+    const app = (
+      <StoreProvider store={store}>
+        <Values id={1} />
+      </StoreProvider>
+    )
+
+    // act
+    const { getByTestId, rerender } = render(app)
+
+    // assert
+    const value = getByTestId('value')
+    expect(value.firstChild.textContent).toBe('foo')
+
+    // act
+    const app2 = (
+      <StoreProvider store={store}>
+        <Values id={2} />
+      </StoreProvider>
+    )
+    rerender(app2)
+
+    // assert
+    expect(value.firstChild.textContent).toBe('foo')
+
+    // We have to flush the change with an extra render
+    rerender(app2)
+
+    // ensure settimeouts fire
+    jest.runAllTimers()
+
+    // assert
+    expect(value.firstChild.textContent).toBe('bar')
+  })
+
+  test('store subscribe is only called once', () => {
     // arrange
     const store = createStore({
       count: 1,
@@ -66,15 +121,15 @@ describe('react', () => {
     // act
     store.dispatch.inc()
 
-    // wait for data update to propagation
-    await resolveAfter(null, 1)
+    // ensure settimeouts fire
+    jest.runAllTimers()
 
     // assert
     expect(renderSpy).toBeCalledTimes(2)
     expect(store.subscribe).toBeCalledTimes(1)
   })
 
-  test('store is unsubscribed on unmount', async () => {
+  test('store is unsubscribed on unmount', () => {
     // arrange
     const store = createStore({
       count: 1,
@@ -103,8 +158,8 @@ describe('react', () => {
     // act
     store.dispatch.inc()
 
-    // wait for data update to propagate
-    await resolveAfter(null, 1)
+    // ensure settimeouts fire
+    jest.runAllTimers()
 
     // assert
     expect(unsubscribeSpy).toBeCalledTimes(0)
@@ -117,7 +172,7 @@ describe('react', () => {
   })
 
   describe('direct form', () => {
-    test('component updates with state change', async () => {
+    test('component updates with state change', () => {
       // arrange
       const store = createStore({
         count: 1,
@@ -157,15 +212,15 @@ describe('react', () => {
       // act
       fireEvent.click(countButton)
 
-      // wait for data update to propagate
-      await resolveAfter(null, 1)
+      // ensure settimeouts fire
+      jest.runAllTimers()
 
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
       expect(renderSpy).toHaveBeenCalledTimes(2)
     })
 
-    test('component only updates with state change', async () => {
+    test('component only updates with state change', () => {
       // arrange
       const store = createStore({
         count: 1,
@@ -200,8 +255,8 @@ describe('react', () => {
       // act
       store.dispatch.updateSomethingElse('foo')
 
-      // wait for data update to propagate
-      await resolveAfter(null, 1)
+      // ensure settimeouts fire
+      jest.runAllTimers()
 
       // assert
       expect(countButton.firstChild.textContent).toBe('1')
@@ -210,7 +265,7 @@ describe('react', () => {
   })
 
   describe('object form', () => {
-    test('component updates with state change', async () => {
+    test('component updates with state change', () => {
       // arrange
       const store = createStore({
         count: 1,
@@ -252,15 +307,15 @@ describe('react', () => {
       // act
       fireEvent.click(countButton)
 
-      // wait for data update to propagate
-      await resolveAfter(null, 1)
+      // ensure settimeouts fire
+      jest.runAllTimers()
 
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
       expect(renderSpy).toHaveBeenCalledTimes(2)
     })
 
-    test('component only updates with state change', async () => {
+    test('component only updates with state change', () => {
       // arrange
       const store = createStore({
         count: 1,
@@ -297,8 +352,8 @@ describe('react', () => {
       // act
       store.dispatch.updateSomethingElse('foo')
 
-      // wait for data update to propagate
-      await resolveAfter(null, 10)
+      // ensure settimeouts fire
+      jest.runAllTimers()
 
       // assert
       expect(countButton.firstChild.textContent).toBe('1')

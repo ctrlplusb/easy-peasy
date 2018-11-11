@@ -3,16 +3,18 @@ import shallowEqual from 'shallowequal'
 import EasyPeasyContext from './context'
 import { isStateObject } from './lib'
 
-export function useStore(mapState) {
+export function useStore(mapState, dependencies = []) {
   const store = useContext(EasyPeasyContext)
   const [state, setState] = useState(mapState(store.getState()))
   // As our effect only fires on mount and unmount it won't have the state
   // changes visible to it, therefore we use a mutable ref to track this.
   const stateRef = useRef(state)
-  const isMounted = useRef(true)
+  // Helps avoid firing of events when unsubscribed, i.e. unmounted
+  const isActive = useRef(true)
   useEffect(() => {
-    const unsubscribe = store.subscribe(() => {
+    const calculateState = () => {
       const newState = mapState(store.getState())
+      isActive.current = true
       if (
         newState === stateRef.current ||
         (isStateObject(newState) &&
@@ -29,16 +31,18 @@ export function useStore(mapState) {
       // the React reconciliation process that ended up with it not
       // propagating
       setTimeout(() => {
-        if (isMounted.current) {
+        if (isActive.current) {
           setState(newState)
         }
       })
-    })
+    }
+    calculateState()
+    const unsubscribe = store.subscribe(calculateState)
     return () => {
       unsubscribe()
-      isMounted.current = false
+      isActive.current = false
     }
-  }, [])
+  }, dependencies)
   return state
 }
 export function useAction(mapActions) {
