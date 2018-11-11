@@ -94,7 +94,7 @@ function TodoList() {
     - [effect(action)](#effectaction)
     - [select(selector)](#selectselector)
     - [StoreProvider](#storeprovider)
-    - [useStore(mapState, dependencies)](#usestoremapstate-dependencies)
+    - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useAction(mapAction)](#useactionmapaction)
   - [Prior Art](#prior-art)
 
@@ -339,17 +339,16 @@ const TodoList = () => {
 };
 ```
 
-It's almost too easy that it doesn't require much explanation. We do however recommend that you read the API docs for the [`useStore` hook](#usestoremapstate) to gain a full understanding of the behaviours and pitfalls of the hook.
-
-In the case that your `useStore` implementation depends on a property/external value then you will need to provide the respective property/properties as the second argument to the `usStore`, similar to the `useEfect` hook. The `useStore` hook will ensure to recalculate the mapped state if any of the external values change.
+In the case that your `useStore` implementation depends on an "external" value when mapping state. Then you should provide the respective "external" within the second argument to the `usStore`. The `useStore` hook will then track the external value and ensure to recalculate the mapped state if any of the external values change.
 
 ```javascript
 import { useStore } from 'easy-peasy';
 
 const Product = ({ id }) => {
   const product = useStore(
-    state => state.products[id], // 👈 we are using an "external" value - id
-    [id] // 👈 so we pass it in so our useStore knows when to re-execute the mapState
+    state => state.products[id], // 👈 we are using an external value: "id"
+    [id] // 👈 we provide "id" so our useStore knows to re-execute mapState
+         //    if the "id" value changes
   );
   return (
     <div>
@@ -359,6 +358,8 @@ const Product = ({ id }) => {
   );
 };
 ```
+
+We recommend that you read the API docs for the [`useStore` hook](#usestoremapstate) to gain a full understanding of the behaviours and pitfalls of the hook.
 
 ### Firing actions in your Components
 
