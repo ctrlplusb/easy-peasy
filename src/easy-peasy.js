@@ -12,6 +12,7 @@ const effectSymbol = '__effect__'
 const selectSymbol = '__select__'
 const selectDependeciesSymbol = '__selectDependencies__'
 const selectStateSymbol = '__selectState__'
+const reducerSymbol = '__reducer__'
 
 const get = (path, target) =>
   path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
@@ -46,6 +47,12 @@ export const select = (fn, dependencies) => {
   return selector
 }
 
+export const reducer = fn => {
+  // eslint-disable-next-line no-param-reassign
+  fn[reducerSymbol] = true
+  return fn
+}
+
 export const createStore = (model, options = {}) => {
   const {
     devTools = true,
@@ -68,6 +75,7 @@ export const createStore = (model, options = {}) => {
   const actionEffects = {}
   const actionCreators = {}
   const actionReducers = {}
+  const customReducers = []
   const selectorReducers = []
 
   const extract = (current, parentPath) =>
@@ -103,6 +111,8 @@ export const createStore = (model, options = {}) => {
           set(path, actionCreators, payload =>
             tick().then(() => references.dispatch(() => action(payload))),
           )
+        } else if (value[reducerSymbol]) {
+          customReducers.push({ path, reducer: value })
         } else {
           // Reducer Action
           const actionName = `@action.${path.join('.')}`
@@ -140,6 +150,8 @@ export const createStore = (model, options = {}) => {
 
   extract(definition, [])
 
+  console.log(customReducers)
+
   const createReducers = (current, path) => {
     const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
       const value = current[key]
@@ -175,8 +187,8 @@ export const createStore = (model, options = {}) => {
         return actionReducer(state, action.payload)
       }
       for (let i = 0; i < nestedReducers.length; i += 1) {
-        const [key, reducer] = nestedReducers[i]
-        const newState = reducer(state[key], action)
+        const [key, red] = nestedReducers[i]
+        const newState = red(state[key], action)
         if (state[key] !== newState) {
           return {
             ...state,
@@ -186,7 +198,21 @@ export const createStore = (model, options = {}) => {
       }
       return state
     }
-    let isInitial = true
+
+    const rootReducer =
+      customReducers.length > 0
+        ? (state, action) => {
+            const stateAfterActions = reducerForActions(state, action)
+            return produce(stateAfterActions, draft => {
+              customReducers.forEach(({ path: p, reducer: red }) => {
+                const target = get(p, draft)
+                const result = red(target, action)
+                set(p, draft, result)
+              })
+            })
+          }
+        : reducerForActions
+
     const runSelectorReducer = (state, selector) => {
       const { parentPath, key, executed } = selector[selectStateSymbol]
       if (executed) {
@@ -207,11 +233,15 @@ export const createStore = (model, options = {}) => {
       selector[selectStateSymbol].executed = true
       return newState
     }
+
     const runSelectors = state =>
       selectorReducers.reduce(runSelectorReducer, state)
-    return selectorReducers.length
+
+    let isInitial = true
+
+    return selectorReducers.length > 0
       ? (state, action) => {
-          const stateAfterActions = reducerForActions(state, action)
+          const stateAfterActions = rootReducer(state, action)
           if (state !== stateAfterActions || isInitial) {
             const stateAfterSelectors = runSelectors(stateAfterActions)
             isInitial = false
@@ -223,7 +253,7 @@ export const createStore = (model, options = {}) => {
           }
           return stateAfterActions
         }
-      : reducerForActions
+      : rootReducer
   }
 
   const reducers = createReducers(actionReducers, [])

@@ -9,6 +9,7 @@ import {
   StoreProvider,
   createStore,
   effect,
+  reducer,
   select,
   useStore,
   useAction,
@@ -923,5 +924,69 @@ describe('dependency injection', () => {
 
     // assert
     expect(injection).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('reducer', () => {
+  it('basic', () => {
+    // arrange
+    const store = createStore({
+      counter: reducer((state = 1, action) => {
+        if (action.type === 'INCREMENT') {
+          return state + 1
+        }
+        return state
+      }),
+    })
+
+    // act
+    store.dispatch({ type: 'INCREMENT' })
+
+    // assert
+    expect(store.getState().counter).toBe(2)
+  })
+
+  it('nested', () => {
+    // arrange
+    const store = createStore({
+      stuff: {
+        counter: reducer((state = 1, action) => {
+          if (action.type === 'INCREMENT') {
+            return state + 1
+          }
+          return state
+        }),
+      },
+    })
+
+    // act
+    store.dispatch({ type: 'INCREMENT' })
+
+    // assert
+    expect(store.getState().stuff.counter).toBe(2)
+  })
+
+  it('with selector', () => {
+    // arrange
+    const store = createStore({
+      products: reducer((state = [], { type, payload }) => {
+        if (type === 'ADD_PRODUCT') {
+          return [...state, payload]
+        }
+        return state
+      }),
+      totalPrice: select(state =>
+        state.products.reduce((acc, cur) => acc + cur.price, 0),
+      ),
+    })
+
+    // act
+    store.dispatch({
+      type: 'ADD_PRODUCT',
+      payload: { name: 'Boots', price: 10 },
+    })
+
+    // assert
+    expect(store.getState().totalPrice).toBe(10)
   })
 })
