@@ -150,54 +150,58 @@ export const createStore = (model, options = {}) => {
 
   extract(definition, [])
 
-  const createReducers = (current, path) => {
-    const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
-      const value = current[key]
-      if (typeof value === 'function' && !value[effectSymbol]) {
-        return [...acc, value]
-      }
-      return acc
-    }, [])
-    const stateAtPath = Object.keys(current).reduce(
-      (acc, key) => (isStateObject(current[key]) ? [...acc, key] : acc),
-      [],
-    )
-    const nestedReducers = stateAtPath.map(key => [
-      key,
-      createReducers(current[key], [...path, key]),
-    ])
-    const reducerForActions = (state = get(path, defaultState), action) => {
-      // short circuit effects as they are noop in reducers
-      if (startsWith(action.type, '@effect.')) {
-        return state
-      }
-      // short circuit actions if they aren't a match on current path
-      if (
-        path.length > 0 &&
-        !startsWith(action.type, `@action.${path.join('.')}`)
-      ) {
-        return state
-      }
-      const actionReducer = actionReducersAtPath.find(
-        x => x.actionName === action.type,
+  const createReducers = () => {
+    const createActionsReducer = (current, path) => {
+      const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
+        const value = current[key]
+        if (typeof value === 'function' && !value[effectSymbol]) {
+          return [...acc, value]
+        }
+        return acc
+      }, [])
+      const stateAtPath = Object.keys(current).reduce(
+        (acc, key) => (isStateObject(current[key]) ? [...acc, key] : acc),
+        [],
       )
-      if (actionReducer) {
-        return actionReducer(state, action.payload)
-      }
-      for (let i = 0; i < nestedReducers.length; i += 1) {
-        const [key, red] = nestedReducers[i]
-        const newState = red(state[key], action)
-        if (state[key] !== newState) {
-          return {
-            ...state,
-            [key]: newState,
+      const nestedReducers = stateAtPath.map(key => [
+        key,
+        createActionsReducer(current[key], [...path, key]),
+      ])
+      return (state = get(path, defaultState), action) => {
+        // short circuit effects as they are noop in reducers
+        if (startsWith(action.type, '@effect.')) {
+          return state
+        }
+        // short circuit actions if they aren't a match on current path
+        if (
+          path.length > 0 &&
+          !startsWith(action.type, `@action.${path.join('.')}`)
+        ) {
+          return state
+        }
+        const actionReducer = actionReducersAtPath.find(
+          x => x.actionName === action.type,
+        )
+        if (actionReducer) {
+          return actionReducer(state, action.payload)
+        }
+        for (let i = 0; i < nestedReducers.length; i += 1) {
+          const [key, red] = nestedReducers[i]
+          const newState = red(state[key], action)
+          if (state[key] !== newState) {
+            return {
+              ...state,
+              [key]: newState,
+            }
           }
         }
+        return state
       }
-      return state
     }
 
-    const rootReducer =
+    const reducerForActions = createActionsReducer(actionReducers, [])
+
+    const reducerWithCustom =
       customReducers.length > 0
         ? (state, action) => {
             const stateAfterActions = reducerForActions(state, action)
@@ -239,7 +243,7 @@ export const createStore = (model, options = {}) => {
 
     return selectorReducers.length > 0
       ? (state, action) => {
-          const stateAfterActions = rootReducer(state, action)
+          const stateAfterActions = reducerWithCustom(state, action)
           if (state !== stateAfterActions || isInitial) {
             const stateAfterSelectors = runSelectors(stateAfterActions)
             isInitial = false
@@ -251,10 +255,10 @@ export const createStore = (model, options = {}) => {
           }
           return stateAfterActions
         }
-      : rootReducer
+      : reducerWithCustom
   }
 
-  const reducers = createReducers(actionReducers, [])
+  const reducers = createReducers()
 
   const composeEnhancers =
     compose ||

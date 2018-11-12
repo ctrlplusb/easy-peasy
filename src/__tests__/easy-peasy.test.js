@@ -937,13 +937,24 @@ describe('reducer', () => {
         }
         return state
       }),
+      foo: {
+        bar: 'baz',
+        update: state => {
+          state.bar = 'bob'
+        },
+      },
     })
 
     // act
     store.dispatch({ type: 'INCREMENT' })
 
     // assert
-    expect(store.getState().counter).toBe(2)
+    expect(store.getState()).toEqual({
+      counter: 2,
+      foo: {
+        bar: 'baz',
+      },
+    })
   })
 
   it('nested', () => {
@@ -963,7 +974,11 @@ describe('reducer', () => {
     store.dispatch({ type: 'INCREMENT' })
 
     // assert
-    expect(store.getState().stuff.counter).toBe(2)
+    expect(store.getState()).toEqual({
+      stuff: {
+        counter: 2,
+      },
+    })
   })
 
   it('with selector', () => {
@@ -987,6 +1002,9 @@ describe('reducer', () => {
     })
 
     // assert
-    expect(store.getState().totalPrice).toBe(10)
+    expect(store.getState()).toEqual({
+      products: [{ name: 'Boots', price: 10 }],
+      totalPrice: 10,
+    })
   })
 })
