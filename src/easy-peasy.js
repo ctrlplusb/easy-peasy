@@ -150,8 +150,6 @@ export const createStore = (model, options = {}) => {
 
   extract(definition, [])
 
-  console.log(customReducers)
-
   const createReducers = (current, path) => {
     const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
       const value = current[key]
