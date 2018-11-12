@@ -945,6 +945,9 @@ describe('reducer', () => {
       },
     })
 
+    // assert
+    expect(store.getState().counter).toEqual(1)
+
     // act
     store.dispatch({ type: 'INCREMENT' })
 

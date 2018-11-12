@@ -207,9 +207,8 @@ export const createStore = (model, options = {}) => {
             const stateAfterActions = reducerForActions(state, action)
             return produce(stateAfterActions, draft => {
               customReducers.forEach(({ path: p, reducer: red }) => {
-                const target = get(p, draft)
-                const result = red(target, action)
-                set(p, draft, result)
+                const current = get(p, draft)
+                set(p, draft, red(current, action))
               })
             })
           }
