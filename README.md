@@ -682,7 +682,7 @@ store.dispatch.doSomething()
 
 ### reducer(fn)
 
-Declares a section of state that is derived via the given selector function. This was specifically added to allow for integrations with existing libraries, or legacy Redux code.
+Declares a section of state to be calculated via a "standard" reducer function - as typical in Redux. This was specifically added to allow for integrations with existing libraries, or legacy Redux code.
 
 Some 3rd party libraries, for example [`connected-react-router`](https://github.com/supasate/connected-react-router), require you to attach a reducer that they provide to your state. This helper will you achieve this.
 
