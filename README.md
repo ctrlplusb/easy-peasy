@@ -22,10 +22,15 @@ const store = createStore({
     // 👇 define actions
     add: (state, payload) => {
       state.items.push(payload) // 👈 you mutate state to update (we convert
-                                //    to immutable updates)
-    }
-  }
-});
+    }                           //    to immutable updates)
+  }                             //
+});                             //    OR
+                                //
+                                //    You can return new "immutable" state:
+                                //    return {
+                                //      ...state,
+                                //      items: [...state.items, payload ]
+                                //    };
 
 const App = () => (
   // 👇 surround your app with the provider to expose the store to your app
@@ -199,6 +204,14 @@ const store = createStore({
 ```
 
 The action will receive as it's first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that may have been provided when the action was triggered.
+
+> Note: Some prefer not to use a mutation based API. You can return new "immutable" instances of your state if you prefer:
+>
+> ```javascript
+> addTodo: (state, payload) => {
+>   return { ...state, items: [...state.items, paylaod] };
+> }
+> ```
 
 ### Dispatching actions directly via the store
 
