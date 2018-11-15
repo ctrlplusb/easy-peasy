@@ -33,11 +33,11 @@
   },
   "peerDependencies": {
     "prop-types": "^15.6.2",
-    "react": "16.7.0-alpha.0"
+    "react": "16.7.0-alpha.2"
   },
   "dependencies": {
     "immer": "^1.7.4",
-    "memoize-one": "^4.0.2",
+    "memoize-one": "^4.0.3",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0"
@@ -73,8 +73,8 @@
     "prettier": "^1.15.2",
     "prettier-eslint": "^8.8.2",
     "prop-types": "^15.6.2",
-    "react": "16.7.0-alpha.0",
-    "react-dom": "16.7.0-alpha.0",
+    "react": "16.7.0-alpha.2",
+    "react-dom": "16.7.0-alpha.2",
     "react-testing-library": "^5.2.3",
     "rimraf": "^2.6.2",
     "rollup": "^0.67.1",
