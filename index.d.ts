@@ -2,6 +2,10 @@ import * as React from 'react';
 import * as Redux from 'redux';
 import { Param1, Overwrite, Omit } from 'type-zoo';
 
+/**
+ * Helper types
+ */
+
 // conditional types from https://www.typescriptlang.org/docs/handbook/advanced-types.html#example-1
 type FunctionPropertyNames<T> = { [K in keyof T]: T[K] extends Function ? K : never }[keyof T];
 type FunctionProperties<T> = Pick<T, FunctionPropertyNames<T>>;
@@ -32,9 +36,6 @@ type SelectValueTypes<Model> = { [K in keyof Model]: SelectPropertyTypes<Model[K
 // given a model, get the value types of any reducer(...)s and select(...)s
 type ReducerValues<Model> = ReducerStateShapes<Model> & SelectValueTypes<Model>;
 
-// for compose in Config
-type EnhancerFunction = (...funcs: Array<Redux.StoreEnhancer>) => Redux.StoreEnhancer;
-
 // given an easy-peasy Model, extract just the actions
 export type ModelActions<Model> = {
   [k in keyof Model]: Omit<FunctionsWithoutFirstParam<FunctionProperties<Model[k]>>, keyof ReducerValues<Model>[k]>
@@ -48,6 +49,15 @@ export type ModelValuesWithoutReducers<Model> = {
 // given an easy-peasy Model, extract just the state values
 export type ModelValues<Model> = ModelValuesWithoutReducers<Model> & ReducerValues<Model>;
 
+// easy-peasy's decorated Redux dispatch() (e.g. dispatch.todos.insert(item); )
+export type Dispatch<Model = any> = Redux.Dispatch & ModelActions<Model>;
+
+/**
+ * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
+ */
+
+type EnhancerFunction = (...funcs: Array<Redux.StoreEnhancer>) => Redux.StoreEnhancer;
+
 export interface Config<Model> {
   devTools?: boolean;
   initialState?: ModelValuesWithoutReducers<Model>;
@@ -56,28 +66,47 @@ export interface Config<Model> {
   compose?: typeof Redux.compose | Redux.StoreEnhancer | EnhancerFunction;
 }
 
-// easy-peasy's decorated Redux dispatch() (e.g. dispatch.todos.insert(item); )
-export type Dispatch<Model = any> = Redux.Dispatch & ModelActions<Model>;
-
 export type Store<Model = any> = Overwrite<
   Redux.Store,
-  { dispatch: Dispatch<Model>; getState: () => ReadOnly<ModelValues<Model>> }
+  { dispatch: Dispatch<Model>; getState: () => Readonly<ModelValues<Model>> }
 >;
 
-export function createStore<Model = any>(model: Model, config: Config<Model>): Store<Model>;
+export function createStore<Model = any>(model: Model, config?: Config<Model>): Store<Model>;
 
-export type Effect<Payload = undefined> = Payload extends undefined ? (a: any) => void : (a: any, b: Payload) => void;
+/**
+ * https://github.com/ctrlplusb/easy-peasy#action
+ */
+
+export type Action<StateValues, Payload = undefined> = Payload extends undefined
+  ? (state: StateValues) => void | StateValues
+  : (state: StateValues, payload: Payload) => void | StateValues;
+
+/**
+ * https://github.com/ctrlplusb/easy-peasy#effectaction
+ */
+
+export type Effect<Model, Payload = undefined> = Payload extends undefined
+  ? (effectAction: any) => void
+  : (a: any, b: Payload) => void;
 
 export function effect<Model = any, Payload = never>(
-  effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => ReadOnly<ModelValues<Model>>) => void,
-): Effect<Payload>;
+  effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => void,
+): Effect<Model, Payload>;
+
+/**
+ * https://github.com/ctrlplusb/easy-peasy#reducerfn
+ */
 
 export type Reducer<State> = (state: State, action: Redux.Action) => State;
 
 export function reducer<State>(reducerFunction: Reducer<State>): Reducer<State>;
 
+/**
+ * https://github.com/ctrlplusb/easy-peasy#selectselector
+ */
+
 export type Select<T> = {
-  __select__: T; // this type exists purely for SelectPropertyNames/SelectPropertyTypes to be able to pull out the type of T
+  __select__: T; // type exists purely for SelectPropertyNames/SelectPropertyTypes to be able to infer the type of T
 };
 
 export function select<State = any, T = any>(
@@ -85,12 +114,24 @@ export function select<State = any, T = any>(
   dependencies?: Array<(state: any) => any>,
 ): Select<T>;
 
+/**
+ * https://github.com/ctrlplusb/easy-peasy#storeprovider
+ */
+
 export class StoreProvider<Model = any> extends React.Component<{ store: Store<Model> }> {}
+
+/**
+ * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
+ */
 
 export function useStore<StoreValue = any, Model = any>(
   mapState: (state: ModelValues<Model>) => StoreValue,
   externals?: Array<any>,
 ): StoreValue;
+
+/**
+ * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
+ */
 
 export function useAction<ActionFunction extends Function = () => void, Model = any>(
   mapAction: (dispatch: ModelActions<Model>) => ActionFunction,
