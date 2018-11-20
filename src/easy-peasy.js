@@ -10,7 +10,7 @@ import { isStateObject } from './lib'
 
 const effectSymbol = '__effect__'
 const selectSymbol = '__select__'
-const selectDependeciesSymbol = '__selectDependencies__'
+const selectDependenciesSymbol = '__selectDependencies__'
 const selectStateSymbol = '__selectState__'
 const reducerSymbol = '__reducer__'
 
@@ -42,7 +42,7 @@ export const effect = fn => {
 export const select = (fn, dependencies) => {
   const selector = memoizeOne(state => fn(state))
   selector[selectSymbol] = true
-  selector[selectDependeciesSymbol] = dependencies
+  selector[selectDependenciesSymbol] = dependencies
   selector[selectStateSymbol] = {}
   return selector
 }
@@ -220,7 +220,7 @@ export const createStore = (model, options = {}) => {
       if (executed) {
         return state
       }
-      const dependencies = selector[selectDependeciesSymbol]
+      const dependencies = selector[selectDependenciesSymbol]
       const newState = produce(
         dependencies ? dependencies.reduce(runSelectorReducer, state) : state,
         draft => {
