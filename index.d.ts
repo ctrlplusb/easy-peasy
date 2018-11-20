@@ -88,10 +88,19 @@ export type Action<StateValues, Payload = undefined> = Payload extends undefined
 
 export type Effect<Model, Payload = undefined> = Payload extends undefined
   ? (
-      effectAction: (dispatch: Dispatch<Model>, payload: never, getState: () => Readonly<ModelValues<Model>>) => void,
+      effectAction: (
+        dispatch: Dispatch<Model>,
+        payload: undefined,
+        getState: () => Readonly<ModelValues<Model>>,
+      ) => void,
+      b?: undefined,
     ) => never
   : (
-      effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => void,
+      effectAction: (
+        dispatch: Dispatch<Model>,
+        payload: Payload,
+        getState: () => Readonly<ModelValues<Model>>,
+      ) => void,
       b: Payload,
     ) => never;
 
