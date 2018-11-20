@@ -109,10 +109,10 @@ export type Select<T> = {
   __select__: T; // type exists purely for SelectPropertyNames/SelectPropertyTypes to be able to infer the type of T
 };
 
-export function select<State = any, T = any>(
-  selectFunction: (state: State) => T,
+export function select<StateValues = any, ResultantType = any>(
+  selectFunction: (state: StateValues) => ResultantType,
   dependencies?: Array<(state: any) => any>,
-): Select<T>;
+): Select<ResultantType>;
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#storeprovider
@@ -124,10 +124,10 @@ export class StoreProvider<Model = any> extends React.Component<{ store: Store<M
  * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
  */
 
-export function useStore<StoreValue = any, Model = any>(
-  mapState: (state: ModelValues<Model>) => StoreValue,
+export function useStore<StateValue = any, Model = any>(
+  mapState: (state: ModelValues<Model>) => StateValue,
   externals?: Array<any>,
-): StoreValue;
+): StateValue;
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
