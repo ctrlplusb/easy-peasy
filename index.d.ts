@@ -27,10 +27,10 @@ type ReducerStateShapes<Model> = {
 };
 
 // given a model, get the value types of any select(...)s
-type SelectPropertyNames<T> = { [K in keyof T]: T[K] extends { __select__: infer R } ? K : never }[keyof T];
+type SelectPropertyNames<T> = { [K in keyof T]: T[K] extends Select<any, any> ? K : never }[keyof T];
 type SelectProperties<T> = Pick<T, SelectPropertyNames<T>>;
 type SelectPropertyTypes<T> = {
-  [K in keyof SelectProperties<T>]: SelectProperties<T>[K] extends { __select__: infer R } ? R : never
+  [K in keyof SelectProperties<T>]: SelectProperties<T>[K] extends Select<any, infer R> ? R : never
 };
 type SelectValueTypes<Model> = { [K in keyof Model]: SelectPropertyTypes<Model[K]> };
 
@@ -89,11 +89,11 @@ export type Action<StateValues, Payload = undefined> = Payload extends undefined
 export type Effect<Model, Payload = undefined> = Payload extends undefined
   ? (
       effectAction: (dispatch: Dispatch<Model>, payload: never, getState: () => Readonly<ModelValues<Model>>) => void,
-    ) => void
+    ) => never
   : (
       effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => void,
       b: Payload,
-    ) => void;
+    ) => never;
 
 export function effect<Model = any, Payload = never>(
   effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => void,
@@ -111,14 +111,15 @@ export function reducer<State>(reducerFunction: Reducer<State>): Reducer<State>;
  * https://github.com/ctrlplusb/easy-peasy#selectselector
  */
 
-export type Select<T> = {
-  __select__: T; // type exists purely for SelectPropertyNames/SelectPropertyTypes to be able to infer the type of T
-};
+export type Select<StateValues, ResultantType> = (
+  selectFunction: (state: StateValues) => ResultantType,
+  dependencies?: Array<(state: any) => any>,
+) => never;
 
 export function select<StateValues = any, ResultantType = any>(
   selectFunction: (state: StateValues) => ResultantType,
   dependencies?: Array<(state: any) => any>,
-): Select<ResultantType>;
+): Select<StateValues, ResultantType>;
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#storeprovider
