@@ -60,6 +60,7 @@ export const createStore = (model, options = {}) => {
     initialState = {},
     injections,
     compose,
+    reducerEnhancer = reducer => reducer,
   } = options
 
   const definition = {
@@ -268,7 +269,7 @@ export const createStore = (model, options = {}) => {
       : reduxCompose)
 
   const store = reduxCreateStore(
-    reducers,
+    reducerEnhancer(reducers),
     defaultState,
     composeEnhancers(applyMiddleware(thunk, ...middleware)),
   )

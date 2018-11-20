@@ -62,6 +62,7 @@ function TodoList() {
   - Provides [React Hooks](https://reactjs.org/docs/hooks-intro.html) to interact with the store 😎
   - Powered by Redux
   - Supports custom Redux middleware
+  - Supports Redux root reducer enhancement
   - Supports Redux Dev Tools
 
 <p>&nbsp;</p>
@@ -523,6 +524,10 @@ Creates a Redux store based on the given model. The model must be an object and 
     - `middleware` (Array, not required, default=[])
 
       Any additional middleware you would like to attach to your Redux store.
+
+    - `reducerEnhancer` (Function, not required, default=(reducer => reducer))
+
+      Any additional reducerEnhancer you would like to enhance to your root reducer (for example you want to use [redux-persist](https://github.com/rt2zz/redux-persist)).
 
 #### Example
 
