@@ -18,6 +18,7 @@ type FunctionWithoutFirstParam<F> = IsMoreThanOneParam<F> extends () => void
   ? (payload: Param1<F>) => void
   : () => void;
 type FunctionsWithoutFirstParam<T> = { [k in keyof T]: FunctionWithoutFirstParam<T[k]> };
+type ActionFunction<Payload = undefined> = Payload extends undefined ? () => void : (payload: Payload) => void;
 
 // given a model, get the state shapes of any reducer(...)s
 type FunctionReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
@@ -86,8 +87,13 @@ export type Action<StateValues, Payload = undefined> = Payload extends undefined
  */
 
 export type Effect<Model, Payload = undefined> = Payload extends undefined
-  ? (effectAction: any) => void
-  : (a: any, b: Payload) => void;
+  ? (
+      effectAction: (dispatch: Dispatch<Model>, payload: never, getState: () => Readonly<ModelValues<Model>>) => void,
+    ) => void
+  : (
+      effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => void,
+      b: Payload,
+    ) => void;
 
 export function effect<Model = any, Payload = never>(
   effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => void,
@@ -124,7 +130,7 @@ export class StoreProvider<Model = any> extends React.Component<{ store: Store<M
  * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
  */
 
-export function useStore<StateValue = any, Model = any>(
+export function useStore<Model = any, StateValue = any>(
   mapState: (state: ModelValues<Model>) => StateValue,
   externals?: Array<any>,
 ): StateValue;
@@ -133,6 +139,6 @@ export function useStore<StateValue = any, Model = any>(
  * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
  */
 
-export function useAction<ActionFunction extends Function = () => void, Model = any>(
-  mapAction: (dispatch: ModelActions<Model>) => ActionFunction,
-): ActionFunction;
+export function useAction<Model = any, ActionFunctionPayload = undefined>(
+  mapAction: (dispatch: ModelActions<Model>) => ActionFunction<ActionFunctionPayload>,
+): ActionFunction<ActionFunctionPayload>;
