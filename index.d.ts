@@ -65,6 +65,7 @@ export interface Config<Model> {
   injections?: any;
   middleware?: Array<Redux.Middleware>;
   compose?: typeof Redux.compose | Redux.StoreEnhancer | EnhancerFunction;
+  reducerEnhancer?: (reducer: Redux.Reducer) => Redux.Reducer;
 }
 
 export type Store<Model = any> = Overwrite<
