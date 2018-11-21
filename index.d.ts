@@ -43,12 +43,12 @@ export type ModelActions<Model> = {
 };
 
 // given an easy-peasy Model, extract just the state values, minus reducers and select(...)s
-export type ModelValuesWithoutReducers<Model> = {
+export type MutableModelValues<Model> = {
   [k in keyof Model]: Omit<NonFunctionProperties<Model[k]>, keyof ReducerValues<Model>[k]>
 };
 
 // given an easy-peasy Model, extract just the state values
-export type ModelValues<Model> = ModelValuesWithoutReducers<Model> & ReducerValues<Model>;
+export type ModelValues<Model> = MutableModelValues<Model> & ReducerValues<Model>;
 
 // easy-peasy's decorated Redux dispatch() (e.g. dispatch.todos.insert(item); )
 export type Dispatch<Model = any> = Redux.Dispatch & ModelActions<Model>;
@@ -61,7 +61,7 @@ type EnhancerFunction = (...funcs: Array<Redux.StoreEnhancer>) => Redux.StoreEnh
 
 export interface Config<Model> {
   devTools?: boolean;
-  initialState?: ModelValuesWithoutReducers<Model>;
+  initialState?: MutableModelValues<Model>;
   injections?: any;
   middleware?: Array<Redux.Middleware>;
   compose?: typeof Redux.compose | Redux.StoreEnhancer | EnhancerFunction;
