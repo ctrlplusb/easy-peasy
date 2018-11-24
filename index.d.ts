@@ -18,7 +18,12 @@ type FunctionWithoutFirstParam<F> = IsMoreThanOneParam<F> extends () => void
   ? (payload: Param1<F>) => void
   : () => void;
 type FunctionsWithoutFirstParam<T> = { [k in keyof T]: FunctionWithoutFirstParam<T[k]> };
-type ActionFunction<Payload = undefined> = Payload extends undefined ? () => void : (payload: Payload) => void;
+type ActionPrimitive = number | string | boolean | null | symbol;
+type ActionFunction<ActionPayload = any> = ActionPayload extends undefined
+  ? () => void
+  : ActionPayload extends ActionPrimitive | Array<ActionPrimitive>
+  ? (payload: ActionPayload) => void
+  : ActionPayload;
 
 // given a model, get the state shapes of any reducer(...)s
 type FunctionReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
@@ -150,6 +155,6 @@ export function useStore<Model = any, StateValue = any>(
  * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
  */
 
-export function useAction<Model = any, ActionFunctionPayload = undefined>(
-  mapAction: (dispatch: ModelActions<Model>) => ActionFunction<ActionFunctionPayload>,
-): ActionFunction<ActionFunctionPayload>;
+export function useAction<Model = any, ActionPayload = any>(
+  mapAction: (dispatch: ModelActions<Model>) => ActionFunction<ActionPayload>,
+): ActionFunction<ActionPayload>;
