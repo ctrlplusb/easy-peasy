@@ -87,27 +87,27 @@ export type Action<StateValues, Payload = undefined> = Payload extends undefined
  * https://github.com/ctrlplusb/easy-peasy#effectaction
  */
 
-export type Effect<Model, Payload = undefined> = Payload extends undefined
+export type Effect<Model, Payload = undefined, EffectResult = any> = Payload extends undefined
   ? (
       effectAction: (
         dispatch: Dispatch<Model>,
         payload: undefined,
         getState: () => Readonly<ModelValues<Model>>,
-      ) => void,
+      ) => EffectResult,
       b?: undefined,
-    ) => never
+    ) => EffectResult
   : (
       effectAction: (
         dispatch: Dispatch<Model>,
         payload: Payload,
         getState: () => Readonly<ModelValues<Model>>,
-      ) => void,
+      ) => EffectResult,
       b: Payload,
-    ) => never;
+    ) => EffectResult;
 
-export function effect<Model = any, Payload = never>(
-  effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => void,
-): Effect<Model, Payload>;
+export function effect<Model = any, Payload = never, EffectResult = any>(
+  effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => EffectResult,
+): Effect<Model, Payload, EffectResult>;
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#reducerfn
