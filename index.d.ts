@@ -60,6 +60,30 @@ export type Dispatch<Model = any> = Redux.Dispatch & ModelActions<Model>;
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
+ *
+ * Example usage:
+ *
+ * interface Model {
+ *   todos: {
+ *     items: Array<string>;
+ *     addTodo: Action<{ items: Array<string> }, string>;
+ *   },
+ *   session: {
+ *     user: User;
+ *   }
+ * }
+ *
+ * const store = createStore<Model>({
+ *   todos: {
+ *     items: [],
+ *     addTodo: (state, text) => {
+ *       state.items.push(text)
+ *     }
+ *   },
+ *   session: {
+ *     user: undefined,
+ *   }
+ * })
  */
 
 type EnhancerFunction = (...funcs: Array<Redux.StoreEnhancer>) => Redux.StoreEnhancer;
@@ -82,6 +106,12 @@ export function createStore<Model = any>(model: Model, config?: Config<Model>): 
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#action
+ *
+ * Example usage:
+ *
+ * const add: Action<TodoValues, string> = (state => payload) => {
+ *   state.items.push(payload)
+ * }
  */
 
 export type Action<StateValues, Payload = undefined> = Payload extends undefined
@@ -90,6 +120,20 @@ export type Action<StateValues, Payload = undefined> = Payload extends undefined
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#effectaction
+ *
+ * Example usage:
+ *
+ * const login: Effect<Model, Credentials> = effect(async (dispatch, payload) => {
+ *   const user = await loginService(payload)
+ *   dispatch.session.loginSucceeded(user)
+ * })
+ *
+ * or
+ *
+ * const login = effect<Model, Credentials>(async (dispatch, payload) => {
+ *   const user = await loginService(payload)
+ *   dispatch.session.loginSucceeded(user)
+ * })
  */
 
 export type Effect<Model, Payload = undefined, EffectResult = any> = Payload extends undefined
@@ -116,6 +160,24 @@ export function effect<Model = any, Payload = never, EffectResult = any>(
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#reducerfn
+ *
+ * Example usage:
+ *
+ * const counter: Reducer<number> = reducer((state = 1, action) => {
+ *   switch (action.type) {
+ *     case 'INCREMENT': state + 1;
+ *     default: return state;
+ *   }
+ * }
+ *
+ * or
+ *
+ * const counter = reducer<number>((state = 1, action) => {
+ *   switch (action.type) {
+ *     case 'INCREMENT': state + 1;
+ *     default: return state;
+ *   }
+ * }
  */
 
 export type Reducer<State> = (state: State, action: Redux.Action) => State;
@@ -124,6 +186,18 @@ export function reducer<State>(reducerFunction: Reducer<State>): Reducer<State>;
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#selectselector
+ *
+ * Example usage:
+ *
+ * const totalPrice: Select<ShoppingBasket, number> = select(state =>
+ *   state.products.reduce((acc, cur) => acc + cur.price, 0)
+ * )
+ *
+ * or
+ *
+ * const totalPrice = select<ShoppingBasket, number>(state =>
+ *   state.products.reduce((acc, cur) => acc + cur.price, 0)
+ * )
  */
 
 export type Select<StateValues, ResultantType> = (
@@ -144,6 +218,15 @@ export class StoreProvider<Model = any> extends React.Component<{ store: Store<M
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
+ *
+ * Example usage:
+ *
+ * const todos = useStore<Model, Array<string>>(state => state.todos.items);
+ *
+ * const { totalPrice, netPrice } = useStore<Model, { totalPrice: number; netPrice: number; }>(state => ({
+ *   totalPrice: state.basket.totalPrice,
+ *   netPrice: state.basket.netPrice
+ * }));
  */
 
 export function useStore<Model = any, StateValue = any>(
@@ -153,6 +236,18 @@ export function useStore<Model = any, StateValue = any>(
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
+ *
+ * Example usage:
+ *
+ * const addTodo = useAction<Model, string>(dispatch => dispatch.todos.add);
+ *
+ * const { saveTodo, removeTodo } = useAction<Model, {
+ *   saveTodo: (todo: string) => void;
+ *   removeTodo: (todo: string) => void;
+ * }>(dispatch => ({
+ *   saveTodo: dispatch.todos.save,
+ *   removeTodo: dispatch.todo.toggle
+ * }));
  */
 
 export function useAction<Model = any, ActionPayload = any>(
