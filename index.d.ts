@@ -14,7 +14,7 @@ type NonFunctionProperties<T> = Pick<T, NonFunctionPropertyNames<T>>;
 
 // helpers to extract actions and values from easy-peasy models
 type IsMoreThanOneParam<Func> = Func extends (a: any, b: undefined, ...args: Array<any>) => any ? Func : never;
-type FunctionWithoutFirstParam<F> = IsMoreThanOneParam<F> extends () => void
+type FunctionWithoutFirstParam<F> = IsMoreThanOneParam<F> extends Function
   ? (payload: Param1<F>) => void
   : () => void;
 type FunctionsWithoutFirstParam<T> = { [k in keyof T]: FunctionWithoutFirstParam<T[k]> };

@@ -40,7 +40,8 @@
     "memoize-one": "^4.0.3",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
-    "shallowequal": "^1.1.0"
+    "shallowequal": "^1.1.0",
+    "type-zoo": "^3.2.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.5",
@@ -83,8 +84,7 @@
     "rollup-plugin-filesize": "^5.0.1",
     "rollup-plugin-node-resolve": "^3.4.0",
     "rollup-plugin-replace": "^2.1.0",
-    "rollup-plugin-uglify": "^6.0.0",
-    "type-zoo": "^3.2.1"
+    "rollup-plugin-uglify": "^6.0.0"
   },
   "jest": {
     "collectCoverageFrom": [
