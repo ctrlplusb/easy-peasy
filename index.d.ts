@@ -19,7 +19,7 @@ type FunctionWithoutFirstParam<F> = IsMoreThanOneParam<F> extends Function
   : () => void;
 type FunctionsWithoutFirstParam<T> = { [k in keyof T]: FunctionWithoutFirstParam<T[k]> };
 type ActionPrimitive = number | string | boolean | null | symbol;
-type ActionFunction<ActionPayload = any> = ActionPayload extends undefined
+type ActionFunction<ActionPayload = any> = ActionPayload extends undefined | void
   ? () => void
   : ActionPayload extends ActionPrimitive | Array<ActionPrimitive>
   ? (payload: ActionPayload) => void
