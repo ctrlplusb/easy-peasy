@@ -251,5 +251,5 @@ export function useStore<Model = any, StateValue = any>(
  */
 
 export function useAction<Model = any, ActionPayload = any>(
-  mapAction: (dispatch: ModelActions<Model>) => ActionFunction<ActionPayload>,
+  mapAction: (dispatch: Dispatch<Model>) => ActionFunction<ActionPayload>,
 ): ActionFunction<ActionPayload>;
