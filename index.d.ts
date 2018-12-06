@@ -60,7 +60,9 @@ export type MutableModelValues<Model> = {
 export type ModelValues<Model> = MutableModelValues<Model> & ReducerValues<Model>;
 
 // easy-peasy's decorated Redux dispatch() (e.g. dispatch.todos.insert(item); )
-export type Dispatch<Model = any> = Redux.Dispatch & ModelActions<Model>;
+export type Dispatch<Model = any> = Model extends Redux.Action
+  ? Redux.Dispatch<Model>
+  : Redux.Dispatch & ModelActions<Model>;
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
@@ -140,26 +142,25 @@ export type Action<StateValues, Payload = undefined> = Payload extends undefined
  * })
  */
 
+type EffectAction<Model, Payload, EffectResult> = (
+  dispatch: Dispatch<Model>,
+  payload: Payload,
+  getState: () => Readonly<ModelValues<Model>>,
+  injections: any,
+) => EffectResult;
+
 export type Effect<Model, Payload = undefined, EffectResult = any> = Payload extends undefined
   ? (
-      effectAction: (
-        dispatch: Dispatch<Model>,
-        payload: undefined,
-        getState: () => Readonly<ModelValues<Model>>,
-      ) => EffectResult,
-      b?: undefined,
+      effectAction: EffectAction<Model, Payload, EffectResult>,
+      b?: undefined
     ) => EffectResult
   : (
-      effectAction: (
-        dispatch: Dispatch<Model>,
-        payload: Payload,
-        getState: () => Readonly<ModelValues<Model>>,
-      ) => EffectResult,
-      b: Payload,
+      effectAction: EffectAction<Model, Payload, EffectResult>,
+      b: Payload
     ) => EffectResult;
 
 export function effect<Model = any, Payload = never, EffectResult = any>(
-  effectAction: (dispatch: Dispatch<Model>, payload: Payload, getState: () => Readonly<ModelValues<Model>>) => EffectResult,
+  effectAction: EffectAction<Model, Payload, EffectResult>
 ): Effect<Model, Payload, EffectResult>;
 
 /**
