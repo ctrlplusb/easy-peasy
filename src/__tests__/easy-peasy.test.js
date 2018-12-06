@@ -720,6 +720,27 @@ describe('effects', () => {
     // act
     await store.dispatch.doSomething()
   })
+
+  test('meta values are exposed', async () => {
+    // arrange
+    let actualMeta
+    const store = createStore({
+      foo: {
+        doSomething: effect((dispatch, payload, getState, injections, meta) => {
+          actualMeta = meta
+        }),
+      },
+    })
+
+    // act
+    await store.dispatch.foo.doSomething()
+
+    // assert
+    expect(actualMeta).toEqual({
+      parent: ['foo'],
+      path: ['foo', 'doSomething'],
+    })
+  })
 })
 
 describe('dev tools', () => {
