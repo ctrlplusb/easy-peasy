@@ -10,7 +10,7 @@ import { isStateObject } from './lib'
 
 const effectSymbol = '__effect__'
 const selectSymbol = '__select__'
-const selectDependeciesSymbol = '__selectDependencies__'
+const selectDependenciesSymbol = '__selectDependencies__'
 const selectStateSymbol = '__selectState__'
 const reducerSymbol = '__reducer__'
 
@@ -42,7 +42,7 @@ export const effect = fn => {
 export const select = (fn, dependencies) => {
   const selector = memoizeOne(state => fn(state))
   selector[selectSymbol] = true
-  selector[selectDependeciesSymbol] = dependencies
+  selector[selectDependenciesSymbol] = dependencies
   selector[selectStateSymbol] = {}
   return selector
 }
@@ -60,6 +60,7 @@ export const createStore = (model, options = {}) => {
     initialState = {},
     injections,
     compose,
+    reducerEnhancer = rootReducer => rootReducer,
   } = options
 
   const definition = {
@@ -102,6 +103,10 @@ export const createStore = (model, options = {}) => {
               payload,
               references.getState,
               injections,
+              {
+                parent: parentPath,
+                path,
+              },
             )
           }
           action.actionName = actionName
@@ -219,7 +224,7 @@ export const createStore = (model, options = {}) => {
       if (executed) {
         return state
       }
-      const dependencies = selector[selectDependeciesSymbol]
+      const dependencies = selector[selectDependenciesSymbol]
       const newState = produce(
         dependencies ? dependencies.reduce(runSelectorReducer, state) : state,
         draft => {
@@ -268,7 +273,7 @@ export const createStore = (model, options = {}) => {
       : reduxCompose)
 
   const store = reduxCreateStore(
-    reducers,
+    reducerEnhancer(reducers),
     defaultState,
     composeEnhancers(applyMiddleware(thunk, ...middleware)),
   )
