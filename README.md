@@ -1087,8 +1087,8 @@ const data = (endpoint) => ({
         state.data[item.id] = item;
       });
     },
-    fetch: effect((dispatch, payload, getState, meta) => {
-      //                                          👆
+    fetch: effect((dispatch, payload, getState, injections, meta) => {
+      //                                                     👆
       // We can get insight into the path of the effect via the "meta" param
       const data = await fetchProducts();
       // Then we utilise lodash to map to the expected location for our
