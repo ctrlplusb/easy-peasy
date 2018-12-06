@@ -60,7 +60,7 @@ export const createStore = (model, options = {}) => {
     initialState = {},
     injections,
     compose,
-    reducerEnhancer = reducer => reducer,
+    reducerEnhancer = rootReducer => rootReducer,
   } = options
 
   const definition = {
@@ -103,6 +103,10 @@ export const createStore = (model, options = {}) => {
               payload,
               references.getState,
               injections,
+              {
+                parent: parentPath,
+                path,
+              },
             )
           }
           action.actionName = actionName

@@ -1,4 +1,4 @@
-> Note: this package depends on the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature of React. Currently available via 16.7.0-alpha.0 of React.
+> Note: this package depends on the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature of React. Currently available via 16.7.0-alpha.2 of React.
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -103,6 +103,8 @@ function TodoList() {
     - [StoreProvider](#storeprovider)
     - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useAction(mapAction)](#useactionmapaction)
+  - [Tips and Tricks](#tips-and-tricks)
+    - [Generalising effects/actions/state via helpers](#generalising-effectsactionsstate-via-helpers)
   - [Prior Art](#prior-art)
 
 <p>&nbsp;</p>
@@ -122,8 +124,8 @@ Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the bo
 Firsly, ensure you have the correct versions of React (i.e. a version that supports Hooks) installed.
 
 ```bash
-npm install react@16.7.0-alpha.0
-npm install react-dom@16.7.0-alpha.0
+npm install react@16.7.0-alpha.2
+npm install react-dom@16.7.0-alpha.2
 ```
 
 Then install Easy Peasy.
@@ -620,6 +622,36 @@ Declares an action on your model as being effectful. i.e. has asynchronous flow.
 
       Any depenencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
 
+    - `meta` (Object, required)
+
+      This object contains meta information related to the effect. Specifically it contains the following properties:
+
+        - parent (Array, string, required)
+
+          An array representing the path of the parent to the action.
+
+        - path (Array, string, required)
+
+          An array representing the path to the action.
+
+      This can be represented via the following example:
+
+      ```javascript
+      const store = createStore({
+        products: {
+          fetchById: effect((dispatch, payload, getState, injections, meta) => {
+            console.log(meta);
+            // {
+            //   parent: ['products'],
+            //   path: ['products', 'fetchById']
+            // }
+          })
+        }
+      });
+
+      await store.dispatch.products.fetchById()
+      ```
+
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
 
 #### Example
@@ -998,6 +1030,91 @@ const EditTodo = ({ todo }) => {
 ```
 
 <p>&nbsp;</p>
+
+----
+
+## Tips and Tricks
+
+Below are a few useful tips and tricks when using Easy Peasy.
+
+### Generalising effects/actions/state via helpers
+
+You may identify repeated patterns within your store implementation. It is possible to generalise these via helpers.
+
+For example, say you had the following:
+
+```javascript
+const store = createStore({
+  products: {
+    data: {},
+    ids: select(state => Object.keys(state.data)),
+    fetched: (state, products) => {
+      products.forEach(product => {
+        state.data[product.id] = product;
+      });
+    },
+    fetch: effect((dispatch) => {
+      const data = await fetchProducts();
+      dispatch.products.fetched(data);
+    })
+  },
+  users: {
+    data: {},
+    ids: select(state => Object.keys(state.data)),
+    fetched: (state, users) => {
+      users.forEach(user => {
+        state.data[user.id] = user;
+      });
+    },
+    fetch: effect((dispatch) => {
+      const data = await fetchUsers();
+      dispatch.users.fetched(data);
+    })
+  }
+})
+```
+
+You will note a distinct pattern between the `products` and `users`. You could create a generic helper like so:
+
+```javascript
+import _ from 'lodash';
+
+const data = (endpoint) => ({
+  data: {},
+    ids: select(state => Object.keys(state.data)),
+    fetched: (state, items) => {
+      items.forEach(item => {
+        state.data[item.id] = item;
+      });
+    },
+    fetch: effect((dispatch, payload, getState, injections, meta) => {
+      //                                                     👆
+      // We can get insight into the path of the effect via the "meta" param
+      const data = await fetchProducts();
+      // Then we utilise lodash to map to the expected location for our
+      // "fetched" action
+      //                 👇
+      const fetched = _.get(dispatch, meta.parent.join('fetched'));
+      fetched(data);
+    })
+})
+```
+
+You can then refactor the previous example to utilise this helper like so:
+
+```javascript
+const store = createStore({
+  products: {
+    ...data(fetchProducts)
+    // attach other state/actions/etc as you like
+  },
+  users: {
+    ...data(fetchUsers)
+  }
+})
+```
+
+This produces an implementation that is like for like in terms of functionality but far less verbose.
 
 ----
 
