@@ -147,6 +147,10 @@ type EffectAction<Model, Payload, EffectResult> = (
   payload: Payload,
   getState: () => Readonly<ModelValues<Model>>,
   injections: any,
+  meta: {
+    parent: Array<string>,
+    path: Array<string>
+  }
 ) => EffectResult;
 
 export type Effect<Model, Payload = undefined, EffectResult = any> = Payload extends undefined
