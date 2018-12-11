@@ -230,7 +230,7 @@ export class StoreProvider<Model = any> extends React.Component<{ store: Store<M
  *
  * Example usage:
  *
- * const todos = useStore<Model, Array<string>>(state => state.todos.items);
+ * const todos = useStore((state: ModelValues<Model>) => state.todos.items);
  *
  * const { totalPrice, netPrice } = useStore<Model, { totalPrice: number; netPrice: number; }>(state => ({
  *   totalPrice: state.basket.totalPrice,
@@ -239,8 +239,8 @@ export class StoreProvider<Model = any> extends React.Component<{ store: Store<M
  */
 
 export function useStore<Model = any, StateValue = any>(
-  mapState: (state: ModelValues<Model>) => StateValue,
-  externals?: Array<any>,
+  mapState: <State extends ModelValues<Model>>(state: State) => StateValue,
+  externals?: Array<any>
 ): StateValue;
 
 /**
