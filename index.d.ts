@@ -28,6 +28,7 @@ type ActionFunction<ActionPayload = any> = ActionPayload extends undefined | voi
   : ActionPayload extends ActionPrimitive | Array<ActionPrimitive>
   ? (payload: ActionPayload) => void
   : ActionPayload;
+type EffectResult<Result> = Result extends Promise<any> ? Result : Promise<Result>;
 
 // given a model, get the state shapes of any reducer(...)s
 type FunctionReturnType<T> = T extends (...args: any[]) => infer R ? R : any;
@@ -142,26 +143,26 @@ export type Action<StateValues, Payload = undefined> = Payload extends undefined
  * })
  */
 
-type EffectAction<Model, Payload, EffectResult> = (
+type EffectAction<Model, Payload, Result> = (
   dispatch: Dispatch<Model>,
   payload: Payload,
   getState: () => Readonly<ModelValues<Model>>,
   injections: any,
   meta: {
-    parent: Array<string>,
-    path: Array<string>
+    parent: Array<string>;
+    path: Array<string>;
   }
-) => EffectResult;
+) => EffectResult<Result>;
 
-export type Effect<Model, Payload = undefined, EffectResult = any> = Payload extends undefined
+export type Effect<Model, Payload = undefined, Result = any> = Payload extends undefined
   ? (
-      effectAction: EffectAction<Model, Payload, EffectResult>,
+      effectAction: EffectAction<Model, Payload, Result>,
       b?: undefined
-    ) => EffectResult
+    ) => EffectResult<Result>
   : (
-      effectAction: EffectAction<Model, Payload, EffectResult>,
+      effectAction: EffectAction<Model, Payload, Result>,
       b: Payload
-    ) => EffectResult;
+    ) => EffectResult<Result>;
 
 export function effect<Model = any, Payload = never, EffectResult = any>(
   effectAction: EffectAction<Model, Payload, EffectResult>
@@ -232,7 +233,7 @@ export class StoreProvider<Model = any> extends React.Component<{ store: Store<M
  *
  * const todos = useStore((state: ModelValues<Model>) => state.todos.items);
  *
- * const { totalPrice, netPrice } = useStore<Model, { totalPrice: number; netPrice: number; }>(state => ({
+ * const { totalPrice, netPrice } = useStore((state: ModelValues<Model>) => ({
  *   totalPrice: state.basket.totalPrice,
  *   netPrice: state.basket.netPrice
  * }));
