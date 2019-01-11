@@ -121,7 +121,7 @@ Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the bo
 
 ## Installation
 
-Firsly, ensure you have the correct versions of React (i.e. a version that supports Hooks) installed.
+First, ensure you have the correct versions of React (i.e. a version that supports Hooks) installed.
 
 ```bash
 npm install react@16.7.0-alpha.2
@@ -212,7 +212,7 @@ The action will receive as it's first parameter the slice of the state that it w
 >
 > ```javascript
 > addTodo: (state, payload) => {
->   return { ...state, items: [...state.items, paylaod] };
+>   return { ...state, items: [...state.items, payload] };
 > }
 > ```
 
@@ -356,7 +356,7 @@ const TodoList = () => {
 };
 ```
 
-In the case that your `useStore` implementation depends on an "external" value when mapping state. Then you should provide the respective "external" within the second argument to the `usStore`. The `useStore` hook will then track the external value and ensure to recalculate the mapped state if any of the external values change.
+In the case that your `useStore` implementation depends on an "external" value when mapping state. Then you should provide the respective "external" within the second argument to the `useStore`. The `useStore` hook will then track the external value and ensure to recalculate the mapped state if any of the external values change.
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -620,7 +620,7 @@ Declares an action on your model as being effectful. i.e. has asynchronous flow.
 
     - `injections` (Any, not required, default=undefined)
 
-      Any depenencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+      Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
 
     - `meta` (Object, required)
 
