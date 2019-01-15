@@ -225,16 +225,30 @@ export const createStore = (model, options = {}) => {
         return state
       }
       const dependencies = selector[selectDependenciesSymbol]
-      const newState = produce(
-        dependencies ? dependencies.reduce(runSelectorReducer, state) : state,
-        draft => {
+
+      const stateAfterDependencies = dependencies
+        ? dependencies.reduce(runSelectorReducer, state)
+        : state
+
+      let newState = state
+
+      if (parentPath.length > 0) {
+        const target = get(parentPath, stateAfterDependencies)
+        if (target) {
+          const newValue = selector(target)
+          newState = produce(state, draft => {
+            const updateTarget = get(parentPath, draft)
+            updateTarget[key] = newValue
+          })
+        }
+      } else {
+        const newValue = selector(stateAfterDependencies)
+        newState = produce(state, draft => {
           // eslint-disable-next-line no-param-reassign
-          const target = parentPath.length > 0 ? get(parentPath, draft) : draft
-          if (target) {
-            target[key] = selector(target)
-          }
-        },
-      )
+          draft[key] = newValue
+        })
+      }
+
       // eslint-disable-next-line no-param-reassign
       selector[selectStateSymbol].executed = true
       return newState
