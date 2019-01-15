@@ -244,6 +244,7 @@ export const createStore = (model, options = {}) => {
       } else {
         const newValue = selector(stateAfterDependencies)
         newState = produce(state, draft => {
+          // eslint-disable-next-line no-param-reassign
           draft[key] = newValue
         })
       }
