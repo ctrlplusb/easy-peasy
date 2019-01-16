@@ -1090,7 +1090,7 @@ const data = (endpoint) => ({
     fetch: effect((dispatch, payload, getState, injections, meta) => {
       //                                                     👆
       // We can get insight into the path of the effect via the "meta" param
-      const data = await fetchProducts();
+      const data = await endpoint();
       // Then we utilise lodash to map to the expected location for our
       // "fetched" action
       //                 👇
