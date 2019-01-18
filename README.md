@@ -124,8 +124,8 @@ Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the bo
 First, ensure you have the correct versions of React (i.e. a version that supports Hooks) installed.
 
 ```bash
-npm install react@16.7.0-alpha.2
-npm install react-dom@16.7.0-alpha.2
+npm install react@16.8.0-alpha.1
+npm install react-dom@16.8.0-alpha.1
 ```
 
 Then install Easy Peasy.
