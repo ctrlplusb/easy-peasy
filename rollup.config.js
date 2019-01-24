@@ -42,6 +42,12 @@ const baseConfig = {
         ['transform-react-remove-prop-types', { removeImport: true }],
       ],
     }),
+    commonjs({
+      include: 'node_modules/**',
+      namedExports: {
+        'node_modules/react-is/index.js': ['isValidElementType'],
+      },
+    }),
   ],
 }
 
