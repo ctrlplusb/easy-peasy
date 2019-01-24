@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import StoreContext from './context'
+import { ReactReduxContext as StoreContext } from 'react-redux'
 
 const StoreProvider = ({ children, store }) => (
   <StoreContext.Provider value={store}>{children}</StoreContext.Provider>

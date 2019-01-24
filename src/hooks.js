@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext, useRef } from 'react'
 import shallowEqual from 'shallowequal'
-import EasyPeasyContext from './context'
+import { ReactReduxContext as EasyPeasyContext } from 'react-redux'
 import { isStateObject } from './lib'
 
 export function useStore(mapState, dependencies = []) {

@@ -38,6 +38,7 @@
   "dependencies": {
     "immer": "^1.10.5",
     "memoize-one": "^5.0.0",
+    "react-redux": "^6.0.0-beta.3",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0"

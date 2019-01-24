@@ -6,11 +6,11 @@ import React from 'react'
 import { render, cleanup, fireEvent } from 'react-testing-library'
 
 import {
-  StoreProvider,
   createStore,
   effect,
   reducer,
   select,
+  StoreProvider,
   useStore,
   useAction,
 } from '../index'

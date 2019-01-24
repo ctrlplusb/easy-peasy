@@ -4,15 +4,25 @@ import {
   createStore as reduxCreateStore,
 } from 'redux'
 import memoizeOne from 'memoize-one'
-import produce from 'immer'
+import produce, { setAutoFreeze } from 'immer'
 import thunk from 'redux-thunk'
 import { isStateObject } from './lib'
 
-const effectSymbol = '__effect__'
-const selectSymbol = '__select__'
-const selectDependenciesSymbol = '__selectDependencies__'
-const selectStateSymbol = '__selectState__'
-const reducerSymbol = '__reducer__'
+setAutoFreeze(false)
+
+const effectSymbol = Symbol('__effect__')
+const selectSymbol = Symbol('__select__')
+const selectDependenciesSymbol = Symbol('__selectDependencies__')
+const selectStateSymbol = Symbol('__selectState__')
+
+class reducerContainer {
+  constructor(fn) {
+    this.fn = fn
+  }
+  getReducer() {
+    return this.fn
+  }
+}
 
 const get = (path, target) =>
   path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
@@ -48,9 +58,7 @@ export const select = (fn, dependencies) => {
 }
 
 export const reducer = fn => {
-  // eslint-disable-next-line no-param-reassign
-  fn[reducerSymbol] = true
-  return fn
+  return new reducerContainer(fn)
 }
 
 export const createStore = (model, options = {}) => {
@@ -83,7 +91,9 @@ export const createStore = (model, options = {}) => {
     Object.keys(current).forEach(key => {
       const value = current[key]
       const path = [...parentPath, key]
-      if (typeof value === 'function') {
+      if (value instanceof reducerContainer) {
+        customReducers.push({ path, reducer: value.getReducer() })
+      } else if (typeof value === 'function') {
         if (value[selectSymbol]) {
           // skip
           value[selectStateSymbol] = { parentPath, key, executed: false }
@@ -116,8 +126,6 @@ export const createStore = (model, options = {}) => {
           set(path, actionCreators, payload =>
             tick().then(() => references.dispatch(() => action(payload))),
           )
-        } else if (value[reducerSymbol]) {
-          customReducers.push({ path, reducer: value })
         } else {
           // Reducer Action
           const actionName = `@action.${path.join('.')}`
