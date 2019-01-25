@@ -28,20 +28,20 @@ interface Todo {
   text: string
 }
 
+interface RouterState {
+  history: {}
+  push: () => undefined
+}
+
 interface TodosModel {
   items: Array<Todo>
   firstItem: Select<TodosModel, Todo | void>
   addItem: Action<TodosModel, Todo>
 }
 
-interface RouterState {
-  history: {}
-  push: () => undefined
-}
-
-interface NestedStuffModel {
+interface DeeplyNestedModel {
   counter: number
-  increment: Action<NestedStuffModel>
+  increment: Action<DeeplyNestedModel>
 }
 
 interface Model {
@@ -57,7 +57,7 @@ interface Model {
     ridiculously: {
       deeply: {
         nested: {
-          stuff: NestedStuffModel
+          stuff: DeeplyNestedModel
         }
       }
     }
@@ -72,6 +72,8 @@ const todos: TodosModel = {
   addItem: (state, payload) => {
     state.firstItem
     state.items.push(payload)
+    // typings:expect-error
+    state.firstItem = undefined // CANNOT ASSIGN TO SELECT RESULTS!
   },
 }
 
@@ -86,6 +88,9 @@ const model: Model = {
     dispatch.todos.addItem({ id: 1, text: 'foo' })
     const state = getState()
     state.todos
+    state.router.history
+    // typings:expect-error
+    state.router = { history: [], push: () => undefined } // CANNOT ASSIGN TO ROUTER RESULT
   }),
   bar: state => {
     state.age += 1
@@ -113,7 +118,7 @@ const store = createStore(model)
 
 store.dispatch({
   type: 'MY_BESPOKE_ACTION',
-  payload: 'I love redux'
+  payload: 'I love redux',
 })
 store.getState().coords
 store.getState().todos.firstItem
@@ -126,6 +131,8 @@ store.dispatch.really.ridiculously.deeply.nested.stuff.increment()
 const counter = useStore<Model, number>(state => {
   return state.really.ridiculously.deeply.nested.stuff.counter
 })
+
+const added = counter + 1
 
 const addTodo = useAction<Model, Todo>(actions => {
   return actions.todos.addItem

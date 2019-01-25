@@ -14,12 +14,12 @@ import {
 /**
  * The standard ReturnType helper of TypeScript doesn't handle generic type
  * aliases very well. This workaround type does.
- * https://github.com/Microsoft/TypeScript/issues/26856 
+ * https://github.com/Microsoft/TypeScript/issues/26856
  */
 type UnsafeReturnType<T> = T extends (...args: any[]) => infer R ? R : any
 
 /**
- * The types that represent "natural", single level state values in or store. 
+ * The types that represent "natural", single level state values in or store.
  * i.e. not actions or objects.
  */
 type NaturalState =
@@ -46,7 +46,7 @@ interface ActionCreator<TPayload = any, TResult = any> {
 }
 
 /**
- * This type recursively filters a model down to the properties which 
+ * This type recursively filters a model down to the properties which
  * represent actions
  */
 type Actions<U extends Object> = {
@@ -63,7 +63,7 @@ type Actions<U extends Object> = {
   }
 
 /**
- * This type recursively filters a model down to the properties which 
+ * This type recursively filters a model down to the properties which
  * represent state - i.e. no actions/selectors etc.
  */
 type State<U extends Object> = {
@@ -74,9 +74,16 @@ type State<U extends Object> = {
 } &
   { [P in keyof Pick<U, KeysOfType<U, NaturalState>>]: U[P] } &
   {
-    [P in keyof Pick<U, KeysOfType<U, Select<any, any>>>]: UnsafeReturnType<
-      U[P]
-    >
+    readonly [P in keyof Pick<
+      U,
+      KeysOfType<U, Select<any, any>>
+    >]: UnsafeReturnType<U[P]>
+  } &
+  {
+    readonly [P in keyof Pick<
+      U,
+      KeysOfType<U, Reducer<any, any>>
+    >]: UnsafeReturnType<U[P]>
   }
 
 type UseStore<TState = any, TReturn = any> = (state: TState) => TReturn
@@ -86,9 +93,8 @@ type EffectMeta = {
   parent: string[]
 }
 
-
 /**
- * Configuration for the createStore 
+ * Configuration for the createStore
  */
 export interface EasyPeasyConfig<
   TInitialState extends Object = {},
@@ -107,7 +113,10 @@ export type Reducer<
   TAction extends ReduxAction = AnyAction
 > = ReduxReducer<TState>
 
-export type Dispatch<TModel, A extends ReduxAction = ReduxAction<any>> = Actions<TModel> & ReduxDispatch<A>;
+export type Dispatch<
+  TModel,
+  A extends ReduxAction = ReduxAction<any>
+> = Actions<TModel> & ReduxDispatch<A>
 
 export type Store<TModel> = Overwrite<
   ReduxStore<State<TModel>>,
@@ -120,7 +129,7 @@ export type Store<TModel> = Overwrite<
  * An effect action type.
  *
  * @example
- * 
+ *
  * import { Effect } from 'easy-peasy';
  *
  * interface Model {
@@ -145,7 +154,7 @@ export type Effect<
  * An action type.
  *
  * @example
- * 
+ *
  * import { Action } from 'easy-peasy';
  *
  * interface Model {
@@ -162,7 +171,7 @@ export type Action<TModel extends Object = {}, UPayload = void> = (
  * A select type.
  *
  * @example
- * 
+ *
  * import { Select } from 'easy-peasy';
  *
  * interface Model {
@@ -177,11 +186,11 @@ export type Select<TModel extends Object = {}, UResult = void> = (
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#effectaction
- * 
+ *
  * @example
- * 
+ *
  * import { effect } from 'easy-peasy';
- * 
+ *
  * const login = effect<Model, Credentials>(async (dispatch, payload) => {
  *   const user = await loginService(payload)
  *   dispatch.session.loginSucceeded(user)
@@ -200,7 +209,7 @@ export function effect<
  * https://github.com/ctrlplusb/easy-peasy#selectselector
  *
  * @example
- * 
+ *
  * import { select } from 'easy-peasy';
  *
  * const totalPrice = select<ShoppingBasketModel, number>(state =>
@@ -234,7 +243,7 @@ export function reducer<TState extends Object = {}>(
  * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
  *
  * @example
- * 
+ *
  * import { createStore } from 'easy-peasy';
  *
  * interface Model {
@@ -258,7 +267,7 @@ export function createStore<TModel extends Object = {}>(
  * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
  *
  * @example
- * 
+ *
  * import { useStore } from 'easy-peasy';
  *
  * const todos = useStore<Model, Array<Todo>>(state => state.todos.items);
@@ -277,7 +286,7 @@ export function useStore<TModel extends Object = {}, TReturn = any>(
  * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
  *
  * @example
- * 
+ *
  * import { useAction } from 'easy-peasy';
  *
  * const addTodo = useAction<Model, Todo>(dispatch => dispatch.todos.add);
@@ -296,7 +305,7 @@ export function useAction<
  * https://github.com/ctrlplusb/easy-peasy#storeprovider
  *
  * @example
- * 
+ *
  * import { StoreProvider } from 'easy-peasy';
  *
  * ReactDOM.render(
