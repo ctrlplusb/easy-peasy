@@ -20,6 +20,10 @@ import { connect } from 'react-redux'
  * Firstly you define your Model
  */
 
+interface Injections {
+  appId: string
+}
+
 interface TodosModel {
   items: Array<string>
   firstItem: Select<TodosModel, string | void>
@@ -36,6 +40,7 @@ interface Model {
   todos: TodosModel
   user: UserModel
   counter: Reducer<number>
+  printDebugInfo: Effect<Model, void, void, Injections>
 }
 
 /**
@@ -79,6 +84,9 @@ const store = createStore<Model>({
         return state
     }
   }),
+  printDebugInfo: effect((state, payload, getState, injections) => {
+    console.log(`App id: ${injections.appId}`)
+  }),
 })
 
 /**
@@ -98,8 +106,8 @@ function MyComponent() {
   //  As you can return "anything" from your mapState you need to provide the
   //  expected type of the mapped state. The state itself will be typed and
   //  then validated against the expected result type.
-  //                                  👇
-  const token = useStore<Model>(state => state.user.token)
+  //                               👇
+  const token = useStore<Model, string | void>(state => state.user.token)
 
   //  Similar to the mapState, the mapAction can return an action that accepts
   //  any "payload" type. Therefore we explicity state the payload type of the
