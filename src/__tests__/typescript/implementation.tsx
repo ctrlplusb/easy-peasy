@@ -1,146 +1,127 @@
 import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 import {
   createStore,
   effect,
   reducer,
   select,
+  StoreProvider,
   useAction,
   useStore,
   Action,
   Effect,
-  Select,
   Reducer,
-  StoreProvider,
+  Select,
 } from 'easy-peasy'
 
-enum Color {
-  Red = 1,
-  Green = 2,
-  Blue = 3,
-}
-
-interface Injections {
-  axios: { get: (url: string) => Promise<any> }
-}
-
-interface Todo {
-  id: number
-  text: string
-}
-
-interface RouterState {
-  history: {}
-  push: () => undefined
-}
+/**
+ * Firstly you define your Model
+ */
 
 interface TodosModel {
-  items: Array<Todo>
-  firstItem: Select<TodosModel, Todo | void>
-  addItem: Action<TodosModel, Todo>
+  items: Array<string>
+  firstItem: Select<TodosModel, string | void>
+  addTodo: Action<TodosModel, string>
 }
 
-interface DeeplyNestedModel {
-  counter: number
-  increment: Action<DeeplyNestedModel>
+interface UserModel {
+  token?: string
+  loggedIn: Action<UserModel, string>
+  login: Effect<Model, { username: string; password: string }>
 }
 
 interface Model {
-  name: string
-  age: 35
-  coords: [number, number]
-  favouriteColor: Color
   todos: TodosModel
-  foo: Effect<Model, Todo, void, Injections>
-  bar: Action<Model>
-  router: Reducer<RouterState>
-  really: {
-    ridiculously: {
-      deeply: {
-        nested: {
-          stuff: DeeplyNestedModel
-        }
-      }
-    }
-  }
+  user: UserModel
+  counter: Reducer<number>
 }
 
-const todos: TodosModel = {
-  items: [],
-  firstItem: select(state => {
-    return state.items.length > 0 ? state.items[0] : undefined
-  }),
-  addItem: (state, payload) => {
-    state.firstItem
-    state.items.push(payload)
-    // typings:expect-error
-    state.firstItem = undefined // CANNOT ASSIGN TO SELECT RESULTS!
-  },
-}
+/**
+ * Then you create your store.
+ * Note that as we pass the Model into the `createStore` function, so all of our
+ * model definition is typed correctly, including inside the actions/helpers etc.
+ */
 
-const model: Model = {
-  name: 'Bob',
-  age: 35,
-  coords: [123, 456],
-  favouriteColor: Color.Red,
-  todos,
-  foo: effect(async (dispatch, payload, getState, injections, meta) => {
-    await injections.axios.get('http:/foo')
-    dispatch.todos.addItem({ id: 1, text: 'foo' })
-    const state = getState()
-    state.todos
-    state.router.history
-    // typings:expect-error
-    state.router = { history: [], push: () => undefined } // CANNOT ASSIGN TO ROUTER RESULT
-  }),
-  bar: state => {
-    state.age += 1
-    state.todos.items
-  },
-  router: reducer((state = { history: [], push: () => undefined }, action) => {
-    state.history
-    return state
-  }),
-  really: {
-    ridiculously: {
-      deeply: {
-        nested: {
-          stuff: {
-            counter: 1,
-            increment: state => {},
-          },
-        },
-      },
+const store = createStore<Model>({
+  todos: {
+    items: [],
+    firstItem: select(state =>
+      state.items.length > 0 ? state.items[0] : undefined,
+    ),
+    addTodo: (state, payload) => {
+      state.items.push(payload)
     },
   },
+  user: {
+    token: undefined,
+    loggedIn: (state, payload) => {
+      state.token = payload
+    },
+    login: effect(async (dispatch, payload) => {
+      const response = await fetch('/login', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const { token } = await response.json()
+      dispatch.user.loggedIn(token)
+    }),
+  },
+  counter: reducer((state = 0, action) => {
+    switch (action.type) {
+      case 'COUNTER_INCREMENT':
+        return state + 1
+      default:
+        return state
+    }
+  }),
+})
+
+/**
+ * You can use the "standard" store APIs
+ */
+
+console.log(store.getState().todos.firstItem)
+
+store.dispatch({ type: 'COUNTER_INCREMENT' })
+
+store.dispatch.todos.addTodo('Install typescript')
+
+/**
+ * You can access state via hooks
+ */
+function MyComponent() {
+  //  As you can return "anything" from your mapState you need to provide the
+  //  expected type of the mapped state. The state itself will be typed and
+  //  then validated against the expected result type.
+  //                                  👇
+  const token = useStore<Model>(state => state.user.token)
+
+  //  Similar to the mapState, the mapAction can return an action that accepts
+  //  any "payload" type. Therefore we explicity state the payload type of the
+  //  action we expect to be mapping out. This will be validated against the
+  //  typed dispatch mounted actions.
+  //                                  👇
+  const login = useAction<Model, { username: string; password: string }>(
+    dispatch => dispatch.user.login,
+  )
+
+  return (
+    <button onClick={() => login({ username: 'foo', password: 'bar' })}>
+      {token || 'Log in'}
+    </button>
+  )
 }
 
-const store = createStore(model)
+/**
+ * Expose the store to your app as normal
+ */
 
-store.dispatch({
-  type: 'MY_BESPOKE_ACTION',
-  payload: 'I love redux',
-})
-store.getState().coords
-store.getState().todos.firstItem
-store.dispatch.todos.addItem({
-  id: 1,
-  text: 'Foo',
-})
-store.dispatch.really.ridiculously.deeply.nested.stuff.increment()
-
-const counter = useStore<Model, number>(state => {
-  return state.really.ridiculously.deeply.nested.stuff.counter
-})
-
-const added = counter + 1
-
-const addTodo = useAction<Model, Todo>(actions => {
-  return actions.todos.addItem
-})
-
-addTodo({
-  id: 1,
-  text: 'foo',
-})
-
-const app = <StoreProvider store={store}>Woot!</StoreProvider>
+ReactDOM.render(
+  <StoreProvider store={store}>
+    <MyComponent />
+  </StoreProvider>,
+  document.getElementById('root'),
+)

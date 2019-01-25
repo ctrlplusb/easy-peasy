@@ -45,20 +45,30 @@ interface ActionCreator<TPayload = any, TResult = any> {
   (payload: TPayload): TResult
 }
 
+type UseStore<TState = any, TReturn = any> = (state: TState) => TReturn
+
+type EffectMeta = {
+  path: string[]
+  parent: string[]
+}
+
 /**
  * This type recursively filters a model down to the properties which
  * represent actions
  */
-type Actions<U extends Object> = {
+export type Actions<TModel extends Object> = {
   [P in keyof (Omit<
-    U,
-    KeysOfType<Pick<U, KeysOfType<U, Object>>, NaturalState | UtilTypes>
-  >)]: Actions<U[P]>
+    TModel,
+    KeysOfType<
+      Pick<TModel, KeysOfType<TModel, Object>>,
+      NaturalState | UtilTypes
+    >
+  >)]: Actions<TModel[P]>
 } &
   {
-    [P in keyof Pick<U, KeysOfType<U, ActionTypes>>]: ActionCreator<
-      Param1<U[P]>,
-      UnsafeReturnType<Param1<U[P]>>
+    [P in keyof Pick<TModel, KeysOfType<TModel, ActionTypes>>]: ActionCreator<
+      Param1<TModel[P]>,
+      UnsafeReturnType<Param1<TModel[P]>>
     >
   }
 
@@ -66,32 +76,28 @@ type Actions<U extends Object> = {
  * This type recursively filters a model down to the properties which
  * represent state - i.e. no actions/selectors etc.
  */
-type State<U extends Object> = {
+export type State<TModel extends Object> = {
   [P in keyof (Omit<
-    U,
-    KeysOfType<Pick<U, KeysOfType<U, Object>>, NaturalState | UtilTypes>
-  >)]: State<U[P]>
+    TModel,
+    KeysOfType<
+      Pick<TModel, KeysOfType<TModel, Object>>,
+      NaturalState | UtilTypes
+    >
+  >)]: State<TModel[P]>
 } &
-  { [P in keyof Pick<U, KeysOfType<U, NaturalState>>]: U[P] } &
+  { [P in keyof Pick<TModel, KeysOfType<TModel, NaturalState>>]: TModel[P] } &
   {
     readonly [P in keyof Pick<
-      U,
-      KeysOfType<U, Select<any, any>>
-    >]: UnsafeReturnType<U[P]>
+      TModel,
+      KeysOfType<TModel, Select<any, any>>
+    >]: UnsafeReturnType<TModel[P]>
   } &
   {
     readonly [P in keyof Pick<
-      U,
-      KeysOfType<U, Reducer<any, any>>
-    >]: UnsafeReturnType<U[P]>
+      TModel,
+      KeysOfType<TModel, Reducer<any, any>>
+    >]: UnsafeReturnType<TModel[P]>
   }
-
-type UseStore<TState = any, TReturn = any> = (state: TState) => TReturn
-
-type EffectMeta = {
-  path: string[]
-  parent: string[]
-}
 
 /**
  * Configuration for the createStore
@@ -115,8 +121,8 @@ export type Reducer<
 
 export type Dispatch<
   TModel,
-  A extends ReduxAction = ReduxAction<any>
-> = Actions<TModel> & ReduxDispatch<A>
+  TAction extends ReduxAction = ReduxAction<any>
+> = Actions<TModel> & ReduxDispatch<TAction>
 
 export type Store<TModel> = Overwrite<
   ReduxStore<State<TModel>>,
@@ -162,9 +168,9 @@ export type Effect<
  *   increment: Action<Model>;
  * }
  */
-export type Action<TModel extends Object = {}, UPayload = void> = (
+export type Action<TModel extends Object = {}, TPayload = void> = (
   state: State<TModel>,
-  payload: UPayload,
+  payload: TPayload,
 ) => void | State<TModel>
 
 /**
@@ -179,10 +185,10 @@ export type Action<TModel extends Object = {}, UPayload = void> = (
  *   totalPrice: Select<Model, number>;
  * }
  */
-export type Select<TModel extends Object = {}, UResult = void> = (
+export type Select<TModel extends Object = {}, TResult = void> = (
   state: State<TModel>,
   dependencies?: Array<Select<any, any>>,
-) => UResult
+) => TResult
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#effectaction
@@ -198,12 +204,12 @@ export type Select<TModel extends Object = {}, UResult = void> = (
  */
 export function effect<
   TModel extends Object = {},
-  UPayload = void,
-  UResult = void,
-  UInjections = void
+  TPayload = void,
+  TResult = void,
+  TInjections = void
 >(
-  effect: Effect<TModel, UPayload, UResult, UInjections>,
-): Effect<TModel, UPayload, UResult, UInjections>
+  effect: Effect<TModel, TPayload, TResult, TInjections>,
+): Effect<TModel, TPayload, TResult, TInjections>
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#selectselector
@@ -216,10 +222,10 @@ export function effect<
  *   state.products.reduce((acc, cur) => acc + cur.price, 0)
  * );
  */
-export function select<TModel extends Object = {}, UResult = void>(
-  select: Select<TModel, UResult>,
+export function select<TModel extends Object = {}, TResult = void>(
+  select: Select<TModel, TResult>,
   dependencies?: Array<Select<any, any>>,
-): Select<TModel, UResult>
+): Select<TModel, TResult>
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#reducerfn
