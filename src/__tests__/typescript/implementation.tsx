@@ -12,7 +12,9 @@ import {
   Effect,
   Reducer,
   Select,
+  State,
 } from 'easy-peasy'
+import { connect } from 'react-redux'
 
 /**
  * Firstly you define your Model
@@ -125,3 +127,15 @@ ReactDOM.render(
   </StoreProvider>,
   document.getElementById('root'),
 )
+
+/**
+ * We also support typing react-redux
+ */
+
+const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
+  <div>{counter}</div>
+)
+
+connect((state: State<Model>) => ({
+  counter: state.counter,
+}))(Counter)
