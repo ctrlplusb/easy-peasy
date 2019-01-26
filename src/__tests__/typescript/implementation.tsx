@@ -9,6 +9,7 @@ import {
   useAction,
   useStore,
   Action,
+  Dispatch,
   Effect,
   Reducer,
   Select,
@@ -103,21 +104,8 @@ store.dispatch.todos.addTodo('Install typescript')
  * You can access state via hooks
  */
 function MyComponent() {
-  //  As you can return "anything" from your mapState you need to provide the
-  //  expected type of the mapped state. The state itself will be typed and
-  //  then validated against the expected result type.
-  //                               👇
-  const token = useStore<Model, string | undefined>(state => state.user.token)
-
-  //  Similar to the mapState, the mapAction can return an action that accepts
-  //  any "payload" type. Therefore we explicity state the payload type of the
-  //  action we expect to be mapping out. This will be validated against the
-  //  typed dispatch mounted actions.
-  //                                  👇
-  const login = useAction<Model, { username: string; password: string }>(
-    dispatch => dispatch.user.login,
-  )
-
+  const token = useStore((state: State<Model>) => state.user.token)
+  const login = useAction((dispatch: Dispatch<Model>) => dispatch.user.login)
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>
       {token || 'Log in'}

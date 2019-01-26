@@ -302,7 +302,7 @@ export function useAction<
   TPayload = void,
   TResult = any
 >(
-  mapAction: (actions: Actions<TModel>) => ActionCreator<TPayload, TResult>,
+  mapAction: (actions: Dispatch<TModel>) => ActionCreator<TPayload, TResult>,
 ): ActionCreator<TPayload, TResult>
 
 /**
