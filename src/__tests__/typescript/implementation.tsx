@@ -107,7 +107,7 @@ function MyComponent() {
   //  expected type of the mapped state. The state itself will be typed and
   //  then validated against the expected result type.
   //                               👇
-  const token = useStore<Model, string | void>(state => state.user.token)
+  const token = useStore<Model, string | undefined>(state => state.user.token)
 
   //  Similar to the mapState, the mapAction can return an action that accepts
   //  any "payload" type. Therefore we explicity state the payload type of the

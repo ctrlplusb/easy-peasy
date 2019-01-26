@@ -45,8 +45,6 @@ interface ActionCreator<TPayload = any, TResult = any> {
   (payload: TPayload): TResult
 }
 
-type UseStore<TState = any, TReturn = any> = (state: TState) => TReturn
-
 type EffectMeta = {
   path: string[]
   parent: string[]
@@ -284,7 +282,7 @@ export function createStore<TModel extends Object = {}>(
  * }));
  */
 export function useStore<TModel extends Object = {}, TReturn = any>(
-  mapState: UseStore<State<TModel>, TReturn>,
+  mapState: (state: State<TModel>) => TReturn,
   dependencies?: Array<any>,
 ): TReturn
 
