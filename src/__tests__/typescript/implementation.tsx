@@ -42,7 +42,7 @@ interface Model {
   todos: TodosModel
   user: UserModel
   counter: Reducer<number>
-  printDebugInfo: Effect<Model, void, void, Injections>
+  printDebugInfo: Effect<Model, void, string, Injections>
 }
 
 /**
@@ -87,7 +87,9 @@ const store = createStore<Model>({
     }
   }),
   printDebugInfo: effect((state, payload, getState, injections) => {
-    console.log(`App id: ${injections.appId}`)
+    const msg = `App id: ${injections.appId}`
+    console.log(msg)
+    return msg
   }),
 })
 
@@ -111,7 +113,8 @@ function MyComponent() {
     login: dispatch.user.login,
     printDebugInfo: dispatch.printDebugInfo,
   }))
-  printDebugInfo()
+  const msg = printDebugInfo()
+  const poop = msg + 'should_be_string'
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>
       {token || 'Log in'}

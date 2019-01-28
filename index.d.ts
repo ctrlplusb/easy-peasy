@@ -60,8 +60,8 @@ export type Actions<Model extends Object> = {
     [P in keyof Pick<Model, KeysOfType<Model, ActionTypes>>]: Param1<
       Model[P]
     > extends void
-      ? () => UnsafeReturnType<Param1<Model[P]>>
-      : (payload: Param1<Model[P]>) => UnsafeReturnType<Param1<Model[P]>>
+      ? () => UnsafeReturnType<Model[P]>
+      : (payload: Param1<Model[P]>) => UnsafeReturnType<Model[P]>
   }
 
 /**
@@ -143,7 +143,7 @@ export type Effect<
   getState: () => State<Model>,
   injections: Injections,
   meta: EffectMeta,
-) => void | Promise<Result> | Result
+) => Result
 
 /**
  * An action type.
