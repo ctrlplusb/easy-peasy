@@ -9,6 +9,7 @@ import {
   useAction,
   useStore,
   Action,
+  Actions,
   Dispatch,
   Effect,
   Reducer,
@@ -98,14 +99,19 @@ console.log(store.getState().todos.firstItem)
 
 store.dispatch({ type: 'COUNTER_INCREMENT' })
 
-store.dispatch.todos.addTodo('Install typescript')
+store.dispatch.todos.addTodo('jello')
+store.dispatch.printDebugInfo()
 
 /**
  * You can access state via hooks
  */
 function MyComponent() {
   const token = useStore((state: State<Model>) => state.user.token)
-  const login = useAction((dispatch: Dispatch<Model>) => dispatch.user.login)
+  const { login, printDebugInfo } = useAction((dispatch: Dispatch<Model>) => ({
+    login: dispatch.user.login,
+    printDebugInfo: dispatch.printDebugInfo,
+  }))
+  printDebugInfo()
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>
       {token || 'Log in'}

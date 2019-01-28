@@ -41,10 +41,6 @@ type UtilTypes =
   | Effect<any, any, any, any>
   | Function
 
-interface ActionCreator<TPayload = any, TResult = any> {
-  (payload: TPayload): TResult
-}
-
 type EffectMeta = {
   path: string[]
   parent: string[]
@@ -64,10 +60,11 @@ export type Actions<TModel extends Object> = {
   >)]: Actions<TModel[P]>
 } &
   {
-    [P in keyof Pick<TModel, KeysOfType<TModel, ActionTypes>>]: ActionCreator<
-      Param1<TModel[P]>,
-      UnsafeReturnType<Param1<TModel[P]>>
-    >
+    [P in keyof Pick<TModel, KeysOfType<TModel, ActionTypes>>]: Param1<
+      TModel[P]
+    > extends void
+      ? () => UnsafeReturnType<Param1<TModel[P]>>
+      : (payload: Param1<TModel[P]>) => UnsafeReturnType<Param1<TModel[P]>>
   }
 
 /**
@@ -299,11 +296,9 @@ export function useStore<TModel extends Object = {}, TReturn = any>(
  */
 export function useAction<
   TModel extends Object = {},
-  TPayload = void,
+  TPayload = any,
   TResult = any
->(
-  mapAction: (actions: Dispatch<TModel>) => ActionCreator<TPayload, TResult>,
-): ActionCreator<TPayload, TResult>
+>(mapAction: (actions: Dispatch<TModel>) => TResult): TResult
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#storeprovider
