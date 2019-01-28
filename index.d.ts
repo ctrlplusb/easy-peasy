@@ -50,79 +50,73 @@ type EffectMeta = {
  * This type recursively filters a model down to the properties which
  * represent actions
  */
-export type Actions<TModel extends Object> = {
+export type Actions<Model extends Object> = {
   [P in keyof (Omit<
-    TModel,
-    KeysOfType<
-      Pick<TModel, KeysOfType<TModel, Object>>,
-      NaturalState | UtilTypes
-    >
-  >)]: Actions<TModel[P]>
+    Model,
+    KeysOfType<Pick<Model, KeysOfType<Model, Object>>, NaturalState | UtilTypes>
+  >)]: Actions<Model[P]>
 } &
   {
-    [P in keyof Pick<TModel, KeysOfType<TModel, ActionTypes>>]: Param1<
-      TModel[P]
+    [P in keyof Pick<Model, KeysOfType<Model, ActionTypes>>]: Param1<
+      Model[P]
     > extends void
-      ? () => UnsafeReturnType<Param1<TModel[P]>>
-      : (payload: Param1<TModel[P]>) => UnsafeReturnType<Param1<TModel[P]>>
+      ? () => UnsafeReturnType<Param1<Model[P]>>
+      : (payload: Param1<Model[P]>) => UnsafeReturnType<Param1<Model[P]>>
   }
 
 /**
  * This type recursively filters a model down to the properties which
  * represent state - i.e. no actions/selectors etc.
  */
-export type State<TModel extends Object> = {
+export type State<Model extends Object> = {
   [P in keyof (Omit<
-    TModel,
-    KeysOfType<
-      Pick<TModel, KeysOfType<TModel, Object>>,
-      NaturalState | UtilTypes
-    >
-  >)]: State<TModel[P]>
+    Model,
+    KeysOfType<Pick<Model, KeysOfType<Model, Object>>, NaturalState | UtilTypes>
+  >)]: State<Model[P]>
 } &
-  { [P in keyof Pick<TModel, KeysOfType<TModel, NaturalState>>]: TModel[P] } &
+  { [P in keyof Pick<Model, KeysOfType<Model, NaturalState>>]: Model[P] } &
   {
     readonly [P in keyof Pick<
-      TModel,
-      KeysOfType<TModel, Select<any, any>>
-    >]: UnsafeReturnType<TModel[P]>
+      Model,
+      KeysOfType<Model, Select<any, any>>
+    >]: UnsafeReturnType<Model[P]>
   } &
   {
     readonly [P in keyof Pick<
-      TModel,
-      KeysOfType<TModel, Reducer<any, any>>
-    >]: UnsafeReturnType<TModel[P]>
+      Model,
+      KeysOfType<Model, Reducer<any, any>>
+    >]: UnsafeReturnType<Model[P]>
   }
 
 /**
  * Configuration for the createStore
  */
 export interface EasyPeasyConfig<
-  TInitialState extends Object = {},
-  TInjections = void
+  InitialState extends Object = {},
+  Injections = void
 > {
   compose?: typeof compose
   devTools?: boolean
-  initialState?: TInitialState
-  injections?: TInjections
+  initialState?: InitialState
+  injections?: Injections
   middlewares?: Array<Middleware<any, any, any>>
   reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>
 }
 
 export type Reducer<
-  TState = any,
-  TAction extends ReduxAction = AnyAction
-> = ReduxReducer<TState>
+  State = any,
+  Action extends ReduxAction = AnyAction
+> = ReduxReducer<State>
 
 export type Dispatch<
-  TModel,
-  TAction extends ReduxAction = ReduxAction<any>
-> = Actions<TModel> & ReduxDispatch<TAction>
+  Model,
+  Action extends ReduxAction = ReduxAction<any>
+> = Actions<Model> & ReduxDispatch<Action>
 
-export type Store<TModel> = Overwrite<
-  ReduxStore<State<TModel>>,
+export type Store<Model> = Overwrite<
+  ReduxStore<State<Model>>,
   {
-    dispatch: Dispatch<TModel>
+    dispatch: Dispatch<Model>
   }
 >
 
@@ -139,17 +133,17 @@ export type Store<TModel> = Overwrite<
  * }
  */
 export type Effect<
-  TModel extends Object = {},
-  TPayload = void,
-  TResult = void,
-  TInjections = void
+  Model extends Object = {},
+  Payload = void,
+  Result = void,
+  Injections = void
 > = (
-  dispatch: Actions<TModel>,
-  payload: TPayload,
-  getState: () => State<TModel>,
-  injections: TInjections,
+  dispatch: Actions<Model>,
+  payload: Payload,
+  getState: () => State<Model>,
+  injections: Injections,
   meta: EffectMeta,
-) => void | Promise<TResult> | TResult
+) => void | Promise<Result> | Result
 
 /**
  * An action type.
@@ -163,10 +157,10 @@ export type Effect<
  *   increment: Action<Model>;
  * }
  */
-export type Action<TModel extends Object = {}, TPayload = void> = (
-  state: State<TModel>,
-  payload: TPayload,
-) => void | State<TModel>
+export type Action<Model extends Object = {}, Payload = void> = (
+  state: State<Model>,
+  payload: Payload,
+) => void | State<Model>
 
 /**
  * A select type.
@@ -180,10 +174,10 @@ export type Action<TModel extends Object = {}, TPayload = void> = (
  *   totalPrice: Select<Model, number>;
  * }
  */
-export type Select<TModel extends Object = {}, TResult = void> = (
-  state: State<TModel>,
+export type Select<Model extends Object = {}, Result = void> = (
+  state: State<Model>,
   dependencies?: Array<Select<any, any>>,
-) => TResult
+) => Result
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#effectaction
@@ -198,13 +192,13 @@ export type Select<TModel extends Object = {}, TResult = void> = (
  * })
  */
 export function effect<
-  TModel extends Object = {},
-  TPayload = void,
-  TResult = void,
-  TInjections = void
+  Model extends Object = {},
+  Payload = void,
+  Result = void,
+  Injections = void
 >(
-  effect: Effect<TModel, TPayload, TResult, TInjections>,
-): Effect<TModel, TPayload, TResult, TInjections>
+  effect: Effect<Model, Payload, Result, Injections>,
+): Effect<Model, Payload, Result, Injections>
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#selectselector
@@ -217,10 +211,10 @@ export function effect<
  *   state.products.reduce((acc, cur) => acc + cur.price, 0)
  * );
  */
-export function select<TModel extends Object = {}, TResult = void>(
-  select: Select<TModel, TResult>,
+export function select<Model extends Object = {}, Result = void>(
+  select: Select<Model, Result>,
   dependencies?: Array<Select<any, any>>,
-): Select<TModel, TResult>
+): Select<Model, Result>
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#reducerfn
@@ -236,9 +230,9 @@ export function select<TModel extends Object = {}, TResult = void>(
  *   }
  * });
  */
-export function reducer<TState extends Object = {}>(
-  state: Reducer<TState>,
-): Reducer<TState>
+export function reducer<State extends Object = {}>(
+  state: Reducer<State>,
+): Reducer<State>
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
@@ -259,10 +253,10 @@ export function reducer<TState extends Object = {}>(
  *   }
  * })
  */
-export function createStore<TModel extends Object = {}>(
-  model: TModel,
+export function createStore<Model extends Object = {}>(
+  model: Model,
   config?: EasyPeasyConfig,
-): Store<TModel>
+): Store<Model>
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
@@ -271,17 +265,17 @@ export function createStore<TModel extends Object = {}>(
  *
  * import { useStore } from 'easy-peasy';
  *
- * const todos = useStore<Model, Array<Todo>>(state => state.todos.items);
+ * const todos = useStore((state: State<Model>) => state.todos.items);
  *
- * const { totalPrice, netPrice } = useStore<Model, { totalPrice: number, netPrice: number }>(state => ({
+ * const { totalPrice, netPrice } = useStore((state: State<Model>) => ({
  *   totalPrice: state.basket.totalPrice,
  *   netPrice: state.basket.netPrice
  * }));
  */
-export function useStore<TModel extends Object = {}, TReturn = any>(
-  mapState: (state: State<TModel>) => TReturn,
+export function useStore<Model extends Object = {}, Result = any>(
+  mapState: (state: State<Model>) => Result,
   dependencies?: Array<any>,
-): TReturn
+): Result
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
@@ -290,15 +284,15 @@ export function useStore<TModel extends Object = {}, TReturn = any>(
  *
  * import { useAction } from 'easy-peasy';
  *
- * const addTodo = useAction<Model, Todo>(dispatch => dispatch.todos.add);
+ * const addTodo = useAction((dispatch: Dispatch<Todo>) => dispatch.todos.add);
  *
  * addTodo({ id: 1, text: 'foo' });
  */
 export function useAction<
-  TModel extends Object = {},
-  TPayload = any,
-  TResult = any
->(mapAction: (actions: Dispatch<TModel>) => TResult): TResult
+  Model extends Object = {},
+  Payload = any,
+  Result = any
+>(mapAction: (actions: Dispatch<Model>) => Result): Result
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#storeprovider
@@ -313,6 +307,6 @@ export function useAction<
  *   </StoreProvider>
  * );
  */
-export class StoreProvider<TModel = any> extends Component<{
-  store: Store<TModel>
+export class StoreProvider<Model = any> extends Component<{
+  store: Store<Model>
 }> {}
