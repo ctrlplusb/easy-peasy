@@ -1,4 +1,4 @@
-> Note: this package depends on the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature of React. Currently available via 16.7.0-alpha.2 of React.
+> Note: this package depends on the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature of React. Currently available via 16.8.0-alpha.1 of React.
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -113,7 +113,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and it's actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with your React components. In terms of integration with React we are leveraging the cutting edge [Hooks](https://reactjs.org/docs/hooks-intro.html) feature. It's a game changer, and we highly recommend you give it a go.
+Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and it's actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with your React components. In terms of integration with React we are leveraging the insanely awesome [Hooks](https://reactjs.org/docs/hooks-intro.html) feature.
 
 <p>&nbsp;</p>
 
@@ -135,6 +135,14 @@ npm install easy-peasy
 ```
 
 You're off to the races.
+
+<p>&nbsp;</p>
+
+> Typescript users! We do have a set of Typescript definitions in dev. If you would like to try them out then install them like so:
+> ```
+> npm install easy-peasy@typescript
+> ```
+> You can read how to use them [here](https://github.com/ctrlplusb/easy-peasy/pull/57). 
 
 <p>&nbsp;</p>
 
