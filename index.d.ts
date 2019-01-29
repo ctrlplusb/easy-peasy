@@ -290,7 +290,6 @@ export function useStore<Model extends Object = {}, Result = any>(
  */
 export function useAction<
   Model extends Object = {},
-  Payload = any,
   Result = any
 >(mapAction: (actions: Dispatch<Model>) => Result): Result
 
