@@ -625,13 +625,20 @@ describe('effects', () => {
         loginSucceeded: (state, payload) => {
           state.user = payload
         },
-        login: effect(async (dispatch, payload) => {
+        login: effect(async (dispatch, payload, getState) => {
           expect(payload).toEqual({
             username: 'bob',
             password: 'foo',
           })
           const user = await resolveAfter({ name: 'bob' }, 15)
           dispatch.session.loginSucceeded(user)
+          expect(getState()).toEqual({
+            session: {
+              user: {
+                name: 'bob',
+              },
+            },
+          })
           return 'resolved'
         }),
       },
