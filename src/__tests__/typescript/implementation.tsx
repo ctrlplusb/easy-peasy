@@ -112,8 +112,9 @@ function MyComponent() {
     login: dispatch.user.login,
     printDebugInfo: dispatch.printDebugInfo,
   }))
-  const msg = printDebugInfo()
-  const poop = msg + 'should_be_string'
+  printDebugInfo().then(result => {
+    console.log(result + 'should_be_string')
+  })
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>
       {token || 'Log in'}
