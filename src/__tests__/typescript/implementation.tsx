@@ -9,7 +9,6 @@ import {
   useAction,
   useStore,
   Action,
-  Actions,
   Dispatch,
   Effect,
   Reducer,
@@ -86,7 +85,7 @@ const store = createStore<Model>({
         return state
     }
   }),
-  printDebugInfo: effect((state, payload, getState, injections) => {
+  printDebugInfo: effect(async (state, payload, getState, injections) => {
     const msg = `App id: ${injections.appId}`
     console.log(msg)
     return msg

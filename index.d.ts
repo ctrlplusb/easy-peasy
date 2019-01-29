@@ -143,7 +143,7 @@ export type Effect<
   getState: () => State<Model>,
   injections: Injections,
   meta: EffectMeta,
-) => Result
+) => Promise<Result>
 
 /**
  * An action type.
@@ -288,10 +288,9 @@ export function useStore<Model extends Object = {}, Result = any>(
  *
  * addTodo({ id: 1, text: 'foo' });
  */
-export function useAction<
-  Model extends Object = {},
-  Result = any
->(mapAction: (actions: Dispatch<Model>) => Result): Result
+export function useAction<Model extends Object = {}, Result = any>(
+  mapAction: (actions: Dispatch<Model>) => Result,
+): Result
 
 /**
  * https://github.com/ctrlplusb/easy-peasy#storeprovider

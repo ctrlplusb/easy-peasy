@@ -42,7 +42,9 @@
     "memoize-one": "^5.0.0",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
-    "shallowequal": "^1.1.0"
+    "shallowequal": "^1.1.0",
+    "type-zoo": "^3.3.0",
+    "typelevel-ts": "^0.3.5"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.5",
