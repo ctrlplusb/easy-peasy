@@ -599,22 +599,32 @@ describe('internals', () => {
 })
 
 describe('effects', () => {
-  test('dispatches an action to represent the start of an effect', async () => {
+  test('dispatches an action to represent the start and end of an effect', async () => {
     // arrange
     const model = {
       foo: {
-        doSomething: effect(() => undefined),
+        counter: 0,
+        increment: state => {
+          state.counter += 1
+        },
+        doSomething: effect(dispatch => {
+          dispatch.foo.increment()
+          return 'did something'
+        }),
       },
     }
     const trackActions = trackActionsMiddleware()
     const store = createStore(model, { middleware: [trackActions] })
     const payload = 'hello'
     // act
-    await store.dispatch.foo.doSomething(payload)
+    const actualResult = await store.dispatch.foo.doSomething(payload)
     // assert
     expect(trackActions.actions).toEqual([
-      { type: '@effect.foo.doSomething', payload },
+      { type: '@effect.foo.doSomething(started)', payload },
+      { type: '@action.foo.increment', payload: undefined },
+      { type: '@effect.foo.doSomething(completed)', payload },
     ])
+    expect(actualResult).toBe('did something')
   })
 
   test('async action', async () => {

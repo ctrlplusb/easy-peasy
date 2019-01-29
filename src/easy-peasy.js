@@ -91,14 +91,8 @@ export const createStore = (model, options = {}) => {
         } else if (value[effectSymbol]) {
           // Effect Action
           const actionName = `@effect.${path.join('.')}`
-          const action = payload => {
-            if (devTools) {
-              references.dispatch({
-                type: actionName,
-                payload,
-              })
-            }
-            return value(
+          const action = payload =>
+            value(
               references.dispatch,
               payload,
               references.getState,
@@ -108,13 +102,26 @@ export const createStore = (model, options = {}) => {
                 path,
               },
             )
-          }
           action.actionName = actionName
           set(path, actionEffects, action)
 
           // Effect Action Creator
           set(path, actionCreators, payload =>
-            tick().then(() => references.dispatch(() => action(payload))),
+            tick()
+              .then(() =>
+                references.dispatch({
+                  type: `${actionName}(started)`,
+                  payload,
+                }),
+              )
+              .then(() => references.dispatch(() => action(payload)))
+              .then(result => {
+                references.dispatch({
+                  type: `${actionName}(completed)`,
+                  payload,
+                })
+                return result
+              }),
           )
         } else if (value[reducerSymbol]) {
           customReducers.push({ path, reducer: value })
