@@ -157,7 +157,7 @@ export type Effect<
  *   increment: Action<Model>;
  * }
  */
-export type Action<Model extends Object = {}, Payload = void> = (
+export type Action<Model extends Object = {}, Payload = any> = (
   state: State<Model>,
   payload: Payload,
 ) => void | State<Model>
@@ -174,7 +174,7 @@ export type Action<Model extends Object = {}, Payload = void> = (
  *   totalPrice: Select<Model, number>;
  * }
  */
-export type Select<Model extends Object = {}, Result = void> = (
+export type Select<Model extends Object = {}, Result = any> = (
   state: State<Model>,
   dependencies?: Array<Select<any, any>>,
 ) => Result
@@ -193,9 +193,9 @@ export type Select<Model extends Object = {}, Result = void> = (
  */
 export function effect<
   Model extends Object = {},
-  Payload = void,
-  Result = void,
-  Injections = void
+  Payload = any,
+  Result = any,
+  Injections = any
 >(
   effect: Effect<Model, Payload, Result, Injections>,
 ): Effect<Model, Payload, Result, Injections>
@@ -211,7 +211,7 @@ export function effect<
  *   state.products.reduce((acc, cur) => acc + cur.price, 0)
  * );
  */
-export function select<Model extends Object = {}, Result = void>(
+export function select<Model extends Object = {}, Result = any>(
   select: Select<Model, Result>,
   dependencies?: Array<Select<any, any>>,
 ): Select<Model, Result>
