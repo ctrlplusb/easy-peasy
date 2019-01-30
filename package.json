@@ -56,21 +56,21 @@
     "app-root-dir": "^1.0.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
-    "babel-jest": "^23.6.0",
+    "babel-jest": "^24.0.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.23",
     "change-case": "^3.1.0",
     "codecov": "^3.1.0",
     "eslint": "^5.9.0",
     "eslint-config-airbnb": "^17.1.0",
-    "eslint-config-prettier": "^3.5.0",
-    "eslint-plugin-import": "^2.15.0",
+    "eslint-config-prettier": "^4.0.0",
+    "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-jsx-a11y": "^6.2.0",
     "eslint-plugin-react": "^7.12.4",
     "husky": "^1.1.4",
-    "jest": "^23.6.0",
-    "jest-dom": "^3.0.0",
-    "lint-staged": "^8.0.4",
-    "prettier": "^1.16.1",
+    "jest": "^24.0.0",
+    "jest-dom": "^3.0.1",
+    "lint-staged": "^8.1.1",
+    "prettier": "^1.16.2",
     "prettier-eslint": "^8.8.2",
     "prop-types": "^15.6.2",
     "react": "16.8.0-alpha.1",
@@ -83,7 +83,7 @@
     "rollup-plugin-filesize": "^6.0.1",
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-replace": "^2.1.0",
-    "rollup-plugin-uglify": "^6.0.1"
+    "rollup-plugin-uglify": "^6.0.2"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -91,6 +91,9 @@
     ],
     "testPathIgnorePatterns": [
       "<rootDir>/(coverage|dist|node_modules|tools)/"
+    ],
+    "setupFiles": [
+      "<rootDir>/node_modules/regenerator-runtime/runtime"
     ]
   },
   "eslintConfig": {
