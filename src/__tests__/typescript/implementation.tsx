@@ -41,7 +41,8 @@ interface Model {
   todos: TodosModel
   user: UserModel
   counter: Reducer<number>
-  printDebugInfo: Effect<Model, void, string, Injections>
+  printDebugInfo: Effect<Model, void, Injections, Promise<string>>
+  sayHello: Effect<Model, void, Injections>
 }
 
 /**
@@ -90,6 +91,9 @@ const store = createStore<Model>({
     console.log(msg)
     return msg
   }),
+  sayHello: effect(() => {
+    console.log('Hello world')
+  }),
 })
 
 /**
@@ -108,12 +112,18 @@ store.dispatch.printDebugInfo()
  */
 function MyComponent() {
   const token = useStore((state: State<Model>) => state.user.token)
-  const { login, printDebugInfo } = useAction((dispatch: Dispatch<Model>) => ({
-    login: dispatch.user.login,
-    printDebugInfo: dispatch.printDebugInfo,
-  }))
+  const { login, printDebugInfo, sayHello } = useAction(
+    (dispatch: Dispatch<Model>) => ({
+      login: dispatch.user.login,
+      printDebugInfo: dispatch.printDebugInfo,
+      sayHello: dispatch.sayHello,
+    }),
+  )
   printDebugInfo().then(result => {
     console.log(result + 'should_be_string')
+  })
+  sayHello().then(() => {
+    console.log('Goodbye')
   })
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>

@@ -60,8 +60,14 @@ export type Actions<Model extends Object> = {
     [P in keyof Pick<Model, KeysOfType<Model, ActionTypes>>]: Param1<
       Model[P]
     > extends void
-      ? () => UnsafeReturnType<Model[P]>
-      : (payload: Param1<Model[P]>) => UnsafeReturnType<Model[P]>
+      ? () => UnsafeReturnType<Model[P]> extends Promise<any>
+          ? UnsafeReturnType<Model[P]>
+          : Promise<UnsafeReturnType<Model[P]>>
+      : (
+          payload: Param1<Model[P]>,
+        ) => UnsafeReturnType<Model[P]> extends Promise<any>
+          ? UnsafeReturnType<Model[P]>
+          : Promise<UnsafeReturnType<Model[P]>>
   }
 
 /**
@@ -135,15 +141,15 @@ export type Store<Model> = Overwrite<
 export type Effect<
   Model extends Object = {},
   Payload = void,
-  Result = void,
-  Injections = void
+  Injections = void,
+  Result = void
 > = (
   dispatch: Actions<Model>,
   payload: Payload,
   getState: () => State<Model>,
   injections: Injections,
   meta: EffectMeta,
-) => Promise<Result>
+) => Result
 
 /**
  * An action type.
