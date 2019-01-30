@@ -13,6 +13,7 @@ import {
   select,
   useStore,
   useAction,
+  when,
 } from '../index'
 
 const resolveAfter = (data, ms) =>
@@ -1037,5 +1038,53 @@ describe('reducer', () => {
       products: [{ name: 'Boots', price: 10 }],
       totalPrice: 10,
     })
+  })
+})
+
+describe('when', () => {
+  it('works beautifully', async () => {
+    // arrange
+    const store = createStore({
+      doNothing: () => undefined,
+      user: {
+        logIn: effect(() => {}),
+        logOut: () => undefined,
+      },
+      audit: {
+        logs: [],
+        add: (state, payload) => {
+          state.logs.push(payload)
+        },
+        userListeners: when(actions => ({
+          [actions.user.logIn]: dispatch => {
+            dispatch.audit.add('User logged in')
+          },
+          [actions.user.logOut]: dispatch => {
+            dispatch.audit.add('User logged out')
+          },
+        })),
+      },
+    })
+
+    // act
+    store.dispatch.doNothing()
+
+    // assert
+    expect(store.getState().audit.logs).toEqual([])
+
+    // act
+    await store.dispatch.user.logIn()
+
+    // assert
+    expect(store.getState().audit.logs).toEqual(['User logged in'])
+
+    // act
+    await store.dispatch.user.logOut()
+
+    // assert
+    expect(store.getState().audit.logs).toEqual([
+      'User logged in',
+      'User logged out',
+    ])
   })
 })

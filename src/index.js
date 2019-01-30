@@ -1,4 +1,4 @@
-import { createStore, effect, reducer, select } from './easy-peasy'
+import { createStore, effect, reducer, select, when } from './easy-peasy'
 import { useStore, useAction } from './hooks'
 import StoreProvider from './provider'
 
@@ -10,4 +10,5 @@ export {
   StoreProvider,
   useAction,
   useStore,
+  when,
 }
