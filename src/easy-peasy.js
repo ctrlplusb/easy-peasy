@@ -13,6 +13,7 @@ const selectSymbol = '__select__'
 const selectDependenciesSymbol = '__selectDependencies__'
 const selectStateSymbol = '__selectState__'
 const reducerSymbol = '__reducer__'
+const whenSymbol = '__when__'
 
 const get = (path, target) =>
   path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
@@ -53,6 +54,12 @@ export const reducer = fn => {
   return fn
 }
 
+export const when = fn => {
+  // eslint-disable-next-line no-param-reassign
+  fn[whenSymbol] = true
+  return fn
+}
+
 export const createStore = (model, options = {}) => {
   const {
     devTools = true,
@@ -75,9 +82,28 @@ export const createStore = (model, options = {}) => {
   const defaultState = {}
   const actionEffects = {}
   const actionCreators = {}
+  const actionCreatorDict = {}
   const actionReducers = {}
   const customReducers = []
   const selectorReducers = []
+  const whenDefinitions = []
+  const whenListenerDict = {}
+
+  const dispatchListenersForAction = (actionName, payload) => {
+    const listeners = whenListenerDict[actionName]
+    return listeners && listeners.length > 0
+      ? Promise.all(
+          listeners.map(listener =>
+            listener(
+              references.dispatch,
+              payload,
+              references.getState,
+              injections,
+            ),
+          ),
+        )
+      : Promise.resolve()
+  }
 
   const extract = (current, parentPath) =>
     Object.keys(current).forEach(key => {
@@ -113,11 +139,20 @@ export const createStore = (model, options = {}) => {
           set(path, actionEffects, action)
 
           // Effect Action Creator
-          set(path, actionCreators, payload =>
-            tick().then(() => references.dispatch(() => action(payload))),
-          )
+          const actionCreator = payload =>
+            tick()
+              .then(() => references.dispatch(() => action(payload)))
+              .then(result => {
+                dispatchListenersForAction(actionCreator, payload)
+                return result
+              })
+          actionCreator.toString = () => actionName
+          actionCreatorDict[actionName] = actionCreator
+          set(path, actionCreators, actionCreator)
         } else if (value[reducerSymbol]) {
           customReducers.push({ path, reducer: value })
+        } else if (value[whenSymbol]) {
+          whenDefinitions.push(value)
         } else {
           // Reducer Action
           const actionName = `@action.${path.join('.')}`
@@ -133,12 +168,17 @@ export const createStore = (model, options = {}) => {
           set(path, actionReducers, action)
 
           // Reducer Action Creator
-          set(path, actionCreators, payload =>
-            references.dispatch({
+          const actionCreator = payload => {
+            const result = references.dispatch({
               type: action.actionName,
               payload,
-            }),
-          )
+            })
+            dispatchListenersForAction(actionCreator, payload)
+            return result
+          }
+          actionCreator.toString = () => actionName
+          actionCreatorDict[actionName] = actionCreator
+          set(path, actionCreators, actionCreator)
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
         extract(value, path)
@@ -154,6 +194,18 @@ export const createStore = (model, options = {}) => {
     })
 
   extract(definition, [])
+
+  whenDefinitions.forEach(def => {
+    const listenersForActions = def(actionCreators)
+    if (isStateObject(listenersForActions)) {
+      Object.keys(listenersForActions).forEach(actionName => {
+        if (actionName && actionCreatorDict[actionName]) {
+          whenListenerDict[actionName] = whenListenerDict[actionName] || []
+          whenListenerDict[actionName].push(listenersForActions[actionName])
+        }
+      })
+    }
+  })
 
   const createReducers = () => {
     const createActionsReducer = (current, path) => {
