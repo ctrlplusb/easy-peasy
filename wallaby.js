@@ -12,7 +12,7 @@ module.exports = wallaby => ({
   testFramework: 'jest',
   env: {
     type: 'node',
-    runner: '/Users/seanmatheson/.nvm/versions/node/v10.8.0/bin/node',
+    runner: 'node',
   },
   compilers: {
     'src/**/*.js': wallaby.compilers.babel(babelConfig),

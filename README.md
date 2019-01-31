@@ -100,6 +100,7 @@ function TodoList() {
     - [effect(action)](#effectaction)
     - [reducer(fn)](#reducerfn)
     - [select(selector)](#selectselector)
+    - [when(listeners)](#whenlisteners)
     - [StoreProvider](#storeprovider)
     - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useAction(mapAction)](#useactionmapaction)
@@ -846,6 +847,84 @@ const store = createStore({
   totalPrice: totalPriceSelector,
   netPrice: netPriceSelector // price after discount applied
 });
+```
+
+### when(listeners)
+
+Allows you to declare a set of action listeners against a specific part of your model. This enables parts of your model to respond to actions being fired in other parts of your model.
+
+For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
+
+Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
+
+#### Arguments
+
+  - listeners (Function, required)
+
+    The listeners function is responsible for resolving the required listeners. It is provided the following arguments:
+
+    - `actions` (Object, required)
+
+      The actions (and effects) of the store.
+
+    The listeners function must then return an object map, where the key is the action to listen to, and the value against the key is the handler function. The handler function will receive the following arguments:
+
+    - `dispatch` (required)
+
+      The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
+
+    - `payload` (Any, not required)
+
+      The payload that the action being listened to received.
+
+    - `getState` (Function, required)
+
+      When executed it will provide the root state of your model..
+
+    - `injections` (Any, not required, default=undefined)
+
+      Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+
+#### Example
+
+```javascript
+import { when } from 'easy-peasy'; // 👈 import the helper
+
+const store = createStore({
+  user: {
+    token: '',
+    loggedIn: (state, payload) => {
+      state.token = payload;
+    },
+    logIn: effect(async (dispatch, payload) => {
+      const token = await loginService(payload);
+      dispatch.user.loggedIn(token);
+    },
+    logOut: (state) => {
+      state.token = '';
+    },
+  },
+  audit: {
+    logs: [],
+    add: (state, payload) => {
+      state.logs.push(payload)
+    },
+    //  👇 name your listeners
+    userListeners: when(actions => ({
+      // 👇 we attach a listener to the "logIn" effect
+      [actions.user.logIn]: dispatch => {
+        dispatch.audit.add('User logged in')
+      },
+      // 👇 we attach a listener to the "logOut" action
+      [actions.user.logOut]: dispatch => {
+        dispatch.audit.add('User logged out')
+      },
+    })),
+  },
+});
+
+// 👇 the login effect will fire, and then any listeners will execute after complete
+store.dispatch.user.login({ username: 'mary', password: 'foo123' });
 ```
 
 ### StoreProvider
