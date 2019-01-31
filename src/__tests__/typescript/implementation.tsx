@@ -140,7 +140,7 @@ ReactDOM.render(
   <StoreProvider store={store}>
     <MyComponent />
   </StoreProvider>,
-  document.getElementById('root'),
+  document.createElement('div'),
 )
 
 /**
