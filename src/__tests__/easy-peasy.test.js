@@ -13,7 +13,7 @@ import {
   select,
   useStore,
   useAction,
-  when,
+  listeners,
 } from '../index'
 
 const resolveAfter = (data, ms) =>
@@ -1041,30 +1041,49 @@ describe('reducer', () => {
   })
 })
 
-describe('when', () => {
-  it('works beautifully', async () => {
+describe('listeners', () => {
+  it('work as expected', async () => {
     // arrange
-    const store = createStore({
-      doNothing: () => undefined,
-      user: {
-        logIn: effect(() => {}),
-        logOut: () => undefined,
-      },
-      audit: {
-        logs: [],
-        add: (state, payload) => {
-          state.logs.push(payload)
+    const expectedInjections = { foo: 'bar' }
+
+    const store = createStore(
+      {
+        doNothing: () => undefined,
+        user: {
+          token: '',
+          logIn: effect(() => {}),
+          logOut: () => undefined,
         },
-        userListeners: when(actions => ({
-          [actions.user.logIn]: dispatch => {
-            dispatch.audit.add('User logged in')
+        audit: {
+          logs: [],
+          add: (state, payload) => {
+            state.logs.push(payload)
           },
-          [actions.user.logOut]: dispatch => {
-            dispatch.audit.add('User logged out')
-          },
-        })),
+          userListeners: listeners((actions, on) => {
+            on(
+              actions.user.logIn,
+              (dispatch, payload, getState, injections) => {
+                expect(payload).toEqual({ username: 'foo', password: 'bar' })
+                expect(getState()).toEqual({
+                  user: {
+                    token: '',
+                  },
+                  audit: { logs: [] },
+                })
+                expect(injections).toEqual(expectedInjections)
+                dispatch.audit.add('User logged in')
+              },
+            )
+            on(actions.user.logOut, dispatch => {
+              dispatch.audit.add('User logged out')
+            })
+          }),
+        },
       },
-    })
+      {
+        injections: expectedInjections,
+      },
+    )
 
     // act
     store.dispatch.doNothing()
@@ -1073,7 +1092,7 @@ describe('when', () => {
     expect(store.getState().audit.logs).toEqual([])
 
     // act
-    await store.dispatch.user.logIn()
+    await store.dispatch.user.logIn({ username: 'foo', password: 'bar' })
 
     // assert
     expect(store.getState().audit.logs).toEqual(['User logged in'])
