@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { KeysOfType, Omit, Overwrite } from 'typelevel-ts'
-import { Param1 } from 'type-zoo'
+import { Param0, Param1 } from 'type-zoo'
 import {
   compose,
   AnyAction,
@@ -47,8 +47,11 @@ type EffectMeta = {
 }
 
 /**
- * This type recursively filters a model down to the properties which
- * represent actions
+ * Filters a model into a type that represents the actions (and effects) only
+ *
+ * @example
+ *
+ * type OnlyActions = Actions<Model>;
  */
 export type Actions<Model extends Object> = {
   [P in keyof (Omit<
@@ -71,8 +74,11 @@ export type Actions<Model extends Object> = {
   }
 
 /**
- * This type recursively filters a model down to the properties which
- * represent state - i.e. no actions/selectors etc.
+ * Filters a model into a type that represents the state only (i.e. no actions)
+ *
+ * @example
+ *
+ * type StateOnly = State<Model>;
  */
 export type State<Model extends Object> = {
   [P in keyof (Omit<
@@ -95,7 +101,7 @@ export type State<Model extends Object> = {
   }
 
 /**
- * Configuration for the createStore
+ * Configuration interface for the createStore
  */
 export interface EasyPeasyConfig<
   InitialState extends Object = {},
@@ -109,16 +115,25 @@ export interface EasyPeasyConfig<
   reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>
 }
 
-export type Reducer<
-  State = any,
-  Action extends ReduxAction = AnyAction
-> = ReduxReducer<State>
-
+/**
+ * Enhances the Redux Dispatch with actions
+ *
+ * @example
+ *
+ * type DispatchWithActions = Dispatch<Model>;
+ */
 export type Dispatch<
   Model,
   Action extends ReduxAction = ReduxAction<any>
 > = Actions<Model> & ReduxDispatch<Action>
 
+/**
+ * Represents a Redux store, enhanced by easy peasy.
+ *
+ * @example
+ *
+ * type EnhancedReduxStore = Store<Model>;
+ */
 export type Store<Model> = Overwrite<
   ReduxStore<State<Model>>,
   {
@@ -127,7 +142,9 @@ export type Store<Model> = Overwrite<
 >
 
 /**
- * An effect action type.
+ * An effect type.
+ *
+ * Useful when declaring your model.
  *
  * @example
  *
@@ -144,7 +161,7 @@ export type Effect<
   Injections = void,
   Result = void
 > = (
-  dispatch: Actions<Model>,
+  dispatch: Dispatch<Model>,
   payload: Payload,
   getState: () => State<Model>,
   injections: Injections,
@@ -152,15 +169,84 @@ export type Effect<
 ) => Result
 
 /**
+ * Declares an effect action type against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#effectaction
+ *
+ * @example
+ *
+ * import { effect } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   login: effect(async (dispatch, payload) => {
+ *    const user = await loginService(payload);
+ *    dispatch.loginSucceeded(user);
+ *  })
+ * });
+ */
+export function effect<
+  Model extends Object = {},
+  Payload = any,
+  Result = any,
+  Injections = any
+>(
+  effect: Effect<Model, Payload, Result, Injections>,
+): Effect<Model, Payload, Result, Injections>
+
+/**
+ * Action listeners type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Listeners } from 'easy-peasy';
+ *
+ * interface Model {
+ *   userListeners: Listeners<Model>;
+ * }
+ */
+export type Listeners<Model extends Object = {}> = (
+  actions: Actions<Model>,
+  attach: <ActionType>(
+    action: ActionType,
+    listener: (dispatch: Dispatch<Model>, payload: Param0<ActionType>) => any,
+  ) => void,
+) => void
+
+/**
+ * Declares action listeners against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#listenersattach
+ *
+ * @example
+ *
+ * import { listeners } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   userListeners: listeners((actions, on) => {
+ *     on(actions.user.login, (dispatch) => {
+ *        dispatch.audit.add('User logged in');
+ *     });
+ *   })
+ * });
+ */
+export function listeners<Model extends Object = {}>(
+  mapListeners: Listeners<Model>,
+): Listeners<Model>
+
+/**
  * An action type.
+ *
+ * Useful when declaring your model.
  *
  * @example
  *
  * import { Action } from 'easy-peasy';
  *
  * interface Model {
- *   count: number;
- *   increment: Action<Model>;
+ *   todos: Array<Todo>; ;
+ *   addTodo: Action<Model, Todo>;
  * }
  */
 export type Action<Model extends Object = {}, Payload = any> = (
@@ -170,6 +256,8 @@ export type Action<Model extends Object = {}, Payload = any> = (
 
 /**
  * A select type.
+ *
+ * Useful when declaring your model.
  *
  * @example
  *
@@ -186,36 +274,20 @@ export type Select<Model extends Object = {}, Result = any> = (
 ) => Result
 
 /**
- * https://github.com/ctrlplusb/easy-peasy#effectaction
+ * Allows you to declare derived state against your model.
  *
- * @example
- *
- * import { effect } from 'easy-peasy';
- *
- * const login = effect<Model, Credentials>(async (dispatch, payload) => {
- *   const user = await loginService(payload)
- *   dispatch.session.loginSucceeded(user)
- * })
- */
-export function effect<
-  Model extends Object = {},
-  Payload = any,
-  Result = any,
-  Injections = any
->(
-  effect: Effect<Model, Payload, Result, Injections>,
-): Effect<Model, Payload, Result, Injections>
-
-/**
  * https://github.com/ctrlplusb/easy-peasy#selectselector
  *
  * @example
  *
  * import { select } from 'easy-peasy';
  *
- * const totalPrice = select<ShoppingBasketModel, number>(state =>
- *   state.products.reduce((acc, cur) => acc + cur.price, 0)
- * );
+ * const store = createStore({
+ *   products: [],
+ *   totalPrice: select(state =>
+ *     state.products.reduce((acc, cur) => acc + cur.price, 0)
+ *   )
+ * });
  */
 export function select<Model extends Object = {}, Result = any>(
   select: Select<Model, Result>,
@@ -223,17 +295,39 @@ export function select<Model extends Object = {}, Result = any>(
 ): Select<Model, Result>
 
 /**
+ * A reducer type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Reducer } from 'easy-peasy';
+ *
+ * interface Model {
+ *   router: Reducer<ReactRouterState>;
+ * }
+ */
+export type Reducer<
+  State = any,
+  Action extends ReduxAction = AnyAction
+> = ReduxReducer<State>
+
+/**
+ * Allows you to declare a custom reducer to manage a bit of your state.
+ *
  * https://github.com/ctrlplusb/easy-peasy#reducerfn
  *
  * @example
  *
  * import { reducer } from 'easy-peasy';
  *
- * const counter = reducer<number>((state = 1, action) => {
- *   switch (action.type) {
- *     case 'INCREMENT': return state + 1;
- *     default: return state;
- *   }
+ * const store = createStore({
+ *   counter: reducer((state = 1, action) => {
+ *     switch (action.type) {
+ *       case 'INCREMENT': return state + 1;
+ *       default: return state;
+ *     }
+ *   })
  * });
  */
 export function reducer<State extends Object = {}>(
@@ -241,6 +335,8 @@ export function reducer<State extends Object = {}>(
 ): Reducer<State>
 
 /**
+ * Creates an easy-peasy powered Redux store.
+ *
  * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
  *
  * @example
@@ -265,18 +361,18 @@ export function createStore<Model extends Object = {}>(
 ): Store<Model>
 
 /**
+ * A React Hook allowing you to use state within your component.
+ *
  * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
  *
  * @example
  *
- * import { useStore } from 'easy-peasy';
+ * import { useStore, State } from 'easy-peasy';
  *
- * const todos = useStore((state: State<Model>) => state.todos.items);
- *
- * const { totalPrice, netPrice } = useStore((state: State<Model>) => ({
- *   totalPrice: state.basket.totalPrice,
- *   netPrice: state.basket.netPrice
- * }));
+ * function MyComponent() {
+ *   const todos = useStore((state: State<Model>) => state.todos.items);
+ *   return todos.map(todo => <Todo todo={todo} />);
+ * }
  */
 export function useStore<Model extends Object = {}, Result = any>(
   mapState: (state: State<Model>) => Result,
@@ -284,21 +380,26 @@ export function useStore<Model extends Object = {}, Result = any>(
 ): Result
 
 /**
+ * A React Hook allowing you to use actions within your component.
+ *
  * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
  *
  * @example
  *
- * import { useAction } from 'easy-peasy';
+ * import { useAction, Dispatch } from 'easy-peasy';
  *
- * const addTodo = useAction((dispatch: Dispatch<Todo>) => dispatch.todos.add);
- *
- * addTodo({ id: 1, text: 'foo' });
+ * function MyComponent() {
+ *   const addTodo = useAction((dispatch: Dispatch<Model>) => dispatch.todos.add);
+ *   return <AddTodoForm save={addTodo} />;
+ * }
  */
 export function useAction<Model extends Object = {}, Result = any>(
   mapAction: (actions: Dispatch<Model>) => Result,
 ): Result
 
 /**
+ * Exposes the store to your app (and hooks).
+ *
  * https://github.com/ctrlplusb/easy-peasy#storeprovider
  *
  * @example

@@ -3,6 +3,7 @@ import * as ReactDOM from 'react-dom'
 import {
   createStore,
   effect,
+  listeners,
   reducer,
   select,
   StoreProvider,
@@ -11,6 +12,7 @@ import {
   Action,
   Dispatch,
   Effect,
+  Listeners,
   Reducer,
   Select,
   State,
@@ -37,12 +39,19 @@ interface UserModel {
   login: Effect<Model, { username: string; password: string }>
 }
 
+interface AuditModel {
+  logs: string[]
+  set: Action<AuditModel, string>
+  userListeners: Listeners<Model>
+}
+
 interface Model {
   todos: TodosModel
   user: UserModel
   counter: Reducer<number>
   printDebugInfo: Effect<Model, void, Injections, Promise<string>>
   sayHello: Effect<Model, void, Injections>
+  audit: AuditModel
 }
 
 /**
@@ -50,8 +59,18 @@ interface Model {
  * Note that as we pass the Model into the `createStore` function, so all of our
  * model definition is typed correctly, including inside the actions/helpers etc.
  */
-
 const store = createStore<Model>({
+  audit: {
+    logs: [],
+    set: (state, payload) => {
+      state.logs.push(payload)
+    },
+    userListeners: listeners((actions, attach) => {
+      attach(actions.user.login, (dispatch, payload) => {
+        dispatch.audit.set(`Logging in ${payload.username}`)
+      })
+    }),
+  },
   todos: {
     items: [],
     firstItem: select(state =>
