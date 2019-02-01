@@ -56,14 +56,15 @@ function TodoList() {
 ## Features
 
   - Quick to set up, easy to use
+  - Supports Typescript
   - Update state via simple mutations (thanks [`immer`](https://github.com/mweststrate/immer))
   - Derived state
   - Async actions for remote data fetching/persisting
-  - Provides [React Hooks](https://reactjs.org/docs/hooks-intro.html) to interact with the store 😎
-  - Powered by Redux
-  - Supports custom Redux middleware
-  - Supports Redux root reducer enhancement
-  - Supports Redux Dev Tools
+  - Provides [React Hooks](https://reactjs.org/docs/hooks-intro.html)
+  - Powered by Redux with full interop
+    - customise middleware
+    - customise root reducer enhancer
+    - Redux Dev Tools
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -94,6 +95,7 @@ function TodoList() {
     - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
   - [Usage with React Native](#usage-with-react-native)
     - [Remote Redux Dev Tools](#remote-redux-dev-tools)
+  - [Usage with Typescript](#usage-with-typescript)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
@@ -136,14 +138,6 @@ npm install easy-peasy
 ```
 
 You're off to the races.
-
-<p>&nbsp;</p>
-
-> Typescript users! We do have a set of Typescript definitions in dev. If you would like to try them out then install them like so:
-> ```
-> npm install easy-peasy@typescript
-> ```
-> You can read how to use them [here](https://github.com/ctrlplusb/easy-peasy/pull/57).
 
 <p>&nbsp;</p>
 
@@ -493,6 +487,14 @@ const store = createStore(model, {
 
 See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
 
+
+<p>&nbsp;</p>
+
+---
+
+## Usage with Typescript
+
+Easy Peasy has full support for Typescript. Detailed documentation is coming soon, however you can view the [original PR](https://github.com/ctrlplusb/easy-peasy/pull/57) for an example on how to use Typescript effectively.
 
 <p>&nbsp;</p>
 
