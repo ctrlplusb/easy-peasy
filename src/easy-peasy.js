@@ -8,12 +8,13 @@ import produce from 'immer'
 import thunk from 'redux-thunk'
 import { isStateObject } from './lib'
 
+const actionNameSymbol = '__actionName__'
 const effectSymbol = '__effect__'
+const listenersSymbol = '__listeners__'
 const selectSymbol = '__select__'
 const selectDependenciesSymbol = '__selectDependencies__'
 const selectStateSymbol = '__selectState__'
 const reducerSymbol = '__reducer__'
-const whenSymbol = '__when__'
 
 const get = (path, target) =>
   path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
@@ -54,9 +55,9 @@ export const reducer = fn => {
   return fn
 }
 
-export const when = fn => {
+export const listeners = fn => {
   // eslint-disable-next-line no-param-reassign
-  fn[whenSymbol] = true
+  fn[listenersSymbol] = true
   return fn
 }
 
@@ -86,15 +87,15 @@ export const createStore = (model, options = {}) => {
   const actionReducers = {}
   const customReducers = []
   const selectorReducers = []
-  const whenDefinitions = []
-  const whenListenerDict = {}
+  const listenerDefinitions = []
+  const listenerDict = {}
 
   const dispatchListenersForAction = (actionName, payload) => {
-    const listeners = whenListenerDict[actionName]
-    return listeners && listeners.length > 0
+    const listenersForAction = listenerDict[actionName]
+    return listenersForAction && listenersForAction.length > 0
       ? Promise.all(
-          listeners.map(listener =>
-            listener(
+          listenersForAction.map(listenerForAction =>
+            listenerForAction(
               references.dispatch,
               payload,
               references.getState,
@@ -143,16 +144,19 @@ export const createStore = (model, options = {}) => {
             tick()
               .then(() => references.dispatch(() => action(payload)))
               .then(result => {
-                dispatchListenersForAction(actionCreator, payload)
+                dispatchListenersForAction(
+                  actionCreator[actionNameSymbol],
+                  payload,
+                )
                 return result
               })
-          actionCreator.toString = () => actionName
+          actionCreator[actionNameSymbol] = actionName
           actionCreatorDict[actionName] = actionCreator
           set(path, actionCreators, actionCreator)
         } else if (value[reducerSymbol]) {
           customReducers.push({ path, reducer: value })
-        } else if (value[whenSymbol]) {
-          whenDefinitions.push(value)
+        } else if (value[listenersSymbol]) {
+          listenerDefinitions.push(value)
         } else {
           // Reducer Action
           const actionName = `@action.${path.join('.')}`
@@ -173,10 +177,10 @@ export const createStore = (model, options = {}) => {
               type: action.actionName,
               payload,
             })
-            dispatchListenersForAction(actionCreator, payload)
+            dispatchListenersForAction(actionCreator[actionNameSymbol], payload)
             return result
           }
-          actionCreator.toString = () => actionName
+          actionCreator[actionNameSymbol] = actionName
           actionCreatorDict[actionName] = actionCreator
           set(path, actionCreators, actionCreator)
         }
@@ -195,16 +199,19 @@ export const createStore = (model, options = {}) => {
 
   extract(definition, [])
 
-  whenDefinitions.forEach(def => {
-    const listenersForActions = def(actionCreators)
-    if (isStateObject(listenersForActions)) {
-      Object.keys(listenersForActions).forEach(actionName => {
-        if (actionName && actionCreatorDict[actionName]) {
-          whenListenerDict[actionName] = whenListenerDict[actionName] || []
-          whenListenerDict[actionName].push(listenersForActions[actionName])
-        }
-      })
+  listenerDefinitions.forEach(def => {
+    const on = (actionCreator, handler) => {
+      if (
+        typeof actionCreator === 'function' &&
+        actionCreator[actionNameSymbol] &&
+        actionCreatorDict[actionCreator[actionNameSymbol]]
+      ) {
+        listenerDict[actionCreator[actionNameSymbol]] =
+          listenerDict[actionCreator[actionNameSymbol]] || []
+        listenerDict[actionCreator[actionNameSymbol]].push(handler)
+      }
     }
+    def(actionCreators, on)
   })
 
   const createReducers = () => {

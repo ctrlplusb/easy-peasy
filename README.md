@@ -100,7 +100,7 @@ function TodoList() {
     - [effect(action)](#effectaction)
     - [reducer(fn)](#reducerfn)
     - [select(selector)](#selectselector)
-    - [when(listeners)](#whenlisteners)
+    - [listeners(attach)](#listenersattach)
     - [StoreProvider](#storeprovider)
     - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useAction(mapAction)](#useactionmapaction)
@@ -143,7 +143,7 @@ You're off to the races.
 > ```
 > npm install easy-peasy@typescript
 > ```
-> You can read how to use them [here](https://github.com/ctrlplusb/easy-peasy/pull/57). 
+> You can read how to use them [here](https://github.com/ctrlplusb/easy-peasy/pull/57).
 
 <p>&nbsp;</p>
 
@@ -789,7 +789,7 @@ store.getState().counter;
 
 ### select(selector)
 
-Declares a section of state that is derived via the given selector function.
+Attach derived state (i.e. is calculated from other parts of your state) to your store.
 
 #### Arguments
 
@@ -849,46 +849,67 @@ const store = createStore({
 });
 ```
 
-### when(listeners)
+### listeners(attach)
 
-Allows you to declare a set of action listeners against a specific part of your model. This enables parts of your model to respond to actions being fired in other parts of your model.
+Allows you to attach listeners to any action from your model, which will then be fired after the targetted action is exectuted.
 
-For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
+This enables parts of your model to respond to actions being fired in other parts of your model. For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
 
 Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
 
+```javascript
+const model = {
+  ...,
+  notificationlisteners: listeners((actions, on) => {
+    on(actions.user.loggedIn, (dispatch) => {
+      dispatch.notifications.set('User logged in');
+    })
+  })
+};
+```
+
 #### Arguments
 
-  - listeners (Function, required)
+  - attach (Function, required)
 
-    The listeners function is responsible for resolving the required listeners. It is provided the following arguments:
+    The attach callback function allows you to attach the listeners to specific actions. It is provided the following arguments:
 
     - `actions` (Object, required)
 
       The actions (and effects) of the store.
 
-    The listeners function must then return an object map, where the key is the action to listen to, and the value against the key is the handler function. The handler function will receive the following arguments:
+    - `on` (Function, required)
 
-    - `dispatch` (required)
+      Allows you to attach a listener to an action. It expects the following arguments:
 
-      The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
+      - `action` (Function, required)
 
-    - `payload` (Any, not required)
+        The target action you wish to listen to - you provide the direct reference to the action.
 
-      The payload that the action being listened to received.
+      - `handler` (Function, required)
 
-    - `getState` (Function, required)
+        The handler function to be executed after the target action is fired successfully. It will receive the following arguments:
 
-      When executed it will provide the root state of your model..
+        - `dispatch` (required)
 
-    - `injections` (Any, not required, default=undefined)
+          The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
 
-      Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+        - `payload` (Any, not required)
+
+          The original payload that the targetted action received.
+
+        - `getState` (Function, required)
+
+          When executed it will provide the root state of your model.
+
+        - `injections` (Any, not required, default=undefined)
+
+          Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
 
 #### Example
 
 ```javascript
-import { when } from 'easy-peasy'; // 👈 import the helper
+import { listeners } from 'easy-peasy'; // 👈 import the helper
 
 const store = createStore({
   user: {
@@ -902,7 +923,7 @@ const store = createStore({
     },
     logOut: (state) => {
       state.token = '';
-    },
+    }
   },
   audit: {
     logs: [],
@@ -910,17 +931,17 @@ const store = createStore({
       state.logs.push(payload)
     },
     //  👇 name your listeners
-    userListeners: when(actions => ({
+    userListeners: listeners((actions, on) => {
       // 👇 we attach a listener to the "logIn" effect
-      [actions.user.logIn]: dispatch => {
-        dispatch.audit.add('User logged in')
-      },
+      on(actions.user.logIn, (dispatch, payload) => {
+        dispatch.audit.add(`${payload.username} logged in`);
+      });
       // 👇 we attach a listener to the "logOut" action
-      [actions.user.logOut]: dispatch => {
-        dispatch.audit.add('User logged out')
-      },
-    })),
-  },
+      on(actions.user.logOut, dispatch => {
+        dispatch.audit.add('User logged out');
+      });
+    }))
+  }
 });
 
 // 👇 the login effect will fire, and then any listeners will execute after complete
