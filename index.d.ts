@@ -1,0 +1,417 @@
+import { Component } from 'react'
+import { KeysOfType, Omit, Overwrite } from 'typelevel-ts'
+import { Param0, Param1 } from 'type-zoo'
+import {
+  compose,
+  AnyAction,
+  Action as ReduxAction,
+  Dispatch as ReduxDispatch,
+  Reducer as ReduxReducer,
+  Store as ReduxStore,
+  Middleware,
+} from 'redux'
+
+/**
+ * The standard ReturnType helper of TypeScript doesn't handle generic type
+ * aliases very well. This workaround type does.
+ * https://github.com/Microsoft/TypeScript/issues/26856
+ */
+type UnsafeReturnType<T> = T extends (...args: any[]) => infer R ? R : any
+
+/**
+ * The types that represent "natural", single level state values in or store.
+ * i.e. not actions or objects.
+ */
+type NaturalState =
+  | Array<any>
+  | boolean
+  | Date
+  | null
+  | number
+  | RegExp
+  | string
+  | undefined
+
+type ActionTypes = Action<any, any> | Effect<any, any, any, any>
+
+type UtilTypes =
+  | Select<any, any>
+  | Reducer<any>
+  | Action<any, any>
+  | Effect<any, any, any, any>
+  | Function
+
+type EffectMeta = {
+  path: string[]
+  parent: string[]
+}
+
+/**
+ * Filters a model into a type that represents the actions (and effects) only
+ *
+ * @example
+ *
+ * type OnlyActions = Actions<Model>;
+ */
+export type Actions<Model extends Object> = {
+  [P in keyof (Omit<
+    Model,
+    KeysOfType<Pick<Model, KeysOfType<Model, Object>>, NaturalState | UtilTypes>
+  >)]: Actions<Model[P]>
+} &
+  {
+    [P in keyof Pick<Model, KeysOfType<Model, ActionTypes>>]: Param1<
+      Model[P]
+    > extends void
+      ? () => UnsafeReturnType<Model[P]> extends Promise<any>
+          ? UnsafeReturnType<Model[P]>
+          : Promise<UnsafeReturnType<Model[P]>>
+      : (
+          payload: Param1<Model[P]>,
+        ) => UnsafeReturnType<Model[P]> extends Promise<any>
+          ? UnsafeReturnType<Model[P]>
+          : Promise<UnsafeReturnType<Model[P]>>
+  }
+
+/**
+ * Filters a model into a type that represents the state only (i.e. no actions)
+ *
+ * @example
+ *
+ * type StateOnly = State<Model>;
+ */
+export type State<Model extends Object> = {
+  [P in keyof (Omit<
+    Model,
+    KeysOfType<Pick<Model, KeysOfType<Model, Object>>, NaturalState | UtilTypes>
+  >)]: State<Model[P]>
+} &
+  { [P in keyof Pick<Model, KeysOfType<Model, NaturalState>>]: Model[P] } &
+  {
+    readonly [P in keyof Pick<
+      Model,
+      KeysOfType<Model, Select<any, any>>
+    >]: UnsafeReturnType<Model[P]>
+  } &
+  {
+    readonly [P in keyof Pick<
+      Model,
+      KeysOfType<Model, Reducer<any, any>>
+    >]: UnsafeReturnType<Model[P]>
+  }
+
+/**
+ * Configuration interface for the createStore
+ */
+export interface EasyPeasyConfig<
+  InitialState extends Object = {},
+  Injections = void
+> {
+  compose?: typeof compose
+  devTools?: boolean
+  initialState?: InitialState
+  injections?: Injections
+  middlewares?: Array<Middleware<any, any, any>>
+  reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>
+}
+
+/**
+ * Enhances the Redux Dispatch with actions
+ *
+ * @example
+ *
+ * type DispatchWithActions = Dispatch<Model>;
+ */
+export type Dispatch<
+  Model,
+  Action extends ReduxAction = ReduxAction<any>
+> = Actions<Model> & ReduxDispatch<Action>
+
+/**
+ * Represents a Redux store, enhanced by easy peasy.
+ *
+ * @example
+ *
+ * type EnhancedReduxStore = Store<Model>;
+ */
+export type Store<Model> = Overwrite<
+  ReduxStore<State<Model>>,
+  {
+    dispatch: Dispatch<Model>
+  }
+>
+
+/**
+ * An effect type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Effect } from 'easy-peasy';
+ *
+ * interface Model {
+ *   todos: Array<string>;
+ *   addTodo: Effect<Model, string>;
+ * }
+ */
+export type Effect<
+  Model extends Object = {},
+  Payload = void,
+  Injections = void,
+  Result = void
+> = (
+  dispatch: Dispatch<Model>,
+  payload: Payload,
+  getState: () => State<Model>,
+  injections: Injections,
+  meta: EffectMeta,
+) => Result
+
+/**
+ * Declares an effect action type against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#effectaction
+ *
+ * @example
+ *
+ * import { effect } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   login: effect(async (dispatch, payload) => {
+ *    const user = await loginService(payload);
+ *    dispatch.loginSucceeded(user);
+ *  })
+ * });
+ */
+export function effect<
+  Model extends Object = {},
+  Payload = any,
+  Result = any,
+  Injections = any
+>(
+  effect: Effect<Model, Payload, Result, Injections>,
+): Effect<Model, Payload, Result, Injections>
+
+/**
+ * Action listeners type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Listeners } from 'easy-peasy';
+ *
+ * interface Model {
+ *   userListeners: Listeners<Model>;
+ * }
+ */
+export type Listeners<Model extends Object = {}> = (
+  actions: Actions<Model>,
+  attach: <ActionType>(
+    action: ActionType,
+    listener: (dispatch: Dispatch<Model>, payload: Param0<ActionType>) => any,
+  ) => void,
+) => void
+
+/**
+ * Declares action listeners against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#listenersattach
+ *
+ * @example
+ *
+ * import { listeners } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   userListeners: listeners((actions, on) => {
+ *     on(actions.user.login, (dispatch) => {
+ *        dispatch.audit.add('User logged in');
+ *     });
+ *   })
+ * });
+ */
+export function listeners<Model extends Object = {}>(
+  mapListeners: Listeners<Model>,
+): Listeners<Model>
+
+/**
+ * An action type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Action } from 'easy-peasy';
+ *
+ * interface Model {
+ *   todos: Array<Todo>; ;
+ *   addTodo: Action<Model, Todo>;
+ * }
+ */
+export type Action<Model extends Object = {}, Payload = any> = (
+  state: State<Model>,
+  payload: Payload,
+) => void | State<Model>
+
+/**
+ * A select type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Select } from 'easy-peasy';
+ *
+ * interface Model {
+ *   products: Array<Product>;
+ *   totalPrice: Select<Model, number>;
+ * }
+ */
+export type Select<Model extends Object = {}, Result = any> = (
+  state: State<Model>,
+  dependencies?: Array<Select<any, any>>,
+) => Result
+
+/**
+ * Allows you to declare derived state against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#selectselector
+ *
+ * @example
+ *
+ * import { select } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   products: [],
+ *   totalPrice: select(state =>
+ *     state.products.reduce((acc, cur) => acc + cur.price, 0)
+ *   )
+ * });
+ */
+export function select<Model extends Object = {}, Result = any>(
+  select: Select<Model, Result>,
+  dependencies?: Array<Select<any, any>>,
+): Select<Model, Result>
+
+/**
+ * A reducer type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Reducer } from 'easy-peasy';
+ *
+ * interface Model {
+ *   router: Reducer<ReactRouterState>;
+ * }
+ */
+export type Reducer<
+  State = any,
+  Action extends ReduxAction = AnyAction
+> = ReduxReducer<State>
+
+/**
+ * Allows you to declare a custom reducer to manage a bit of your state.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#reducerfn
+ *
+ * @example
+ *
+ * import { reducer } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   counter: reducer((state = 1, action) => {
+ *     switch (action.type) {
+ *       case 'INCREMENT': return state + 1;
+ *       default: return state;
+ *     }
+ *   })
+ * });
+ */
+export function reducer<State extends Object = {}>(
+  state: Reducer<State>,
+): Reducer<State>
+
+/**
+ * Creates an easy-peasy powered Redux store.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
+ *
+ * @example
+ *
+ * import { createStore } from 'easy-peasy';
+ *
+ * interface Model {
+ *   todos: {
+ *     items: Array<string>;
+ *   }
+ * }
+ *
+ * const store = createStore<Model>({
+ *   todos: {
+ *     items: [],
+ *   }
+ * })
+ */
+export function createStore<Model extends Object = {}>(
+  model: Model,
+  config?: EasyPeasyConfig,
+): Store<Model>
+
+/**
+ * A React Hook allowing you to use state within your component.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
+ *
+ * @example
+ *
+ * import { useStore, State } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const todos = useStore((state: State<Model>) => state.todos.items);
+ *   return todos.map(todo => <Todo todo={todo} />);
+ * }
+ */
+export function useStore<Model extends Object = {}, Result = any>(
+  mapState: (state: State<Model>) => Result,
+  dependencies?: Array<any>,
+): Result
+
+/**
+ * A React Hook allowing you to use actions within your component.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
+ *
+ * @example
+ *
+ * import { useAction, Dispatch } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const addTodo = useAction((dispatch: Dispatch<Model>) => dispatch.todos.add);
+ *   return <AddTodoForm save={addTodo} />;
+ * }
+ */
+export function useAction<Model extends Object = {}, Result = any>(
+  mapAction: (actions: Dispatch<Model>) => Result,
+): Result
+
+/**
+ * Exposes the store to your app (and hooks).
+ *
+ * https://github.com/ctrlplusb/easy-peasy#storeprovider
+ *
+ * @example
+ *
+ * import { StoreProvider } from 'easy-peasy';
+ *
+ * ReactDOM.render(
+ *   <StoreProvider store={store}>
+ *     <App />
+ *   </StoreProvider>
+ * );
+ */
+export class StoreProvider<Model = any> extends Component<{
+  store: Store<Model>
+}> {}
