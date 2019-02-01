@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "lib": ["es2015", "dom"],
+    "jsx": "react",
+    "strict": true,
+    "baseUrl": "../../..",
+    "paths": {
+      "easy-peasy": ["index.d.ts"]
+    }
+  }
+}
