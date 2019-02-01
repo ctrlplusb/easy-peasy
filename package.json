@@ -78,7 +78,7 @@
     "jest": "^24.0.0",
     "jest-dom": "^3.0.1",
     "lint-staged": "^8.1.1",
-    "prettier": "^1.16.2",
+    "prettier": "^1.16.3",
     "prettier-eslint": "^8.8.2",
     "prop-types": "^15.6.2",
     "react": "16.8.0-alpha.1",
@@ -93,7 +93,7 @@
     "rollup-plugin-node-resolve": "^4.0.0",
     "rollup-plugin-replace": "^2.1.0",
     "rollup-plugin-uglify": "^6.0.2",
-    "typescript": "^3.2.4",
+    "typescript": "^3.3.1",
     "typings-tester": "^0.3.2"
   },
   "jest": {
@@ -103,7 +103,9 @@
     "setupFiles": [
       "<rootDir>/node_modules/regenerator-runtime/runtime"
     ],
-    "testMatch": [ "**/?(*.)+(spec|test).[jt]s?(x)" ],
+    "testMatch": [
+      "**/?(*.)+(spec|test).[jt]s?(x)"
+    ],
     "testPathIgnorePatterns": [
       "<rootDir>/(coverage|dist|node_modules|tools)/"
     ]
