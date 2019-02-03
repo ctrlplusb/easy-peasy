@@ -929,6 +929,53 @@ describe('select', () => {
     // assert
     expect(store.getState().finalPrice).toBe(150)
   })
+
+  test('supports internal auto memoised fns', () => {
+    // arrange
+    let callCount = 0
+    const store = createStore({
+      products: [{ id: 1, name: 'Shoes' }, { id: 2, name: 'Book' }],
+      productById: select(state => id => {
+        callCount += 1
+        return state.products.find(x => x.id === id)
+      }),
+    })
+
+    // act
+    let product = store.getState().productById(1)
+
+    // assert
+    expect(product).toEqual({ id: 1, name: 'Shoes' })
+    expect(callCount).toBe(1)
+
+    // act
+    product = store.getState().productById(1)
+
+    // assert
+    expect(product).toEqual({ id: 1, name: 'Shoes' })
+    expect(callCount).toBe(1)
+
+    // act
+    product = store.getState().productById(2)
+
+    // assert
+    expect(product).toEqual({ id: 2, name: 'Book' })
+    expect(callCount).toBe(2)
+
+    // act
+    product = store.getState().productById(1)
+
+    // assert
+    expect(product).toEqual({ id: 1, name: 'Shoes' })
+    expect(callCount).toBe(2)
+
+    // act
+    product = store.getState().productById(2)
+
+    // assert
+    expect(product).toEqual({ id: 2, name: 'Book' })
+    expect(callCount).toBe(2)
+  })
 })
 
 describe('dependency injection', () => {

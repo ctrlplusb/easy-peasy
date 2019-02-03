@@ -3,10 +3,12 @@ import {
   compose as reduxCompose,
   createStore as reduxCreateStore,
 } from 'redux'
-import memoizeOne from 'memoize-one'
+import memoizerific from 'memoizerific'
 import produce from 'immer'
 import thunk from 'redux-thunk'
 import { isStateObject } from './lib'
+
+const maxSelectFnMemoize = 100
 
 const actionNameSymbol = '__actionName__'
 const effectSymbol = '__effect__'
@@ -35,6 +37,9 @@ const tick = () => new Promise(resolve => setTimeout(resolve))
 const startsWith = (target, search) =>
   target.substr(0, search.length) === search
 
+const wrapFnWithMemoize = x =>
+  typeof x === 'function' ? memoizerific(maxSelectFnMemoize)(x) : x
+
 export const effect = fn => {
   // eslint-disable-next-line no-param-reassign
   fn[effectSymbol] = true
@@ -42,7 +47,7 @@ export const effect = fn => {
 }
 
 export const select = (fn, dependencies) => {
-  const selector = memoizeOne(state => fn(state))
+  const selector = memoizerific(1)(state => wrapFnWithMemoize(fn(state)))
   selector[selectSymbol] = true
   selector[selectDependenciesSymbol] = dependencies
   selector[selectStateSymbol] = {}
