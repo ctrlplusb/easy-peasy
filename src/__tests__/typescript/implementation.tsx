@@ -43,6 +43,7 @@ interface AuditModel {
   logs: string[]
   set: Action<AuditModel, string>
   userListeners: Listeners<Model>
+  getNLog: Select<AuditModel, (n: number) => string | undefined>
 }
 
 interface Model {
@@ -70,6 +71,9 @@ const store = createStore<Model>({
         dispatch.audit.set(`Logging in ${payload.username}`)
       })
     }),
+    getNLog: select(state => (n: number) =>
+      state.logs.length > n ? state.logs[n] : undefined,
+    ),
   },
   todos: {
     items: [],
@@ -125,6 +129,13 @@ store.dispatch({ type: 'COUNTER_INCREMENT' })
 
 store.dispatch.todos.addTodo('jello')
 store.dispatch.printDebugInfo()
+
+const log1 = store.getState().audit.getNLog(1)
+
+if (log1) {
+  const logconcat = 'Debug ' + log1
+  console.log(logconcat)
+}
 
 /**
  * You can access state via hooks
