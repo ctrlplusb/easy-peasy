@@ -15,33 +15,28 @@
 ```javascript
 import { StoreProvider, createStore, useStore, useAction } from 'easy-peasy';
 
-// 👇 create your store by providing your model
+// 👇 create your store, providing the model
 const store = createStore({
   todos: {
     items: ['Install easy-peasy', 'Build app', 'Profit'],
-    // 👇 define actions
+    // 👇 define actions directly on your model
     add: (state, payload) => {
-      state.items.push(payload) // 👈 you mutate state to update (we convert
-    }                           //    to immutable updates)
-  }                             //
-});                             //    OR
-                                //
-                                //    You can return new "immutable" state:
-                                //    return {
-                                //      ...state,
-                                //      items: [...state.items, payload ]
-                                //    };
+      // do simple mutation to update state, and we make it an immutable update
+      state.items.push(payload)
+      // (you can also return a new immutable instance if you prefer)
+    }
+  }
+});
 
 const App = () => (
-  // 👇 surround your app with the provider to expose the store to your app
+  // 👇 wrap your app to expose the store
   <StoreProvider store={store}>
     <TodoList />
   </StoreProvider>
 )
 
 function TodoList() {
-  // 👇 use hooks to get state or actions. your component will receive
-  //    updated state automatically
+  // 👇  use hooks to get state or actions
   const todos = useStore(state => state.todos.items)
   const add = useAction(dispatch => dispatch.todos.add)
   return (
@@ -55,16 +50,18 @@ function TodoList() {
 
 ## Features
 
-  - Quick to set up, easy to use
+  - Quick, easy, fun
   - Supports Typescript
-  - Update state via simple mutations (thanks [`immer`](https://github.com/mweststrate/immer))
+  - Update state via simple mutations
   - Derived state
-  - Async actions for remote data fetching/persisting
+  - "Effect" actions for data fetching/persisting
   - Provides [React Hooks](https://reactjs.org/docs/hooks-intro.html)
+  - Supports React Native
   - Powered by Redux with full interop
-    - customise middleware
+    - Redux Dev Tools support
+    - provide custom middleware
     - customise root reducer enhancer
-    - Redux Dev Tools
+    - easy migration path for traditional styled Redux apps
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -116,7 +113,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and it's actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with your React components. In terms of integration with React we are leveraging the insanely awesome [Hooks](https://reactjs.org/docs/hooks-intro.html) feature.
+Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and it's actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with React.
 
 <p>&nbsp;</p>
 
