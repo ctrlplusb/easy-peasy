@@ -478,11 +478,17 @@ import { createStore } from 'easy-peasy';
 import { composeWithDevTools } from 'remote-redux-devtools';
 import model from './model';
 
+/**
+ * model, is used for passing through the base model
+ * the second argument takes an object for additional configuration
+ */
+
 const store = createStore(model, {
-  config: {
-    compose: composeWithDevTools({ realtime: true }),
-  }
-);
+  compose: composeWithDevTools({ realtime: true, trace: true })
+  // initialState: {}
+});
+
+export default store;
 ```
 
 See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
