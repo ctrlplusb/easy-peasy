@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+
 import {
   applyMiddleware,
   compose as reduxCompose,
@@ -14,6 +16,7 @@ const actionNameSymbol = '__actionName__'
 const effectSymbol = '__effect__'
 const listenersSymbol = '__listeners__'
 const selectSymbol = '__select__'
+const selectImpSymbol = '__selectImp__'
 const selectDependenciesSymbol = '__selectDependencies__'
 const selectStateSymbol = '__selectState__'
 const reducerSymbol = '__reducer__'
@@ -37,31 +40,24 @@ const tick = () => new Promise(resolve => setTimeout(resolve))
 const startsWith = (target, search) =>
   target.substr(0, search.length) === search
 
-const wrapFnWithMemoize = x =>
-  typeof x === 'function' ? memoizerific(maxSelectFnMemoize)(x) : x
-
 export const effect = fn => {
-  // eslint-disable-next-line no-param-reassign
   fn[effectSymbol] = true
   return fn
 }
 
 export const select = (fn, dependencies) => {
-  const selector = memoizerific(1)(state => wrapFnWithMemoize(fn(state)))
-  selector[selectSymbol] = true
-  selector[selectDependenciesSymbol] = dependencies
-  selector[selectStateSymbol] = {}
-  return selector
+  fn[selectSymbol] = true
+  fn[selectDependenciesSymbol] = dependencies
+  fn[selectStateSymbol] = {}
+  return fn
 }
 
 export const reducer = fn => {
-  // eslint-disable-next-line no-param-reassign
   fn[reducerSymbol] = true
   return fn
 }
 
 export const listeners = fn => {
-  // eslint-disable-next-line no-param-reassign
   fn[listenersSymbol] = true
   return fn
 }
@@ -69,12 +65,18 @@ export const listeners = fn => {
 export const createStore = (model, options = {}) => {
   const {
     devTools = true,
+    disableInternalSelectFnMemoize = false,
     middleware = [],
     initialState = {},
     injections,
     compose,
     reducerEnhancer = rootReducer => rootReducer,
   } = options
+
+  const wrapFnWithMemoize = x =>
+    !disableInternalSelectFnMemoize && typeof x === 'function'
+      ? memoizerific(maxSelectFnMemoize)(x)
+      : x
 
   const definition = {
     ...model,
@@ -204,6 +206,12 @@ export const createStore = (model, options = {}) => {
 
   extract(definition, [])
 
+  selectorReducers.forEach(selector => {
+    selector[selectImpSymbol] = memoizerific(1)(state =>
+      wrapFnWithMemoize(selector(state)),
+    )
+  })
+
   listenerDefinitions.forEach(def => {
     const on = (actionCreator, handler) => {
       if (
@@ -299,21 +307,19 @@ export const createStore = (model, options = {}) => {
       if (parentPath.length > 0) {
         const target = get(parentPath, stateAfterDependencies)
         if (target) {
-          const newValue = selector(target)
+          const newValue = selector[selectImpSymbol](target)
           newState = produce(state, draft => {
             const updateTarget = get(parentPath, draft)
             updateTarget[key] = newValue
           })
         }
       } else {
-        const newValue = selector(stateAfterDependencies)
+        const newValue = selector[selectImpSymbol](stateAfterDependencies)
         newState = produce(state, draft => {
-          // eslint-disable-next-line no-param-reassign
           draft[key] = newValue
         })
       }
 
-      // eslint-disable-next-line no-param-reassign
       selector[selectStateSymbol].executed = true
       return newState
     }
@@ -330,7 +336,6 @@ export const createStore = (model, options = {}) => {
             const stateAfterSelectors = runSelectors(stateAfterActions)
             isInitial = false
             selectorReducers.forEach(selector => {
-              // eslint-disable-next-line no-param-reassign
               selector[selectStateSymbol].executed = false
             })
             return stateAfterSelectors

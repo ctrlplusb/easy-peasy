@@ -526,6 +526,10 @@ Creates a Redux store based on the given model. The model must be an object and 
 
        Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
+    - `disableInternalSelectFnMemoize` (bool, not required, default=false)
+
+      Setting this to `true` will disable the automatic memoisation of a fn that you may return in any of your [`select`](#selectselector) implementations. Please see the respective helpers documentation for more information.
+
     - `initialState` (Object, not required, default=undefined)
 
       Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
@@ -807,7 +811,7 @@ The results of your selectors will be cached, and will only be recomputed if the
 
     You can return any derived state you like.
 
-    It also supports returning a function. This allows you to support creating a "dynamic" selector that accepts arguments (e.g. `productById(1)`). We will automatically optimise the function that you return - ensuring that any calls to the function will be automatically be memoised - i.e. calls to it with the same arguments will return cached results. Caching is limited to the 100 most recent unique calls to this function (where each argument does not strictly === equal any of the previous call arguments). The limit can be adjusted via the `createStore` config.
+    It also supports returning a function. This allows you to support creating a "dynamic" selector that accepts arguments (e.g. `productById(1)`). We will automatically optimise the function that you return - ensuring that any calls to the function will be automatically be memoised - i.e. calls to it with the same arguments will return cached results. This automatic memoisation of the function can be disabled via the `disableInternalSelectFnMemoize` setting on the `createStore`'s config argument.
 
   - dependencies (Array, not required)
 
