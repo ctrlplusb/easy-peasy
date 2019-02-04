@@ -76,7 +76,7 @@ function TodoList() {
   - [Examples](#examples)
     - [React Todo List](#react-todo-list)
   - [Core Concepts](#core-concepts)
-    - [Setting up your store](#setting-up-your-store)
+    - [Creating the store](#creating-the-store)
     - [Accessing state directly via the store](#accessing-state-directly-via-the-store)
     - [Modifying state via actions](#modifying-state-via-actions)
     - [Dispatching actions directly via the store](#dispatching-actions-directly-via-the-store)
@@ -154,11 +154,11 @@ https://codesandbox.io/s/woyn8xqk15
 
 ## Core Concepts
 
-The below will introduce you to the core concepts of Easy Peasy. At first we will interact with the store directly (we output a standard Redux store). In the following section we shall then cover how to use [Easy Peasy within a React application](#usage-with-react).
+The below will introduce you to the core concepts of Easy Peasy, where we will interact with the Redux store directly. In a following section we shall illustrate how to integrate [Easy Peasy within a React application](#usage-with-react).
 
-### Setting up your store
+### Creating the store
 
-Firstly you need to define your model. This represents the structure of your Redux store along with the default values. It can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
+Firstly you need to define your model. This represents the structure of your Redux state along with its default values. Your model can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
 
 ```javascript
 const model = {
@@ -176,7 +176,7 @@ import { createStore } from 'easy-peasy';
 const store = createStore(model);
 ```
 
-You will now have a [Redux store](https://redux.js.org/api/store). 👍
+You will now have a [Redux store](https://redux.js.org/api/store) - all the standard APIs of a Redux store is available to you. 👍
 
 ### Accessing state directly via the store
 
@@ -206,7 +206,7 @@ const store = createStore({
 });
 ```
 
-The action will receive as it's first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that may have been provided when the action was triggered.
+The action will receive as its first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that may have been provided when the action was triggered.
 
 > Note: Some prefer not to use a mutation based API. You can return new "immutable" instances of your state if you prefer:
 >
@@ -218,7 +218,7 @@ The action will receive as it's first parameter the slice of the state that it w
 
 ### Dispatching actions directly via the store
 
-Easy Peasy will bind your actions against the store's `dispatch` using a path that matches where the action was defined against your model. You can dispatch your actions directly via the store, providing any payload that they may require.
+Easy Peasy will bind your actions against the store's `dispatch` using paths that match the location of the action on your model. This allows you to easily dispatch your actions, providing any payload that they may require.
 
 ```javascript
 store.dispatch.todos.addTodo('Install easy-peasy');
