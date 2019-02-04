@@ -529,6 +529,10 @@ Creates a Redux store based on the given model. The model must be an object and 
 
        Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
+    - `disableInternalSelectFnMemoize` (bool, not required, default=false)
+
+      Setting this to `true` will disable the automatic memoisation of a fn that you may return in any of your [`select`](#selectselector) implementations. Please see the respective helpers documentation for more information.
+
     - `initialState` (Object, not required, default=undefined)
 
       Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
@@ -796,6 +800,8 @@ store.getState().counter;
 
 Attach derived state (i.e. is calculated from other parts of your state) to your store.
 
+The results of your selectors will be cached, and will only be recomputed if the state that they depend on changes. You may be familiar with `reselect` - this feature provides you with the same benefits.
+
 #### Arguments
 
   - selector (Function, required)
@@ -806,12 +812,13 @@ Attach derived state (i.e. is calculated from other parts of your state) to your
 
       The local part of state that the `select` property was attached to.
 
+    You can return any derived state you like.
+
+    It also supports returning a function. This allows you to support creating a "dynamic" selector that accepts arguments (e.g. `productById(1)`). We will automatically optimise the function that you return - ensuring that any calls to the function will be automatically be memoised - i.e. calls to it with the same arguments will return cached results. This automatic memoisation of the function can be disabled via the `disableInternalSelectFnMemoize` setting on the `createStore`'s config argument.
+
   - dependencies (Array, not required)
 
-    If this selector depends on other selectors your need to pass these selectors in here to indicate that is the case. Under the hood we will ensure the correct execution order.
-
-Select's have their outputs cached to avoid unnecessary work, and will be executed
-any time their local state changes.
+    If this selector depends on data from other selectors then you should provide the respective selectors within an array to indicate the case. This allows us to make guarantees of execution order so that your state is derived in the manner you expect it to.
 
 #### Example
 
@@ -830,6 +837,27 @@ const store = createStore({
 
 // 👇 access the derived state as you would normal state
 store.getState().shoppingBasket.totalPrice;
+```
+
+#### Example with arguments
+
+```javascript
+import { select } from 'easy-peasy'; // 👈 import then helper
+
+const store = createStore({
+  products: [{ id: 1, name: 'Shoes', price: 123 }, { id: 2, name: 'Hat', price: 75 }],
+
+  productById: select(state =>
+    // 👇 return a function that accepts the arguments
+    id => state.products.find(x => x.id === id)
+  )
+};
+
+// 👇 access the select fn and provide its required arguments
+store.getState().productById(1);
+
+// This next call will return a cached result
+store.getState().productById(1);
 ```
 
 #### Example with Dependencies

@@ -16,7 +16,7 @@ process.env.BABEL_ENV = 'production'
 const baseConfig = {
   external: [
     'immer',
-    'memoize-one',
+    'memoizerific',
     'react',
     'redux',
     'redux-thunk',
@@ -50,7 +50,7 @@ const commonUMD = config =>
     draft.external.splice(draft.external.indexOf('shallowequal'), 1)
     draft.output.format = 'umd'
     draft.output.globals = {
-      'memoize-one': 'memoizeOne',
+      memoizerific: 'memoizerific',
       'redux-thunk': 'ReduxThunk',
       immer: 'immer',
       react: 'React',
