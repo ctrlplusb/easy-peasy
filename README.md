@@ -1235,7 +1235,7 @@ const data = (endpoint) => ({
       // Then we utilise lodash to map to the expected location for our
       // "fetched" action
       //                 👇
-      const fetched = _.get(dispatch, meta.parent.join('fetched'));
+      const fetched = _.get(dispatch, meta.parent.concat(['fetched']));
       fetched(data);
     })
 })
