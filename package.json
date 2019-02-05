@@ -38,7 +38,7 @@
     "react": "16.8.0-alpha.1"
   },
   "dependencies": {
-    "immer": "^1.12.1",
+    "immer": "^2.0.0",
     "memoizerific": "^1.11.3",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
