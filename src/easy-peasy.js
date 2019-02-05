@@ -6,9 +6,18 @@ import {
   createStore as reduxCreateStore,
 } from 'redux'
 import memoizerific from 'memoizerific'
-import produce from 'immer'
+import produce, { setAutoFreeze } from 'immer'
 import thunk from 'redux-thunk'
 import { isStateObject } from './lib'
+
+/**
+ * immer is an implementation detail, so we are not going to use its auto freeze
+ * behaviour, which throws errors if trying to mutate state. It's also risky
+ * for production builds as has a perf overhead.
+ *
+ * @see https://github.com/mweststrate/immer#auto-freezing
+ */
+setAutoFreeze(false)
 
 const maxSelectFnMemoize = 100
 
