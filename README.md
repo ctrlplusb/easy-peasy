@@ -100,12 +100,13 @@ function TodoList() {
     - [thunk(action)](#thunkaction)
     - [reducer(fn)](#reducerfn)
     - [select(selector)](#selectselector)
-    - [listeners(attach)](#listenersattach)
+    - [listen(on)](#listenon)
     - [StoreProvider](#storeprovider)
     - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useAction(mapAction)](#useactionmapaction)
   - [Deprecated API](#deprecated-api)
     - [effect(action)](#effectaction)
+    - [listeners(attach)](#listenersattach)
   - [Tips and Tricks](#tips-and-tricks)
     - [Generalising effects/actions/state via helpers](#generalising-effectsactionsstate-via-helpers)
   - [Prior Art](#prior-art)
@@ -516,7 +517,9 @@ Below is an overview of the API exposed by Easy Peasy.
 
 Creates a Redux store based on the given model. The model must be an object and can be any depth. It also accepts an optional configuration parameter for customisations.
 
-#### Arguments
+<details>
+<summary>Arguments</summary>
+<p>
 
   - `model` (Object, required)
 
@@ -554,7 +557,12 @@ Creates a Redux store based on the given model. The model must be an object and 
 
       Any additional reducerEnhancer you would like to enhance to your root reducer (for example you want to use [redux-persist](https://github.com/rt2zz/redux-persist)).
 
-#### Example
+</p>
+</details>
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -572,13 +580,18 @@ const store = createStore({
 })
 ```
 
+</p>
+</details>
+
 ### action
 
 A function assigned to your model will be considered an action, which can be be used to dispatch updates to your store.
 
 The action will have access to the part of the state tree where it was defined.
 
-It has the following arguments:
+<details>
+<summary>Arguments</summary>
+<p>
 
   - `state` (Object, required)
 
@@ -589,8 +602,12 @@ It has the following arguments:
     The payload, if any, that was provided to the action.
 
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
+</p>
+</details>
 
-#### Example
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -616,12 +633,16 @@ store.dispatch.todos.add('Install easy-peasy');
 
 store.dispatch.user.preferences.changeBackgroundColor('#FFF');
 ```
+</p>
+</details>
 
 ### thunk(action)
 
 Declares a thunk action on your model. Allows you to perform effects such as data fetching and persisting.
 
-#### Arguments
+<details>
+<summary>Arguments</summary>
+<p>
 
   - action (Function, required)
 
@@ -683,7 +704,12 @@ Declares a thunk action on your model. Allows you to perform effects such as dat
 
 When your model is processed by Easy Peasy to create your store all of your thunk actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the examples below.
 
-#### Example
+</p>
+</details>
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { createStore, thunk } from 'easy-peasy'; // 👈 import then helper
@@ -712,7 +738,12 @@ store.dispatch.session.login({
 
 ```
 
-#### Example accessing State via the getState parameter
+</p>
+</details>
+
+<details>
+<summary>Example accessing State via the getState parameter</summary>
+<p>
 
 ```javascript
 import { createStore, thunk } from 'easy-peasy';
@@ -732,7 +763,12 @@ const store = createStore({
 store.dispatch.doSomething()
 ```
 
-#### Example dispatching an action from another part of the model
+</p>
+</details>
+
+<details>
+<summary>Example dispatching an action from another part of the model</summary>
+<p>
 
 ```javascript
 import { createStore, thunk } from 'easy-peasy';
@@ -759,7 +795,12 @@ store.dispatch.todos.saveTodo('foo');
 
 We don't recommned doing this, and instead encourage you to use the `listeners` helper to invert responsibilites. However, there may be cases in which you need to do the above.
 
-#### Example with Dependency Injection
+</p>
+</details>
+
+<details>
+<summary>Example with Dependency Injection</summary>
+<p>
 
 ```javascript
 import { createStore, effect } from 'easy-peasy';
@@ -785,13 +826,18 @@ const store = createStore(
 store.dispatch.doSomething()
 ```
 
+</p>
+</details>
+
 ### reducer(fn)
 
 Declares a section of state to be calculated via a "standard" reducer function - as typical in Redux. This was specifically added to allow for integrations with existing libraries, or legacy Redux code.
 
 Some 3rd party libraries, for example [`connected-react-router`](https://github.com/supasate/connected-react-router), require you to attach a reducer that they provide to your state. This helper will you achieve this.
 
-#### Arguments
+<details>
+<summary>Arguments</summary>
+<p>
 
   - fn (Function, required)
 
@@ -813,7 +859,12 @@ Some 3rd party libraries, for example [`connected-react-router`](https://github.
 
         Any payload that was provided to the action.
 
-#### Example
+</p>
+</details>
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { createStore, reducer } from 'easy-peasy';
@@ -833,13 +884,18 @@ store.getState().counter;
 // 2
 ```
 
+</p>
+</details>
+
 ### select(selector)
 
 Attach derived state (i.e. is calculated from other parts of your state) to your store.
 
 The results of your selectors will be cached, and will only be recomputed if the state that they depend on changes. You may be familiar with `reselect` - this feature provides you with the same benefits.
 
-#### Arguments
+<details>
+<summary>Arguments</summary>
+<p>
 
   - selector (Function, required)
 
@@ -857,7 +913,12 @@ The results of your selectors will be cached, and will only be recomputed if the
 
     If this selector depends on data from other selectors then you should provide the respective selectors within an array to indicate the case. This allows us to make guarantees of execution order so that your state is derived in the manner you expect it to.
 
-#### Example
+</p>
+</details>
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { select } from 'easy-peasy'; // 👈 import then helper
@@ -876,7 +937,12 @@ const store = createStore({
 store.getState().shoppingBasket.totalPrice;
 ```
 
-#### Example with arguments
+</p>
+</details>
+
+<details>
+<summary>Example with arguments</summary>
+<p>
 
 ```javascript
 import { select } from 'easy-peasy'; // 👈 import then helper
@@ -897,7 +963,12 @@ store.getState().productById(1);
 store.getState().productById(1);
 ```
 
-#### Example with Dependencies
+</p>
+</details>
+
+<details>
+<summary>Example with Dependencies</summary>
+<p>
 
 ```javascript
 import { select } from 'easy-peasy';
@@ -919,9 +990,12 @@ const store = createStore({
 });
 ```
 
-### listeners(attach)
+</p>
+</details>
 
-Allows you to attach listeners to any action from your model, which will then be fired after the targetted action is exectuted.
+## listen(on)
+
+Allows you to attach listeners to any normal or thunk action. Listeners are themselves thunks, and will be executed after the targetted action successfully completes its execution.
 
 This enables parts of your model to respond to actions being fired in other parts of your model. For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
 
@@ -929,54 +1003,43 @@ Note: If any action being listened to does not complete successfully (i.e. throw
 
 ```javascript
 const model = {
-  ...,
-  notificationlisteners: listeners((actions, on) => {
-    on(actions.user.loggedIn, (dispatch) => {
-      dispatch.notifications.set('User logged in');
+  user: userModel,
+  notifcations: {
+    msg: '',
+    set: (state, payload) => { state.msg = payload; },
+    notificationlisteners: listen((on) => {
+      on(userModel.loggedIn, (actions, paylaod) => {
+        actions.set(`${payload.username} logged in`);
+      })
     })
-  })
+  }
 };
 ```
 
-#### Arguments
+<details>
+<summary>Arguments</summary>
+<p>
 
-  - attach (Function, required)
+  - `on` (Function, required)
 
-    The attach callback function allows you to attach the listeners to specific actions. It is provided the following arguments:
+    Allows you to attach a listener to an action. It expects the following arguments:
 
-    - `actions` (Object, required)
+    - `action` (Function, required)
 
-      The actions (and effects) of the store.
+      The target action you wish to listen to - you provide the direct reference to the action.
 
-    - `on` (Function, required)
+    - `thunk` (Function, required)
 
-      Allows you to attach a listener to an action. It expects the following arguments:
+      The handler thunk to be executed after the target action is fired successfully. It has the same arguments and characteristics of a [thunk](#thunkaction) action. Please refer to the thunk API documentation for more information.
 
-      - `action` (Function, required)
+      The only difference is that the `payload` argument will be the payload value that the action being listened to received.
+</p>
+</details>
 
-        The target action you wish to listen to - you provide the direct reference to the action.
 
-      - `handler` (Function, required)
-
-        The handler function to be executed after the target action is fired successfully. It will receive the following arguments:
-
-        - `dispatch` (required)
-
-          The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
-
-        - `payload` (Any, not required)
-
-          The original payload that the targetted action received.
-
-        - `getState` (Function, required)
-
-          When executed it will provide the root state of your model.
-
-        - `injections` (Any, not required, default=undefined)
-
-          Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
-
-#### Example
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { listeners } from 'easy-peasy'; // 👈 import the helper
@@ -1017,12 +1080,17 @@ const store = createStore({
 // 👇 the login effect will fire, and then any listeners will execute after complete
 store.dispatch.user.login({ username: 'mary', password: 'foo123' });
 ```
+</p>
+</details>
+
 
 ### StoreProvider
 
 Initialises your React application with the store so that your components will be able to consume and interact with the state via the `useStore` and `useAction` hooks.
 
-#### Example
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { StoreProvider, createStore } from 'easy-peasy';
@@ -1037,11 +1105,16 @@ const App = () => (
 )
 ```
 
+</p>
+</details>
+
 ### useStore(mapState, externals)
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state.
 
-#### Arguments
+<details>
+<summary>Argument</summary>
+<p>
 
   - `mapState` (Function, required)
 
@@ -1056,8 +1129,12 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
     If your `useStore` function depends on an external value (for example a property of your component), then you should provide the respective value within this argument so that the `useStore` knows to remap your state when the respective externals change in value.
 
 Your `mapState` can either resolve a single piece of state. If you wish to resolve multiple pieces of state then you can either call `useStore` multiple times, or if you like resolve an object within your `mapState` where each property of the object is a resolved piece of state (similar to the `connect` from `react-redux`). The examples will illustrate the various forms.
+</p>
+</details>
 
-#### Example
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -1072,7 +1149,12 @@ const TodoList = () => {
 };
 ```
 
-#### Example resolving multiple values
+</p>
+</details>
+
+<details>
+<summary>Example resolving multiple values</summary>
+<p>
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -1089,7 +1171,12 @@ const BasketTotal = () => {
 };
 ```
 
-#### Example resolving multiple values via an object result
+</p>
+</details>
+
+<details>
+<summary>Example resolving multiple values via an object result</summary>
+<p>
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -1108,8 +1195,12 @@ const BasketTotal = () => {
 };
 ```
 
-#### A word of caution
+</p>
+</details>
 
+<details>
+<summary>A word of caution</summary>
+<p>
 Please be careful in the manner that you resolve values from your `mapToState`. To optimise the rendering performance of your components we use equality checking (===) to determine if the mapped state has changed.
 
 When an action changes the piece of state your `mapState` is resolving the equality check will break, which will cause your component to re-render with the new state.
@@ -1151,11 +1242,16 @@ const { productNames, total } = useStore(state => ({
 }));
 ```
 
+</p>
+</details>
+
 ### useAction(mapAction)
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions.
 
-#### Arguments
+<details>
+<summary>Arguments</summary>
+<p>
 
   - `mapAction` (Function, required)
 
@@ -1166,8 +1262,12 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
       The `dispatch` of your store, which has all the actions mapped against it.
 
 Your `mapAction` can either resolve a single action. If you wish to resolve multiple actions then you can either call `useAction` multiple times, or if you like resolve an object within your `mapAction` where each property of the object is a resolved action. The examples below will illustrate these options.
+</p>
+</details>
 
-#### Example
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { useState } from 'react';
@@ -1185,7 +1285,12 @@ const AddTodo = () => {
 };
 ```
 
-#### Example resolving multiple actions via an object map
+</p>
+</details>
+
+<details>
+<summary>Example resolving multiple actions via an object map</summary>
+<p>
 
 ```javascript
 import { useState } from 'react';
@@ -1207,6 +1312,9 @@ const EditTodo = ({ todo }) => {
 };
 ```
 
+</p>
+</details>
+
 <p>&nbsp;</p>
 
 ---
@@ -1219,7 +1327,9 @@ Below is an overview of the deprecated APIs exposed by Easy Peasy. These will be
 
 Declares an action on your model as being effectful. i.e. has asynchronous flow.
 
-#### Arguments
+<details>
+<summary>Arguments</summary>
+<p>
 
   - action (Function, required)
 
@@ -1274,8 +1384,12 @@ Declares an action on your model as being effectful. i.e. has asynchronous flow.
       ```
 
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
+</p>
+</details>
 
-#### Example
+<details>
+<summary>Example</summary>
+<p>
 
 ```javascript
 import { createStore, effect } from 'easy-peasy'; // 👈 import then helper
@@ -1304,7 +1418,12 @@ store.dispatch.session.login({
 
 ```
 
-#### Example accessing State via the getState parameter
+</p>
+</details>
+
+<details>
+<summary>Example accessing State via the getState parameter</summary>
+<p>
 
 ```javascript
 import { createStore, effect } from 'easy-peasy';
@@ -1324,8 +1443,13 @@ const store = createStore({
 store.dispatch.doSomething()
 ```
 
+</p>
+</details>
 
-#### Example with Dependency Injection
+
+<details>
+<summary>Example with Dependency Injection</summary>
+<p>
 
 ```javascript
 import { createStore, effect } from 'easy-peasy';
@@ -1351,9 +1475,120 @@ const store = createStore(
 store.dispatch.doSomething()
 ```
 
+</p>
+</details>
+
+### listeners(attach)
+
+Allows you to attach listeners to any action from your model, which will then be fired after the targetted action is exectuted.
+
+This enables parts of your model to respond to actions being fired in other parts of your model. For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
+
+Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
+
+```javascript
+const model = {
+  ...,
+  notificationlisteners: listeners((actions, on) => {
+    on(actions.user.loggedIn, (dispatch) => {
+      dispatch.notifications.set('User logged in');
+    })
+  })
+};
+```
+
+<details>
+<summary>Arguments</summary>
+<p>
+
+  - attach (Function, required)
+
+    The attach callback function allows you to attach the listeners to specific actions. It is provided the following arguments:
+
+    - `actions` (Object, required)
+
+      The actions (and effects) of the store.
+
+    - `on` (Function, required)
+
+      Allows you to attach a listener to an action. It expects the following arguments:
+
+      - `action` (Function, required)
+
+        The target action you wish to listen to - you provide the direct reference to the action.
+
+      - `handler` (Function, required)
+
+        The handler function to be executed after the target action is fired successfully. It will receive the following arguments:
+
+        - `dispatch` (required)
+
+          The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
+
+        - `payload` (Any, not required)
+
+          The original payload that the targetted action received.
+
+        - `getState` (Function, required)
+
+          When executed it will provide the root state of your model.
+
+        - `injections` (Any, not required, default=undefined)
+
+          Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+</p>
+</details>
+
+
+<details>
+<summary>Example</summary>
+<p>
+
+```javascript
+import { listeners } from 'easy-peasy'; // 👈 import the helper
+
+const store = createStore({
+  user: {
+    token: '',
+    loggedIn: (state, payload) => {
+      state.token = payload;
+    },
+    logIn: effect(async (dispatch, payload) => {
+      const token = await loginService(payload);
+      dispatch.user.loggedIn(token);
+    },
+    logOut: (state) => {
+      state.token = '';
+    }
+  },
+  audit: {
+    logs: [],
+    add: (state, payload) => {
+      state.logs.push(payload)
+    },
+    //  👇 name your listeners
+    userListeners: listeners((actions, on) => {
+      // 👇 we attach a listener to the "logIn" effect
+      on(actions.user.logIn, (dispatch, payload) => {
+        dispatch.audit.add(`${payload.username} logged in`);
+      });
+      // 👇 we attach a listener to the "logOut" action
+      on(actions.user.logOut, dispatch => {
+        dispatch.audit.add('User logged out');
+      });
+    }))
+  }
+});
+
+// 👇 the login effect will fire, and then any listeners will execute after complete
+store.dispatch.user.login({ username: 'mary', password: 'foo123' });
+```
+</p>
+</details>
+
 <p>&nbsp;</p>
 
-----
+---
 
 ## Tips and Tricks
 
