@@ -1,5 +1,3 @@
-> Note: this package depends on the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature of React. Currently available via 16.8+ of React.
-
 <p>&nbsp;</p>
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
@@ -125,12 +123,14 @@ Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the bo
 
 ## Installation
 
-First, ensure you have the correct version of React installed - i.e. a version that supports Hooks.
+Firstly, install React and React DOM.
 
 ```bash
-npm install react@^16.8.0
-npm install react-dom@^16.8.0
+npm install react
+npm install react-dom
 ```
+
+> Note: please ensure you install a version >= 16.8.0 in order to support the hooks functionality
 
 Then install Easy Peasy.
 
