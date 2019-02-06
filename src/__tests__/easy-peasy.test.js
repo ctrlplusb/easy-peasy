@@ -16,6 +16,7 @@ import {
   useStore,
   useAction,
   listeners,
+  listen,
 } from '../index'
 
 const resolveAfter = (data, ms) =>
@@ -1355,6 +1356,80 @@ describe('listeners', () => {
             )
             on(actions.user.logOut, dispatch => {
               dispatch.audit.add('User logged out')
+            })
+          }),
+        },
+      },
+      {
+        injections: expectedInjections,
+      },
+    )
+
+    // act
+    store.dispatch.doNothing()
+
+    // assert
+    expect(store.getState().audit.logs).toEqual([])
+
+    // act
+    await store.dispatch.user.logIn({ username: 'foo', password: 'bar' })
+
+    // assert
+    expect(store.getState().audit.logs).toEqual(['User logged in'])
+
+    // act
+    await store.dispatch.user.logOut()
+
+    // assert
+    expect(store.getState().audit.logs).toEqual([
+      'User logged in',
+      'User logged out',
+    ])
+  })
+})
+
+describe.only('listen', () => {
+  it('work as expected', async () => {
+    // arrange
+    const expectedInjections = { foo: 'bar' }
+
+    const userModel = {
+      token: '',
+      logIn: effect(() => {}),
+      logOut: () => undefined,
+    }
+
+    const store = createStore(
+      {
+        doNothing: () => undefined,
+        user: userModel,
+        audit: {
+          logs: [],
+          add: (state, payload) => {
+            state.logs.push(payload)
+          },
+          userListeners: listen(on => {
+            on(
+              userModel.logIn,
+              (actions, payload, { dispatch, getState, meta, injections }) => {
+                expect(payload).toEqual({ username: 'foo', password: 'bar' })
+                expect(getState()).toEqual({
+                  user: {
+                    token: '',
+                  },
+                  audit: { logs: [] },
+                })
+                expect(dispatch).toBe(store.dispatch)
+                expect(meta).toEqual({
+                  parent: ['audit'],
+                  path: ['audit', 'userListeners'],
+                })
+                expect(injections).toEqual(expectedInjections)
+                actions.add('User logged in')
+              },
+            )
+            on(userModel.logOut, actions => {
+              actions.add('User logged out')
             })
           }),
         },

@@ -26,6 +26,7 @@ const effectSymbol = '__effect__'
 const thunkSymbol = '__thunk__'
 const listenersSymbol = '__listeners__'
 const listenSymbol = '__listen__'
+const metaSymbol = '__meta__'
 const selectSymbol = '__select__'
 const selectImpSymbol = '__selectImp__'
 const selectDependenciesSymbol = '__selectDependencies__'
@@ -129,7 +130,7 @@ export const createStore = (model, options = {}) => {
   const listenDefinitions = []
   const listenDict = {}
 
-  const dispatchListenersForAction = (actionName, payload, meta) => {
+  const dispatchListenersForAction = (actionName, payload) => {
     const listenersForAction = listenerDict[actionName]
     const listensForAction = listenDict[actionName]
     return Promise.all([
@@ -148,12 +149,16 @@ export const createStore = (model, options = {}) => {
       listensForAction && listensForAction.length > 0
         ? Promise.all(
             listensForAction.map(listenForAction =>
-              listenForAction(get(meta.parentPath, actionCreators), payload, {
-                dispatch: references.dispatch,
-                getState: references.getState,
-                injections,
-                meta,
-              }),
+              listenForAction(
+                get(listenForAction[metaSymbol].parent, actionCreators),
+                payload,
+                {
+                  dispatch: references.dispatch,
+                  getState: references.getState,
+                  injections,
+                  meta: listenForAction[metaSymbol],
+                },
+              ),
             ),
           )
         : Promise.resolve(),
@@ -240,7 +245,6 @@ export const createStore = (model, options = {}) => {
                 dispatchListenersForAction(
                   actionCreator[actionNameSymbol],
                   payload,
-                  meta,
                 )
                 return result
               })
@@ -253,6 +257,7 @@ export const createStore = (model, options = {}) => {
           listenerDefinitions.push(value)
         } else if (value[listenSymbol]) {
           listenDefinitions.push(value)
+          value[metaSymbol] = meta
         } else {
           const actionName = `@action.${path.join('.')}`
           value[actionNameSymbol] = actionName
@@ -275,11 +280,7 @@ export const createStore = (model, options = {}) => {
               type: action.actionName,
               payload,
             })
-            dispatchListenersForAction(
-              actionCreator[actionNameSymbol],
-              payload,
-              meta,
-            )
+            dispatchListenersForAction(actionCreator[actionNameSymbol], payload)
             return result
           }
           actionCreator[actionNameSymbol] = actionName
@@ -312,14 +313,16 @@ export const createStore = (model, options = {}) => {
       if (
         typeof action === 'function' &&
         action[actionNameSymbol] &&
-        actionCreatorDict[action[actionNameSymbol]]
+        actionCreatorDict[action[actionNameSymbol]] &&
+        typeof thunkHandler === 'function'
       ) {
+        thunkHandler[metaSymbol] = def[metaSymbol]
         listenDict[action[actionNameSymbol]] =
           listenDict[action[actionNameSymbol]] || []
         listenDict[action[actionNameSymbol]].push(thunkHandler)
       }
     }
-    def(actionCreators, on)
+    def(on)
   })
 
   listenerDefinitions.forEach(def => {
