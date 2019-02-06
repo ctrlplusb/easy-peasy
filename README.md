@@ -116,7 +116,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and it's actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with React.
+Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and its actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with React.
 
 <p>&nbsp;</p>
 
@@ -124,7 +124,7 @@ Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the bo
 
 ## Installation
 
-First, ensure you have the correct versions of React (i.e. a version that supports Hooks) installed.
+First, ensure you have the correct version of React installed - i.e. a version that supports Hooks.
 
 ```bash
 npm install react@^16.8.0
@@ -264,13 +264,13 @@ const store = createStore({
 });
 ```
 
-As you can see in the example above you can't modify the state directly within an `thunk` action, however, the `thunk` action is provided `actions`, which will contain all the actions scoped to where you applied the `thunk` to your model. This allows you to dispatch other actions to update the state where required.
+As you can see in the example above you can't modify the state directly within an `thunk` action, however, the `thunk` action is provided `actions`, which contains all the actions scoped to where the `thunk` exists on your model. This allows you to delegate to state updates to "normal" actions where required.
 
-> Note: If you want to dispatch actions from other branches of your model within your `thunk` action you can use the `dispatch` which is provided within the `helper` argument of the `thunk`. See the API docs for more information.
+> Note: If you want to dispatch actions that live within other branches of your model you can use the `dispatch` which is provided inside the `helper` argument. See the `thunk` API docs for more information.
 
 ### Dispatching a `thunk` action directly via the store
 
-You dispatch an thunk action in the same manner as a normal action. However, a `thunk` action always returns a `Promise` allowing you to chain in order to execute after the `thunk` has completed.
+You can dispatch a thunk action in the same manner as a normal action. However, a `thunk` action always returns a `Promise` allowing you to chain in order to execute after the `thunk` has completed.
 
 ```javascript
 store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
@@ -536,7 +536,7 @@ Creates a Redux store based on the given model. The model must be an object and 
 
     - `disableInternalSelectFnMemoize` (bool, not required, default=false)
 
-      Setting this to `true` will disable the automatic memoisation of a fn that you may return in any of your [`select`](#selectselector) implementations. Please see the respective helpers documentation for more information.
+      Setting this to `true` will disable the automatic memoisation of a fn that you may return in any of your [`select`](#selectselector) implementations. Please see the [`select`](#selectselector) documentation for more information.
 
     - `initialState` (Object, not required, default=undefined)
 
@@ -619,15 +619,15 @@ store.dispatch.user.preferences.changeBackgroundColor('#FFF');
 
 ### thunk(action)
 
-Declares a thunk on your model. Allows you to perform effects such as data fetching and persisting.
+Declares a thunk action on your model. Allows you to perform effects such as data fetching and persisting.
 
 #### Arguments
 
   - action (Function, required)
 
-    The thunk action definition. It can be asynchronous, e.g. return a Promise or use async/await. Thunk actions cannot modify state directly, however, they can dispatch other actions to do so.
+    The thunk action definition. A thunk typically encapsulates side effects (e.g. calls to an API). It can be asynchronous - i.e. use Promises or async/await. Thunk actions cannot modify state directly, however, they can dispatch other actions to do so.
 
-    It accepts the following arguments:
+    It receives the following arguments:
 
     - `actions` (required)
 
@@ -691,7 +691,7 @@ import { createStore, thunk } from 'easy-peasy'; // 👈 import then helper
 const store = createStore({
   session: {
     user: undefined,
-    // 👇 define your effectful action
+    // 👇 define your thunk action
     login: thunk(async (actions, payload) => {
       const user = await loginService(payload)
       actions.loginSucceeded(user)
@@ -702,12 +702,12 @@ const store = createStore({
   }
 });
 
-// 👇 you can dispatch and await on the effectful actions
+// 👇 you can dispatch and await on the thunk action
 store.dispatch.session.login({
   username: 'foo',
   password: 'bar'
 })
-// 👇 effectful actions _always_ return a Promise
+// 👇 thunk actions _always_ return a Promise
 .then(() => console.log('Logged in'));
 
 ```
