@@ -7,7 +7,7 @@ import {
 } from 'redux'
 import memoizerific from 'memoizerific'
 import produce, { setAutoFreeze } from 'immer'
-import thunk from 'redux-thunk'
+import reduxThunk from 'redux-thunk'
 import { isStateObject } from './lib'
 
 /**
@@ -23,6 +23,7 @@ const maxSelectFnMemoize = 100
 
 const actionNameSymbol = '__actionName__'
 const effectSymbol = '__effect__'
+const thunkSymbol = '__thunk__'
 const listenersSymbol = '__listeners__'
 const selectSymbol = '__select__'
 const selectImpSymbol = '__selectImp__'
@@ -49,8 +50,22 @@ const tick = () => new Promise(resolve => setTimeout(resolve))
 const startsWith = (target, search) =>
   target.substr(0, search.length) === search
 
+let notifiedAboutEffectDeprecation = false
+
 export const effect = fn => {
+  if (!notifiedAboutEffectDeprecation) {
+    notifiedAboutEffectDeprecation = true
+    // eslint-disable-next-line no-console
+    console.warn(
+      'Easy Peasy: warning we have deprecated the "effect" helper. It will be removed in the next major release. We recommend that you migrate to the "thunk" helper, which satisfies the same responsibilities.',
+    )
+  }
   fn[effectSymbol] = true
+  return fn
+}
+
+export const thunk = fn => {
+  fn[thunkSymbol] = true
   return fn
 }
 
@@ -97,7 +112,7 @@ export const createStore = (model, options = {}) => {
 
   const references = {}
   const defaultState = {}
-  const actionEffects = {}
+  const actionThunks = {}
   const actionCreators = {}
   const actionCreatorDict = {}
   const actionReducers = {}
@@ -131,6 +146,42 @@ export const createStore = (model, options = {}) => {
           // skip
           value[selectStateSymbol] = { parentPath, key, executed: false }
           selectorReducers.push(value)
+        } else if (value[thunkSymbol]) {
+          // Thunk Action
+          const actionName = `@thunk.${path.join('.')}`
+          const action = payload => {
+            return value(get(parentPath, actionCreators), payload, {
+              dispatch: references.dispatch,
+              getState: references.getState,
+              injections,
+              meta: {
+                parent: parentPath,
+                path,
+              },
+            })
+          }
+          set(path, actionThunks, action)
+
+          // Thunk Action Creator
+          const actionCreator = payload =>
+            tick()
+              .then(() =>
+                references.dispatch({
+                  type: `${actionName}(started)`,
+                  payload,
+                }),
+              )
+              .then(() => references.dispatch(() => action(payload)))
+              .then(result => {
+                references.dispatch({
+                  type: `${actionName}(completed)`,
+                  payload,
+                })
+                return result
+              })
+          actionCreator[actionNameSymbol] = actionName
+          actionCreatorDict[actionName] = actionCreator
+          set(path, actionCreators, actionCreator)
         } else if (value[effectSymbol]) {
           // Effect Action
           const actionName = `@effect.${path.join('.')}`
@@ -152,8 +203,6 @@ export const createStore = (model, options = {}) => {
               },
             )
           }
-          action.actionName = actionName
-          set(path, actionEffects, action)
 
           // Effect Action Creator
           const actionCreator = payload =>
@@ -367,7 +416,7 @@ export const createStore = (model, options = {}) => {
   const store = reduxCreateStore(
     reducerEnhancer(reducers),
     defaultState,
-    composeEnhancers(applyMiddleware(thunk, ...middleware)),
+    composeEnhancers(applyMiddleware(reduxThunk, ...middleware)),
   )
 
   // attach the action creators to dispatch
