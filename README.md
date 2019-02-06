@@ -993,7 +993,7 @@ const store = createStore({
 </p>
 </details>
 
-## listen(on)
+### listen(on)
 
 Allows you to attach listeners to any normal or thunk action. Listeners are themselves thunks, and will be executed after the targetted action successfully completes its execution.
 
