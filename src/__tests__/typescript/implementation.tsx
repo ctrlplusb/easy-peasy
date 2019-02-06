@@ -1,21 +1,23 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import {
-  createStore,
-  effect,
-  listeners,
-  reducer,
-  select,
-  StoreProvider,
-  useAction,
-  useStore,
   Action,
+  createStore,
   Dispatch,
+  effect,
   Effect,
+  listeners,
   Listeners,
+  reducer,
   Reducer,
+  select,
   Select,
   State,
+  StoreProvider,
+  thunk,
+  Thunk,
+  useAction,
+  useStore,
 } from 'easy-peasy'
 import { connect } from 'react-redux'
 
@@ -36,7 +38,7 @@ interface TodosModel {
 interface UserModel {
   token?: string
   loggedIn: Action<UserModel, string>
-  login: Effect<Model, { username: string; password: string }>
+  login: Thunk<UserModel, { username: string; password: string }>
 }
 
 interface AuditModel {
@@ -89,7 +91,7 @@ const store = createStore<Model>({
     loggedIn: (state, payload) => {
       state.token = payload
     },
-    login: effect(async (dispatch, payload) => {
+    login: thunk(async (actions, payload) => {
       const response = await fetch('/login', {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -98,7 +100,7 @@ const store = createStore<Model>({
         },
       })
       const { token } = await response.json()
-      dispatch.user.loggedIn(token)
+      actions.loggedIn(token)
     }),
   },
   counter: reducer((state = 0, action) => {
