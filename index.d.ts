@@ -32,16 +32,20 @@ type NaturalState =
   | string
   | undefined
 
-type ActionTypes = Action<any, any> | Effect<any, any, any, any>
+type ActionTypes =
+  | Action<any, any>
+  | Thunk<any, any, any, any, any>
+  | Effect<any, any, any, any>
 
 type UtilTypes =
   | Select<any, any>
   | Reducer<any>
-  | Action<any, any>
+  | Thunk<any, any, any, any, any>
   | Effect<any, any, any, any>
+  | Action<any, any>
   | Function
 
-type EffectMeta = {
+type Meta = {
   path: string[]
   parent: string[]
 }
@@ -142,6 +146,63 @@ export type Store<Model> = Overwrite<
 >
 
 /**
+ * A thunk type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Thunk } from 'easy-peasy';
+ *
+ * interface TodosModel {
+ *   todos: Array<string>;
+ *   addTodo: Effect<TodosModel, string>;
+ * }
+ */
+export type Thunk<
+  Model extends Object = {},
+  Payload = void,
+  Injections = void,
+  StoreModel extends Object = {},
+  Result = void
+> = (
+  actions: Actions<Model>,
+  payload: Payload,
+  helpers: {
+    dispatch: Dispatch<StoreModel>
+    getState: () => State<StoreModel>
+    injections: Injections
+    meta: Meta
+  },
+) => Result
+
+/**
+ * Declares an thunk action type against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#thunkaction
+ *
+ * @example
+ *
+ * import { thunk } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   login: thunk(async (actions, payload) => {
+ *    const user = await loginService(payload);
+ *    actions.loginSucceeded(user);
+ *  })
+ * });
+ */
+export function thunk<
+  Model extends Object = {},
+  Payload = void,
+  Injections = void,
+  StoreModel extends Object = {},
+  Result = void
+>(
+  effect: Thunk<Model, Payload, Injections, StoreModel, Result>,
+): Thunk<Model, Payload, Injections, StoreModel, Result>
+
+/**
  * An effect type.
  *
  * Useful when declaring your model.
@@ -156,22 +217,20 @@ export type Store<Model> = Overwrite<
  * }
  */
 export type Effect<
-  Model extends Object = {},
+  StoreModel extends Object = {},
   Payload = void,
   Injections = void,
   Result = void
 > = (
-  dispatch: Dispatch<Model>,
+  dispatch: Dispatch<StoreModel>,
   payload: Payload,
-  getState: () => State<Model>,
+  getState: () => State<StoreModel>,
   injections: Injections,
-  meta: EffectMeta,
+  meta: Meta,
 ) => Result
 
 /**
  * Declares an effect action type against your model.
- *
- * https://github.com/ctrlplusb/easy-peasy#effectaction
  *
  * @example
  *
@@ -206,11 +265,14 @@ export function effect<
  *   userListeners: Listeners<Model>;
  * }
  */
-export type Listeners<Model extends Object = {}> = (
-  actions: Actions<Model>,
+export type Listeners<StoreModel extends Object = {}> = (
+  actions: Actions<StoreModel>,
   attach: <ActionType>(
     action: ActionType,
-    listener: (dispatch: Dispatch<Model>, payload: Param0<ActionType>) => any,
+    listener: (
+      dispatch: Dispatch<StoreModel>,
+      payload: Param0<ActionType>,
+    ) => any,
   ) => void,
 ) => void
 

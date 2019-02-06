@@ -52,16 +52,17 @@ function TodoList() {
 
   - Quick, easy, fun
   - Supports Typescript
-  - Update state via simple mutations
+  - Update state via mutations that auto convert to immutable updates
   - Derived state
-  - "Effect" actions for data fetching/persisting
-  - Provides [React Hooks](https://reactjs.org/docs/hooks-intro.html)
+  - Thunks for data fetching/persisting
+  - Includes hooks for React integration
   - Supports React Native
   - Powered by Redux with full interop
+    - All the best of Redux, without the boilerplate
     - Redux Dev Tools support
-    - provide custom middleware
-    - customise root reducer enhancer
-    - easy migration path for traditional styled Redux apps
+    - Custom middleware
+    - Customise root reducer enhancer
+    - Easy migration path for traditional styled Redux apps
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -80,8 +81,8 @@ function TodoList() {
     - [Accessing state directly via the store](#accessing-state-directly-via-the-store)
     - [Modifying state via actions](#modifying-state-via-actions)
     - [Dispatching actions directly via the store](#dispatching-actions-directly-via-the-store)
-    - [Creating an `effect` action](#creating-an-effect-action)
-    - [Dispatching an `effect` action directly via the store](#dispatching-an-effect-action-directly-via-the-store)
+    - [Creating a `thunk` action](#creating-a-thunk-action)
+    - [Dispatching a `thunk` action directly via the store](#dispatching-a-thunk-action-directly-via-the-store)
     - [Deriving state via `select`](#deriving-state-via-select)
     - [Accessing Derived State directly via the store](#accessing-derived-state)
     - [Final notes](#final-notes)
@@ -96,13 +97,15 @@ function TodoList() {
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
-    - [effect(action)](#effectaction)
+    - [thunk(action)](#thunkaction)
     - [reducer(fn)](#reducerfn)
     - [select(selector)](#selectselector)
     - [listeners(attach)](#listenersattach)
     - [StoreProvider](#storeprovider)
     - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useAction(mapAction)](#useactionmapaction)
+  - [Deprecated API](#deprecated-api)
+    - [effect(action)](#effectaction)
   - [Tips and Tricks](#tips-and-tricks)
     - [Generalising effects/actions/state via helpers](#generalising-effectsactionsstate-via-helpers)
   - [Prior Art](#prior-art)
@@ -233,25 +236,25 @@ store.getState().todos.items;
 // ['Install easy-peasy']
 ```
 
-### Creating an `effect` action
+### Creating a `thunk` action
 
-If you wish to perform side effects, such as fetching or persisting data from your server then you can use the `effect` helper to declare an effectful action.
+If you wish to perform side effects, such as fetching or persisting data from your server then you can use the `thunk` helper to declare a thunk action.
 
 ```javascript
-import { effect } from 'easy-peasy'; // 👈 import the helper
+import { thunk } from 'easy-peasy'; // 👈 import the helper
 
 const store = createStore({
   todos: {
     items: [],
 
-    //          👇 define an action surrounding it with the helper
-    saveTodo: effect(async (dispatch, payload, getState) => {
+    //          👇 define a thunk action via the helper
+    saveTodo: thunk(async (actions, payload) => {
       //                      👆
-      // Notice that an effect will receive the actions allowing you to dispatch
+      // Notice that the thunk will receive the actions allowing you to dispatch
       // other actions after you have performed your side effect.
       const saved = await todoService.save(payload);
       // 👇 Now we dispatch an action to add the saved item to our state
-      dispatch.todos.todoSaved(saved);
+      actions.todoSaved(saved);
     }),
 
     todoSaved: (state, payload) => {
@@ -261,11 +264,13 @@ const store = createStore({
 });
 ```
 
-As you can see in the example above you can't modify the state directly within an `effect` action, however, the `effect` action is provided `dispatch`, allowing you dispatch actions to update the state where required.
+As you can see in the example above you can't modify the state directly within an `thunk` action, however, the `thunk` action is provided `actions`, which will contain all the actions scoped to where you applied the `thunk` to your model. This allows you to dispatch other actions to update the state where required.
 
-### Dispatching an `effect` action directly via the store
+> Note: If you want to dispatch actions from other branches of your model within your `thunk` action you can use the `dispatch` which is provided within the `helper` argument of the `thunk`. See the API docs for more information.
 
-You dispatch an effectful action in the same manner as a normal action. However, an `effect` action always returns a Promise allowing you to chain commands to execute after the `effect` action has completed.
+### Dispatching a `thunk` action directly via the store
+
+You dispatch an thunk action in the same manner as a normal action. However, a `thunk` action always returns a `Promise` allowing you to chain in order to execute after the `thunk` has completed.
 
 ```javascript
 store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
@@ -612,78 +617,84 @@ store.dispatch.todos.add('Install easy-peasy');
 store.dispatch.user.preferences.changeBackgroundColor('#FFF');
 ```
 
-### effect(action)
+### thunk(action)
 
-Declares an action on your model as being effectful. i.e. has asynchronous flow.
+Declares a thunk on your model. Allows you to perform effects such as data fetching and persisting.
 
 #### Arguments
 
   - action (Function, required)
 
-    The action function to execute the effects. It can be asynchronous, e.g. return a Promise or use async/await. Effectful actions cannot modify state, however, they can dispatch other actions providing fetched data for example in order to update the state.
+    The thunk action definition. It can be asynchronous, e.g. return a Promise or use async/await. Thunk actions cannot modify state directly, however, they can dispatch other actions to do so.
 
     It accepts the following arguments:
 
-    - `dispatch` (required)
+    - `actions` (required)
 
-      The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
+      The actions that are bound to same section of your model as the thunk. This allows you to dispatch another action to update state for example.
 
     - `payload` (Any, not required)
 
       The payload, if any, that was provided to the action.
 
-    - `getState` (Function, required)
+    - `helpers` (Object, required)
 
-      When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
+      Contains a set of helpers which may be useful in advanced cases. The object contains the following properties:
 
-    - `injections` (Any, not required, default=undefined)
+      - `dispatch` (required)
 
-      Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+        The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
 
-    - `meta` (Object, required)
+      - `getState` (Function, required)
 
-      This object contains meta information related to the effect. Specifically it contains the following properties:
+        When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
 
-        - parent (Array, string, required)
+      - `injections` (Any, not required, default=undefined)
 
-          An array representing the path of the parent to the action.
+        Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
 
-        - path (Array, string, required)
+      - `meta` (Object, required)
 
-          An array representing the path to the action.
+        This object contains meta information related to the effect. Specifically it contains the following properties:
 
-      This can be represented via the following example:
+          - parent (Array, string, required)
 
-      ```javascript
-      const store = createStore({
-        products: {
-          fetchById: effect((dispatch, payload, getState, injections, meta) => {
-            console.log(meta);
-            // {
-            //   parent: ['products'],
-            //   path: ['products', 'fetchById']
-            // }
-          })
-        }
-      });
+            An array representing the path of the parent to the action.
 
-      await store.dispatch.products.fetchById()
-      ```
+          - path (Array, string, required)
 
-When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
+            An array representing the path to the action.
+
+        This can be represented via the following example:
+
+        ```javascript
+        const store = createStore({
+          products: {
+            fetchById: thunk((dispatch, payload, { meta }) => {
+              console.log(meta);
+              // {
+              //   parent: ['products'],
+              //   path: ['products', 'fetchById']
+              // }
+            })
+          }
+        });
+        ```
+
+When your model is processed by Easy Peasy to create your store all of your thunk actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the examples below.
 
 #### Example
 
 ```javascript
-import { createStore, effect } from 'easy-peasy'; // 👈 import then helper
+import { createStore, thunk } from 'easy-peasy'; // 👈 import then helper
 
 const store = createStore({
   session: {
     user: undefined,
     // 👇 define your effectful action
-    login: effect(async (dispatch, payload) => {
+    login: thunk(async (actions, payload) => {
       const user = await loginService(payload)
-      dispatch.session.loginSucceeded(user)
+      actions.loginSucceeded(user)
     }),
     loginSucceeded: (state, payload) => {
       state.user = payload
@@ -704,13 +715,13 @@ store.dispatch.session.login({
 #### Example accessing State via the getState parameter
 
 ```javascript
-import { createStore, effect } from 'easy-peasy';
+import { createStore, thunk } from 'easy-peasy';
 
 const store = createStore({
   foo: 'bar',
   // getState allows you to gain access to the  store's state
   //                                               👇
-  doSomething: effect(async (dispatch, payload, getState, injections) => {
+  doSomething: thunk(async (dispatch, payload, { getState }) => {
     // Calling it exposes the root state of your store. i.e. the full
     // store state 👇
     console.log(getState())
@@ -721,6 +732,32 @@ const store = createStore({
 store.dispatch.doSomething()
 ```
 
+#### Example dispatching an action from another part of the model
+
+```javascript
+import { createStore, thunk } from 'easy-peasy';
+
+const store = createStore({
+  audit: {
+    logs: [],
+    add: (state, payload) => {
+      audit.logs.push(payload);
+    }
+  },
+  todos: {
+    // dispatch allows you to gain access to the store's dispatch
+    //                                      👇
+    saveTodo: thunk((actions, payload, { dispatch }) => {
+      // ...
+      dispatch.audit.add('Added a todo');
+    })
+  }
+});
+
+store.dispatch.todos.saveTodo('foo');
+```
+
+We don't recommned doing this, and instead encourage you to use the `listeners` helper to invert responsibilites. However, there may be cases in which you need to do the above.
 
 #### Example with Dependency Injection
 
@@ -731,8 +768,8 @@ import api from './api' // 👈 a dependency we want to inject
 const store = createStore(
   {
     foo: 'bar',
-    //                              injections are exposed here 👇
-    doSomething: effect(async (dispatch, payload, getState, injections) => {
+    //                       injections are exposed here 👇
+    doSomething: effect(async (dispatch, payload, { injections }) => {
       const { api } = injections
       await api.foo()
     }),
@@ -1168,6 +1205,150 @@ const EditTodo = ({ todo }) => {
     </div>
   );
 };
+```
+
+<p>&nbsp;</p>
+
+---
+
+## Deprecated API
+
+Below is an overview of the deprecated APIs exposed by Easy Peasy. These will be removed in the next major release.
+
+### effect(action)
+
+Declares an action on your model as being effectful. i.e. has asynchronous flow.
+
+#### Arguments
+
+  - action (Function, required)
+
+    The action function to execute the effects. It can be asynchronous, e.g. return a Promise or use async/await. Effectful actions cannot modify state, however, they can dispatch other actions providing fetched data for example in order to update the state.
+
+    It accepts the following arguments:
+
+    - `dispatch` (required)
+
+      The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
+
+    - `payload` (Any, not required)
+
+      The payload, if any, that was provided to the action.
+
+    - `getState` (Function, required)
+
+      When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
+
+    - `injections` (Any, not required, default=undefined)
+
+      Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+
+    - `meta` (Object, required)
+
+      This object contains meta information related to the effect. Specifically it contains the following properties:
+
+        - parent (Array, string, required)
+
+          An array representing the path of the parent to the action.
+
+        - path (Array, string, required)
+
+          An array representing the path to the action.
+
+      This can be represented via the following example:
+
+      ```javascript
+      const store = createStore({
+        products: {
+          fetchById: effect((dispatch, payload, getState, injections, meta) => {
+            console.log(meta);
+            // {
+            //   parent: ['products'],
+            //   path: ['products', 'fetchById']
+            // }
+          })
+        }
+      });
+
+      await store.dispatch.products.fetchById()
+      ```
+
+When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
+
+#### Example
+
+```javascript
+import { createStore, effect } from 'easy-peasy'; // 👈 import then helper
+
+const store = createStore({
+  session: {
+    user: undefined,
+    // 👇 define your effectful action
+    login: effect(async (dispatch, payload) => {
+      const user = await loginService(payload)
+      dispatch.session.loginSucceeded(user)
+    }),
+    loginSucceeded: (state, payload) => {
+      state.user = payload
+    }
+  }
+});
+
+// 👇 you can dispatch and await on the effectful actions
+store.dispatch.session.login({
+  username: 'foo',
+  password: 'bar'
+})
+// 👇 effectful actions _always_ return a Promise
+.then(() => console.log('Logged in'));
+
+```
+
+#### Example accessing State via the getState parameter
+
+```javascript
+import { createStore, effect } from 'easy-peasy';
+
+const store = createStore({
+  foo: 'bar',
+  // getState allows you to gain access to the  store's state
+  //                                               👇
+  doSomething: effect(async (dispatch, payload, getState, injections) => {
+    // Calling it exposes the root state of your store. i.e. the full
+    // store state 👇
+    console.log(getState())
+    // { foo: 'bar' }
+  }),
+});
+
+store.dispatch.doSomething()
+```
+
+
+#### Example with Dependency Injection
+
+```javascript
+import { createStore, effect } from 'easy-peasy';
+import api from './api' // 👈 a dependency we want to inject
+
+const store = createStore(
+  {
+    foo: 'bar',
+    //                              injections are exposed here 👇
+    doSomething: effect(async (dispatch, payload, getState, injections) => {
+      const { api } = injections
+      await api.foo()
+    }),
+  },
+  {
+    // 👇 specify the injections parameter when creating your store
+    injections: {
+      api,
+    }
+  }
+);
+
+store.dispatch.doSomething()
 ```
 
 <p>&nbsp;</p>
