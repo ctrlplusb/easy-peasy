@@ -15,6 +15,8 @@ import {
   thunk,
   useStore,
   useAction,
+  useActions,
+  useDispatch,
   listeners,
   listen,
 } from '../index'
@@ -44,6 +46,25 @@ describe('react', () => {
 
   afterEach(() => {
     jest.useRealTimers()
+  })
+
+  test('exposes dispatch', () => {
+    // arrange
+    const store = createStore({ foo: 'bar' })
+
+    function MyComponent() {
+      const dispatch = useDispatch()
+      // assert
+      expect(dispatch).toBe(store.dispatch)
+      return null
+    }
+
+    // act
+    render(
+      <StoreProvider store={store}>
+        <MyComponent />
+      </StoreProvider>,
+    )
   })
 
   test('maps state when prop dependency changes', async () => {
@@ -189,7 +210,7 @@ describe('react', () => {
       const renderSpy = jest.fn()
       function Counter() {
         const count = useStore(state => state.count)
-        const inc = useAction(actions => actions.inc)
+        const inc = useActions(actions => actions.inc)
         renderSpy()
         return (
           <button data-testid="count" type="button" onClick={inc}>
