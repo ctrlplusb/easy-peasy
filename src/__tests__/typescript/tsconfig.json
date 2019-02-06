@@ -4,6 +4,7 @@
     "jsx": "react",
     "strict": true,
     "baseUrl": "../../..",
+    "skipLibCheck": true,
     "paths": {
       "easy-peasy": ["index.d.ts"]
     }
