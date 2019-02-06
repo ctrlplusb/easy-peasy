@@ -1388,7 +1388,7 @@ describe('listeners', () => {
   })
 })
 
-describe.only('listen', () => {
+describe('listen', () => {
   it('work as expected', async () => {
     // arrange
     const expectedInjections = { foo: 'bar' }
