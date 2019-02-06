@@ -3,6 +3,7 @@
 
 import 'jest-dom/extend-expect'
 import React from 'react'
+import { act } from 'react-dom/test-utils'
 import { render, cleanup, fireEvent } from 'react-testing-library'
 
 import {
@@ -63,7 +64,11 @@ describe('react', () => {
     )
 
     // act
-    const { getByTestId, rerender } = render(app)
+    let renderResult
+    act(() => {
+      renderResult = render(app)
+    })
+    const { getByTestId, rerender } = renderResult
 
     // assert
     const value = getByTestId('value')
@@ -75,16 +80,20 @@ describe('react', () => {
         <Values id={2} />
       </StoreProvider>
     )
-    rerender(app2)
+    act(() => {
+      rerender(app2)
+    })
 
     // assert
     expect(value.firstChild.textContent).toBe('foo')
 
     // We have to flush the change with an extra render
-    rerender(app2)
+    act(() => {
+      rerender(app2)
 
-    // ensure settimeouts fire
-    jest.runAllTimers()
+      // ensure settimeouts fire
+      jest.runAllTimers()
+    })
 
     // assert
     expect(value.firstChild.textContent).toBe('bar')
@@ -112,10 +121,9 @@ describe('react', () => {
     )
 
     // act
-    const { rerender } = render(app)
-
-    // this triggers the effect to fire
-    rerender(app)
+    act(() => {
+      render(app)
+    })
 
     // assert
     expect(renderSpy).toBeCalledTimes(1)
@@ -125,7 +133,9 @@ describe('react', () => {
     store.dispatch.inc()
 
     // ensure settimeouts fire
-    jest.runAllTimers()
+    act(() => {
+      jest.runAllTimers()
+    })
 
     // assert
     expect(renderSpy).toBeCalledTimes(2)
@@ -153,7 +163,11 @@ describe('react', () => {
     )
 
     // act
-    const { unmount } = render(app)
+    let renderResult
+    act(() => {
+      renderResult = render(app)
+    })
+    const { unmount } = renderResult
 
     // assert
     expect(unsubscribeSpy).toBeCalledTimes(0)
@@ -162,13 +176,17 @@ describe('react', () => {
     store.dispatch.inc()
 
     // ensure settimeouts fire
-    jest.runAllTimers()
+    act(() => {
+      jest.runAllTimers()
+    })
 
     // assert
     expect(unsubscribeSpy).toBeCalledTimes(0)
 
     // act
-    unmount()
+    act(() => {
+      unmount()
+    })
 
     // assert
     expect(unsubscribeSpy).toBeCalledTimes(1)
@@ -202,10 +220,11 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId, rerender } = render(app)
-
-      // this triggers the effect to fire
-      rerender(app)
+      let renderResult
+      act(() => {
+        renderResult = render(app)
+      })
+      const { getByTestId } = renderResult
 
       // assert
       const countButton = getByTestId('count')
@@ -213,10 +232,11 @@ describe('react', () => {
       expect(renderSpy).toHaveBeenCalledTimes(1)
 
       // act
-      fireEvent.click(countButton)
-
-      // ensure settimeouts fire
-      jest.runAllTimers()
+      act(() => {
+        fireEvent.click(countButton)
+        // ensure settimeouts fire
+        jest.runAllTimers()
+      })
 
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
@@ -245,10 +265,11 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId, rerender } = render(app)
-
-      // this triggers the effect to fire
-      rerender(app)
+      let renderResult
+      act(() => {
+        renderResult = render(app)
+      })
+      const { getByTestId } = renderResult
 
       // assert
       const countButton = getByTestId('count')
@@ -259,7 +280,9 @@ describe('react', () => {
       store.dispatch.updateSomethingElse('foo')
 
       // ensure settimeouts fire
-      jest.runAllTimers()
+      act(() => {
+        jest.runAllTimers()
+      })
 
       // assert
       expect(countButton.firstChild.textContent).toBe('1')
@@ -297,10 +320,11 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId, rerender } = render(app)
-
-      // this triggers the effect to fire
-      rerender(app)
+      let renderResult
+      act(() => {
+        renderResult = render(app)
+      })
+      const { getByTestId } = renderResult
 
       // assert
       const countButton = getByTestId('count')
@@ -308,10 +332,11 @@ describe('react', () => {
       expect(renderSpy).toHaveBeenCalledTimes(1)
 
       // act
-      fireEvent.click(countButton)
-
-      // ensure settimeouts fire
-      jest.runAllTimers()
+      act(() => {
+        fireEvent.click(countButton)
+        // ensure settimeouts fire
+        jest.runAllTimers()
+      })
 
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
@@ -342,10 +367,11 @@ describe('react', () => {
       )
 
       // act
-      const { getByTestId, rerender } = render(app)
-
-      // this triggers the effect to fire
-      rerender(app)
+      let renderResult
+      act(() => {
+        renderResult = render(app)
+      })
+      const { getByTestId } = renderResult
 
       // assert
       const countButton = getByTestId('count')
@@ -356,7 +382,9 @@ describe('react', () => {
       store.dispatch.updateSomethingElse('foo')
 
       // ensure settimeouts fire
-      jest.runAllTimers()
+      act(() => {
+        jest.runAllTimers()
+      })
 
       // assert
       expect(countButton.firstChild.textContent).toBe('1')
