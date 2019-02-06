@@ -264,6 +264,58 @@ export function effect<
  * interface Model {
  *   userListeners: Listeners<Model>;
  * }
+ * 
+ * listen(on => {
+ *   on()
+ * })
+ */
+export type Listen<Model extends Object = {}, Injections = void, StoreModel extends Object = {}> = (
+  on: <ListenAction extends ActionTypes>(
+    action: ListenAction,
+    handler: Thunk<Model, Param1<ListenAction>, Injections, StoreModel>,
+  ) => void,
+) => void
+
+/**
+ * Declares action listeners against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#listenersattach
+ *
+ * @example
+ *
+ * import { listen } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   users: userModel,
+ *   audit: {
+ *     logs: [],
+ *     add: (state, payload) => {
+ *       state.logs.push(payload)
+ *     },
+ *     userListeners: listen((on) => {
+ *       on(userModel.login, (actions) => {
+ *          actions.add('User logged in');
+ *       });
+ *     })
+ *   }
+ * });
+ */
+export function listen<Model extends Object = {}>(
+  attach: Listen<Model>,
+): Listen<Model>
+
+/**
+ * Action listeners type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Listeners } from 'easy-peasy';
+ *
+ * interface Model {
+ *   userListeners: Listeners<Model>;
+ * }
  */
 export type Listeners<StoreModel extends Object = {}> = (
   actions: Actions<StoreModel>,

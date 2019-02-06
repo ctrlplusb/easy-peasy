@@ -25,6 +25,7 @@ const actionNameSymbol = '__actionName__'
 const effectSymbol = '__effect__'
 const thunkSymbol = '__thunk__'
 const listenersSymbol = '__listeners__'
+const listenSymbol = '__listen__'
 const selectSymbol = '__select__'
 const selectImpSymbol = '__selectImp__'
 const selectDependenciesSymbol = '__selectDependencies__'
@@ -86,6 +87,11 @@ export const listeners = fn => {
   return fn
 }
 
+export const listen = fn => {
+  fn[listenSymbol] = true
+  return fn
+}
+
 export const createStore = (model, options = {}) => {
   const {
     devTools = true,
@@ -120,44 +126,64 @@ export const createStore = (model, options = {}) => {
   const selectorReducers = []
   const listenerDefinitions = []
   const listenerDict = {}
+  const listenDefinitions = []
+  const listenDict = {}
 
-  const dispatchListenersForAction = (actionName, payload) => {
+  const dispatchListenersForAction = (actionName, payload, meta) => {
     const listenersForAction = listenerDict[actionName]
-    return listenersForAction && listenersForAction.length > 0
-      ? Promise.all(
-          listenersForAction.map(listenerForAction =>
-            listenerForAction(
-              references.dispatch,
-              payload,
-              references.getState,
-              injections,
+    const listensForAction = listenDict[actionName]
+    return Promise.all([
+      listenersForAction && listenersForAction.length > 0
+        ? Promise.all(
+            listenersForAction.map(listenerForAction =>
+              listenerForAction(
+                references.dispatch,
+                payload,
+                references.getState,
+                injections,
+              ),
             ),
-          ),
-        )
-      : Promise.resolve()
+          )
+        : Promise.resolve(),
+      listensForAction && listensForAction.length > 0
+        ? Promise.all(
+            listensForAction.map(listenForAction =>
+              listenForAction(get(meta.parentPath, actionCreators), payload, {
+                dispatch: references.dispatch,
+                getState: references.getState,
+                injections,
+                meta,
+              }),
+            ),
+          )
+        : Promise.resolve(),
+    ])
   }
 
   const extract = (current, parentPath) =>
     Object.keys(current).forEach(key => {
       const value = current[key]
       const path = [...parentPath, key]
+      const meta = {
+        parent: parentPath,
+        path,
+      }
       if (typeof value === 'function') {
         if (value[selectSymbol]) {
           // skip
           value[selectStateSymbol] = { parentPath, key, executed: false }
           selectorReducers.push(value)
         } else if (value[thunkSymbol]) {
-          // Thunk Action
           const actionName = `@thunk.${path.join('.')}`
+          value[actionNameSymbol] = actionName
+
+          // Thunk Action
           const action = payload => {
             return value(get(parentPath, actionCreators), payload, {
               dispatch: references.dispatch,
               getState: references.getState,
               injections,
-              meta: {
-                parent: parentPath,
-                path,
-              },
+              meta,
             })
           }
           set(path, actionThunks, action)
@@ -183,8 +209,10 @@ export const createStore = (model, options = {}) => {
           actionCreatorDict[actionName] = actionCreator
           set(path, actionCreators, actionCreator)
         } else if (value[effectSymbol]) {
-          // Effect Action
           const actionName = `@effect.${path.join('.')}`
+          value[actionNameSymbol] = actionName
+
+          // Effect Action
           const action = payload => {
             if (devTools) {
               references.dispatch({
@@ -212,6 +240,7 @@ export const createStore = (model, options = {}) => {
                 dispatchListenersForAction(
                   actionCreator[actionNameSymbol],
                   payload,
+                  meta,
                 )
                 return result
               })
@@ -222,9 +251,13 @@ export const createStore = (model, options = {}) => {
           customReducers.push({ path, reducer: value })
         } else if (value[listenersSymbol]) {
           listenerDefinitions.push(value)
+        } else if (value[listenSymbol]) {
+          listenDefinitions.push(value)
         } else {
-          // Reducer Action
           const actionName = `@action.${path.join('.')}`
+          value[actionNameSymbol] = actionName
+
+          // Reducer Action
           const action = (state, payload) =>
             produce(state, draft =>
               value(draft, payload, {
@@ -242,7 +275,11 @@ export const createStore = (model, options = {}) => {
               type: action.actionName,
               payload,
             })
-            dispatchListenersForAction(actionCreator[actionNameSymbol], payload)
+            dispatchListenersForAction(
+              actionCreator[actionNameSymbol],
+              payload,
+              meta,
+            )
             return result
           }
           actionCreator[actionNameSymbol] = actionName
@@ -268,6 +305,21 @@ export const createStore = (model, options = {}) => {
     selector[selectImpSymbol] = memoizerific(1)(state =>
       wrapFnWithMemoize(selector(state)),
     )
+  })
+
+  listenDefinitions.forEach(def => {
+    const on = (action, thunkHandler) => {
+      if (
+        typeof action === 'function' &&
+        action[actionNameSymbol] &&
+        actionCreatorDict[action[actionNameSymbol]]
+      ) {
+        listenDict[action[actionNameSymbol]] =
+          listenDict[action[actionNameSymbol]] || []
+        listenDict[action[actionNameSymbol]].push(thunkHandler)
+      }
+    }
+    def(actionCreators, on)
   })
 
   listenerDefinitions.forEach(def => {
