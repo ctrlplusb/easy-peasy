@@ -6,6 +6,8 @@ import {
   Dispatch,
   effect,
   Effect,
+  listen,
+  Listen,
   listeners,
   Listeners,
   reducer,
@@ -45,6 +47,7 @@ interface AuditModel {
   logs: string[]
   set: Action<AuditModel, string>
   userListeners: Listeners<Model>
+  newUserListeners: Listen<AuditModel>
   getNLog: Select<AuditModel, (n: number) => string | undefined>
 }
 
@@ -62,6 +65,23 @@ interface Model {
  * Note that as we pass the Model into the `createStore` function, so all of our
  * model definition is typed correctly, including inside the actions/helpers etc.
  */
+const userModel : UserModel = {
+  token: undefined,
+  loggedIn: (state, payload) => {
+    state.token = payload
+  },
+  login: thunk(async (actions, payload) => {
+    const response = await fetch('/login', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+    const { token } = await response.json()
+    actions.loggedIn(token)
+  }),
+}
 const store = createStore<Model>({
   audit: {
     logs: [],
@@ -76,6 +96,11 @@ const store = createStore<Model>({
     getNLog: select(state => (n: number) =>
       state.logs.length > n ? state.logs[n] : undefined,
     ),
+    newUserListeners: listen(on => {
+      on(userModel.login, (actions, payload) => {
+        actions.set(`Logging in ${payload.username}`)
+      })
+    })
   },
   todos: {
     items: [],
@@ -86,23 +111,7 @@ const store = createStore<Model>({
       state.items.push(payload)
     },
   },
-  user: {
-    token: undefined,
-    loggedIn: (state, payload) => {
-      state.token = payload
-    },
-    login: thunk(async (actions, payload) => {
-      const response = await fetch('/login', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      const { token } = await response.json()
-      actions.loggedIn(token)
-    }),
-  },
+  user: userModel,
   counter: reducer((state = 0, action) => {
     switch (action.type) {
       case 'COUNTER_INCREMENT':
