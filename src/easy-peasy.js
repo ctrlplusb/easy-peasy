@@ -83,7 +83,16 @@ export const reducer = fn => {
   return fn
 }
 
+let notifiedAboutListenersDeprecation = false
+
 export const listeners = fn => {
+  if (!notifiedAboutListenersDeprecation) {
+    notifiedAboutListenersDeprecation = true
+    // eslint-disable-next-line no-console
+    console.warn(
+      'Easy Peasy: warning we have deprecated the "listeners" helper. It will be removed in the next major release. We recommend that you migrate to the "listen" helper, which satisfies the same responsibilities.',
+    )
+  }
   fn[listenersSymbol] = true
   return fn
 }
