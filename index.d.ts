@@ -264,12 +264,16 @@ export function effect<
  * interface Model {
  *   userListeners: Listeners<Model>;
  * }
- * 
+ *
  * listen(on => {
  *   on()
  * })
  */
-export type Listen<Model extends Object = {}, Injections = void, StoreModel extends Object = {}> = (
+export type Listen<
+  Model extends Object = {},
+  Injections = void,
+  StoreModel extends Object = {}
+> = (
   on: <ListenAction extends ActionTypes>(
     action: ListenAction,
     handler: Thunk<Model, Param1<ListenAction>, Injections, StoreModel>,
@@ -510,6 +514,42 @@ export function useStore<Model extends Object = {}, Result = any>(
 export function useAction<Model extends Object = {}, Result = any>(
   mapAction: (actions: Dispatch<Model>) => Result,
 ): Result
+
+/**
+ * A React Hook allowing you to use actions within your component.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#useactionsmapactions
+ *
+ * @example
+ *
+ * import { useActions, Actions } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const addTodo = useAction((actions: Actions<StoreModel>) => actions.todos.add);
+ *   return <AddTodoForm save={addTodo} />;
+ * }
+ */
+export function useActions<StoreModel extends Object = {}, Result = any>(
+  mapActions: (actions: Actions<StoreModel>) => Result,
+): Result
+
+/**
+ * A React Hook allowing you to use the store's dispatch within your component.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#usedispatch
+ *
+ * @example
+ *
+ * import { useDispatch } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const dispatch = useDispatch();
+ *   return <AddTodoForm save={(todo) => dispatch({ type: 'ADD_TODO', payload: todo })} />;
+ * }
+ */
+export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
+  StoreModel
+>
 
 /**
  * Exposes the store to your app (and hooks).

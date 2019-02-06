@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import {
   Action,
+  Actions,
   createStore,
   Dispatch,
   effect,
@@ -19,6 +20,8 @@ import {
   thunk,
   Thunk,
   useAction,
+  useActions,
+  useDispatch,
   useStore,
 } from 'easy-peasy'
 import { connect } from 'react-redux'
@@ -65,7 +68,7 @@ interface Model {
  * Note that as we pass the Model into the `createStore` function, so all of our
  * model definition is typed correctly, including inside the actions/helpers etc.
  */
-const userModel : UserModel = {
+const userModel: UserModel = {
   token: undefined,
   loggedIn: (state, payload) => {
     state.token = payload
@@ -100,7 +103,7 @@ const store = createStore<Model>({
       on(userModel.login, (actions, payload) => {
         actions.set(`Logging in ${payload.username}`)
       })
-    })
+    }),
   },
   todos: {
     items: [],
@@ -160,6 +163,15 @@ function MyComponent() {
       sayHello: dispatch.sayHello,
     }),
   )
+  const { addTodo } = useActions((actions: Actions<Model>) => ({
+    addTodo: actions.todos.addTodo,
+  }))
+  addTodo('Install easy peasy')
+  const dispatch = useDispatch()
+  dispatch({
+    type: 'ADD_FOO',
+    payload: 'bar',
+  })
   printDebugInfo().then(result => {
     console.log(result + 'should_be_string')
   })

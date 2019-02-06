@@ -7,7 +7,7 @@ import {
   select,
   thunk,
 } from './easy-peasy'
-import { useStore, useAction } from './hooks'
+import { useStore, useAction, useActions, useDispatch } from './hooks'
 import StoreProvider from './provider'
 
 export {
@@ -20,5 +20,7 @@ export {
   StoreProvider,
   thunk,
   useAction,
+  useActions,
+  useDispatch,
   useStore,
 }

@@ -101,10 +101,12 @@ function TodoList() {
     - [listen(on)](#listenon)
     - [StoreProvider](#storeprovider)
     - [useStore(mapState, externals)](#usestoremapstate-externals)
-    - [useAction(mapAction)](#useactionmapaction)
+    - [useActions(mapActions)](#useactionsmapactions)
+    - [useDispatch](#usedispatch)
   - [Deprecated API](#deprecated-api)
     - [effect(action)](#effectaction)
     - [listeners(attach)](#listenersattach)
+    - [useAction(mapAction)](#useactionmapaction)
   - [Tips and Tricks](#tips-and-tricks)
     - [Generalising effects/actions/state via helpers](#generalising-effectsactionsstate-via-helpers)
   - [Prior Art](#prior-art)
@@ -1245,7 +1247,7 @@ const { productNames, total } = useStore(state => ({
 </p>
 </details>
 
-### useAction(mapAction)
+### useActions(mapActions)
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions.
 
@@ -1253,15 +1255,14 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
 <summary>Arguments</summary>
 <p>
 
-  - `mapAction` (Function, required)
+  - `mapActions` (Function, required)
 
-    The function that is used to resolved the action that your component requires. The function will receive the following arguments:
+    The function that is used to resolved the action(s) that your component requires. Your `mapActions` can either resolve single or multiple actions. The function will receive the following arguments:
 
-    - `dispatch` (Object, required)
+    - `actions` (Object, required)
 
-      The `dispatch` of your store, which has all the actions mapped against it.
+      The `actions` of your store.
 
-Your `mapAction` can either resolve a single action. If you wish to resolve multiple actions then you can either call `useAction` multiple times, or if you like resolve an object within your `mapAction` where each property of the object is a resolved action. The examples below will illustrate these options.
 </p>
 </details>
 
@@ -1271,11 +1272,11 @@ Your `mapAction` can either resolve a single action. If you wish to resolve mult
 
 ```javascript
 import { useState } from 'react';
-import { useAction } from 'easy-peasy';
+import { useActions } from 'easy-peasy';
 
 const AddTodo = () => {
   const [text, setText] = useState('');
-  const addTodo = useAction(dispatch => dispatch.todos.add);
+  const addTodo = useActions(actions => actions.todos.add);
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -1289,18 +1290,18 @@ const AddTodo = () => {
 </details>
 
 <details>
-<summary>Example resolving multiple actions via an object map</summary>
+<summary>Example resolving multiple actions</summary>
 <p>
 
 ```javascript
 import { useState } from 'react';
-import { useAction } from 'easy-peasy';
+import { useActions } from 'easy-peasy';
 
 const EditTodo = ({ todo }) => {
   const [text, setText] = useState(todo.text);
-  const { saveTodo, removeTodo } = useAction(dispatch => ({
-    saveTodo: dispatch.todos.save,
-    removeTodo: dispatch.todo.toggle
+  const { saveTodo, removeTodo } = useActions(actions => ({
+    saveTodo: actions.todos.save,
+    removeTodo: actions.todo.toggle
   }));
   return (
     <div>
@@ -1314,6 +1315,31 @@ const EditTodo = ({ todo }) => {
 
 </p>
 </details>
+
+### useDispatch()
+
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's dispatch.
+
+<details>
+<summary>Example</summary>
+<p>
+
+```javascript
+import { useState } from 'react';
+import { useDispatch } from 'easy-peasy';
+
+const AddTodo = () => {
+  const [text, setText] = useState('');
+  const dispatch = useDispatch();
+  return (
+    <div>
+      <input value={text} onChange={(e) => setText(e.target.value)} />
+      <button onClick={() => dispatch({ type: 'ADD_TODO', payload: text })}>Add</button>
+    </div>
+  );
+};
+```
+
 
 <p>&nbsp;</p>
 
@@ -1583,6 +1609,26 @@ const store = createStore({
 // 👇 the login effect will fire, and then any listeners will execute after complete
 store.dispatch.user.login({ username: 'mary', password: 'foo123' });
 ```
+</p>
+</details>
+
+### useAction(mapAction)
+
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions.
+
+<details>
+<summary>Arguments</summary>
+<p>
+
+  - `mapAction` (Function, required)
+
+    The function that is used to resolved the action that your component requires. The function will receive the following arguments:
+
+    - `dispatch` (Object, required)
+
+      The `dispatch` of your store, which has all the actions mapped against it.
+
+Your `mapAction` can either resolve a single action. If you wish to resolve multiple actions then you can either call `useAction` multiple times, or if you like resolve an object within your `mapAction` where each property of the object is a resolved action. The examples below will illustrate these options.
 </p>
 </details>
 

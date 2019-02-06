@@ -45,7 +45,18 @@ export function useStore(mapState, dependencies = []) {
   }, dependencies)
   return state
 }
+
 export function useAction(mapActions) {
   const store = useContext(EasyPeasyContext)
   return mapActions(store.dispatch)
+}
+
+export function useActions(mapActions) {
+  const store = useContext(EasyPeasyContext)
+  return mapActions(store.dispatch)
+}
+
+export function useDispatch() {
+  const store = useContext(EasyPeasyContext)
+  return store.dispatch
 }
