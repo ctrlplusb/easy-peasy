@@ -124,24 +124,24 @@ export interface EasyPeasyConfig<
  *
  * @example
  *
- * type DispatchWithActions = Dispatch<Model>;
+ * type DispatchWithActions = Dispatch<StoreModel>;
  */
 export type Dispatch<
-  Model,
+  StoreModel,
   Action extends ReduxAction = ReduxAction<any>
-> = Actions<Model> & ReduxDispatch<Action>
+> = Actions<StoreModel> & ReduxDispatch<Action>
 
 /**
  * Represents a Redux store, enhanced by easy peasy.
  *
  * @example
  *
- * type EnhancedReduxStore = Store<Model>;
+ * type EnhancedReduxStore = Store<StoreModel>;
  */
-export type Store<Model> = Overwrite<
-  ReduxStore<State<Model>>,
+export type Store<StoreModel> = Overwrite<
+  ReduxStore<State<StoreModel>>,
   {
-    dispatch: Dispatch<Model>
+    dispatch: Dispatch<StoreModel>
   }
 >
 
@@ -244,13 +244,13 @@ export type Effect<
  * });
  */
 export function effect<
-  Model extends Object = {},
+  StoreModel extends Object = {},
   Payload = any,
   Result = any,
   Injections = any
 >(
-  effect: Effect<Model, Payload, Result, Injections>,
-): Effect<Model, Payload, Result, Injections>
+  effect: Effect<StoreModel, Payload, Result, Injections>,
+): Effect<StoreModel, Payload, Result, Injections>
 
 /**
  * Action listeners type.
@@ -317,8 +317,8 @@ export function listen<Model extends Object = {}>(
  *
  * import { Listeners } from 'easy-peasy';
  *
- * interface Model {
- *   userListeners: Listeners<Model>;
+ * interface StoreModel {
+ *   userListeners: Listeners<StoreModel>;
  * }
  */
 export type Listeners<StoreModel extends Object = {}> = (
@@ -349,9 +349,9 @@ export type Listeners<StoreModel extends Object = {}> = (
  *   })
  * });
  */
-export function listeners<Model extends Object = {}>(
-  mapListeners: Listeners<Model>,
-): Listeners<Model>
+export function listeners<StoreModel extends Object = {}>(
+  mapListeners: Listeners<StoreModel>,
+): Listeners<StoreModel>
 
 /**
  * An action type.
@@ -461,22 +461,22 @@ export function reducer<State extends Object = {}>(
  *
  * import { createStore } from 'easy-peasy';
  *
- * interface Model {
+ * interface StoreModel {
  *   todos: {
  *     items: Array<string>;
  *   }
  * }
  *
- * const store = createStore<Model>({
+ * const store = createStore<StoreModel>({
  *   todos: {
  *     items: [],
  *   }
  * })
  */
-export function createStore<Model extends Object = {}>(
-  model: Model,
+export function createStore<StoreModel extends Object = {}>(
+  model: StoreModel,
   config?: EasyPeasyConfig,
-): Store<Model>
+): Store<StoreModel>
 
 /**
  * A React Hook allowing you to use state within your component.
@@ -488,12 +488,12 @@ export function createStore<Model extends Object = {}>(
  * import { useStore, State } from 'easy-peasy';
  *
  * function MyComponent() {
- *   const todos = useStore((state: State<Model>) => state.todos.items);
+ *   const todos = useStore((state: State<StoreModel>) => state.todos.items);
  *   return todos.map(todo => <Todo todo={todo} />);
  * }
  */
-export function useStore<Model extends Object = {}, Result = any>(
-  mapState: (state: State<Model>) => Result,
+export function useStore<StoreModel extends Object = {}, Result = any>(
+  mapState: (state: State<StoreModel>) => Result,
   dependencies?: Array<any>,
 ): Result
 
@@ -507,12 +507,12 @@ export function useStore<Model extends Object = {}, Result = any>(
  * import { useAction, Dispatch } from 'easy-peasy';
  *
  * function MyComponent() {
- *   const addTodo = useAction((dispatch: Dispatch<Model>) => dispatch.todos.add);
+ *   const addTodo = useAction((dispatch: Dispatch<StoreModel>) => dispatch.todos.add);
  *   return <AddTodoForm save={addTodo} />;
  * }
  */
-export function useAction<Model extends Object = {}, Result = any>(
-  mapAction: (actions: Dispatch<Model>) => Result,
+export function useAction<StoreModel extends Object = {}, Result = any>(
+  mapAction: (actions: Dispatch<StoreModel>) => Result,
 ): Result
 
 /**
@@ -552,6 +552,28 @@ export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
 >
 
 /**
+ * A utility function used to create pre-typed hooks.
+ *
+ * @example
+ * const { useActions, useStore, useDispatch } = createTypedHooks<StoreModel>();
+ *
+ * useActions(actions => actions.todo.add); // fully typed
+ */
+export function createTypedHooks<StoreModel extends Object = {}>(): {
+  useActions: <Result = any>(
+    mapActions: (actions: Actions<StoreModel>) => Result,
+  ) => Result
+  useAction: <Result = any>(
+    mapAction: (actions: Dispatch<StoreModel>) => Result,
+  ) => Result
+  useDispatch: () => Dispatch<StoreModel>
+  useStore: <Result = any>(
+    mapState: (state: State<StoreModel>) => Result,
+    dependencies?: Array<any>,
+  ) => Result
+}
+
+/**
  * Exposes the store to your app (and hooks).
  *
  * https://github.com/ctrlplusb/easy-peasy#storeprovider
@@ -566,6 +588,6 @@ export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
  *   </StoreProvider>
  * );
  */
-export class StoreProvider<Model = any> extends Component<{
-  store: Store<Model>
+export class StoreProvider<StoreModel = any> extends Component<{
+  store: Store<StoreModel>
 }> {}

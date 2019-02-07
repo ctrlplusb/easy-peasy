@@ -7,11 +7,18 @@ import {
   select,
   thunk,
 } from './easy-peasy'
-import { useStore, useAction, useActions, useDispatch } from './hooks'
+import {
+  createTypedHooks,
+  useStore,
+  useAction,
+  useActions,
+  useDispatch,
+} from './hooks'
 import StoreProvider from './provider'
 
 export {
   createStore,
+  createTypedHooks,
   effect,
   listeners,
   listen,

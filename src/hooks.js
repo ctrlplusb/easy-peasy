@@ -69,3 +69,12 @@ export function useDispatch() {
   const store = useContext(EasyPeasyContext)
   return store.dispatch
 }
+
+export function createTypedHooks() {
+  return {
+    useActions,
+    useAction,
+    useDispatch,
+    useStore,
+  }
+}
