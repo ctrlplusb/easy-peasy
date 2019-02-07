@@ -606,11 +606,9 @@ function MyComponent() {
   const token = useStore((state: State<Model>) =>
     state.user.token
   )
-
   const login = useActions((actions: Actions<Model>) =>
 	  actions.user.login,
   )
-
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>
       {token || 'Log in'}
@@ -627,25 +625,28 @@ The above can become a bit cumbersome - having to constantly provide your types 
 import {
   useStore as useStoreOriginal,
   useActions as useActionsOriginal,
+  State,
+  Actions,
   createStore
-} from 'easy-peasy'
+} from "easy-peasy";
+import model, { Model } from "./model";
 
-export type Model = { ... }
-
-export const store = createStore<Model>({ ... })
-
-export function useStore<Result>(
-    mapState: (state: State<Model>) => Result,
-    externals?: Array<any>,
+export function useStore<Result = any>(
+  mapState: (state: State<Model>) => Result,
+  externals?: Array<any>
 ) {
-    return useStoreOriginal(mapState, externals);
+  return useStoreOriginal(mapState, externals);
 }
 
-export function useActions<Result>(
-    mapActions: (actions: Actions<Model>) => Result,
-) {
-    return useActionsOriginal(mapAction);
+export function useActions<Result = any>(
+  mapActions: (actions: Actions<Model>) => Result
+): Result {
+  return useActionsOriginal(mapActions);
 }
+
+const store = createStore<Model>(model);
+
+export default store;
 ```
 
 We could then revise our previous example.
@@ -664,7 +665,9 @@ function MyComponent() {
 }
 ```
 
-We also support typing react-redux.
+That's far cleaner - and it's still fully type checked.
+
+We also support typing `react-redux` based integrations.
 
 ```typescript
 const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
