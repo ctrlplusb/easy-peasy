@@ -53,6 +53,7 @@ function TodoList() {
   - Update state via mutations that auto convert to immutable updates
   - Derived state
   - Thunks for data fetching/persisting
+  - Auto memoisation for performance
   - Includes hooks for React integration
   - Supports React Native
   - Tiny, 3.2 KB gzipped
@@ -118,7 +119,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and its actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, or integration with React.
+Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and its actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, memoisation, or integration with React.
 
 <p>&nbsp;</p>
 
