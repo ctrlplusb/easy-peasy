@@ -9,6 +9,7 @@ import { render, cleanup, fireEvent } from 'react-testing-library'
 import {
   StoreProvider,
   createStore,
+  createTypedHooks,
   effect,
   reducer,
   select,
@@ -1450,5 +1451,18 @@ describe('listen', () => {
       'User logged in',
       'User logged out',
     ])
+  })
+})
+
+describe('createTypedHooks', () => {
+  test('exports all hooks', () => {
+    // act
+    const typedHooks = createTypedHooks()
+
+    // assert
+    expect(typedHooks.useAction).toBe(useAction)
+    expect(typedHooks.useActions).toBe(useActions)
+    expect(typedHooks.useStore).toBe(useStore)
+    expect(typedHooks.useDispatch).toBe(useDispatch)
   })
 })

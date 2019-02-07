@@ -4,6 +4,7 @@ import {
   Action,
   Actions,
   createStore,
+  createTypedHooks,
   Dispatch,
   effect,
   Effect,
@@ -49,17 +50,17 @@ interface UserModel {
 interface AuditModel {
   logs: string[]
   set: Action<AuditModel, string>
-  userListeners: Listeners<Model>
+  userListeners: Listeners<StoreModel>
   newUserListeners: Listen<AuditModel>
   getNLog: Select<AuditModel, (n: number) => string | undefined>
 }
 
-interface Model {
+interface StoreModel {
   todos: TodosModel
   user: UserModel
   counter: Reducer<number>
-  printDebugInfo: Effect<Model, void, Injections, Promise<string>>
-  sayHello: Effect<Model, void, Injections>
+  printDebugInfo: Effect<StoreModel, void, Injections, Promise<string>>
+  sayHello: Effect<StoreModel, void, Injections>
   audit: AuditModel
 }
 
@@ -85,7 +86,7 @@ const userModel: UserModel = {
     actions.loggedIn(token)
   }),
 }
-const store = createStore<Model>({
+const store = createStore<StoreModel>({
   audit: {
     logs: [],
     set: (state, payload) => {
@@ -155,15 +156,15 @@ if (log1) {
  * You can access state via hooks
  */
 function MyComponent() {
-  const token = useStore((state: State<Model>) => state.user.token)
+  const token = useStore((state: State<StoreModel>) => state.user.token)
   const { login, printDebugInfo, sayHello } = useAction(
-    (dispatch: Dispatch<Model>) => ({
+    (dispatch: Dispatch<StoreModel>) => ({
       login: dispatch.user.login,
       printDebugInfo: dispatch.printDebugInfo,
       sayHello: dispatch.sayHello,
     }),
   )
-  const { addTodo } = useActions((actions: Actions<Model>) => ({
+  const { addTodo } = useActions((actions: Actions<StoreModel>) => ({
     addTodo: actions.todos.addTodo,
   }))
   addTodo('Install easy peasy')
@@ -204,6 +205,12 @@ const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
   <div>{counter}</div>
 )
 
-connect((state: State<Model>) => ({
+connect((state: State<StoreModel>) => ({
   counter: state.counter,
 }))(Counter)
+
+const typedHooks = createTypedHooks<StoreModel>()
+
+typedHooks.useAction(actions => actions.todos.addTodo)('bar')
+typedHooks.useStore(state => state.todos.items).concat(['what'])
+typedHooks.useDispatch().todos.addTodo('foo')
