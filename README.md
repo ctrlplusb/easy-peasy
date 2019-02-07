@@ -134,7 +134,7 @@ npm install react
 npm install react-dom
 ```
 
-> Note: please ensure you install a version >= 16.8.0 in order to support the hooks functionality
+> Note: please ensure you install versions >= 16.8.0 for both `react` and `react-dom`, as this library depends on the new hooks feature
 
 Then install Easy Peasy.
 
@@ -531,7 +531,7 @@ interface UserModel {
   token?: string
   loggedIn: Action<UserModel, string>
   // represents a "thunk"
-  login: Effect<UserModel, { username: string; password: string }>
+  login: Thunk<UserModel, { username: string; password: string }>
 }
 
 interface Model {
