@@ -390,15 +390,15 @@ We recommend that you read the API docs for the [`useStore` hook](#usestoremapst
 
 ### Firing actions in your Components
 
-In order to fire actions in your components you can use the `useAction` hook.
+In order to fire actions in your components you can use the `useActions` hook.
 
 ```javascript
 import { useState } from 'react';
-import { useAction } from 'easy-peasy';
+import { useActions } from 'easy-peasy';
 
 const AddTodo = () => {
   const [text, setText] = useState('');
-  const addTodo = useAction(dispatch => dispatch.todos.add);
+  const addTodo = useActions(actions => actions.todos.add);
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -408,7 +408,7 @@ const AddTodo = () => {
 };
 ```
 
-For more on how you can use this hook please ready the API docs for the [`useAction` hook](#useactionmapaction).
+For more on how you can use this hook please ready the API docs for the [`useActions` hook](#useactionsmapactions).
 
 ### Alternative usage via react-redux
 
@@ -1260,7 +1260,7 @@ store.dispatch.user.login({ username: 'mary', password: 'foo123' });
 
 ### StoreProvider
 
-Initialises your React application with the store so that your components will be able to consume and interact with the state via the `useStore` and `useAction` hooks.
+Initialises your React application with the store so that your components will be able to consume and interact with the state via the `useStore` and `useActions` hooks.
 
 <details>
 <summary>Example</summary>
@@ -1830,9 +1830,9 @@ const store = createStore({
         state.data[product.id] = product;
       });
     },
-    fetch: effect((dispatch) => {
+    fetch: thunk((actions) => {
       const data = await fetchProducts();
-      dispatch.products.fetched(data);
+      actions.fetched(data);
     })
   },
   users: {
@@ -1843,9 +1843,9 @@ const store = createStore({
         state.data[user.id] = user;
       });
     },
-    fetch: effect((dispatch) => {
+    fetch: thunk((dispatch) => {
       const data = await fetchUsers();
-      dispatch.users.fetched(data);
+      actions.fetched(data);
     })
   }
 })
@@ -1854,8 +1854,6 @@ const store = createStore({
 You will note a distinct pattern between the `products` and `users`. You could create a generic helper like so:
 
 ```javascript
-import _ from 'lodash';
-
 const data = (endpoint) => ({
   data: {},
     ids: select(state => Object.keys(state.data)),
@@ -1864,15 +1862,9 @@ const data = (endpoint) => ({
         state.data[item.id] = item;
       });
     },
-    fetch: effect((dispatch, payload, getState, injections, meta) => {
-      //                                                     👆
-      // We can get insight into the path of the effect via the "meta" param
+    fetch: effect((actions, payload) => {
       const data = await endpoint();
-      // Then we utilise lodash to map to the expected location for our
-      // "fetched" action
-      //                 👇
-      const fetched = _.get(dispatch, meta.parent.concat(['fetched']));
-      fetched(data);
+      actions.fetched(data);
     })
 })
 ```
