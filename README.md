@@ -1856,16 +1856,16 @@ You will note a distinct pattern between the `products` and `users`. You could c
 ```javascript
 const data = (endpoint) => ({
   data: {},
-    ids: select(state => Object.keys(state.data)),
-    fetched: (state, items) => {
-      items.forEach(item => {
-        state.data[item.id] = item;
-      });
-    },
-    fetch: effect((actions, payload) => {
-      const data = await endpoint();
-      actions.fetched(data);
-    })
+  ids: select(state => Object.keys(state.data)),
+  fetched: (state, items) => {
+    items.forEach(item => {
+      state.data[item.id] = item;
+    });
+  },
+  fetch: effect((actions, payload) => {
+    const data = await endpoint();
+    actions.fetched(data);
+  })
 })
 ```
 
