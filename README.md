@@ -1862,7 +1862,7 @@ const data = (endpoint) => ({
       state.data[item.id] = item;
     });
   },
-  fetch: effect((actions, payload) => {
+  fetch: thunk((actions, payload) => {
     const data = await endpoint();
     actions.fetched(data);
   })
