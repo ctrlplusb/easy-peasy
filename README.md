@@ -55,6 +55,7 @@ function TodoList() {
   - Thunks for data fetching/persisting
   - Includes hooks for React integration
   - Supports React Native
+  - Tiny, 3.2 KB gzipped
   - Powered by Redux with full interop
     - All the best of Redux, without the boilerplate
     - Redux Dev Tools support
