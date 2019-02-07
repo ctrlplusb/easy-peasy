@@ -506,7 +506,177 @@ See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://git
 
 ## Usage with Typescript
 
-Easy Peasy has full support for Typescript. Detailed documentation is coming soon, however you can view the [original PR](https://github.com/ctrlplusb/easy-peasy/pull/57) for an example on how to use Typescript effectively.
+Easy Peasy has full support for Typescript, via its bundled definitions. More detailed documentation is coming soon, however, you can expand the below to get a general overview of how to use Typescript with Easy Peasy.
+
+<details>
+<summary>Overview of using Typescript with Easy Peasy</summary>
+<p>
+
+Firstly, you need to define a type that represents your model. Easy Peasy exports numerous types to help you declare your model correctly.
+
+```typescript
+
+import { Action, Reducer, Thunk, Select } from 'easy-peasy'
+
+interface TodosModel {
+  items: Array<string>
+  // represents a "select"
+  firstItem: Select<TodosModel, string | void>
+  // represents an "action"
+  addTodo: Action<TodosModel, string>
+}
+
+interface UserModel {
+  token?: string
+  loggedIn: Action<UserModel, string>
+  // represents a "thunk"
+  login: Effect<UserModel, { username: string; password: string }>
+}
+
+interface Model {
+  todos: TodosModel
+  user: UserModel
+  // represents a custom reducer
+  counter: Reducer<number>
+}
+```
+
+Then you create your store.
+
+```typescript
+// Note that as we pass the Model into the `createStore` function. This allows
+// full type checking along with auto complete to take place
+//                          👇
+const store = createStore<Model>({
+  todos: {
+    items: [],
+    firstItem: select(state =>
+      state.items.length > 0 ? state.items[0] : undefined,
+    ),
+    addTodo: (state, payload) => {
+      state.items.push(payload)
+    },
+  },
+  user: {
+    token: undefined,
+    loggedIn: (state, payload) => {
+      state.token = payload
+    },
+    login: effect(async (dispatch, payload) => {
+      const response = await fetch('/login', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const { token } = await response.json()
+      dispatch.user.loggedIn(token)
+    }),
+  },
+  counter: reducer((state = 0, action) => {
+    switch (action.type) {
+      case 'COUNTER_INCREMENT':
+        return state + 1
+      default:
+        return state
+    }
+  }),
+})
+```
+
+You can use the store's standard APIs. They will be typed.
+
+```typescript
+console.log(store.getState().todos.firstItem)
+
+store.dispatch({ type: 'COUNTER_INCREMENT' })
+
+store.dispatch.todos.addTodo('Install typescript')
+```
+
+You can type your hooks too.
+
+``` typescript
+import { useStore, useActions, Actions, State } from 'easy-peasy';
+import { Model } from './your-store';
+
+function MyComponent() {
+  const token = useStore((state: State<Model>) =>
+    state.user.token
+  )
+
+  const login = useActions((actions: Actions<Model>) =>
+	  actions.user.login,
+  )
+
+  return (
+    <button onClick={() => login({ username: 'foo', password: 'bar' })}>
+      {token || 'Log in'}
+    </button>
+  )
+}
+```
+
+The above can become a bit cumbersome - having to constantly provide your types to the hooks. To avoid this you can use @formula349's [tip](https://github.com/ctrlplusb/easy-peasy/issues/21#issuecomment-457644655), where you export pre-typed versions of the hooks along with your store.
+
+```typescript
+// your-store.js
+
+import {
+  useStore as useStoreOriginal,
+  useActions as useActionsOriginal,
+  createStore
+} from 'easy-peasy'
+
+export type Model = { ... }
+
+export const store = createStore<Model>({ ... })
+
+export function useStore<Result>(
+    mapState: (state: State<Model>) => Result,
+    externals?: Array<any>,
+) {
+    return useStoreOriginal(mapState, externals);
+}
+
+export function useActions<Result>(
+    mapActions: (actions: Actions<Model>) => Result,
+) {
+    return useActionsOriginal(mapAction);
+}
+```
+
+We could then revise our previous example.
+
+``` typescript
+import { useStore, useActions } from './your-store';
+
+function MyComponent() {
+  const token = useStore((state) => state.user.token)
+  const login = useActions((actions) => actions.user.login)
+  return (
+    <button onClick={() => login({ username: 'foo', password: 'bar' })}>
+      {token || 'Log in'}
+    </button>
+  )
+}
+```
+
+We also support typing react-redux.
+
+```typescript
+const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
+  <div>{counter}</div>
+)
+
+connect((state: State<Model>) => ({
+  counter: state.counter,
+}))(Counter)
+```
+
+</p>
+</details>
 
 <p>&nbsp;</p>
 
