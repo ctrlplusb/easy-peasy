@@ -212,5 +212,6 @@ connect((state: State<StoreModel>) => ({
 const typedHooks = createTypedHooks<StoreModel>()
 
 typedHooks.useAction(actions => actions.todos.addTodo)('bar')
+typedHooks.useActions(actions => actions.todos.addTodo)('bar')
 typedHooks.useStore(state => state.todos.items).concat(['what'])
 typedHooks.useDispatch().todos.addTodo('foo')
