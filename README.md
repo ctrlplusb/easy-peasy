@@ -104,7 +104,8 @@ function TodoList() {
     - [StoreProvider](#storeprovider)
     - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useActions(mapActions)](#useactionsmapactions)
-    - [useDispatch](#usedispatch)
+    - [useDispatch()](#usedispatch)
+    - [createTypedHooks()](#createTypedHooks)
   - [Deprecated API](#deprecated-api)
     - [effect(action)](#effectaction)
     - [listeners(attach)](#listenersattach)
@@ -414,13 +415,20 @@ For more on how you can use this hook please ready the API docs for the [`useAct
 
 As Easy Peasy outputs a standard Redux store it is entirely possible to use Easy Peasy with the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
 
-#### First, install the `react-redux` package
+<details>
+<summary>First, install the `react-redux` package</summary>
+<p>
 
 ```bash
 npm install react-redux
 ```
 
-#### Then wrap your app with the `Provider`
+</p>
+</details>
+
+<details>
+<summary>Then wrap your app with the `Provider`</summary>
+<p>
 
 ```javascript
 import React from 'react';
@@ -443,7 +451,12 @@ const App = () => (
 render(<App />, document.querySelector('#app'));
 ```
 
-#### Finally, use `connect` against your components
+</p>
+</details>
+
+<details>
+<summary>Finally, use `connect` against your components</summary>
+<p>
 
 ```javascript
 import React, { Component } from 'react';
@@ -466,6 +479,9 @@ export default connect(
 )(EditTodo)
 ```
 
+</p>
+</details>
+
 <p>&nbsp;</p>
 
 ---
@@ -474,8 +490,9 @@ export default connect(
 
 Easy Peasy is platform agnostic but makes use of features that may not be available in all environments.
 
-### Remote Redux Dev Tools
-
+<details>
+<summary>How to enable remote Redux dev tools</summary>
+<p>
 React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
 
 To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
@@ -499,7 +516,8 @@ export default store;
 ```
 
 See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
-
+</p>
+</details>
 
 <p>&nbsp;</p>
 
@@ -534,7 +552,7 @@ interface UserModel {
   login: Thunk<UserModel, { username: string; password: string }>
 }
 
-interface Model {
+interface StoreModel {
   todos: TodosModel
   user: UserModel
   // represents a custom reducer
@@ -548,7 +566,7 @@ Then you create your store.
 // Note that as we pass the Model into the `createStore` function. This allows
 // full type checking along with auto complete to take place
 //                          👇
-const store = createStore<Model>({
+const store = createStore<StoreModel>({
   todos: {
     items: [],
     firstItem: select(state =>
@@ -600,13 +618,13 @@ You can type your hooks too.
 
 ``` typescript
 import { useStore, useActions, Actions, State } from 'easy-peasy';
-import { Model } from './your-store';
+import { StoreModel } from './your-store';
 
 function MyComponent() {
-  const token = useStore((state: State<Model>) =>
+  const token = useStore((state: State<StoreModel>) =>
     state.user.token
   )
-  const login = useActions((actions: Actions<Model>) =>
+  const login = useActions((actions: Actions<StoreModel>) =>
 	  actions.user.login,
   )
   return (
@@ -617,42 +635,21 @@ function MyComponent() {
 }
 ```
 
-The above can become a bit cumbersome - having to constantly provide your types to the hooks. To avoid this you can use @formula349's [tip](https://github.com/ctrlplusb/easy-peasy/issues/21#issuecomment-457644655), where you export pre-typed versions of the hooks along with your store.
+The above can become a bit cumbersome - having to constantly provide your types to the hooks. Therefore we recommend using the bundled `createTypedHooks` helper in order to create pre-typed versions of the hooks.
 
 ```typescript
-// your-store.js
+// hooks.js
 
-import {
-  useStore as useStoreOriginal,
-  useActions as useActionsOriginal,
-  State,
-  Actions,
-  createStore
-} from "easy-peasy";
-import model, { Model } from "./model";
+import { createTypedHooks } from "easy-peasy";
+import { StoreModel } from "./model";
 
-export function useStore<Result = any>(
-  mapState: (state: State<Model>) => Result,
-  externals?: Array<any>
-) {
-  return useStoreOriginal(mapState, externals);
-}
-
-export function useActions<Result = any>(
-  mapActions: (actions: Actions<Model>) => Result
-): Result {
-  return useActionsOriginal(mapActions);
-}
-
-const store = createStore<Model>(model);
-
-export default store;
+export default createTypedHooks<StoreModel>();
 ```
 
 We could then revise our previous example.
 
 ``` typescript
-import { useStore, useActions } from './your-store';
+import { useStore, useActions } from './hooks';
 
 function MyComponent() {
   const token = useStore((state) => state.user.token)
@@ -674,7 +671,7 @@ const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
   <div>{counter}</div>
 )
 
-connect((state: State<Model>) => ({
+connect((state: State<StoreModel>) => ({
   counter: state.counter,
 }))(Counter)
 ```
@@ -1517,6 +1514,32 @@ const AddTodo = () => {
 
 </p>
 </details>
+
+### createTypedHooks()
+
+Useful in the context of Typescript. It allows you to create typed versions of all the hooks so that you don't need to constantly apply typing information against them.
+
+<details>
+<summary>Example</summary>
+<p>
+
+```javascript
+// hooks.js
+import { createTypedHooks } from 'easy-peasy';
+import { StoreModel } from './store';
+
+const { useActions, useStore, useDispatch } = createTypedHooks<StoreModel>();
+
+export default {
+  useActions,
+  useStore,
+  useDispatch
+}
+```
+
+</p>
+</details>
+
 
 <p>&nbsp;</p>
 
