@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "1.11.0",
+  "version": "1.11.1",
   "description": "Easy peasy global state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
