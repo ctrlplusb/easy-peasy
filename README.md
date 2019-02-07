@@ -11,7 +11,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 ```javascript
-import { StoreProvider, createStore, useStore, useAction } from 'easy-peasy';
+import { StoreProvider, createStore, useStore, useActions } from 'easy-peasy';
 
 // 👇 create your store, providing the model
 const store = createStore({
@@ -36,7 +36,7 @@ const App = () => (
 function TodoList() {
   // 👇  use hooks to get state or actions
   const todos = useStore(state => state.todos.items)
-  const add = useAction(dispatch => dispatch.todos.add)
+  const add = useActions(actions => actions.todos.add)
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
