@@ -1512,6 +1512,8 @@ const AddTodo = () => {
 };
 ```
 
+</p>
+</details>
 
 <p>&nbsp;</p>
 
