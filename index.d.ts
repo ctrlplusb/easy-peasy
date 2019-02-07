@@ -32,10 +32,11 @@ type NaturalState =
   | string
   | undefined
 
-type ActionTypes =
-  | Action<any, any>
+type AsyncActionTypes =
   | Thunk<any, any, any, any, any>
   | Effect<any, any, any, any>
+
+type ActionTypes = AsyncActionTypes | Action<any, any>
 
 type UtilTypes =
   | Select<any, any>
@@ -64,7 +65,7 @@ export type Actions<Model extends Object> = {
   >)]: Actions<Model[P]>
 } &
   {
-    [P in keyof Pick<Model, KeysOfType<Model, ActionTypes>>]: Param1<
+    [P in keyof Pick<Model, KeysOfType<Model, AsyncActionTypes>>]: Param1<
       Model[P]
     > extends void
       ? () => UnsafeReturnType<Model[P]> extends Promise<any>
@@ -75,6 +76,13 @@ export type Actions<Model extends Object> = {
         ) => UnsafeReturnType<Model[P]> extends Promise<any>
           ? UnsafeReturnType<Model[P]>
           : Promise<UnsafeReturnType<Model[P]>>
+  } &
+  {
+    [P in keyof Pick<Model, KeysOfType<Model, Action<any, any>>>]: Param1<
+      Model[P]
+    > extends void
+      ? () => void
+      : (payload: Param1<Model[P]>) => void
   }
 
 /**
