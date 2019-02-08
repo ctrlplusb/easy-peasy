@@ -31,7 +31,16 @@ const baseConfig = {
       babelrc: false,
       exclude: 'node_modules/**',
       presets: [
-        ['@babel/preset-env', { modules: false }],
+        [
+          '@babel/preset-env',
+          {
+            targets: {
+              browsers: ['ie >= 11'],
+            },
+            modules: false,
+            loose: true,
+          },
+        ],
         '@babel/preset-react',
       ],
       plugins: [
