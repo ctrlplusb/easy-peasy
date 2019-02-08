@@ -32,6 +32,15 @@ type NaturalState =
   | string
   | undefined
 
+type PickWithType<Base, Condition> = Pick<
+  Base,
+  {
+    [Key in keyof Base]: Condition extends Extract<Base[Key], Condition>
+      ? Key
+      : never
+  }[keyof Base]
+>
+
 type AsyncActionTypes =
   | Thunk<any, any, any, any, any>
   | Effect<any, any, any, any>
@@ -59,10 +68,7 @@ type Meta = {
  * type OnlyActions = Actions<Model>;
  */
 export type Actions<Model extends Object> = {
-  [P in keyof (Omit<
-    Model,
-    KeysOfType<Pick<Model, KeysOfType<Model, Object>>, NaturalState | UtilTypes>
-  >)]: Actions<Model[P]>
+  [P in keyof (Pick<Model, KeysOfType<Model, PickWithType<Model, object>>>)]: Actions<Model[P]>
 } &
   {
     [P in keyof Pick<Model, KeysOfType<Model, AsyncActionTypes>>]: Param1<
@@ -93,10 +99,7 @@ export type Actions<Model extends Object> = {
  * type StateOnly = State<Model>;
  */
 export type State<Model extends Object> = {
-  [P in keyof (Omit<
-    Model,
-    KeysOfType<Pick<Model, KeysOfType<Model, Object>>, NaturalState | UtilTypes>
-  >)]: State<Model[P]>
+  [P in keyof (Pick<Model, KeysOfType<Model, PickWithType<Model, object>>>)]: State<Model[P]>
 } &
   { [P in keyof Pick<Model, KeysOfType<Model, NaturalState>>]: Model[P] } &
   {
