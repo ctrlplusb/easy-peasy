@@ -84,7 +84,7 @@
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "react-redux": "^6.0.0",
-    "react-testing-library": "^5.5.3",
+    "react-testing-library": "^5.5.4",
     "rimraf": "^2.6.2",
     "rollup": "^1.1.2",
     "rollup-plugin-babel": "^4.3.1",
