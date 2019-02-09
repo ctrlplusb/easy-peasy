@@ -11,54 +11,49 @@ import {
   Middleware,
 } from 'redux'
 
-/**
- * The standard ReturnType helper of TypeScript doesn't handle generic type
- * aliases very well. This workaround type does.
- * https://github.com/Microsoft/TypeScript/issues/26856
- */
-type UnsafeReturnType<T> = T extends (...args: any[]) => infer R ? R : any
-
-/**
- * The types that represent "natural", single level state values in or store.
- * i.e. not actions or objects.
- */
-type NaturalState =
-  | Array<any>
-  | boolean
-  | Date
-  | null
-  | number
-  | RegExp
-  | string
-  | undefined
-
-type PickWithType<Base, Condition> = Pick<
-  Base,
-  {
-    [Key in keyof Base]: Condition extends Extract<Base[Key], Condition>
-      ? Key
-      : never
-  }[keyof Base]
->
-
 type AsyncActionTypes =
   | Thunk<any, any, any, any, any>
   | Effect<any, any, any, any>
 
-type ActionTypes = AsyncActionTypes | Action<any, any>
-
-type UtilTypes =
-  | Select<any, any>
-  | Reducer<any>
-  | Thunk<any, any, any, any, any>
-  | Effect<any, any, any, any>
+type ActionTypes =
   | Action<any, any>
-  | Function
+  | Effect<any, any, any, any>
+  | Thunk<any, any, any, any, any>
 
 type Meta = {
   path: string[]
   parent: string[]
 }
+
+type FilterActionTypes<T extends object> = Omit<
+  T,
+  KeysOfType<
+    T,
+    | Array<any>
+    | Date
+    | RegExp
+    | Reducer<any, any>
+    | Select<any, any>
+    | Listen<any, any, any>
+    | Listeners<any>
+  >
+>
+
+type FilterStateTypes<T extends object> = Overwrite<
+  Omit<
+    T,
+    KeysOfType<
+      T,
+      | Listen<any, any, any>
+      | Listeners<any>
+      | Action<any, any>
+      | Effect<any, any, any, any>
+      | Thunk<any, any, any, any, any>
+      | Function
+    >
+  >,
+  Pick<T, KeysOfType<T, Select<any, any> | Reducer<any, any>>>
+>
 
 /**
  * Filters a model into a type that represents the actions (and effects) only
@@ -68,28 +63,20 @@ type Meta = {
  * type OnlyActions = Actions<Model>;
  */
 export type Actions<Model extends Object> = {
-  [P in keyof (Pick<Model, KeysOfType<Model, PickWithType<Model, object>>>)]: Actions<Model[P]>
-} &
-  {
-    [P in keyof Pick<Model, KeysOfType<Model, AsyncActionTypes>>]: Param1<
-      Model[P]
-    > extends void
-      ? () => UnsafeReturnType<Model[P]> extends Promise<any>
-          ? UnsafeReturnType<Model[P]>
-          : Promise<UnsafeReturnType<Model[P]>>
-      : (
-          payload: Param1<Model[P]>,
-        ) => UnsafeReturnType<Model[P]> extends Promise<any>
-          ? UnsafeReturnType<Model[P]>
-          : Promise<UnsafeReturnType<Model[P]>>
-  } &
-  {
-    [P in keyof Pick<Model, KeysOfType<Model, Action<any, any>>>]: Param1<
-      Model[P]
-    > extends void
+  [P in keyof FilterActionTypes<
+    Pick<Model, KeysOfType<Model, object>>
+  >]: Model[P] extends AsyncActionTypes
+    ? (
+        payload: Model[P]['payload'],
+      ) => Model[P]['result'] extends Promise<any>
+        ? Model[P]['result']
+        : Promise<Model[P]['result']>
+    : Model[P] extends Action<any, any>
+    ? Param1<Model[P]> extends void
       ? () => void
       : (payload: Param1<Model[P]>) => void
-  }
+    : Actions<Model[P]>
+}
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -99,28 +86,23 @@ export type Actions<Model extends Object> = {
  * type StateOnly = State<Model>;
  */
 export type State<Model extends Object> = {
-  [P in keyof (Pick<Model, KeysOfType<Model, PickWithType<Model, object>>>)]: State<Model[P]>
-} &
-  { [P in keyof Pick<Model, KeysOfType<Model, NaturalState>>]: Model[P] } &
-  {
-    readonly [P in keyof Pick<
-      Model,
-      KeysOfType<Model, Select<any, any>>
-    >]: UnsafeReturnType<Model[P]>
-  } &
-  {
-    readonly [P in keyof Pick<
-      Model,
-      KeysOfType<Model, Reducer<any, any>>
-    >]: UnsafeReturnType<Model[P]>
-  }
+  [P in keyof FilterStateTypes<Model>]: Model[P] extends Select<any, any>
+    ? Model[P]['result']
+    : Model[P] extends Reducer<any, any>
+    ? Model[P]['result']
+    : Model[P] extends object
+    ? Model[P] extends Array<any> | RegExp | Date
+      ? Model[P]
+      : State<Model[P]>
+    : Model[P]
+}
 
 /**
  * Configuration interface for the createStore
  */
 export interface EasyPeasyConfig<
   InitialState extends Object = {},
-  Injections = void
+  Injections = any
 > {
   compose?: typeof compose
   devTools?: boolean
@@ -173,19 +155,24 @@ export type Store<StoreModel> = Overwrite<
 export type Thunk<
   Model extends Object = {},
   Payload = void,
-  Injections = void,
+  Injections = any,
   StoreModel extends Object = {},
-  Result = void
-> = (
-  actions: Actions<Model>,
-  payload: Payload,
-  helpers: {
-    dispatch: Dispatch<StoreModel>
-    getState: () => State<StoreModel>
-    injections: Injections
-    meta: Meta
-  },
-) => Result
+  Result = any
+> = {
+  (
+    actions: Actions<Model>,
+    payload: Payload,
+    helpers: {
+      dispatch: Dispatch<StoreModel>
+      getState: () => State<StoreModel>
+      injections: Injections
+      meta: Meta
+    },
+  ): Result
+  type: 'thunk'
+  payload: Payload
+  result: Result
+}
 
 /**
  * Declares an thunk action type against your model.
@@ -206,11 +193,20 @@ export type Thunk<
 export function thunk<
   Model extends Object = {},
   Payload = void,
-  Injections = void,
+  Injections = any,
   StoreModel extends Object = {},
-  Result = void
+  Result = any
 >(
-  effect: Thunk<Model, Payload, Injections, StoreModel, Result>,
+  thunk: (
+    actions: Actions<Model>,
+    payload: Payload,
+    helpers: {
+      dispatch: Dispatch<StoreModel>
+      getState: () => State<StoreModel>
+      injections: Injections
+      meta: Meta
+    },
+  ) => Result,
 ): Thunk<Model, Payload, Injections, StoreModel, Result>
 
 /**
@@ -230,15 +226,20 @@ export function thunk<
 export type Effect<
   StoreModel extends Object = {},
   Payload = void,
-  Injections = void,
-  Result = void
-> = (
-  dispatch: Dispatch<StoreModel>,
-  payload: Payload,
-  getState: () => State<StoreModel>,
-  injections: Injections,
-  meta: Meta,
-) => Result
+  Injections = any,
+  Result = any
+> = {
+  (
+    dispatch: Dispatch<StoreModel>,
+    payload: Payload,
+    getState: () => State<StoreModel>,
+    injections: Injections,
+    meta: Meta,
+  ): Result
+  type: 'effect'
+  payload: Payload
+  result: Result
+}
 
 /**
  * Declares an effect action type against your model.
@@ -256,12 +257,18 @@ export type Effect<
  */
 export function effect<
   StoreModel extends Object = {},
-  Payload = any,
-  Result = any,
-  Injections = any
+  Payload = void,
+  Injections = any,
+  Result = any
 >(
-  effect: Effect<StoreModel, Payload, Result, Injections>,
-): Effect<StoreModel, Payload, Result, Injections>
+  effect: (
+    dispatch: Dispatch<StoreModel>,
+    payload: Payload,
+    getState: () => State<StoreModel>,
+    injections: Injections,
+    meta: Meta,
+  ) => Result,
+): Effect<StoreModel, Payload, Injections, Result>
 
 /**
  * Action listeners type.
@@ -282,14 +289,28 @@ export function effect<
  */
 export type Listen<
   Model extends Object = {},
-  Injections = void,
+  Injections = any,
   StoreModel extends Object = {}
-> = (
-  on: <ListenAction extends ActionTypes>(
-    action: ListenAction,
-    handler: Thunk<Model, Param1<ListenAction>, Injections, StoreModel>,
-  ) => void,
-) => void
+> = {
+  (
+    on: <ListenAction extends ActionTypes>(
+      action: ListenAction,
+      handler: (
+        actions: Actions<Model>,
+        payload: ListenAction extends Function
+          ? Param1<ListenAction>
+          : ListenAction['payload'],
+        helpers: {
+          dispatch: Dispatch<StoreModel>
+          getState: () => State<StoreModel>
+          injections: Injections
+          meta: Meta
+        },
+      ) => Result,
+    ) => void,
+  ): void
+  type: 'listen'
+}
 
 /**
  * Declares action listeners against your model.
@@ -315,9 +336,29 @@ export type Listen<
  *   }
  * });
  */
-export function listen<Model extends Object = {}>(
-  attach: Listen<Model>,
-): Listen<Model>
+export function listen<
+  Model extends Object = {},
+  Injections = any,
+  StoreModel extends Object = {}
+>(
+  attach: (
+    on: <ListenAction extends ActionTypes>(
+      action: ListenAction,
+      handler: (
+        actions: Actions<Model>,
+        payload: ListenAction extends Function
+          ? Param1<ListenAction>
+          : ListenAction['payload'],
+        helpers: {
+          dispatch: Dispatch<StoreModel>
+          getState: () => State<StoreModel>
+          injections: Injections
+          meta: Meta
+        },
+      ) => Result,
+    ) => void,
+  ) => void,
+): Listen<Model, Injections, StoreModel>
 
 /**
  * Action listeners type.
@@ -332,16 +373,19 @@ export function listen<Model extends Object = {}>(
  *   userListeners: Listeners<StoreModel>;
  * }
  */
-export type Listeners<StoreModel extends Object = {}> = (
-  actions: Actions<StoreModel>,
-  attach: <ActionType>(
-    action: ActionType,
-    listener: (
-      dispatch: Dispatch<StoreModel>,
-      payload: Param0<ActionType>,
-    ) => any,
-  ) => void,
-) => void
+export type Listeners<StoreModel extends Object = {}> = {
+  (
+    actions: Actions<StoreModel>,
+    attach: <ActionCreator extends Function>(
+      action: ActionCreator,
+      listener: (
+        dispatch: Dispatch<StoreModel>,
+        payload: Param0<ActionCreator>,
+      ) => any,
+    ) => void,
+  ): void
+  type: 'listeners'
+}
 
 /**
  * Declares action listeners against your model.
@@ -361,7 +405,16 @@ export type Listeners<StoreModel extends Object = {}> = (
  * });
  */
 export function listeners<StoreModel extends Object = {}>(
-  mapListeners: Listeners<StoreModel>,
+  mapListeners: (
+    actions: Actions<StoreModel>,
+    attach: <ActionCreator extends Function>(
+      action: ActionCreator,
+      listener: (
+        dispatch: Dispatch<StoreModel>,
+        payload: Param0<ActionCreator>,
+      ) => any,
+    ) => void,
+  ) => void,
 ): Listeners<StoreModel>
 
 /**
@@ -397,10 +450,11 @@ export type Action<Model extends Object = {}, Payload = any> = (
  *   totalPrice: Select<Model, number>;
  * }
  */
-export type Select<Model extends Object = {}, Result = any> = (
-  state: State<Model>,
-  dependencies?: Array<Select<any, any>>,
-) => Result
+export type Select<Model extends Object = {}, Result = any> = {
+  (state: State<Model>): Result
+  type: 'select'
+  result: Result
+}
 
 /**
  * Allows you to declare derived state against your model.
@@ -419,7 +473,7 @@ export type Select<Model extends Object = {}, Result = any> = (
  * });
  */
 export function select<Model extends Object = {}, Result = any>(
-  select: Select<Model, Result>,
+  select: (state: State<Model>) => Result,
   dependencies?: Array<Select<any, any>>,
 ): Select<Model, Result>
 
@@ -436,10 +490,11 @@ export function select<Model extends Object = {}, Result = any>(
  *   router: Reducer<ReactRouterState>;
  * }
  */
-export type Reducer<
-  State = any,
-  Action extends ReduxAction = AnyAction
-> = ReduxReducer<State>
+export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
+  (state: State, action: Action): State
+  type: 'reducer'
+  result: State
+}
 
 /**
  * Allows you to declare a custom reducer to manage a bit of your state.
@@ -460,7 +515,7 @@ export type Reducer<
  * });
  */
 export function reducer<State extends Object = {}>(
-  state: Reducer<State>,
+  state: ReduxReducer<State>,
 ): Reducer<State>
 
 /**
