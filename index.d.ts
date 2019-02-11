@@ -293,11 +293,13 @@ export type Listen<
   StoreModel extends Object = {}
 > = {
   (
-    on: <ListenAction extends Action<any, any>>(
+    on: <ListenAction extends ActionTypes | string>(
       action: ListenAction,
       handler: (
         actions: Actions<Model>,
-        payload: ListenAction extends AsyncActionTypes
+        payload: ListenAction extends string
+          ? any
+          : ListenAction extends AsyncActionTypes
           ? ListenAction['payload']
           : Param1<ListenAction>,
         helpers: {
@@ -342,11 +344,13 @@ export function listen<
   StoreModel extends Object = {}
 >(
   attach: (
-    on: <ListenAction extends ActionTypes>(
+    on: <ListenAction extends ActionTypes | string>(
       action: ListenAction,
       handler: (
         actions: Actions<Model>,
-        payload: ListenAction extends AsyncActionTypes
+        payload: ListenAction extends string
+          ? any
+          : ListenAction extends AsyncActionTypes
           ? ListenAction['payload']
           : Param1<ListenAction>,
         helpers: {

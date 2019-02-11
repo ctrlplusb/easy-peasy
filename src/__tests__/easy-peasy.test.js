@@ -1452,6 +1452,48 @@ describe('listen', () => {
       'User logged out',
     ])
   })
+
+  it('listens to string actions', () => {
+    // arrange
+    const store = createStore({
+      routeChangeLogs: [],
+      log: (state, payload) => {
+        state.routeChangeLogs.push(payload)
+      },
+      listeners: listen(on => {
+        on('ROUTE_CHANGED', (action, payload) => {
+          action.log(payload)
+        })
+      }),
+    })
+
+    // act
+    store.dispatch({
+      type: 'ROUTE_CHANGED',
+      payload: '/about',
+    })
+
+    // assert
+    expect(store.getState().routeChangeLogs).toEqual(['/about'])
+  })
+
+  it('listening to an invalid type does nothing', () => {
+    // act
+    createStore({
+      listeners: listen(on => {
+        on(true, () => {})
+      }),
+    })
+  })
+
+  it('listening with an invalid handler does nothing', () => {
+    // act
+    createStore({
+      listeners: listen(on => {
+        on('FOO_BAR', true)
+      }),
+    })
+  })
 })
 
 describe('createTypedHooks', () => {

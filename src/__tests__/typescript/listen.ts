@@ -47,6 +47,9 @@ createStore<StoreModel>({
         injections.id + 7331
         meta.parent.concat(meta.path)
       })
+      on('ROUTE_CHANGED', (actions, payload) => {
+        actions.log('Route changed')
+      })
     }),
   },
 })

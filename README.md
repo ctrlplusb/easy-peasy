@@ -1173,6 +1173,8 @@ Allows you to attach listeners to any normal or thunk action. Listeners are them
 
 This enables parts of your model to respond to actions being fired in other parts of your model. For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
 
+It also supports attach listeners to a "string" named action. This allows with interop with 3rd party libraries, or aids in migration.
+
 Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
 
 <details>
@@ -1183,9 +1185,9 @@ Note: If any action being listened to does not complete successfully (i.e. throw
 
     Allows you to attach a listener to an action. It expects the following arguments:
 
-    - `action` (Function, required)
+    - `action` (Function | string, required)
 
-      The target action you wish to listen to - you provide the direct reference to the action.
+      The target action you wish to listen to - you provide the direct reference to the action, or the string name of it.
 
     - `thunk` (Function, required)
 
@@ -1234,6 +1236,32 @@ const notificationModel = {
 const model = {
   user: userModel,
   notification: notificationModel
+};
+```
+</p>
+</details>
+
+<details>
+<summary>Example listening to string named action</summary>
+<p>
+
+```javascript
+import { listen } from 'easy-peasy';
+
+const model = {
+  msg: '',
+  set: (state, payload) => { state.msg = payload; },
+
+  listeners: listen((on) => {
+    //      👇 passing in action name
+    on('ROUTE_CHANGED', (actions, payload) => {
+      //                            👆
+      // We won't know the type of payload, so it will be "any".
+      // You will have to annotate it manually if you are using
+      // Typescript and care about the payload type.
+      actions.set(`Route was changed`);
+    });
+  })
 };
 ```
 </p>

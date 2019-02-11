@@ -138,10 +138,14 @@ export const createStore = (model, options = {}) => {
   const listenerDict = {}
   const listenDefinitions = []
   const listenDict = {}
+  const listenStringDict = {}
 
   const dispatchListenersForAction = (actionName, payload) => {
     const listenersForAction = listenerDict[actionName]
-    const listensForAction = listenDict[actionName]
+    const listensForAction = [
+      ...(listenDict[actionName] || []),
+      ...(listenStringDict[actionName] || []),
+    ]
     return Promise.all([
       listenersForAction && listenersForAction.length > 0
         ? Promise.all(
@@ -319,16 +323,23 @@ export const createStore = (model, options = {}) => {
 
   listenDefinitions.forEach(def => {
     const on = (action, thunkHandler) => {
+      if (typeof thunkHandler !== 'function') {
+        return
+      }
+
+      thunkHandler[metaSymbol] = def[metaSymbol]
+
       if (
         typeof action === 'function' &&
         action[actionNameSymbol] &&
-        actionCreatorDict[action[actionNameSymbol]] &&
-        typeof thunkHandler === 'function'
+        actionCreatorDict[action[actionNameSymbol]]
       ) {
-        thunkHandler[metaSymbol] = def[metaSymbol]
         listenDict[action[actionNameSymbol]] =
           listenDict[action[actionNameSymbol]] || []
         listenDict[action[actionNameSymbol]].push(thunkHandler)
+      } else if (typeof action === 'string') {
+        listenStringDict[action] = listenStringDict[action] || []
+        listenStringDict[action].push(thunkHandler)
       }
     }
     def(on)
@@ -477,10 +488,19 @@ export const createStore = (model, options = {}) => {
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       : reduxCompose)
 
+  const dispatchActionStringListeners = () => next => action => {
+    if (listenStringDict[action.type]) {
+      dispatchListenersForAction(action.type, action.payload)
+    }
+    next(action)
+  }
+
   const store = reduxCreateStore(
     reducerEnhancer(reducers),
     defaultState,
-    composeEnhancers(applyMiddleware(reduxThunk, ...middleware)),
+    composeEnhancers(
+      applyMiddleware(reduxThunk, dispatchActionStringListeners, ...middleware),
+    ),
   )
 
   // attach the action creators to dispatch
