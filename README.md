@@ -1189,7 +1189,7 @@ const notificationModel = {
   // 👇 you can label your listeners as you like, e.g. "userListeners"
   listeners: listen((on) => {
     //             👇 pass in direct reference to target action
-    on(userModel.loggedIn, (actions, paylaod) => {
+    on(userModel.loggedIn, (actions, payload) => {
       actions.set(`${payload.username} logged in`);
     })
   })
