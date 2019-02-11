@@ -75,6 +75,7 @@ function TodoList() {
   - [Introduction](#introduction)
   - [Installation](#installation)
   - [Examples](#examples)
+    - [Easy Peasy Typescript](#easy-peasy-typescript)
     - [React Todo List](#react-todo-list)
   - [Core Concepts](#core-concepts)
     - [Creating the store](#creating-the-store)
@@ -91,9 +92,8 @@ function TodoList() {
     - [Consuming state in your Components](#consuming-state-in-your-components)
     - [Firing actions in your Components](#firing-actions-in-your-components)
     - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
-  - [Usage with React Native](#usage-with-react-native)
-    - [Remote Redux Dev Tools](#remote-redux-dev-tools)
   - [Usage with Typescript](#usage-with-typescript)
+  - [Usage with React Native](#usage-with-react-native)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
@@ -150,6 +150,12 @@ You're off to the races.
 ---
 
 ## Examples
+
+### Easy Peasy Typescript
+
+This GitHub repository shows off how to utilise Typescript with Easy Peasy. I highly recommend cloning it and running it so that you can experience first hand what a joy it is to have types helping you with global state.
+
+https://github.com/ctrlplusb/easy-peasy-typescript
 
 ### React Todo List
 
@@ -486,52 +492,21 @@ export default connect(
 
 ---
 
-## Usage with React Native
-
-Easy Peasy is platform agnostic but makes use of features that may not be available in all environments.
-
-<details>
-<summary>How to enable remote Redux dev tools</summary>
-<p>
-React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
-
-To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
-
-```javascript
-import { createStore } from 'easy-peasy';
-import { composeWithDevTools } from 'remote-redux-devtools';
-import model from './model';
-
-/**
- * model, is used for passing through the base model
- * the second argument takes an object for additional configuration
- */
-
-const store = createStore(model, {
-  compose: composeWithDevTools({ realtime: true, trace: true })
-  // initialState: {}
-});
-
-export default store;
-```
-
-See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
-</p>
-</details>
-
-<p>&nbsp;</p>
-
----
-
 ## Usage with Typescript
 
-Easy Peasy has full support for Typescript, via its bundled definitions. More detailed documentation is coming soon, however, you can expand the below to get a general overview of how to use Typescript with Easy Peasy.
+Easy Peasy has full support for Typescript, via its bundled definitions.
+
+We announced our support for Typescript via [this Medium post](https://medium.com/@ctrlplusb/easy-typed-state-in-react-with-hooks-and-typescript-eacd32901f05).
+
+The documentation below will be expanded into higher detail soon, but the combination of the Medium post and the below examples should be enough to get you up and running for now. If anything is unclear please feel free to post and issue and we would be happy to help.
+
+We also have an [example repository](https://github.com/ctrlplusb/easy-peasy-typescript) which you can clone and run for a more interactive run through.
 
 <details>
-<summary>Overview of using Typescript with Easy Peasy</summary>
+<summary>Firstly, you need to define a type that represents your model.</summary>
 <p>
 
-Firstly, you need to define a type that represents your model. Easy Peasy exports numerous types to help you declare your model correctly.
+Easy Peasy exports numerous types to help you declare your model correctly.
 
 ```typescript
 
@@ -560,7 +535,12 @@ interface StoreModel {
 }
 ```
 
-Then you create your store.
+</p>
+</details>
+
+<details>
+<summary>Then you create your store.</summary>
+<p>
 
 ```typescript
 // Note that as we pass the Model into the `createStore` function. This allows
@@ -604,7 +584,12 @@ const store = createStore<StoreModel>({
 })
 ```
 
-You can use the store's standard APIs. They will be typed.
+</p>
+</details>
+
+<details>
+<summary>The store's APIs will be typed</summary>
+<p>
 
 ```typescript
 console.log(store.getState().todos.firstItem)
@@ -614,7 +599,12 @@ store.dispatch({ type: 'COUNTER_INCREMENT' })
 store.dispatch.todos.addTodo('Install typescript')
 ```
 
-You can type your hooks too.
+</p>
+</details>
+
+<details>
+<summary>You can type your hooks too.</summary>
+<p>
 
 ``` typescript
 import { useStore, useActions, Actions, State } from 'easy-peasy';
@@ -664,7 +654,12 @@ function MyComponent() {
 
 That's far cleaner - and it's still fully type checked.
 
-We also support typing `react-redux` based integrations.
+</p>
+</details>
+
+<details>
+<summary>We also support typing `react-redux` based integrations.</summary>
+<p>
 
 ```typescript
 const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
@@ -676,6 +671,43 @@ connect((state: State<StoreModel>) => ({
 }))(Counter)
 ```
 
+</p>
+</details>
+
+<p>&nbsp;</p>
+
+---
+
+## Usage with React Native
+
+Easy Peasy is platform agnostic but makes use of features that may not be available in all environments.
+
+<details>
+<summary>How to enable remote Redux dev tools</summary>
+<p>
+React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
+
+To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
+
+```javascript
+import { createStore } from 'easy-peasy';
+import { composeWithDevTools } from 'remote-redux-devtools';
+import model from './model';
+
+/**
+ * model, is used for passing through the base model
+ * the second argument takes an object for additional configuration
+ */
+
+const store = createStore(model, {
+  compose: composeWithDevTools({ realtime: true, trace: true })
+  // initialState: {}
+});
+
+export default store;
+```
+
+See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
 </p>
 </details>
 
