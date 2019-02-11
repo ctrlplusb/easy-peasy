@@ -108,7 +108,7 @@ export interface EasyPeasyConfig<
   devTools?: boolean
   initialState?: InitialState
   injections?: Injections
-  middlewares?: Array<Middleware<any, any, any>>
+  middleware?: Array<Middleware<any, any, any>>
   reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>
 }
 
