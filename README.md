@@ -1175,32 +1175,6 @@ This enables parts of your model to respond to actions being fired in other part
 
 Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
 
-```javascript
-const userModel = {
-  user: null,
-  loggedIn: (state, user) => {
-    state.user = user;
-  }
-};
-
-const notificationModel = {
-  msg: '',
-  set: (state, payload) => { state.msg = payload; },
-  // 👇 you can label your listeners as you like, e.g. "userListeners"
-  listeners: listen((on) => {
-    //             👇 pass in direct reference to target action
-    on(userModel.loggedIn, (actions, payload) => {
-      actions.set(`${payload.username} logged in`);
-    })
-  })
-};
-
-const model = {
-  user: userModel,
-  notification: notificationModel
-};
-```
-
 <details>
 <summary>Arguments</summary>
 <p>
@@ -1227,43 +1201,40 @@ const model = {
 <p>
 
 ```javascript
-import { listeners } from 'easy-peasy'; // 👈 import the helper
+import { listen } from 'easy-peasy'; // 👈 import the helper
 
-const store = createStore({
-  user: {
-    token: '',
-    loggedIn: (state, payload) => {
-      state.token = payload;
-    },
-    logIn: effect(async (dispatch, payload) => {
-      const token = await loginService(payload);
-      dispatch.user.loggedIn(token);
-    },
-    logOut: (state) => {
-      state.token = '';
-    }
+const userModel = {
+  user: null,
+  loggedIn: (state, user) => {
+    state.user = user;
   },
-  audit: {
-    logs: [],
-    add: (state, payload) => {
-      state.logs.push(payload)
-    },
-    //  👇 name your listeners
-    userListeners: listeners((actions, on) => {
-      // 👇 we attach a listener to the "logIn" effect
-      on(actions.user.logIn, (dispatch, payload) => {
-        dispatch.audit.add(`${payload.username} logged in`);
-      });
-      // 👇 we attach a listener to the "logOut" action
-      on(actions.user.logOut, dispatch => {
-        dispatch.audit.add('User logged out');
-      });
-    }))
+  logOut: (state) => {
+    state.user = null;
   }
-});
+};
 
-// 👇 the login effect will fire, and then any listeners will execute after complete
-store.dispatch.user.login({ username: 'mary', password: 'foo123' });
+const notificationModel = {
+  msg: '',
+  set: (state, payload) => { state.msg = payload; },
+
+  // 👇 you can label your listeners as you like, e.g. "userListeners"
+  listeners: listen((on) => {
+    //             👇 pass in direct reference to target action
+    on(userModel.loggedIn, (actions, payload) => {
+      actions.set(`${payload.username} logged in`);
+    })
+
+    // you can listen to as many actions as you like in a block
+    on(userModel.logOut, actions => {
+      actions.set('Logged out');
+    });
+  })
+};
+
+const model = {
+  user: userModel,
+  notification: notificationModel
+};
 ```
 </p>
 </details>
