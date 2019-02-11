@@ -293,20 +293,20 @@ export type Listen<
   StoreModel extends Object = {}
 > = {
   (
-    on: <ListenAction extends ActionTypes>(
+    on: <ListenAction extends Action<any, any>>(
       action: ListenAction,
       handler: (
         actions: Actions<Model>,
-        payload: ListenAction extends Function
-          ? Param1<ListenAction>
-          : ListenAction['payload'],
+        payload: ListenAction extends AsyncActionTypes
+          ? ListenAction['payload']
+          : Param1<ListenAction>,
         helpers: {
           dispatch: Dispatch<StoreModel>
           getState: () => State<StoreModel>
           injections: Injections
           meta: Meta
         },
-      ) => Result,
+      ) => any,
     ) => void,
   ): void
   type: 'listen'
@@ -346,16 +346,16 @@ export function listen<
       action: ListenAction,
       handler: (
         actions: Actions<Model>,
-        payload: ListenAction extends Function
-          ? Param1<ListenAction>
-          : ListenAction['payload'],
+        payload: ListenAction extends AsyncActionTypes
+          ? ListenAction['payload']
+          : Param1<ListenAction>,
         helpers: {
           dispatch: Dispatch<StoreModel>
           getState: () => State<StoreModel>
           injections: Injections
           meta: Meta
         },
-      ) => Result,
+      ) => any,
     ) => void,
   ) => void,
 ): Listen<Model, Injections, StoreModel>
