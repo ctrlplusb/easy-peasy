@@ -1176,17 +1176,28 @@ This enables parts of your model to respond to actions being fired in other part
 Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
 
 ```javascript
+const userModel = {
+  user: null,
+  loggedIn: (state, user) => {
+    state.user = user;
+  }
+};
+
+const notificationModel = {
+  msg: '',
+  set: (state, payload) => { state.msg = payload; },
+  // 👇 you can label your listeners as you like, e.g. "userListeners"
+  listeners: listen((on) => {
+    //             👇 pass in direct reference to target action
+    on(userModel.loggedIn, (actions, paylaod) => {
+      actions.set(`${payload.username} logged in`);
+    })
+  })
+};
+
 const model = {
   user: userModel,
-  notifcations: {
-    msg: '',
-    set: (state, payload) => { state.msg = payload; },
-    notificationlisteners: listen((on) => {
-      on(userModel.loggedIn, (actions, paylaod) => {
-        actions.set(`${payload.username} logged in`);
-      })
-    })
-  }
+  notification: notificationModel
 };
 ```
 
