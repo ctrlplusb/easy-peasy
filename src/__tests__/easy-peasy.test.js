@@ -1452,6 +1452,30 @@ describe('listen', () => {
       'User logged out',
     ])
   })
+
+  it('listens to string actions', () => {
+    // arrange
+    const store = createStore({
+      routeChangeLogs: [],
+      log: (state, payload) => {
+        state.routeChangeLogs.push(payload)
+      },
+      listeners: listen(on => {
+        on('ROUTE_CHANGED', (action, payload) => {
+          action.log(payload)
+        })
+      }),
+    })
+
+    // act
+    store.dispatch({
+      type: 'ROUTE_CHANGED',
+      payload: '/about',
+    })
+
+    // assert
+    expect(store.getState().routeChangeLogs).toEqual(['/about'])
+  })
 })
 
 describe('createTypedHooks', () => {
