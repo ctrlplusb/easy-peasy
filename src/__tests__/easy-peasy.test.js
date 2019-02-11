@@ -1476,6 +1476,24 @@ describe('listen', () => {
     // assert
     expect(store.getState().routeChangeLogs).toEqual(['/about'])
   })
+
+  it('listening to an invalid type does nothing', () => {
+    // act
+    createStore({
+      listeners: listen(on => {
+        on(true, () => {})
+      }),
+    })
+  })
+
+  it('listening with an invalid handler does nothing', () => {
+    // act
+    createStore({
+      listeners: listen(on => {
+        on('FOO_BAR', true)
+      }),
+    })
+  })
 })
 
 describe('createTypedHooks', () => {
