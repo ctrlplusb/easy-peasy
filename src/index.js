@@ -1,4 +1,5 @@
 import {
+  actionName,
   createStore,
   effect,
   listeners,
@@ -6,6 +7,8 @@ import {
   reducer,
   select,
   thunk,
+  thunkStartName,
+  thunkEndName,
 } from './easy-peasy'
 import {
   createTypedHooks,
@@ -17,6 +20,7 @@ import {
 import StoreProvider from './provider'
 
 export {
+  actionName,
   createStore,
   createTypedHooks,
   effect,
@@ -26,6 +30,8 @@ export {
   select,
   StoreProvider,
   thunk,
+  thunkStartName,
+  thunkEndName,
   useAction,
   useActions,
   useDispatch,

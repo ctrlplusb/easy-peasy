@@ -131,6 +131,7 @@ export interface EasyPeasyConfig<
   initialState?: InitialState
   injections?: Injections
   middleware?: Array<Middleware<any, any, any>>
+  recordActions?: boolean
   reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>
 }
 
@@ -146,6 +147,11 @@ export type Dispatch<
   Action extends ReduxAction = ReduxAction<any>
 > = Actions<StoreModel> & ReduxDispatch<Action>
 
+export interface ActionData {
+  type: string
+  payload: any
+}
+
 /**
  * Represents a Redux store, enhanced by easy peasy.
  *
@@ -153,10 +159,14 @@ export type Dispatch<
  *
  * type EnhancedReduxStore = Store<StoreModel>;
  */
-export type Store<StoreModel> = Overwrite<
+export type Store<
+  StoreModel,
+  StoreConfig extends EasyPeasyConfig<any, any> = void
+> = Overwrite<
   ReduxStore<State<StoreModel>>,
   {
     dispatch: Dispatch<StoreModel>
+    dispatched: ActionData[]
   }
 >
 
@@ -565,10 +575,10 @@ export function reducer<State extends Object = {}>(
  *   }
  * })
  */
-export function createStore<StoreModel extends Object = {}>(
-  model: StoreModel,
-  config?: EasyPeasyConfig,
-): Store<StoreModel>
+export function createStore<
+  StoreModel extends Object = {},
+  StoreConfig extends EasyPeasyConfig<any, any> = void
+>(model: StoreModel, config?: StoreConfig): Store<StoreModel, StoreConfig>
 
 /**
  * A React Hook allowing you to use state within your component.
