@@ -5547,10 +5547,10 @@ react-redux@^6.0.0:
     prop-types "^15.6.2"
     react-is "^16.6.3"
 
-react-testing-library@^5.6.0:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/react-testing-library/-/react-testing-library-5.6.0.tgz#1a964e50750695426da69eaa9caafbdd414965ed"
-  integrity sha512-K9Ql3ytFhblRGs19MjwwdvOT0MZ4XhamVGrS7FtVxSzpmmG1gIPVWYwgt7Mz8LNUDW2BOsBGFDp0a2UskCJI4w==
+react-testing-library@^5.7.0:
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/react-testing-library/-/react-testing-library-5.7.0.tgz#88684033dd982654ef4ce8eab9c0a4ab547d2737"
+  integrity sha512-VKUmQlv/0/bFXCifRpgWBFWumxlmUo5o6FzG41//6tl2LfcJg/ccklGPYgQYLYJzbrIlq/TqsUAT133DwovDPA==
   dependencies:
     "@babel/runtime" "^7.3.1"
     dom-testing-library "^3.13.1"
