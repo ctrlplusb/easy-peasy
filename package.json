@@ -5,7 +5,6 @@
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
   "module": "dist/easy-peasy.esm.js",
-  "typings": "./index.d.ts",
   "types": "./index.d.ts",
   "sideEffects": false,
   "files": [
@@ -40,7 +39,6 @@
     "react": "^16.8.0"
   },
   "dependencies": {
-    "@types/react-redux": "^7.0.1",
     "immer": "^2.0.0",
     "memoizerific": "^1.11.3",
     "redux": "^4.0.1",
@@ -63,6 +61,7 @@
     "@babel/register": "^7.0.0",
     "@types/react": "^16.8.2",
     "@types/react-dom": "^16.8.0",
+    "@types/react-redux": "^7.0.1",
     "app-root-dir": "^1.0.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
