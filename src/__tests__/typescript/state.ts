@@ -7,6 +7,8 @@ import {
   Listen,
   Listeners,
   Reducer,
+  select,
+  reducer,
 } from 'easy-peasy'
 
 type Model = {
@@ -42,9 +44,33 @@ type Model = {
   }
 }
 
-type ModelState = State<Model>
-
-const assert = {} as ModelState
+const assert : State<Model> = {
+  stateArray: [],
+  stateBoolean: true,
+  stateDate: new Date(),
+  stateNull: null,
+  stateNumber: 1,
+  stateRegExp: /abc/,
+  stateString: 'foo',
+  stateUndefined: undefined,
+  stateUnion: 'bar',
+  selectUnion: undefined,
+  selectImp: 1,
+  reducerImp: 1,
+  nested: {
+    stateArray: [],
+    stateBoolean: true,
+    stateDate: new Date(),
+    stateNull: null,
+    stateNumber: 1,
+    stateRegExp: /abc/,
+    stateString: 'foo',
+    stateUndefined: undefined,
+    stateUnion: 'bar',
+    selectImp: 1,
+    reducerImp: 1,
+  },
+}
 
 /**
  * State Types

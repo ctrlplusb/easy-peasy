@@ -1,5 +1,5 @@
 import { Component } from 'react'
-import { KeysOfType, Omit, Overwrite } from 'typelevel-ts'
+import { KeysOfType, Omit, OptionalKeys, Overwrite, RequiredKeys } from 'typelevel-ts'
 import { Param0, Param1 } from 'type-zoo'
 import {
   compose,
@@ -85,17 +85,30 @@ export type Actions<Model extends Object> = {
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends Object> = {
-  [P in keyof FilterStateTypes<Model>]: Model[P] extends Select<any, any>
-    ? Model[P]['result']
-    : Model[P] extends Reducer<any, any>
-    ? Model[P]['result']
-    : Model[P] extends object
-    ? Model[P] extends Array<any> | RegExp | Date
-      ? Model[P]
-      : State<Model[P]>
-    : Model[P]
-}
+export type State<Model extends Object> = 
+  {
+    [P in keyof FilterStateTypes<Pick<Model, RequiredKeys<Model>>>]: Model[P] extends Select<any, any>
+      ? Model[P]['result']
+      : Model[P] extends Reducer<any, any>
+      ? Model[P]['result']
+      : Model[P] extends object
+      ? Model[P] extends Array<any> | RegExp | Date
+        ? Model[P]
+        : State<Model[P]>
+      : Model[P]
+  }
+  &
+  {
+    [P in keyof FilterStateTypes<Pick<Model, OptionalKeys<Model>>>]?: Model[P] extends Select<any, any>
+      ? Model[P]['result']
+      : Model[P] extends Reducer<any, any>
+      ? Model[P]['result']
+      : Model[P] extends object
+      ? Model[P] extends Array<any> | RegExp | Date
+        ? Model[P]
+        : State<Model[P]>
+      : Model[P]
+  }
 
 /**
  * Configuration interface for the createStore
