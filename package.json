@@ -1,11 +1,12 @@
 {
   "name": "easy-peasy",
-  "version": "1.13.2",
+  "version": "1.13.3",
   "description": "Easy peasy global state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
   "module": "dist/easy-peasy.esm.js",
   "typings": "./index.d.ts",
+  "types": "./index.d.ts",
   "sideEffects": false,
   "files": [
     "dist",
