@@ -25,16 +25,10 @@ export function useStore(mapState, dependencies = []) {
         return
       }
       stateRef.current = newState
-      // The settimeout wrap fixes a strange issue where a setState would
-      // fire but the associated hook wouldn't receive it. It's almost as
-      // if the effect was handled in a synchronous manner in some part of
-      // the React reconciliation process that ended up with it not
-      // propagating
-      setTimeout(() => {
-        if (isActive.current) {
-          setState(newState)
-        }
-      })
+
+      if (isActive.current) {
+        setState(newState)
+      }
     }
     calculateState()
     const unsubscribe = store.subscribe(calculateState)

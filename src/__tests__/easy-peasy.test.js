@@ -94,16 +94,14 @@ describe('react', () => {
     expect(value.firstChild.textContent).toBe('foo')
 
     // act
-    const app2 = (
-      <StoreProvider store={store}>
-        <Values id={2} />
-      </StoreProvider>
-    )
-
-    rerender(app2)
-
-    // assert
-    expect(value.firstChild.textContent).toBe('foo')
+    act(() => {
+      const app2 = (
+        <StoreProvider store={store}>
+          <Values id={2} />
+        </StoreProvider>
+      )
+      rerender(app2)
+    })
 
     // ensure settimeouts fire
     act(() => {
