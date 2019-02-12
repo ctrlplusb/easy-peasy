@@ -78,6 +78,35 @@ export type Actions<Model extends Object> = {
     : Actions<Model[P]>
 }
 
+type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>
+type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>
+
+type RecursiveState<RequiredModel extends Object, OptionalModel extends Object> = 
+  {
+    [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, any>
+      ? RequiredModel[P]['result']
+      : RequiredModel[P] extends Reducer<any, any>
+      ? RequiredModel[P]['result']
+      : RequiredModel[P] extends object
+      ? RequiredModel[P] extends Array<any> | RegExp | Date
+        ? RequiredModel[P]
+        : State<RequiredModel[P]>
+      : RequiredModel[P]
+  }
+  &
+  {
+    [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, any>
+      ? OptionalModel[P]['result']
+      : OptionalModel[P] extends Reducer<any, any>
+      ? OptionalModel[P]['result']
+      : OptionalModel[P] extends object
+      ? OptionalModel[P] extends Array<any> | RegExp | Date
+        ? OptionalModel[P]
+        : State<OptionalModel[P]>
+      : OptionalModel[P]
+  }
+
+
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
  *
@@ -85,30 +114,10 @@ export type Actions<Model extends Object> = {
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends Object> = 
-  {
-    [P in keyof FilterStateTypes<Pick<Model, RequiredKeys<Model>>>]: Model[P] extends Select<any, any>
-      ? Model[P]['result']
-      : Model[P] extends Reducer<any, any>
-      ? Model[P]['result']
-      : Model[P] extends object
-      ? Model[P] extends Array<any> | RegExp | Date
-        ? Model[P]
-        : State<Model[P]>
-      : Model[P]
-  }
-  &
-  {
-    [P in keyof FilterStateTypes<Pick<Model, OptionalKeys<Model>>>]?: Model[P] extends Select<any, any>
-      ? Model[P]['result']
-      : Model[P] extends Reducer<any, any>
-      ? Model[P]['result']
-      : Model[P] extends object
-      ? Model[P] extends Array<any> | RegExp | Date
-        ? Model[P]
-        : State<Model[P]>
-      : Model[P]
-  }
+export type State<Model extends Object> = RecursiveState<
+  FilterStateTypes<RequiredOnly<Model>>,
+  FilterStateTypes<OptionalOnly<Model>>
+>
 
 /**
  * Configuration interface for the createStore
@@ -575,8 +584,8 @@ export function createStore<StoreModel extends Object = {}>(
  *   return todos.map(todo => <Todo todo={todo} />);
  * }
  */
-export function useStore<StoreModel extends Object = {}, Result = any>(
-  mapState: (state: State<StoreModel>) => Result,
+export function useStore<StoreState extends State<any> = {}, Result = any>(
+  mapState: (state: StoreState) => Result,
   dependencies?: Array<any>,
 ): Result
 
