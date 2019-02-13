@@ -197,7 +197,7 @@ export type Store<
  *
  * interface TodosModel {
  *   todos: Array<string>;
- *   addTodo: Effect<TodosModel, string>;
+ *   addTodo: Thunk<TodosModel, string>;
  * }
  */
 export type Thunk<
@@ -479,7 +479,7 @@ export function listeners<StoreModel extends Object = {}>(
  * import { Action } from 'easy-peasy';
  *
  * interface Model {
- *   todos: Array<Todo>; ;
+ *   todos: Array<Todo>;
  *   addTodo: Action<Model, Todo>;
  * }
  */
