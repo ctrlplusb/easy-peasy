@@ -727,6 +727,7 @@ In the examples below you will see that we are testing specific parts of our mod
 <details>
 <summary>Testing an action</summary>
 <p>
+
 Actions are relatively simple to test as they are essentially an immutable update to the store. We can therefore test the difference.
 
 Given the following model under test:
@@ -762,6 +763,7 @@ test('add action', async () => {
 <details>
 <summary>Testing a thunk</summary>
 <p>
+
 Thunks are more complicated to test than actions as they can invoke network requests and other actions.
 
 There will likely be seperate tests for our actions, therefore it is recommended that you don't test for the state changes of actions fired by your thunk. We rather recommend that you test for what actions were fired from your thunk under test.
@@ -791,6 +793,8 @@ const todosModel = {
 We could test it like so:
 
 ```typescript
+import { createStore, actionName, thunkStartName, thunkCompleteName } from 'easy-peasy'
+
 const createFetchMock = response =>
   jest.fn(() => Promise.resolve({ json: () => Promise.resolve(response) }))
 
@@ -822,6 +826,7 @@ test('fetchById', async () => {
 <details>
 <summary>Testing components</summary>
 <p>
+
 When testing your components I strongly recommend the approach recommended by Kent C. Dodd's awesome [Testing Javascript](https://testingjavascript.com/) course, where you try to test the behaviour of your components using a natural DOM API, rather than reaching into the internals of your components. He has published a very useful package by the name of [`react-testing-library`](https://github.com/kentcdodds/react-testing-library) to help us do so. The tests below shall be adopting this package and strategy.
 
 Imagine we were trying to test the following component.
@@ -898,7 +903,7 @@ Some other strategies that you could employ whilst using this pattern include:
 
   - Utilising the `injections` and `mockActions` configurations of the `createStore` to avoid performing actions with side effects in your test.
 
-There is no one way to test your components, but it is good to know of the tools available to you. However you test your components though I do recommend that you try to test it as close to real behaviour as possible - i.e. try your best to avoid implementation details from leaking into your tests.
+There is no one way to test your components, but it is good to know of the tools available to you. However you choose to test your components, I do recommend that you try to test them as close to their real behaviour as possible - i.e. try your best to prevent implementation details leaking into your tests.
 
 </p>
 </details>
@@ -965,6 +970,7 @@ Creates a Redux store based on the given model. The model must be an object and 
 <details>
 <summary>Store Instance API</summary>
 <p>
+
 When you have created a store all the standard APIs of a [Redux Store](https://redux.js.org/api/store) are available. Please reference [their docs](https://redux.js.org/api/store) for more information. In addition to the standard APIs, Easy Peasy enhances the instance to contain the following:
 
   - `dispatch` (Function & Object, required)
@@ -978,6 +984,7 @@ When you have created a store all the standard APIs of a [Redux Store](https://r
   - `clearMockedActions` (Function, required)
 
     When the `mockActions` configuration value was passed to the `createStore` then calling this function clears the list of mocked actions that have been tracked by the store. This is useful in the context of testing - especially thunks.
+
 </p>
 </details>
 
@@ -1441,6 +1448,7 @@ Note: If any action being listened to does not complete successfully (i.e. throw
       The handler thunk to be executed after the target action is fired successfully. It has the same arguments and characteristics of a [thunk](#thunkaction) action. Please refer to the thunk API documentation for more information.
 
       The only difference is that the `payload` argument will be the payload value that the action being listened to received.
+
 </p>
 </details>
 
@@ -1485,6 +1493,7 @@ const model = {
   notification: notificationModel
 };
 ```
+
 </p>
 </details>
 
@@ -1560,6 +1569,7 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
     If your `useStore` function depends on an external value (for example a property of your component), then you should provide the respective value within this argument so that the `useStore` knows to remap your state when the respective externals change in value.
 
 Your `mapState` can either resolve a single piece of state. If you wish to resolve multiple pieces of state then you can either call `useStore` multiple times, or if you like resolve an object within your `mapState` where each property of the object is a resolved piece of state (similar to the `connect` from `react-redux`). The examples will illustrate the various forms.
+
 </p>
 </details>
 
@@ -1632,6 +1642,7 @@ const BasketTotal = () => {
 <details>
 <summary>A word of caution</summary>
 <p>
+
 Please be careful in the manner that you resolve values from your `mapToState`. To optimise the rendering performance of your components we use equality checking (===) to determine if the mapped state has changed.
 
 When an action changes the piece of state your `mapState` is resolving the equality check will break, which will cause your component to re-render with the new state.
@@ -1867,6 +1878,7 @@ Declares an action on your model as being effectful. i.e. has asynchronous flow.
       ```
 
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
+
 </p>
 </details>
 
@@ -2019,6 +2031,7 @@ const model = {
         - `injections` (Any, not required, default=undefined)
 
           Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+
 </p>
 </details>
 
@@ -2066,6 +2079,7 @@ const store = createStore({
 // 👇 the login effect will fire, and then any listeners will execute after complete
 store.dispatch.user.login({ username: 'mary', password: 'foo123' });
 ```
+
 </p>
 </details>
 
@@ -2086,6 +2100,7 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
       The `dispatch` of your store, which has all the actions mapped against it.
 
 Your `mapAction` can either resolve a single action. If you wish to resolve multiple actions then you can either call `useAction` multiple times, or if you like resolve an object within your `mapAction` where each property of the object is a resolved action. The examples below will illustrate these options.
+
 </p>
 </details>
 
