@@ -1009,14 +1009,14 @@ We don't recommned doing this, and instead encourage you to use the `listeners` 
 <p>
 
 ```javascript
-import { createStore, effect } from 'easy-peasy';
+import { createStore, thunk } from 'easy-peasy';
 import api from './api' // 👈 a dependency we want to inject
 
 const store = createStore(
   {
     foo: 'bar',
     //                       injections are exposed here 👇
-    doSomething: effect(async (dispatch, payload, { injections }) => {
+    doSomething: thunk(async (dispatch, payload, { injections }) => {
       const { api } = injections
       await api.foo()
     }),
