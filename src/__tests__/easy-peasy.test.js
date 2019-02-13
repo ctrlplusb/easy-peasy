@@ -9,15 +9,12 @@ import {
   StoreProvider,
   createStore,
   createTypedHooks,
-  effect,
   reducer,
   select,
   thunk,
   useStore,
-  useAction,
   useActions,
   useDispatch,
-  listeners,
   listen,
 } from '../index'
 
@@ -273,7 +270,7 @@ describe('react', () => {
         const { count } = useStore(state => ({
           count: state.count,
         }))
-        const inc = useAction(actions => actions.inc)
+        const inc = useActions(actions => actions.inc)
         renderSpy()
         return (
           <button data-testid="count" type="button" onClick={inc}>
@@ -536,12 +533,12 @@ describe('store', () => {
   })
 
   test('complex configuration', async () => {
-    const wrappedEffect = fn =>
-      effect(async (dispatch, payload, additional) => {
+    const wrappedThunk = fn =>
+      thunk(async (actions, payload, helpers) => {
         try {
-          return await fn(dispatch, payload, additional)
+          return await fn(actions, payload, helpers)
         } catch (err) {
-          dispatch.error.unexpectedError(err)
+          helpers.dispatch.error.unexpectedError(err)
           return undefined
         }
       })
@@ -556,8 +553,8 @@ describe('store', () => {
         initialised: state => {
           state.isInitialised = true
         },
-        initialise: wrappedEffect(async dispatch => {
-          dispatch.session.initialised()
+        initialise: wrappedThunk(async actions => {
+          actions.initialised()
           return 'done'
         }),
       },
@@ -579,158 +576,6 @@ describe('internals', () => {
     const result = await store.dispatch(action('foo'))
     // assert
     expect(result).toBe('foo')
-  })
-})
-
-describe('effects', () => {
-  test('dispatches an action to represent the start of an effect', async () => {
-    // arrange
-    const model = {
-      foo: {
-        doSomething: effect(() => undefined),
-      },
-    }
-    const trackActions = trackActionsMiddleware()
-    const store = createStore(model, { middleware: [trackActions] })
-    const payload = 'hello'
-    // act
-    await store.dispatch.foo.doSomething(payload)
-    // assert
-    expect(trackActions.actions).toEqual([
-      { type: '@effect.foo.doSomething', payload },
-    ])
-  })
-
-  test('async action', async () => {
-    // arrange
-    const model = {
-      session: {
-        user: undefined,
-        loginSucceeded: (state, payload) => {
-          state.user = payload
-        },
-        login: effect(async (dispatch, payload, getState) => {
-          expect(payload).toEqual({
-            username: 'bob',
-            password: 'foo',
-          })
-          const user = await resolveAfter({ name: 'bob' }, 15)
-          dispatch.session.loginSucceeded(user)
-          expect(getState()).toEqual({
-            session: {
-              user: {
-                name: 'bob',
-              },
-            },
-          })
-          return 'resolved'
-        }),
-      },
-    }
-    // act
-    const store = createStore(model)
-    // act
-    const result = await store.dispatch.session.login({
-      username: 'bob',
-      password: 'foo',
-    })
-    // assert
-    expect(result).toBe('resolved')
-    expect(store.getState()).toEqual({
-      session: {
-        user: {
-          name: 'bob',
-        },
-      },
-    })
-  })
-
-  test('action is always promise chainable', done => {
-    // arrange
-    const model = { doSomething: effect(() => undefined) }
-    const store = createStore(model)
-    // act
-    store.dispatch.doSomething().then(done)
-  })
-
-  test('dispatch another branch action', async () => {
-    // arrange
-    const model = {
-      session: {
-        user: undefined,
-        login: effect(dispatch => {
-          dispatch.stats.incrementLoginAttempts()
-        }),
-      },
-      stats: {
-        loginAttempts: 0,
-        incrementLoginAttempts: state => {
-          state.loginAttempts += 1
-        },
-      },
-    }
-    // act
-    const store = createStore(model)
-    // act
-    await store.dispatch.session.login()
-    // assert
-    expect(store.getState()).toEqual({
-      session: {
-        user: undefined,
-      },
-      stats: {
-        loginAttempts: 1,
-      },
-    })
-  })
-
-  test('getState is exposed', async () => {
-    // arrange
-    const store = createStore({
-      count: 1,
-      doSomething: effect((dispatch, payload, getState) => {
-        // assert
-        expect(getState()).toEqual({ count: 1 })
-      }),
-    })
-
-    // act
-    await store.dispatch.doSomething()
-  })
-
-  test('deprecated getState is exposed', async () => {
-    // arrange
-    const store = createStore({
-      count: 1,
-      doSomething: effect((dispatch, payload, { getState }) => {
-        // assert
-        expect(getState()).toEqual({ count: 1 })
-      }),
-    })
-
-    // act
-    await store.dispatch.doSomething()
-  })
-
-  test('meta values are exposed', async () => {
-    // arrange
-    let actualMeta
-    const store = createStore({
-      foo: {
-        doSomething: effect((dispatch, payload, getState, injections, meta) => {
-          actualMeta = meta
-        }),
-      },
-    })
-
-    // act
-    await store.dispatch.foo.doSomething()
-
-    // assert
-    expect(actualMeta).toEqual({
-      parent: ['foo'],
-      path: ['foo', 'doSomething'],
-    })
   })
 })
 
@@ -1170,7 +1015,7 @@ describe('dependency injection', () => {
     const injection = jest.fn()
     const store = createStore(
       {
-        doSomething: effect((dispatch, payload, getState, injections) => {
+        doSomething: thunk((actions, payload, { injections }) => {
           injections.injection()
         }),
       },
@@ -1271,73 +1116,6 @@ describe('reducer', () => {
       products: [{ name: 'Boots', price: 10 }],
       totalPrice: 10,
     })
-  })
-})
-
-describe('listeners', () => {
-  it('work as expected', async () => {
-    // arrange
-    const expectedInjections = { foo: 'bar' }
-
-    const store = createStore(
-      {
-        doNothing: () => undefined,
-        user: {
-          token: '',
-          logIn: effect(() => {}),
-          logOut: () => undefined,
-        },
-        audit: {
-          logs: [],
-          add: (state, payload) => {
-            state.logs.push(payload)
-          },
-          userListeners: listeners((actions, on) => {
-            on(
-              actions.user.logIn,
-              (dispatch, payload, getState, injections) => {
-                expect(payload).toEqual({ username: 'foo', password: 'bar' })
-                expect(getState()).toEqual({
-                  user: {
-                    token: '',
-                  },
-                  audit: { logs: [] },
-                })
-                expect(injections).toEqual(expectedInjections)
-                dispatch.audit.add('User logged in')
-              },
-            )
-            on(actions.user.logOut, dispatch => {
-              dispatch.audit.add('User logged out')
-            })
-          }),
-        },
-      },
-      {
-        injections: expectedInjections,
-      },
-    )
-
-    // act
-    store.dispatch.doNothing()
-
-    // assert
-    expect(store.getState().audit.logs).toEqual([])
-
-    // act
-    await store.dispatch.user.logIn({ username: 'foo', password: 'bar' })
-
-    // assert
-    expect(store.getState().audit.logs).toEqual(['User logged in'])
-
-    // act
-    await store.dispatch.user.logOut()
-
-    // assert
-    expect(store.getState().audit.logs).toEqual([
-      'User logged in',
-      'User logged out',
-    ])
   })
 })
 
@@ -1463,7 +1241,6 @@ describe('createTypedHooks', () => {
     const typedHooks = createTypedHooks()
 
     // assert
-    expect(typedHooks.useAction).toBe(useAction)
     expect(typedHooks.useActions).toBe(useActions)
     expect(typedHooks.useStore).toBe(useStore)
     expect(typedHooks.useDispatch).toBe(useDispatch)

@@ -3,16 +3,12 @@ import {
   Thunk,
   Action,
   Select,
-  Effect,
   Listen,
-  Listeners,
   Reducer,
   State,
   createTypedHooks,
   useActions,
-  useAction,
-  useDispatch,
-  useStore
+  useStore,
 } from 'easy-peasy'
 
 interface Model {
@@ -26,27 +22,24 @@ interface Model {
   stateUndefined: undefined
   stateUnion: string | null
   actionImp: Action<Model, number>
-  effectImp: Effect<Model, string | null>
   thunkImp: Thunk<Model, string>
   selectImp: Select<Model, number>
   listenImp: Listen<Model>
-  listenersImp: Listeners<Model>
   reducerImp: Reducer<number>
   nested: {
     actionImp: Action<Model, number>
-    effectImp: Effect<Model, string | null>
     thunkImp: Thunk<Model, string>
   }
 }
 
-let useStoreResult = useStore((state: State<Model>) => state.stateNumber);
+let useStoreResult = useStore((state: State<Model>) => state.stateNumber)
 useStoreResult + 1
-let useActionResult = useActions((actions: Actions<Model>) => actions.actionImp);
+let useActionResult = useActions((actions: Actions<Model>) => actions.actionImp)
 useActionResult(1)
 
-const typedHooks = createTypedHooks<Model>();
+const typedHooks = createTypedHooks<Model>()
 
-useStoreResult = typedHooks.useStore((state) => state.stateNumber);
+useStoreResult = typedHooks.useStore(state => state.stateNumber)
 useStoreResult + 1
-useActionResult = typedHooks.useActions((actions) => actions.actionImp);
+useActionResult = typedHooks.useActions(actions => actions.actionImp)
 useActionResult(1)

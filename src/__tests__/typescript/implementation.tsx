@@ -5,13 +5,8 @@ import {
   Actions,
   createStore,
   createTypedHooks,
-  Dispatch,
-  effect,
-  Effect,
   listen,
   Listen,
-  listeners,
-  Listeners,
   reducer,
   Reducer,
   select,
@@ -20,7 +15,6 @@ import {
   StoreProvider,
   thunk,
   Thunk,
-  useAction,
   useActions,
   useDispatch,
   useStore,
@@ -50,7 +44,6 @@ interface UserModel {
 interface AuditModel {
   logs: string[]
   set: Action<AuditModel, string>
-  userListeners: Listeners<StoreModel>
   newUserListeners: Listen<AuditModel>
   getNLog: Select<AuditModel, (n: number) => string | undefined>
 }
@@ -59,8 +52,6 @@ interface StoreModel {
   todos: TodosModel
   user: UserModel
   counter: Reducer<number>
-  printDebugInfo: Effect<StoreModel, void, Injections, Promise<string>>
-  sayHello: Effect<StoreModel, void, Injections>
   audit: AuditModel
 }
 
@@ -92,11 +83,6 @@ const store = createStore<StoreModel>({
     set: (state, payload) => {
       state.logs.push(payload)
     },
-    userListeners: listeners((actions, attach) => {
-      attach(actions.user.login, (dispatch, payload) => {
-        dispatch.audit.set(`Logging in ${payload.username}`)
-      })
-    }),
     getNLog: select(state => (n: number) =>
       state.logs.length > n ? state.logs[n] : undefined,
     ),
@@ -124,14 +110,6 @@ const store = createStore<StoreModel>({
         return state
     }
   }),
-  printDebugInfo: effect(async (state, payload, getState, injections) => {
-    const msg = `App id: ${injections.appId}`
-    console.log(msg)
-    return msg
-  }),
-  sayHello: effect(() => {
-    console.log('Hello world')
-  }),
 })
 
 /**
@@ -143,7 +121,6 @@ console.log(store.getState().todos.firstItem)
 store.dispatch({ type: 'COUNTER_INCREMENT' })
 
 store.dispatch.todos.addTodo('jello')
-store.dispatch.printDebugInfo()
 
 const log1 = store.getState().audit.getNLog(1)
 
@@ -157,13 +134,9 @@ if (log1) {
  */
 function MyComponent() {
   const token = useStore((state: State<StoreModel>) => state.user.token)
-  const { login, printDebugInfo, sayHello } = useAction(
-    (dispatch: Dispatch<StoreModel>) => ({
-      login: dispatch.user.login,
-      printDebugInfo: dispatch.printDebugInfo,
-      sayHello: dispatch.sayHello,
-    }),
-  )
+  const { login } = useActions((dispatch: Actions<StoreModel>) => ({
+    login: dispatch.user.login,
+  }))
   const { addTodo } = useActions((actions: Actions<StoreModel>) => ({
     addTodo: actions.todos.addTodo,
   }))
@@ -172,12 +145,6 @@ function MyComponent() {
   dispatch({
     type: 'ADD_FOO',
     payload: 'bar',
-  })
-  printDebugInfo().then(result => {
-    console.log(result + 'should_be_string')
-  })
-  sayHello().then(() => {
-    console.log('Goodbye')
   })
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>
