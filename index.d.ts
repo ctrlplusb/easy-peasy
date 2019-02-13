@@ -18,13 +18,10 @@ import {
 } from 'redux'
 import { string } from 'prop-types'
 
-type AsyncActionTypes =
-  | Thunk<any, any, any, any, any>
-  | Effect<any, any, any, any>
+type AsyncActionTypes = Thunk<any, any, any, any, any>
 
 type ActionTypes =
   | Action<any, any>
-  | Effect<any, any, any, any>
   | Thunk<any, any, any, any, any>
 
 type Meta = {
@@ -50,7 +47,6 @@ type FilterActionTypes<T extends object> = Omit<
     | Reducer<any, any>
     | Select<any, any>
     | Listen<any, any, any>
-    | Listeners<any>
   >
 >
 
@@ -60,9 +56,7 @@ type FilterStateTypes<T extends object> = Overwrite<
     KeysOfType<
       T,
       | Listen<any, any, any>
-      | Listeners<any>
       | Action<any, any>
-      | Effect<any, any, any, any>
       | Thunk<any, any, any, any, any>
       | Function
     >
