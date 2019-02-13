@@ -1,5 +1,11 @@
 import { Component } from 'react'
-import { KeysOfType, Omit, OptionalKeys, Overwrite, RequiredKeys } from 'typelevel-ts'
+import {
+  KeysOfType,
+  Omit,
+  OptionalKeys,
+  Overwrite,
+  RequiredKeys,
+} from 'typelevel-ts'
 import { Param0, Param1 } from 'type-zoo'
 import {
   compose,
@@ -10,6 +16,7 @@ import {
   Store as ReduxStore,
   Middleware,
 } from 'redux'
+import { string } from 'prop-types'
 
 type AsyncActionTypes =
   | Thunk<any, any, any, any, any>
@@ -24,6 +31,14 @@ type Meta = {
   path: string[]
   parent: string[]
 }
+
+export function actionName(action: Action<any, any>): string
+
+export function thunkStartName(action: Thunk<any, any, any, any, any>): string
+
+export function thunkCompleteName(
+  action: Thunk<any, any, any, any, any>,
+): string
 
 type FilterActionTypes<T extends object> = Omit<
   T,
@@ -81,19 +96,20 @@ export type Actions<Model extends Object> = {
 type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>
 type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>
 
-type RecursiveState<RequiredModel extends Object, OptionalModel extends Object> = 
-  {
-    [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, any>
-      ? RequiredModel[P]['result']
-      : RequiredModel[P] extends Reducer<any, any>
-      ? RequiredModel[P]['result']
-      : RequiredModel[P] extends object
-      ? RequiredModel[P] extends Array<any> | RegExp | Date
-        ? RequiredModel[P]
-        : State<RequiredModel[P]>
-      : RequiredModel[P]
-  }
-  &
+type RecursiveState<
+  RequiredModel extends Object,
+  OptionalModel extends Object
+> = {
+  [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, any>
+    ? RequiredModel[P]['result']
+    : RequiredModel[P] extends Reducer<any, any>
+    ? RequiredModel[P]['result']
+    : RequiredModel[P] extends object
+    ? RequiredModel[P] extends Array<any> | RegExp | Date
+      ? RequiredModel[P]
+      : State<RequiredModel[P]>
+    : RequiredModel[P]
+} &
   {
     [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, any>
       ? OptionalModel[P]['result']
@@ -105,7 +121,6 @@ type RecursiveState<RequiredModel extends Object, OptionalModel extends Object> 
         : State<OptionalModel[P]>
       : OptionalModel[P]
   }
-
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)

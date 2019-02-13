@@ -3,7 +3,7 @@ import {
   createStore,
   thunk,
   thunkStartName,
-  thunkEndName,
+  thunkCompleteName,
 } from '../index'
 
 const todosModel = {
@@ -38,7 +38,7 @@ it('thunk', async () => {
   expect(store.dispatched).toEqual([
     { type: thunkStartName(todosModel.fetchById), payload: todo.id },
     { type: actionName(todosModel.add), payload: todo },
-    { type: thunkEndName(todosModel.fetchById), payload: todo.id },
+    { type: thunkCompleteName(todosModel.fetchById), payload: todo.id },
   ])
 })
 

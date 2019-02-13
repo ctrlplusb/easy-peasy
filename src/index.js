@@ -8,7 +8,7 @@ import {
   select,
   thunk,
   thunkStartName,
-  thunkEndName,
+  thunkCompleteName,
 } from './easy-peasy'
 import {
   createTypedHooks,
@@ -31,7 +31,7 @@ export {
   StoreProvider,
   thunk,
   thunkStartName,
-  thunkEndName,
+  thunkCompleteName,
   useAction,
   useActions,
   useDispatch,

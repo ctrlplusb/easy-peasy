@@ -56,7 +56,8 @@ export const actionName = action => action[actionNameSymbol]
 
 export const thunkStartName = action => `${action[actionNameSymbol]}(started)`
 
-export const thunkEndName = action => `${action[actionNameSymbol]}(completed)`
+export const thunkCompleteName = action =>
+  `${action[actionNameSymbol]}(completed)`
 
 export const effect = fn => {
   if (!notifiedAboutEffectDeprecation) {
