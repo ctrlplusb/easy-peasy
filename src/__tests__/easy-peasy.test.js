@@ -825,7 +825,7 @@ describe('thunks', () => {
     expect(trackActions.actions).toEqual([
       { type: '@thunk.foo.doSomething(started)', payload },
       { type: '@thunk.foo.error(started)', payload: undefined },
-      { type: '@thunk.foo.error(completed)', payload: undefined },
+      { type: '@thunk.foo.error(failed)', payload: undefined },
       { type: '@thunk.foo.doSomething(completed)', payload },
     ])
     expect(actualResult).toBe('did something')

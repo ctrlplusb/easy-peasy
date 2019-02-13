@@ -225,7 +225,7 @@ export const createStore = (model, options = {}) => {
               })
               .catch(err => {
                 references.dispatch({
-                  type: `${actionName}(completed)`,
+                  type: `${actionName}(failed)`,
                   payload: err,
                 })
               })
