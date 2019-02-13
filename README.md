@@ -1814,6 +1814,36 @@ export default {
 
 ---
 
+## Typescript API
+
+### Actions
+
+Todo
+
+### Action
+
+Todo
+
+### Listen
+
+Todo
+
+### Reducer
+
+Todo
+
+### Select
+
+Todo
+
+### Thunk
+
+Todo
+
+<p>&nbsp;</p>
+
+---
+
 ## Deprecated API
 
 Below is an overview of the deprecated APIs exposed by Easy Peasy. These will be removed in the next major release.
