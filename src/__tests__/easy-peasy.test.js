@@ -493,7 +493,7 @@ describe('store', () => {
     // arrange
     const customMiddleware = () => next => action => {
       // assert
-      expect(action.type).toBe('@action.logFullState')
+      expect(action.type).toMatch(/@thunk.logFullState\((started|completed)\)/)
       next(action)
       done()
     }

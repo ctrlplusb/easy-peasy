@@ -126,10 +126,10 @@ export const createStore = (model, options = {}) => {
 
   const definition = {
     ...model,
-    logFullState: state => {
+    logFullState: thunk((actions, payload, { getState }) => {
       // eslint-disable-next-line no-console
-      console.log(JSON.stringify(state, null, 2))
-    },
+      console.log(JSON.stringify(getState(), null, 2))
+    }),
   }
 
   const references = {}
