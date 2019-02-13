@@ -1,15 +1,4 @@
-import {
-  State,
-  Thunk,
-  Action,
-  Select,
-  Effect,
-  Listen,
-  Listeners,
-  Reducer,
-  select,
-  reducer,
-} from 'easy-peasy'
+import { State, Thunk, Action, Select, Listen, Reducer } from 'easy-peasy'
 
 type Model = {
   stateArray: Array<string>
@@ -22,12 +11,10 @@ type Model = {
   stateUndefined: undefined
   stateUnion: string | null
   actionImp: Action<Model, number>
-  effectImp: Effect<Model, string | null>
   thunkImp: Thunk<Model, string>
   selectImp: Select<Model, number>
   selectUnion: Select<Model, string | void>
   listenImp: Listen<Model>
-  listenersImp: Listeners<Model>
   reducerImp: Reducer<number>
   nested: {
     stateArray: Array<string>
@@ -44,7 +31,7 @@ type Model = {
   }
 }
 
-const assert : State<Model> = {
+const assert: State<Model> = {
   stateArray: [],
   stateBoolean: true,
   stateDate: new Date(),
@@ -111,8 +98,6 @@ assert.nested.selectImp + 10
 
 // typings:expect-error
 assert.listenImp
-// typings:expect-error
-assert.listenersImp
 
 /**
  * Action Types
@@ -120,9 +105,5 @@ assert.listenersImp
 
 // typings:expect-error
 assert.actionImp(1)
-// typings:expect-error
-assert.effectImp('foo')
-// typings:expect-error
-assert.effectImp(null)
 // typings:expect-error
 assert.thunkImp('foo')
