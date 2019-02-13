@@ -1,9 +1,14 @@
+import React from 'react'
+import { render, fireEvent } from 'react-testing-library'
 import {
   actionName,
   createStore,
+  StoreProvider,
   thunk,
   thunkStartName,
   thunkCompleteName,
+  useStore,
+  useActions,
 } from '../index'
 
 const todosModel = {
@@ -52,4 +57,45 @@ it('action', () => {
 
   // assert
   expect(store.getState().items).toEqual({ [todo.id]: todo })
+})
+
+it('component "integration" test', () => {
+  // arrange
+  function ComponentUnderTest() {
+    const count = useStore(state => state.count)
+    const increment = useActions(actions => actions.increment)
+    return (
+      <div>
+        Count: <span data-testid="count">{count}</span>
+        <button type="button" onClick={increment}>
+          +
+        </button>
+      </div>
+    )
+  }
+
+  const store = createStore({
+    count: 0,
+    increment: state => {
+      state.count += 1
+    },
+  })
+
+  const app = (
+    <StoreProvider store={store}>
+      <ComponentUnderTest />
+    </StoreProvider>
+  )
+
+  // act
+  const { getByTestId, getByText } = render(app)
+
+  // assert
+  expect(getByTestId('count').textContent).toEqual('0')
+
+  // act
+  fireEvent.click(getByText('+'))
+
+  // assert
+  expect(getByTestId('count').textContent).toEqual('1')
 })
