@@ -1387,7 +1387,7 @@ describe('listen', () => {
 
     const userModel = {
       token: '',
-      logIn: effect(() => {}),
+      logIn: thunk(() => {}),
       logOut: () => undefined,
     }
 

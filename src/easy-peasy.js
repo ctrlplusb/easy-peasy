@@ -221,6 +221,10 @@ export const createStore = (model, options = {}) => {
                   type: `${actionName}(completed)`,
                   payload,
                 })
+                dispatchListenersForAction(
+                  actionCreator[actionNameSymbol],
+                  payload,
+                )
                 return result
               })
           actionCreator[actionNameSymbol] = actionName
