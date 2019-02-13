@@ -94,6 +94,7 @@ function TodoList() {
     - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
   - [Usage with Typescript](#usage-with-typescript)
   - [Usage with React Native](#usage-with-react-native)
+  - [Writing Tests](#writing-tests)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
@@ -715,6 +716,110 @@ See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://git
 
 ---
 
+## Writing Tests
+
+The below covers some strategies for testing your store / components. If you have any useful test strategies please consider making a pull request so that we can expand this section.
+
+All the below examples are using [Jest](https://jestjs.io) as the test framework, but the ideas should hopefully translate easily onto your test framework of choice.
+
+In the examples below you should see that we recommend to to test specific parts of your store model in isolation. This makes it far easier to boostrap initial state, whilst making your tests less brittle to changes in your full store model structure.
+
+<details>
+<summary>Testing an action</summary>
+<p>
+Actions are relatively simple to test as they are essentially an immutable update to the store. We can therefore test the difference.
+
+Given the following model under test:
+
+```typescript
+const todosModel = {
+  items: {},
+  add: (state, payload) => {
+    state.items[payload.id] = payload
+  },
+}
+```
+
+We could test it like so:
+
+```typescript
+test('add action', async () => {
+  // arrange
+  const todo = { id: 1, text: 'foo' }
+  const store = createStore(todosModel)
+
+  // act
+  store.dispatch.add(todo)
+
+  // assert
+  expect(store.getState().items).toEqual({ [todo.id]: todo })
+})
+```
+
+</p>
+</details>
+
+<details>
+<summary>Testing a thunk</summary>
+<p>
+Thunks are more complicated to test than actions as they can invoke network requests and other actions. 
+
+There will likely be seperate tests for our actions, therefore it is recommended that you don't test for the state changes of actions fired by your thunk. We rather recommend that you test for what actions were fired from your thunk under test. 
+
+To do this we expose an additional configuration value on the `createStore` API, specifically `mockActions`. If you set the `mockActions` configuration value, then all actions that are dispatched will not affect state, and will instead be mocked and recorded. You can get access to the recorded actions via the `getMockedActions` function that is available on the store instance. We took inspiration for this functionality from the awesome [`redux-mock-store`](https://github.com/dmitry-zaets/redux-mock-store) package.
+
+In addition to this approach, if you perform side effects such as network requests within your thunks, we highly recommend that you expose the modules you use to do so via the `injections` configuration variable of your store. If you do this then it makes it significantly easier to provide mocked instances to your thunks when testing.
+
+We will demonstrate all of the above within the below example.
+
+Given the following model under test:
+
+```typescript
+const todosModel = {
+  items: {},
+  add: (state, payload) => {
+    state.items[payload.id] = payload
+  },
+  fetchById: thunk(async (actions, payload, helpers) => {
+    const { injections } = helpers
+    const todo = await injections.fetch(`/todos/${payload}`).then(r => r.json())
+    actions.add(todo)
+  }),
+}
+```
+
+We could test it like so:
+
+```typescript
+test('fetchById', async () => {
+  // arrange
+  const todo = { id: 1, text: 'Test my store' }
+  const fetch = createFetchMock(todo)
+  const store = createStore(todosModel, {
+    injections: { fetch },
+    mockActions: true,
+  })
+
+  // act
+  await store.dispatch.fetchById(todo.id)
+
+  // assert
+  expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`)
+  expect(store.getMockedActions).toEqual([
+    { type: thunkStartName(todosModel.fetchById), payload: todo.id },
+    { type: actionName(todosModel.add), payload: todo },
+    { type: thunkCompleteName(todosModel.fetchById), payload: todo.id },
+  ])
+})
+```
+
+</p>
+</details>
+
+<p>&nbsp;</p>
+
+---
+
 ## API
 
 Below is an overview of the API exposed by Easy Peasy.
@@ -759,10 +864,33 @@ Creates a Redux store based on the given model. The model must be an object and 
 
       Any additional middleware you would like to attach to your Redux store.
 
+    - `mockActions` (boolean, not required, default=false)
+
+      Useful when testing your store, especially in the context of thunks. When set to `true` none of the actions dispatched will update the state, they will be instead recorded and can be accessed via the `getMockedActions` API that is added to the store.  Please see the ["Writing Tests"](#writing-tests) section for more information.
+
     - `reducerEnhancer` (Function, not required, default=(reducer => reducer))
 
       Any additional reducerEnhancer you would like to enhance to your root reducer (for example you want to use [redux-persist](https://github.com/rt2zz/redux-persist)).
 
+</p>
+</details>
+
+<details>
+<summary>Store Instance API</summary>
+<p>
+When you have created a store all the standard APIs of a [Redux Store](https://redux.js.org/api/store) are available. Please reference [their docs](https://redux.js.org/api/store) for more information. In addition to the standard APIs, Easy Peasy enhances the instance to contain the following:
+
+  - `dispatch` (Function & Object, required)
+
+    The Redux store `dispatch` behaves as normal, however, it also has the actions from your model directly mounted against it - allowing you to easily dispatch actions. Please see the docs on actions/thunks for examples.
+
+  - `getMockedActions` (Function, required)
+
+    When the `mockActions` configuration value was passed to the `createStore` then calling this function will return the actions that have been dispatched (and mocked). This is useful in the context of testing - especially thunks.
+
+  - `clearMockedActions` (Function, required)
+
+    When the `mockActions` configuration value was passed to the `createStore` then calling this function clears the list of mocked actions that have been tracked by the store. This is useful in the context of testing - especially thunks.
 </p>
 </details>
 

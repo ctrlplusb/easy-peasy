@@ -14,15 +14,16 @@ const model: StoreModel = {
 
 const storeWithoutConfig = createStore(model)
 
-storeWithoutConfig.dispatched.length
+storeWithoutConfig.getMockedActions().length
+storeWithoutConfig.clearMockedActions()
 storeWithoutConfig.getState().foo
 storeWithoutConfig.dispatch.update('bar')
 
 const config: EasyPeasyConfig = {
-  recordActions: true,
+  mockActions: true,
 }
 const storeWithConfig = createStore(model, config)
 
-storeWithConfig.dispatched.length
-storeWithConfig.getState().foo
+storeWithConfig.getMockedActions().length
+storeWithoutConfig.clearMockedActions()
 storeWithConfig.dispatch.update('bar')

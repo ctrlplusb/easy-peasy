@@ -146,7 +146,7 @@ export interface EasyPeasyConfig<
   initialState?: InitialState
   injections?: Injections
   middleware?: Array<Middleware<any, any, any>>
-  recordActions?: boolean
+  mockActions?: boolean
   reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>
 }
 
@@ -164,7 +164,7 @@ export type Dispatch<
 
 export interface ActionData {
   type: string
-  payload: any
+  [key: string | number]: any
 }
 
 /**
@@ -181,7 +181,8 @@ export type Store<
   ReduxStore<State<StoreModel>>,
   {
     dispatch: Dispatch<StoreModel>
-    dispatched: ActionData[]
+    getMockedActions: () => ActionData[]
+    clearMockedActions: () => void
   }
 >
 

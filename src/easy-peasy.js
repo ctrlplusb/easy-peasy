@@ -114,7 +114,7 @@ export const createStore = (model, options = {}) => {
     disableInternalSelectFnMemoize = false,
     initialState = {},
     injections,
-    recordActions = false,
+    mockActions = false,
     middleware = [],
     reducerEnhancer = rootReducer => rootReducer,
   } = options
@@ -505,9 +505,12 @@ export const createStore = (model, options = {}) => {
     return next(action)
   }
 
-  const logActionsMiddlware = () => next => action => {
-    if (recordActions) {
-      references.dispatched.push(action)
+  let mockedActions = []
+
+  const mockActionsMiddlware = () => next => action => {
+    if (mockActions) {
+      mockedActions.push(action)
+      return undefined
     }
     return next(action)
   }
@@ -519,20 +522,22 @@ export const createStore = (model, options = {}) => {
       applyMiddleware(
         reduxThunk,
         dispatchActionStringListeners,
-        logActionsMiddlware,
+        mockActionsMiddlware,
         ...middleware,
       ),
     ),
   )
 
-  store.dispatched = []
+  store.getMockedActions = () => [...mockedActions]
+  store.clearMockedActions = () => {
+    mockedActions = []
+  }
 
   // attach the action creators to dispatch
   Object.keys(actionCreators).forEach(key => {
     store.dispatch[key] = actionCreators[key]
   })
 
-  references.dispatched = store.dispatched
   references.dispatch = store.dispatch
   references.getState = store.getState
   references.getState.getState = store.getState

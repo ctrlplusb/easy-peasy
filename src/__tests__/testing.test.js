@@ -32,7 +32,7 @@ it('thunk', async () => {
   const fetch = createFetchMock(todo)
   const store = createStore(todosModel, {
     injections: { fetch },
-    recordActions: true,
+    mockActions: true,
   })
 
   // act
@@ -40,11 +40,19 @@ it('thunk', async () => {
 
   // assert
   expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`)
-  expect(store.dispatched).toEqual([
+  expect(store.getMockedActions()).toEqual([
     { type: thunkStartName(todosModel.fetchById), payload: todo.id },
     { type: actionName(todosModel.add), payload: todo },
     { type: thunkCompleteName(todosModel.fetchById), payload: todo.id },
   ])
+  expect(store.getState()).toEqual({ items: {} }) // No actual actions were run
+
+  // act
+  store.clearMockedActions()
+
+  // assert
+  expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`)
+  expect(store.getMockedActions()).toEqual([])
 })
 
 it('action', () => {
