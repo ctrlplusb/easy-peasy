@@ -223,6 +223,12 @@ export const createStore = (model, options = {}) => {
                 })
                 return result
               })
+              .catch(err => {
+                references.dispatch({
+                  type: `${actionName}(completed)`,
+                  payload: err,
+                })
+              })
           actionCreator[actionNameSymbol] = actionName
           actionCreatorDict[actionName] = actionCreator
           set(path, actionCreators, actionCreator)
