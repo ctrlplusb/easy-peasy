@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "1.13.4",
+  "version": "1.14.0",
   "description": "Easy peasy global state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
@@ -68,7 +68,7 @@
     "babel-jest": "^24.1.0",
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "change-case": "^3.1.0",
-    "codecov": "^3.1.0",
+    "codecov": "^3.2.0",
     "eslint": "^5.13.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^4.0.0",
@@ -85,7 +85,7 @@
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "react-redux": "^6.0.0",
-    "react-testing-library": "^5.7.0",
+    "react-testing-library": "^5.8.0",
     "rimraf": "^2.6.2",
     "rollup": "^1.1.2",
     "rollup-plugin-babel": "^4.3.1",
@@ -101,8 +101,10 @@
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}"
     ],
-    "setupFiles": [
-      "<rootDir>/node_modules/regenerator-runtime/runtime"
+    "setupFilesAfterEnv": [
+      "<rootDir>/node_modules/regenerator-runtime/runtime",
+      "react-testing-library/cleanup-after-each",
+      "jest-dom/extend-expect"
     ],
     "testMatch": [
       "**/?(*.)+(spec|test).[jt]s?(x)"
@@ -127,14 +129,16 @@
     "rules": {
       "array-callback-return": 0,
       "camelcase": 0,
-      "import/prefer-default-export": 0,
       "import/no-extraneous-dependencies": 0,
-      "no-underscore-dangle": 0,
+      "import/prefer-default-export": 0,
       "no-nested-ternary": 0,
-      "react/no-array-index-key": 0,
-      "react/react-in-jsx-scope": 0,
+      "no-param-reassign": 0,
+      "no-underscore-dangle": 0,
       "react/forbid-prop-types": 0,
       "react/jsx-filename-extension": 0,
+      "react/jsx-one-expression-per-line": 0,
+      "react/no-array-index-key": 0,
+      "react/react-in-jsx-scope": 0,
       "react/sort-comp": 0
     }
   },
