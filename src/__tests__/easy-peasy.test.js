@@ -1,10 +1,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable react/prop-types */
 
-import 'jest-dom/extend-expect'
 import React from 'react'
 import { act } from 'react-dom/test-utils'
-import { render, cleanup, fireEvent } from 'react-testing-library'
+import { render, fireEvent } from 'react-testing-library'
 
 import {
   StoreProvider,
@@ -28,8 +27,6 @@ const resolveAfter = (data, ms) =>
 beforeEach(() => {
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = undefined
 })
-
-afterEach(cleanup)
 
 const trackActionsMiddleware = () => {
   const middleware = () => next => action => {
@@ -94,21 +91,11 @@ describe('react', () => {
     expect(value.firstChild.textContent).toBe('foo')
 
     // act
-    const app2 = (
+    rerender(
       <StoreProvider store={store}>
         <Values id={2} />
-      </StoreProvider>
+      </StoreProvider>,
     )
-
-    rerender(app2)
-
-    // assert
-    expect(value.firstChild.textContent).toBe('foo')
-
-    // ensure settimeouts fire
-    act(() => {
-      jest.runAllTimers()
-    })
 
     // assert
     expect(value.firstChild.textContent).toBe('bar')
@@ -143,11 +130,8 @@ describe('react', () => {
     expect(store.subscribe).toBeCalledTimes(1)
 
     // act
-    store.dispatch.inc()
-
-    // ensure settimeouts fire
     act(() => {
-      jest.runAllTimers()
+      store.dispatch.inc()
     })
 
     // assert
@@ -183,11 +167,6 @@ describe('react', () => {
 
     // act
     store.dispatch.inc()
-
-    // ensure settimeouts fire
-    act(() => {
-      jest.runAllTimers()
-    })
 
     // assert
     expect(unsubscribeSpy).toBeCalledTimes(0)
@@ -237,11 +216,6 @@ describe('react', () => {
       // act
       fireEvent.click(countButton)
 
-      // ensure settimeouts fire
-      act(() => {
-        jest.runAllTimers()
-      })
-
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
       expect(renderSpy).toHaveBeenCalledTimes(2)
@@ -278,11 +252,6 @@ describe('react', () => {
 
       // act
       store.dispatch.updateSomethingElse('foo')
-
-      // ensure settimeouts fire
-      act(() => {
-        jest.runAllTimers()
-      })
 
       // assert
       expect(countButton.firstChild.textContent).toBe('1')
@@ -330,11 +299,6 @@ describe('react', () => {
       // act
       fireEvent.click(countButton)
 
-      // ensure settimeouts fire
-      act(() => {
-        jest.runAllTimers()
-      })
-
       // assert
       expect(countButton.firstChild.textContent).toBe('2')
       expect(renderSpy).toHaveBeenCalledTimes(2)
@@ -372,11 +336,8 @@ describe('react', () => {
       expect(renderSpy).toHaveBeenCalledTimes(1)
 
       // act
-      store.dispatch.updateSomethingElse('foo')
-
-      // ensure settimeouts fire
       act(() => {
-        jest.runAllTimers()
+        store.dispatch.updateSomethingElse('foo')
       })
 
       // assert

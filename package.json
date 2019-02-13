@@ -101,8 +101,10 @@
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}"
     ],
-    "setupFiles": [
-      "<rootDir>/node_modules/regenerator-runtime/runtime"
+    "setupFilesAfterEnv": [
+      "<rootDir>/node_modules/regenerator-runtime/runtime",
+      "react-testing-library/cleanup-after-each",
+      "jest-dom/extend-expect"
     ],
     "testMatch": [
       "**/?(*.)+(spec|test).[jt]s?(x)"
@@ -127,14 +129,16 @@
     "rules": {
       "array-callback-return": 0,
       "camelcase": 0,
-      "import/prefer-default-export": 0,
       "import/no-extraneous-dependencies": 0,
-      "no-underscore-dangle": 0,
+      "import/prefer-default-export": 0,
       "no-nested-ternary": 0,
-      "react/no-array-index-key": 0,
-      "react/react-in-jsx-scope": 0,
+      "no-param-reassign": 0,
+      "no-underscore-dangle": 0,
       "react/forbid-prop-types": 0,
       "react/jsx-filename-extension": 0,
+      "react/jsx-one-expression-per-line": 0,
+      "react/no-array-index-key": 0,
+      "react/react-in-jsx-scope": 0,
       "react/sort-comp": 0
     }
   },
