@@ -39,20 +39,6 @@ export function useStore(mapState, dependencies = []) {
   return state
 }
 
-let warnedAboutUseActionDeprecation = false
-
-export function useAction(mapActions) {
-  if (!warnedAboutUseActionDeprecation) {
-    warnedAboutUseActionDeprecation = true
-    // eslint-disable-next-line no-console
-    console.warn(
-      'Easy Peasy: the "useAction" hook has been deprecated and will be removed in the next major release. We recommend using the "useActions" hook instead.',
-    )
-  }
-  const store = useContext(EasyPeasyContext)
-  return mapActions(store.dispatch)
-}
-
 export function useActions(mapActions) {
   const store = useContext(EasyPeasyContext)
   return mapActions(store.dispatch)
@@ -66,7 +52,6 @@ export function useDispatch() {
 export function createTypedHooks() {
   return {
     useActions,
-    useAction,
     useDispatch,
     useStore,
   }

@@ -20,9 +20,7 @@ import { string } from 'prop-types'
 
 type AsyncActionTypes = Thunk<any, any, any, any, any>
 
-type ActionTypes =
-  | Action<any, any>
-  | Thunk<any, any, any, any, any>
+type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>
 
 type Meta = {
   path: string[]
@@ -252,67 +250,6 @@ export function thunk<
 ): Thunk<Model, Payload, Injections, StoreModel, Result>
 
 /**
- * An effect type.
- *
- * Useful when declaring your model.
- *
- * @example
- *
- * import { Effect } from 'easy-peasy';
- *
- * interface Model {
- *   todos: Array<string>;
- *   addTodo: Effect<Model, string>;
- * }
- */
-export type Effect<
-  StoreModel extends Object = {},
-  Payload = void,
-  Injections = any,
-  Result = any
-> = {
-  (
-    dispatch: Dispatch<StoreModel>,
-    payload: Payload,
-    getState: () => State<StoreModel>,
-    injections: Injections,
-    meta: Meta,
-  ): Result
-  type: 'effect'
-  payload: Payload
-  result: Result
-}
-
-/**
- * Declares an effect action type against your model.
- *
- * @example
- *
- * import { effect } from 'easy-peasy';
- *
- * const store = createStore({
- *   login: effect(async (dispatch, payload) => {
- *    const user = await loginService(payload);
- *    dispatch.loginSucceeded(user);
- *  })
- * });
- */
-export function effect<
-  StoreModel extends Object = {},
-  Payload = void,
-  Injections = any,
-  Result = any
->(
-  effect: (
-    dispatch: Dispatch<StoreModel>,
-    payload: Payload,
-    getState: () => State<StoreModel>,
-    injections: Injections,
-    meta: Meta,
-  ) => Result,
-): Effect<StoreModel, Payload, Injections, Result>
-
-/**
  * Action listeners type.
  *
  * Useful when declaring your model.
@@ -405,63 +342,6 @@ export function listen<
     ) => void,
   ) => void,
 ): Listen<Model, Injections, StoreModel>
-
-/**
- * Action listeners type.
- *
- * Useful when declaring your model.
- *
- * @example
- *
- * import { Listeners } from 'easy-peasy';
- *
- * interface StoreModel {
- *   userListeners: Listeners<StoreModel>;
- * }
- */
-export type Listeners<StoreModel extends Object = {}> = {
-  (
-    actions: Actions<StoreModel>,
-    attach: <ActionCreator extends Function>(
-      action: ActionCreator,
-      listener: (
-        dispatch: Dispatch<StoreModel>,
-        payload: Param0<ActionCreator>,
-      ) => any,
-    ) => void,
-  ): void
-  type: 'listeners'
-}
-
-/**
- * Declares action listeners against your model.
- *
- * https://github.com/ctrlplusb/easy-peasy#listenersattach
- *
- * @example
- *
- * import { listeners } from 'easy-peasy';
- *
- * const store = createStore({
- *   userListeners: listeners((actions, on) => {
- *     on(actions.user.login, (dispatch) => {
- *        dispatch.audit.add('User logged in');
- *     });
- *   })
- * });
- */
-export function listeners<StoreModel extends Object = {}>(
-  mapListeners: (
-    actions: Actions<StoreModel>,
-    attach: <ActionCreator extends Function>(
-      action: ActionCreator,
-      listener: (
-        dispatch: Dispatch<StoreModel>,
-        payload: Param0<ActionCreator>,
-      ) => any,
-    ) => void,
-  ) => void,
-): Listeners<StoreModel>
 
 /**
  * An action type.
@@ -607,24 +487,6 @@ export function createStore<
 export function useStore<StoreState extends State<any> = {}, Result = any>(
   mapState: (state: StoreState) => Result,
   dependencies?: Array<any>,
-): Result
-
-/**
- * A React Hook allowing you to use actions within your component.
- *
- * https://github.com/ctrlplusb/easy-peasy#useactionmapaction
- *
- * @example
- *
- * import { useAction, Dispatch } from 'easy-peasy';
- *
- * function MyComponent() {
- *   const addTodo = useAction((dispatch: Dispatch<StoreModel>) => dispatch.todos.add);
- *   return <AddTodoForm save={addTodo} />;
- * }
- */
-export function useAction<StoreModel extends Object = {}, Result = any>(
-  mapAction: (actions: Dispatch<StoreModel>) => Result,
 ): Result
 
 /**
