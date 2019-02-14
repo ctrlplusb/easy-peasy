@@ -1211,6 +1211,10 @@ describe('listen', () => {
     // act
     await store.dispatch.user.logIn({ username: 'foo', password: 'bar' })
 
+    const tick = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+    await tick(10)
+
     // assert
     expect(store.getState().audit.logs).toEqual(['User logged in'])
 
