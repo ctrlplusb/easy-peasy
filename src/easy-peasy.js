@@ -299,7 +299,9 @@ export const createStore = (model, options = {}) => {
       const actionListenersAtPath = actionListenersDict[path] || {}
       console.log(current)
       const stateAtPath = Object.keys(current).reduce(
-        (acc, key) => console.log('key', key) || (isStateObject(current[key]) ? [...acc, key] : acc),
+        (acc, key) =>
+          console.log('key', key) ||
+          (isStateObject(current[key]) ? [...acc, key] : acc),
         [],
       )
       console.log(stateAtPath)

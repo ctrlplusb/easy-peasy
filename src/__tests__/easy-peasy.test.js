@@ -1248,7 +1248,7 @@ describe('listen', () => {
             state.routeChangeLogs.push(payload)
           })
         }),
-      }
+      },
     })
 
     // act
