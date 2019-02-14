@@ -779,11 +779,11 @@ describe('thunks', () => {
     const trackActions = trackActionsMiddleware()
     const store = createStore(model, { middleware: [trackActions] })
     const payload = 'hello'
-    // act
     try {
+      // act
       await store.dispatch.foo.doSomething(payload)
-      // assert
 
+      // assert
       expect(trackActions.actions).toEqual([
         { type: '@thunk.foo.doSomething(started)', payload },
         { type: '@thunk.foo.error(started)', payload: undefined },
