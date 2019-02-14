@@ -120,6 +120,8 @@ export const createStore = (model, options = {}) => {
   const listenDefinitions = []
   const thunkListenersDict = {}
   const actionListenersDict = {}
+  const actionReducersDict = {}
+  const actionReducersForPath = {}
 
   const dispatchThunkListeners = (name, payload) => {
     const listensForAction = thunkListenersDict[name]
@@ -205,17 +207,19 @@ export const createStore = (model, options = {}) => {
         } else {
           const name = `@action.${path.join('.')}`
           value[actionNameSymbol] = name
+          value[metaSymbol] = meta
 
           // Reducer Action
-          const action = (state, payload) =>
-            produce(state, draft => value(draft, payload))
-          action.actionName = name
+          const action = value
+          action[actionNameSymbol] = name
+          actionReducersDict[name] = action
+          actionReducersForPath[parentPath] = action
           set(path, actionReducers, action)
 
           // Reducer Action Creator
           const actionCreator = payload => {
             const result = references.dispatch({
-              type: action.actionName,
+              type: action[actionNameSymbol],
               payload,
             })
             return result
@@ -287,6 +291,7 @@ export const createStore = (model, options = {}) => {
   })
 
   const createReducers = () => {
+    /*
     const createActionsReducer = (current, path) => {
       console.log(path)
       const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
@@ -349,6 +354,28 @@ export const createStore = (model, options = {}) => {
     }
 
     const reducerForActions = createActionsReducer(actionReducers, [])
+    */
+
+    const reducerForActions = (state, action) => {
+      const actionReducer = actionReducersDict[action.type]
+      if (actionReducer) {
+        console.log(actionReducer[actionNameSymbol])
+
+        const current = get(actionReducer[metaSymbol].parent, state)
+        console.log(actionReducer[metaSymbol].parent)
+        console.log(current)
+        if (actionReducer[metaSymbol].parent.length === 0) {
+          return produce(state, _draft => actionReducer(_draft, action.payload))
+        }
+        set(
+          actionReducer[metaSymbol].parent,
+          state,
+          produce(current, _draft => actionReducer(_draft, action.payload)),
+        )
+        return state
+      }
+      return state
+    }
 
     const reducerWithCustom =
       customReducers.length > 0

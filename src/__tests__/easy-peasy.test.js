@@ -1237,7 +1237,7 @@ describe('listen', () => {
     ])
   })
 
-  it.only('listeners can fire actions to update state', () => {
+  it.skip('listeners can fire actions to update state', () => {
     // arrange
     const store = createStore({
       audit: {
