@@ -306,17 +306,6 @@ export const createStore = (model, options = {}) => {
         createActionsReducer(current[key], [...path, key]),
       ])
       return (state = get(path, defaultState), action) => {
-        // short circuit thunks as they are noop in reducers
-        if (startsWith(action.type, '@thunk.')) {
-          return state
-        }
-        // short circuit actions if they aren't a match on current path
-        if (
-          path.length > 0 &&
-          !startsWith(action.type, `@action.${path.join('.')}`)
-        ) {
-          return state
-        }
         const actionReducer = actionReducersAtPath.find(
           x => x.actionName === action.type,
         )
