@@ -1174,26 +1174,35 @@ describe('listen', () => {
           userListeners: listen(on => {
             on(
               userModel.logIn,
-              (actions, payload, { dispatch, getState, meta, injections }) => {
-                expect(payload).toEqual({ username: 'foo', password: 'bar' })
-                expect(getState()).toEqual({
-                  user: {
-                    token: '',
-                  },
-                  audit: { logs: [] },
-                })
-                expect(dispatch).toBe(store.dispatch)
-                expect(meta).toEqual({
-                  parent: ['audit'],
-                  path: ['audit', 'userListeners'],
-                })
-                expect(injections).toEqual(expectedInjections)
-                actions.add('User logged in')
-              },
+              thunk(
+                (
+                  actions,
+                  payload,
+                  { dispatch, getState, meta, injections },
+                ) => {
+                  expect(payload).toEqual({ username: 'foo', password: 'bar' })
+                  expect(getState()).toEqual({
+                    user: {
+                      token: '',
+                    },
+                    audit: { logs: [] },
+                  })
+                  expect(dispatch).toBe(store.dispatch)
+                  expect(meta).toEqual({
+                    parent: ['audit'],
+                    path: ['audit', 'userListeners'],
+                  })
+                  expect(injections).toEqual(expectedInjections)
+                  actions.add('User logged in')
+                },
+              ),
             )
-            on(userModel.logOut, actions => {
-              actions.add('User logged out')
-            })
+            on(
+              userModel.logOut,
+              thunk(actions => {
+                actions.add('User logged out')
+              }),
+            )
           }),
         },
       },
@@ -1236,9 +1245,12 @@ describe('listen', () => {
         state.routeChangeLogs.push(payload)
       },
       listeners: listen(on => {
-        on('ROUTE_CHANGED', (action, payload) => {
-          action.log(payload)
-        })
+        on(
+          'ROUTE_CHANGED',
+          thunk((action, payload) => {
+            action.log(payload)
+          }),
+        )
       }),
     })
 
@@ -1256,7 +1268,7 @@ describe('listen', () => {
     // act
     createStore({
       listeners: listen(on => {
-        on(true, () => {})
+        on(true, thunk(() => {}))
       }),
     })
   })

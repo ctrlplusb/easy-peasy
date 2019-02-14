@@ -77,6 +77,13 @@ export const listen = fn => {
   return fn
 }
 
+/**
+ *  LISTENER RULES
+ *  (targets)    thunk      action     (listeners)
+ *  thunk         mid        red
+ *  action        mid        red
+ */
+
 export const createStore = (model, options = {}) => {
   const {
     compose,
@@ -112,6 +119,7 @@ export const createStore = (model, options = {}) => {
   const selectorReducers = []
   const listenDefinitions = []
   const thunkListenersDict = {}
+  const actionListenersDict = {}
 
   const dispatchThunkListeners = (name, payload) => {
     const listensForAction = thunkListenersDict[name]
@@ -245,12 +253,12 @@ export const createStore = (model, options = {}) => {
   })
 
   listenDefinitions.forEach(def => {
-    const on = (action, thunkHandler) => {
-      if (typeof thunkHandler !== 'function') {
+    const on = (action, handler) => {
+      if (typeof handler !== 'function') {
         return
       }
 
-      thunkHandler[metaSymbol] = def[metaSymbol]
+      handler[metaSymbol] = def[metaSymbol]
 
       let name
 
@@ -269,8 +277,13 @@ export const createStore = (model, options = {}) => {
       }
 
       if (name) {
-        thunkListenersDict[name] = thunkListenersDict[name] || []
-        thunkListenersDict[name].push(thunkHandler)
+        if (handler[thunkSymbol]) {
+          thunkListenersDict[name] = thunkListenersDict[name] || []
+          thunkListenersDict[name].push(handler)
+        } else {
+          actionListenersDict[name] = actionListenersDict[name] || []
+          actionListenersDict[name].push(handler)
+        }
       }
     }
     def(on)
