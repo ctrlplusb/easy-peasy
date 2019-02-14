@@ -111,14 +111,10 @@ export const createStore = (model, options = {}) => {
   const customReducers = []
   const selectorReducers = []
   const listenDefinitions = []
-  const listenDict = {}
-  const listenStringDict = {}
+  const thunkListenersDict = {}
 
-  const dispatchListenersForAction = (name, payload) => {
-    const listensForAction = [
-      ...(listenDict[name] || []),
-      ...(listenStringDict[name] || []),
-    ]
+  const dispatchThunkListeners = (name, payload) => {
+    const listensForAction = thunkListenersDict[name]
     return listensForAction && listensForAction.length > 0
       ? Promise.all(
           listensForAction.map(listenForAction =>
@@ -180,10 +176,6 @@ export const createStore = (model, options = {}) => {
                   type: `${name}(completed)`,
                   payload,
                 })
-                dispatchListenersForAction(
-                  actionCreator[actionNameSymbol],
-                  payload,
-                )
                 return result
               })
               .catch(err => {
@@ -224,7 +216,6 @@ export const createStore = (model, options = {}) => {
               type: action.actionName,
               payload,
             })
-            dispatchListenersForAction(actionCreator[actionNameSymbol], payload)
             return result
           }
           actionCreator[actionNameSymbol] = name
@@ -260,17 +251,25 @@ export const createStore = (model, options = {}) => {
 
       thunkHandler[metaSymbol] = def[metaSymbol]
 
+      let name
+
       if (
         typeof action === 'function' &&
         action[actionNameSymbol] &&
         actionCreatorDict[action[actionNameSymbol]]
       ) {
-        listenDict[action[actionNameSymbol]] =
-          listenDict[action[actionNameSymbol]] || []
-        listenDict[action[actionNameSymbol]].push(thunkHandler)
+        if (action[thunkSymbol]) {
+          name = thunkCompleteName(action)
+        } else {
+          name = action[actionNameSymbol]
+        }
       } else if (typeof action === 'string') {
-        listenStringDict[action] = listenStringDict[action] || []
-        listenStringDict[action].push(thunkHandler)
+        name = action
+      }
+
+      if (name) {
+        thunkListenersDict[name] = thunkListenersDict[name] || []
+        thunkListenersDict[name].push(thunkHandler)
       }
     }
     def(on)
@@ -308,6 +307,7 @@ export const createStore = (model, options = {}) => {
         const actionReducer = actionReducersAtPath.find(
           x => x.actionName === action.type,
         )
+        // listenDict[]
         if (actionReducer) {
           return actionReducer(state, action.payload)
         }
@@ -405,8 +405,8 @@ export const createStore = (model, options = {}) => {
       : reduxCompose)
 
   const dispatchActionStringListeners = () => next => action => {
-    if (listenStringDict[action.type]) {
-      dispatchListenersForAction(action.type, action.payload)
+    if (thunkListenersDict[action.type]) {
+      dispatchThunkListeners(action.type, action.payload)
     }
     return next(action)
   }
