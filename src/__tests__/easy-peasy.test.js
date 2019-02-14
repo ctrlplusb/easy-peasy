@@ -1237,6 +1237,30 @@ describe('listen', () => {
     ])
   })
 
+  it.only('listeners can fire actions to update state', () => {
+    // arrange
+    const store = createStore({
+      audit: {
+        routeChangeLogs: [],
+        foo: state => state,
+        listeners: listen(on => {
+          on('ROUTE_CHANGED', (state, payload) => {
+            state.routeChangeLogs.push(payload)
+          })
+        }),
+      }
+    })
+
+    // act
+    store.dispatch({
+      type: 'ROUTE_CHANGED',
+      payload: '/about',
+    })
+
+    // assert
+    expect(store.getState().audit.routeChangeLogs).toEqual(['/about'])
+  })
+
   it('listens to string actions', () => {
     // arrange
     const store = createStore({

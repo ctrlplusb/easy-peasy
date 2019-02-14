@@ -208,13 +208,7 @@ export const createStore = (model, options = {}) => {
 
           // Reducer Action
           const action = (state, payload) =>
-            produce(state, draft =>
-              value(draft, payload, {
-                dispatch: references.dispatch,
-                dispatchLocal: get(path, references.dispatch),
-                getState: references.getState,
-              }),
-            )
+            produce(state, draft => value(draft, payload))
           action.actionName = name
           set(path, actionReducers, action)
 
@@ -257,7 +251,8 @@ export const createStore = (model, options = {}) => {
         return
       }
 
-      handler[metaSymbol] = def[metaSymbol]
+      const meta = def[metaSymbol]
+      handler[metaSymbol] = meta
 
       let name
 
@@ -280,8 +275,11 @@ export const createStore = (model, options = {}) => {
           thunkListenersDict[name] = thunkListenersDict[name] || []
           thunkListenersDict[name].push(handler)
         } else {
-          actionListenersDict[name] = actionListenersDict[name] || []
-          actionListenersDict[name].push(handler)
+          actionListenersDict[meta.parent] =
+            actionListenersDict[meta.parent] || {}
+          actionListenersDict[meta.parent][name] =
+            actionListenersDict[meta.parent][name] || []
+          actionListenersDict[meta.parent][name].push(handler)
         }
       }
     }
@@ -290,6 +288,7 @@ export const createStore = (model, options = {}) => {
 
   const createReducers = () => {
     const createActionsReducer = (current, path) => {
+      console.log(path)
       const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
         const value = current[key]
         if (typeof value === 'function' && !value[thunkSymbol]) {
@@ -297,19 +296,21 @@ export const createStore = (model, options = {}) => {
         }
         return acc
       }, [])
+      const actionListenersAtPath = actionListenersDict[path] || {}
+      console.log(current)
       const stateAtPath = Object.keys(current).reduce(
-        (acc, key) => (isStateObject(current[key]) ? [...acc, key] : acc),
+        (acc, key) => console.log('key', key) || (isStateObject(current[key]) ? [...acc, key] : acc),
         [],
       )
+      console.log(stateAtPath)
       const nestedReducers = stateAtPath.map(key => [
         key,
         createActionsReducer(current[key], [...path, key]),
       ])
-      return (state = get(path, defaultState), action) => {
+      const _actionReducers = (state = get(path, defaultState), action) => {
         const actionReducer = actionReducersAtPath.find(
           x => x.actionName === action.type,
         )
-        // listenDict[]
         if (actionReducer) {
           return actionReducer(state, action.payload)
         }
@@ -324,6 +325,24 @@ export const createStore = (model, options = {}) => {
           }
         }
         return state
+      }
+      const listenerReducers = (state, action) => {
+        console.log('👀', path, action.type)
+        const actionListeners = actionListenersAtPath[action.type]
+        if (actionListeners) {
+          console.log(path, action.type)
+          return actionListeners.reduce(
+            (newState, handler) =>
+              produce(newState, draft => handler(draft, action.payload)),
+            state,
+          )
+        }
+        return state
+      }
+      return (state = get(path, defaultState), action) => {
+        const stateAfterAction = _actionReducers(state, action)
+        const stateAfterListeners = listenerReducers(stateAfterAction, action)
+        return stateAfterListeners
       }
     }
 
