@@ -45,9 +45,6 @@ const set = (path, target, value) => {
 
 const tick = () => new Promise(resolve => setTimeout(resolve))
 
-const startsWith = (target, search) =>
-  target.substr(0, search.length) === search
-
 export const actionName = action => action[actionNameSymbol]
 
 export const thunkStartName = action => `${action[actionNameSymbol]}(started)`
@@ -76,13 +73,6 @@ export const listen = fn => {
   fn[listenSymbol] = true
   return fn
 }
-
-/**
- *  LISTENER RULES
- *  (targets)    thunk      action     (listeners)
- *  thunk         mid        red
- *  action        mid        red
- */
 
 export const createStore = (model, options = {}) => {
   const {
@@ -114,7 +104,6 @@ export const createStore = (model, options = {}) => {
   const actionThunks = {}
   const actionCreators = {}
   const actionCreatorDict = {}
-  const actionReducers = {}
   const customReducers = []
   const selectorReducers = []
   const listenDefinitions = []
@@ -214,7 +203,6 @@ export const createStore = (model, options = {}) => {
           action[actionNameSymbol] = name
           actionReducersDict[name] = action
           actionReducersForPath[parentPath] = action
-          set(path, actionReducers, action)
 
           // Reducer Action Creator
           const actionCreator = payload => {
@@ -244,9 +232,7 @@ export const createStore = (model, options = {}) => {
   extract(definition, [])
 
   selectorReducers.forEach(selector => {
-    selector[selectImpSymbol] = memoizerific(1)(state =>
-      wrapFnWithMemoize(selector(state)),
-    )
+    selector[selectImpSymbol] = state => wrapFnWithMemoize(selector(state))
   })
 
   listenDefinitions.forEach(def => {
@@ -279,11 +265,11 @@ export const createStore = (model, options = {}) => {
           thunkListenersDict[name] = thunkListenersDict[name] || []
           thunkListenersDict[name].push(handler)
         } else {
-          actionListenersDict[meta.parent] =
-            actionListenersDict[meta.parent] || {}
-          actionListenersDict[meta.parent][name] =
-            actionListenersDict[meta.parent][name] || []
-          actionListenersDict[meta.parent][name].push(handler)
+          actionListenersDict[name] = actionListenersDict[name] || []
+          actionListenersDict[name].push({
+            path: meta.parent,
+            handler,
+          })
         }
       }
     }
@@ -291,104 +277,53 @@ export const createStore = (model, options = {}) => {
   })
 
   const createReducers = () => {
-    /*
-    const createActionsReducer = (current, path) => {
-      console.log(path)
-      const actionReducersAtPath = Object.keys(current).reduce((acc, key) => {
-        const value = current[key]
-        if (typeof value === 'function' && !value[thunkSymbol]) {
-          return [...acc, value]
-        }
-        return acc
-      }, [])
-      const actionListenersAtPath = actionListenersDict[path] || {}
-      console.log(current)
-      const stateAtPath = Object.keys(current).reduce(
-        (acc, key) =>
-          console.log('key', key) ||
-          (isStateObject(current[key]) ? [...acc, key] : acc),
-        [],
-      )
-      console.log(stateAtPath)
-      const nestedReducers = stateAtPath.map(key => [
-        key,
-        createActionsReducer(current[key], [...path, key]),
-      ])
-      const _actionReducers = (state = get(path, defaultState), action) => {
-        const actionReducer = actionReducersAtPath.find(
-          x => x.actionName === action.type,
+    const runActionReducerAtPath = (state, action, actionReducer, path) => {
+      const current = get(path, state)
+      if (path.length === 0) {
+        return produce(state, _draft => actionReducer(_draft, action.payload))
+      }
+      return produce(state, draft => {
+        set(
+          actionReducer[metaSymbol].parent,
+          draft,
+          produce(current, _draft => actionReducer(_draft, action.payload)),
         )
-        if (actionReducer) {
-          return actionReducer(state, action.payload)
-        }
-        for (let i = 0; i < nestedReducers.length; i += 1) {
-          const [key, red] = nestedReducers[i]
-          const newState = red(state[key], action)
-          if (state[key] !== newState) {
-            return {
-              ...state,
-              [key]: newState,
-            }
-          }
-        }
-        return state
-      }
-      const listenerReducers = (state, action) => {
-        console.log('👀', path, action.type)
-        const actionListeners = actionListenersAtPath[action.type]
-        if (actionListeners) {
-          console.log(path, action.type)
-          return actionListeners.reduce(
-            (newState, handler) =>
-              produce(newState, draft => handler(draft, action.payload)),
-            state,
-          )
-        }
-        return state
-      }
-      return (state = get(path, defaultState), action) => {
-        const stateAfterAction = _actionReducers(state, action)
-        const stateAfterListeners = listenerReducers(stateAfterAction, action)
-        return stateAfterListeners
-      }
+      })
     }
-
-    const reducerForActions = createActionsReducer(actionReducers, [])
-    */
 
     const reducerForActions = (state, action) => {
       const actionReducer = actionReducersDict[action.type]
       if (actionReducer) {
-        console.log(actionReducer[actionNameSymbol])
-
-        const current = get(actionReducer[metaSymbol].parent, state)
-        console.log(actionReducer[metaSymbol].parent)
-        console.log(current)
-        if (actionReducer[metaSymbol].parent.length === 0) {
-          return produce(state, _draft => actionReducer(_draft, action.payload))
-        }
-        set(
-          actionReducer[metaSymbol].parent,
+        return runActionReducerAtPath(
           state,
-          produce(current, _draft => actionReducer(_draft, action.payload)),
+          action,
+          actionReducer,
+          actionReducer[metaSymbol].parent,
         )
-        return state
       }
       return state
     }
 
-    const reducerWithCustom =
-      customReducers.length > 0
-        ? (state, action) => {
-            const stateAfterActions = reducerForActions(state, action)
-            return produce(stateAfterActions, draft => {
-              customReducers.forEach(({ path: p, reducer: red }) => {
-                const current = get(p, draft)
-                set(p, draft, red(current, action))
-              })
-            })
-          }
-        : reducerForActions
+    const reducerForListeners = (state, action) => {
+      const actionListeners = actionListenersDict[action.type]
+      if (actionListeners) {
+        return actionListeners.reduce(
+          (newState, { path, handler }) =>
+            runActionReducerAtPath(newState, action, handler, path),
+          state,
+        )
+      }
+      return state
+    }
+
+    const reducerForCustomReducers = (state, action) => {
+      return produce(state, draft => {
+        customReducers.forEach(({ path: p, reducer: red }) => {
+          const current = get(p, draft)
+          set(p, draft, red(current, action))
+        })
+      })
+    }
 
     const runSelectorReducer = (state, selector) => {
       const { parentPath, key, executed } = selector[selectStateSymbol]
@@ -401,22 +336,26 @@ export const createStore = (model, options = {}) => {
         ? dependencies.reduce(runSelectorReducer, state)
         : state
 
-      let newState = state
+      let newState = stateAfterDependencies
 
       if (parentPath.length > 0) {
         const target = get(parentPath, stateAfterDependencies)
         if (target) {
-          const newValue = selector[selectImpSymbol](target)
-          newState = produce(state, draft => {
-            const updateTarget = get(parentPath, draft)
-            updateTarget[key] = newValue
-          })
+          if (!selector.prevState || selector.prevState !== state) {
+            const newValue = selector[selectImpSymbol](target)
+            newState = produce(state, draft => {
+              const updateTarget = get(parentPath, draft)
+              updateTarget[key] = newValue
+            })
+            selector.prevState = newState
+          }
         }
-      } else {
+      } else if (!selector.prevState || selector.prevState !== state) {
         const newValue = selector[selectImpSymbol](stateAfterDependencies)
         newState = produce(state, draft => {
           draft[key] = newValue
         })
+        selector.prevState = newState
       }
 
       selector[selectStateSymbol].executed = true
@@ -428,20 +367,27 @@ export const createStore = (model, options = {}) => {
 
     let isInitial = true
 
-    return selectorReducers.length > 0
-      ? (state, action) => {
-          const stateAfterActions = reducerWithCustom(state, action)
-          if (state !== stateAfterActions || isInitial) {
-            const stateAfterSelectors = runSelectors(stateAfterActions)
-            isInitial = false
-            selectorReducers.forEach(selector => {
-              selector[selectStateSymbol].executed = false
-            })
-            return stateAfterSelectors
-          }
-          return stateAfterActions
-        }
-      : reducerWithCustom
+    const selectorsReducer = state => {
+      const stateAfterSelectors = runSelectors(state)
+      isInitial = false
+      selectorReducers.forEach(selector => {
+        selector[selectStateSymbol].executed = false
+      })
+      return stateAfterSelectors
+    }
+
+    return (state, action) => {
+      const stateAfterActions = reducerForActions(state, action)
+      const stateAfterListeners = reducerForListeners(stateAfterActions, action)
+      const stateAfterCustomReducers = reducerForCustomReducers(
+        stateAfterListeners,
+        action,
+      )
+      if (state !== stateAfterCustomReducers || isInitial) {
+        return selectorsReducer(stateAfterCustomReducers)
+      }
+      return stateAfterCustomReducers
+    }
   }
 
   const reducers = createReducers()

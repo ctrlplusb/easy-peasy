@@ -824,15 +824,16 @@ describe('select', () => {
     expect(actual).toEqual([{ text: 'foo' }])
     expect(selector).toHaveBeenCalledTimes(1)
   })
+
   test('executes one only if state does not change', () => {
     // arrange
-    const selector = jest.fn()
-    selector.mockImplementation(state =>
-      Object.keys(state.items).map(key => state.items[key]),
-    )
+    let callCount = 0
     const store = createStore({
       items: { 1: { text: 'foo' } },
-      itemList: select(selector),
+      itemList: select(state => {
+        callCount += 1
+        return Object.keys(state.items).map(key => state.items[key])
+      }),
       doNothing: () => undefined,
     })
     // act
@@ -840,7 +841,13 @@ describe('select', () => {
     // assert
     const actual = store.getState().itemList
     expect(actual).toEqual([{ text: 'foo' }])
-    expect(selector).toHaveBeenCalledTimes(1)
+    expect(callCount).toBe(1)
+
+    // act
+    store.dispatch.doNothing()
+
+    // assert
+    expect(callCount).toBe(1)
   })
 
   test('executes again if state does change', () => {
@@ -1237,7 +1244,7 @@ describe('listen', () => {
     ])
   })
 
-  it.skip('listeners can fire actions to update state', () => {
+  it('listeners can fire actions to update state', () => {
     // arrange
     const store = createStore({
       audit: {
