@@ -768,7 +768,7 @@ describe('thunks', () => {
     const model = {
       foo: {
         error: thunk(() => {
-          return Promise.reject()
+          return Promise.reject(Error('error'))
         }),
         doSomething: thunk(async actions => {
           await actions.error()
@@ -780,16 +780,19 @@ describe('thunks', () => {
     const store = createStore(model, { middleware: [trackActions] })
     const payload = 'hello'
     // act
-    const actualResult = await store.dispatch.foo.doSomething(payload)
-    // assert
+    try {
+      await store.dispatch.foo.doSomething(payload)
+      // assert
 
-    expect(trackActions.actions).toEqual([
-      { type: '@thunk.foo.doSomething(started)', payload },
-      { type: '@thunk.foo.error(started)', payload: undefined },
-      { type: '@thunk.foo.error(failed)', payload: undefined },
-      { type: '@thunk.foo.doSomething(completed)', payload },
-    ])
-    expect(actualResult).toBe('did something')
+      expect(trackActions.actions).toEqual([
+        { type: '@thunk.foo.doSomething(started)', payload },
+        { type: '@thunk.foo.error(started)', payload: undefined },
+        { type: '@thunk.foo.error(failed)', payload: undefined },
+        { type: '@thunk.foo.doSomething(failed)', payload },
+      ])
+    } catch (e) {
+      expect(e).toEqual(Error('error'))
+    }
   })
 
   test('async', async () => {

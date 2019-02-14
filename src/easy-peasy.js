@@ -238,6 +238,7 @@ export const createStore = (model, options = {}) => {
                   type: `${name}(failed)`,
                   payload: err,
                 })
+                return Promise.reject(err)
               })
 
           actionCreator[actionNameSymbol] = name
