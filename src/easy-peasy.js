@@ -186,6 +186,14 @@ export const createStore = (model, options = {}) => {
                 )
                 return result
               })
+              .catch(err => {
+                references.dispatch({
+                  type: `${name}(failed)`,
+                  payload: err,
+                })
+                return Promise.reject(err)
+              })
+
           actionCreator[actionNameSymbol] = name
           actionCreatorDict[name] = actionCreator
           set(path, actionCreators, actionCreator)
