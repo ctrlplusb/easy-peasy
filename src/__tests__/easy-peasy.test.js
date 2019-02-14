@@ -763,7 +763,7 @@ describe('thunks', () => {
     expect(actualResult).toBe('did something')
   })
 
-  test('completes a thunk when error is thrown', async () => {
+  test('fails a thunk when error is thrown', async () => {
     // arrange
     const model = {
       foo: {
