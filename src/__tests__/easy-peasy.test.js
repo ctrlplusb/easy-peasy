@@ -1353,7 +1353,7 @@ describe('createTypedHooks', () => {
   })
 })
 
-describe('add/remove models', () => {
+describe.only('add/remove models', () => {
   test('addModel', () => {
     // arrange
     const store = createStore({
@@ -1366,7 +1366,7 @@ describe('add/remove models', () => {
     })
 
     // act
-    const storeWithRouter = store.addModel('router', {
+    store.addModel('router', {
       path: '/',
       push: action((state, payload) => {
         state.path = payload
@@ -1374,12 +1374,41 @@ describe('add/remove models', () => {
     })
 
     // assert
-    expect(storeWithRouter.getState().router.path).toBe('/')
+    expect(store.getState().router.path).toBe('/')
 
     // act
     store.dispatch.router.push('/foo')
 
     // assert
-    expect(storeWithRouter.getState().router.path).toBe('/foo')
+    expect(store.getState().router.path).toBe('/foo')
+  })
+
+  test('removeModel', () => {
+    // arrange
+    const store = createStore({
+      counter: {
+        count: 0,
+        increment: action(state => {
+          state.count += 1
+        }),
+      },
+      router: {
+        path: '/',
+        push: action((state, payload) => {
+          state.path = payload
+        }),
+      },
+    })
+
+    // act
+    store.removeModel('router')
+
+    // assert
+    expect(store.dispatch.router).toBeUndefined()
+    expect(store.getState()).toEqual({
+      counter: {
+        count: 0,
+      },
+    })
   })
 })

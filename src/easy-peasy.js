@@ -197,7 +197,6 @@ const createStoreInternals = ({
         if (initialParentRef && key in initialParentRef) {
           set(path, defaultState, initialParentRef[key])
         } else {
-          console.log(path, value)
           set(path, defaultState, value)
         }
       }
@@ -494,13 +493,7 @@ export const createStore = (model, options = {}) => {
   references.getState = store.getState
   references.getState.getState = store.getState
 
-  store.addModel = (key, modelForKey) => {
-    if (definition[key]) {
-      throw new Error(
-        `The store model already contains a model definition for "${key}"`,
-      )
-    }
-    definition[key] = modelForKey
+  const rebuildStore = () => {
     const newInternals = createStoreInternals({
       disableInternalSelectFnMemoize,
       initialState: store.getState(),
@@ -515,6 +508,26 @@ export const createStore = (model, options = {}) => {
     })
     bindActionCreators(newInternals.actionCreators)
     return store
+  }
+
+  store.addModel = (key, modelForKey) => {
+    if (definition[key]) {
+      throw new Error(
+        `The store model already contains a model definition for "${key}"`,
+      )
+    }
+    definition[key] = modelForKey
+    return rebuildStore()
+  }
+
+  store.removeModel = key => {
+    if (!definition[key]) {
+      throw new Error(
+        `The store model does not contains a model definition for "${key}"`,
+      )
+    }
+    delete definition[key]
+    return rebuildStore()
   }
 
   return store
