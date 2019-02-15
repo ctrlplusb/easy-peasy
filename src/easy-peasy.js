@@ -19,6 +19,7 @@ setAutoFreeze(false)
 
 const maxSelectFnMemoize = 100
 
+const actionSymbol = '__action__'
 const actionNameSymbol = '__actionName__'
 const thunkSymbol = '__thunk__'
 const listenSymbol = '__listen__'
@@ -45,33 +46,32 @@ const set = (path, target, value) => {
 
 const tick = () => new Promise(resolve => setTimeout(resolve))
 
-export const actionName = action => action[actionNameSymbol]
-
-export const thunkStartName = action => `${action[actionNameSymbol]}(started)`
-
-export const thunkCompleteName = action =>
-  `${action[actionNameSymbol]}(completed)`
-
-export const thunk = fn => {
-  fn[thunkSymbol] = true
-  return fn
-}
-
-export const select = (fn, dependencies) => {
-  fn[selectSymbol] = true
-  fn[selectDependenciesSymbol] = dependencies
-  fn[selectStateSymbol] = {}
-  return fn
-}
-
-export const reducer = fn => {
-  fn[reducerSymbol] = true
-  return fn
-}
-
-export const listen = fn => {
-  fn[listenSymbol] = true
-  return fn
+export const helpers = {
+  actionName: action => action[actionNameSymbol],
+  thunkStartName: action => `${action[actionNameSymbol]}(started)`,
+  thunkCompleteName: action => `${action[actionNameSymbol]}(completed)`,
+  action: fn => {
+    fn[actionSymbol] = true
+    return fn
+  },
+  thunk: fn => {
+    fn[thunkSymbol] = true
+    return fn
+  },
+  select: (fn, dependencies) => {
+    fn[selectSymbol] = true
+    fn[selectDependenciesSymbol] = dependencies
+    fn[selectStateSymbol] = {}
+    return fn
+  },
+  reducer: fn => {
+    fn[reducerSymbol] = true
+    return fn
+  },
+  listen: fn => {
+    fn[listenSymbol] = true
+    return fn
+  },
 }
 
 export const createStore = (model, options = {}) => {
@@ -93,7 +93,7 @@ export const createStore = (model, options = {}) => {
 
   const definition = {
     ...model,
-    logFullState: thunk((actions, payload, { getState }) => {
+    logFullState: helpers.thunk((actions, payload, { getState }) => {
       // eslint-disable-next-line no-console
       console.log(JSON.stringify(getState(), null, 2))
     }),
@@ -141,7 +141,29 @@ export const createStore = (model, options = {}) => {
         path,
       }
       if (typeof value === 'function') {
-        if (value[selectSymbol]) {
+        if (value[actionSymbol]) {
+          const name = `@action.${path.join('.')}`
+          value[actionNameSymbol] = name
+          value[metaSymbol] = meta
+
+          // Action Reducer
+          const actionReducer = value
+          actionReducer[actionNameSymbol] = name
+          actionReducersDict[name] = actionReducer
+          actionReducersForPath[parentPath] = actionReducer
+
+          // Action Creator
+          const actionCreator = payload => {
+            const result = references.dispatch({
+              type: actionReducer[actionNameSymbol],
+              payload,
+            })
+            return result
+          }
+          actionCreator[actionNameSymbol] = name
+          actionCreatorDict[name] = actionCreator
+          set(path, actionCreators, actionCreator)
+        } else if (value[selectSymbol]) {
           // skip
           value[selectStateSymbol] = { parentPath, key, executed: false }
           selectorReducers.push(value)
@@ -194,27 +216,12 @@ export const createStore = (model, options = {}) => {
           listenDefinitions.push(value)
           value[metaSymbol] = meta
         } else {
-          const name = `@action.${path.join('.')}`
-          value[actionNameSymbol] = name
-          value[metaSymbol] = meta
-
-          // Reducer Action
-          const action = value
-          action[actionNameSymbol] = name
-          actionReducersDict[name] = action
-          actionReducersForPath[parentPath] = action
-
-          // Reducer Action Creator
-          const actionCreator = payload => {
-            const result = references.dispatch({
-              type: action[actionNameSymbol],
-              payload,
-            })
-            return result
-          }
-          actionCreator[actionNameSymbol] = name
-          actionCreatorDict[name] = actionCreator
-          set(path, actionCreators, actionCreator)
+          // eslint-disable-next-line no-console
+          console.warn(
+            `Easy Peasy: Found a function at path ${path.join(
+              '.',
+            )} in your model. Version 2 required that you wrap functions with the action helper`,
+          )
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
         set(path, defaultState, {})
@@ -237,7 +244,7 @@ export const createStore = (model, options = {}) => {
   })
 
   listenDefinitions.forEach(def => {
-    const on = (action, handler) => {
+    const on = (target, handler) => {
       if (typeof handler !== 'function') {
         return
       }
@@ -248,17 +255,17 @@ export const createStore = (model, options = {}) => {
       let name
 
       if (
-        typeof action === 'function' &&
-        action[actionNameSymbol] &&
-        actionCreatorDict[action[actionNameSymbol]]
+        typeof target === 'function' &&
+        target[actionNameSymbol] &&
+        actionCreatorDict[target[actionNameSymbol]]
       ) {
-        if (action[thunkSymbol]) {
-          name = thunkCompleteName(action)
+        if (target[thunkSymbol]) {
+          name = helpers.thunkCompleteName(target)
         } else {
-          name = action[actionNameSymbol]
+          name = target[actionNameSymbol]
         }
-      } else if (typeof action === 'string') {
-        name = action
+      } else if (typeof target === 'string') {
+        name = target
       }
 
       if (name) {
