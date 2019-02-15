@@ -252,6 +252,16 @@ export const createStore = (model, options = {}) => {
       const meta = def[metaSymbol]
       handler[metaSymbol] = meta
 
+      if (!handler[actionSymbol] && !handler[thunkSymbol]) {
+        // eslint-disable-next-line
+        console.warn(
+          `Easy Peasy: you must provide either an "action" or "thunk" to your listeners. Found an invalid handler at "${meta.path.join(
+            '.',
+          )}"`,
+        )
+        return
+      }
+
       let name
 
       if (
