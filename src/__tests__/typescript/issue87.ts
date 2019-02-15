@@ -1,21 +1,21 @@
-import { Action, createStore } from 'easy-peasy'
+import { action, Action, createStore } from 'easy-peasy'
 
 interface IAnimal {
-  name?: string;
+  name?: string
 }
 
 interface IModel {
-  animal: IAnimal;
-  setAnimal: Action<IModel, { animal: IAnimal }>;
+  animal: IAnimal
+  setAnimal: Action<IModel, { animal: IAnimal }>
 }
 
 const model: IModel = {
   animal: {
-    name: "robert"
+    name: 'robert',
   },
-  setAnimal: (state, payload) => {
-    return { ...state, animal: payload.animal };
-  }
-};
+  setAnimal: action((state, payload) => {
+    return { ...state, animal: payload.animal }
+  }),
+}
 
-const store = createStore(model);
+const store = createStore(model)
