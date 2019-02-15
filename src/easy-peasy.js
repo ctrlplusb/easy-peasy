@@ -74,18 +74,13 @@ export const helpers = {
   },
 }
 
-export const createStore = (model, options = {}) => {
-  const {
-    compose,
-    devTools = true,
-    disableInternalSelectFnMemoize = false,
-    initialState = {},
-    injections,
-    mockActions = false,
-    middleware = [],
-    reducerEnhancer = rootReducer => rootReducer,
-  } = options
-
+const createStoreInternals = ({
+  model,
+  injections,
+  initialState,
+  disableInternalSelectFnMemoize,
+  references,
+}) => {
   const wrapFnWithMemoize = x =>
     !disableInternalSelectFnMemoize && typeof x === 'function'
       ? memoizerific(maxSelectFnMemoize)(x)
@@ -99,7 +94,6 @@ export const createStore = (model, options = {}) => {
     }),
   }
 
-  const references = {}
   const defaultState = {}
   const actionThunks = {}
   const actionCreators = {}
@@ -111,26 +105,6 @@ export const createStore = (model, options = {}) => {
   const actionListenersDict = {}
   const actionReducersDict = {}
   const actionReducersForPath = {}
-
-  const dispatchThunkListeners = (name, payload) => {
-    const listensForAction = thunkListenersDict[name]
-    return listensForAction && listensForAction.length > 0
-      ? Promise.all(
-          listensForAction.map(listenForAction =>
-            listenForAction(
-              get(listenForAction[metaSymbol].parent, actionCreators),
-              payload,
-              {
-                dispatch: references.dispatch,
-                getState: references.getState,
-                injections,
-                meta: listenForAction[metaSymbol],
-              },
-            ),
-          ),
-        )
-      : Promise.resolve()
-  }
 
   const extract = (current, parentPath) =>
     Object.keys(current).forEach(key => {
@@ -407,7 +381,27 @@ export const createStore = (model, options = {}) => {
     }
   }
 
-  const reducers = createReducers()
+  return {
+    reducer: createReducers(),
+    defaultState,
+    actionCreators,
+    thunkListenersDict,
+  }
+}
+
+export const createStore = (model, options = {}) => {
+  const {
+    compose,
+    devTools = true,
+    disableInternalSelectFnMemoize = false,
+    initialState = {},
+    injections,
+    mockActions = false,
+    middleware = [],
+    reducerEnhancer = rootReducer => rootReducer,
+  } = options
+
+  const references = {}
 
   const composeEnhancers =
     compose ||
@@ -416,13 +410,6 @@ export const createStore = (model, options = {}) => {
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       : reduxCompose)
-
-  const dispatchActionStringListeners = () => next => action => {
-    if (thunkListenersDict[action.type]) {
-      dispatchThunkListeners(action.type, action.payload)
-    }
-    return next(action)
-  }
 
   let mockedActions = []
 
@@ -434,8 +421,48 @@ export const createStore = (model, options = {}) => {
     return next(action)
   }
 
+  const {
+    actionCreators,
+    defaultState,
+    reducer,
+    thunkListenersDict,
+  } = createStoreInternals({
+    disableInternalSelectFnMemoize,
+    initialState,
+    injections,
+    model,
+    references,
+  })
+
+  const dispatchThunkListeners = (name, payload) => {
+    const listensForAction = thunkListenersDict[name]
+    return listensForAction && listensForAction.length > 0
+      ? Promise.all(
+          listensForAction.map(listenForAction =>
+            listenForAction(
+              get(listenForAction[metaSymbol].parent, actionCreators),
+              payload,
+              {
+                dispatch: references.dispatch,
+                getState: references.getState,
+                injections,
+                meta: listenForAction[metaSymbol],
+              },
+            ),
+          ),
+        )
+      : Promise.resolve()
+  }
+
+  const dispatchActionStringListeners = () => next => action => {
+    if (thunkListenersDict[action.type]) {
+      dispatchThunkListeners(action.type, action.payload)
+    }
+    return next(action)
+  }
+
   const store = reduxCreateStore(
-    reducerEnhancer(reducers),
+    reducerEnhancer(reducer),
     defaultState,
     composeEnhancers(
       applyMiddleware(
@@ -450,6 +477,10 @@ export const createStore = (model, options = {}) => {
   store.getMockedActions = () => [...mockedActions]
   store.clearMockedActions = () => {
     mockedActions = []
+  }
+
+  store.addModel = (key, model) => {
+    return store
   }
 
   // attach the action creators to dispatch

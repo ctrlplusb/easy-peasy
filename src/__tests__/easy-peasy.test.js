@@ -1352,3 +1352,28 @@ describe('createTypedHooks', () => {
     expect(typedHooks.useDispatch).toBe(useDispatch)
   })
 })
+
+describe.skip('add/remove models', () => {
+  test('addModel', () => {
+    // arrange
+    const store = createStore({
+      counter: {
+        count: 0,
+        increment: action(state => {
+          state.count += 1
+        }),
+      },
+    })
+
+    // act
+    const storeWithRouter = store.addModel('router', {
+      path: '/',
+      push: action((state, payload) => {
+        state.path = payload
+      }),
+    })
+
+    // assert
+    expect(storeWithRouter.getState().router.path).toBe('/')
+  })
+})
