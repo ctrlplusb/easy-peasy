@@ -1353,7 +1353,7 @@ describe('createTypedHooks', () => {
   })
 })
 
-describe.skip('add/remove models', () => {
+describe('add/remove models', () => {
   test('addModel', () => {
     // arrange
     const store = createStore({
@@ -1375,5 +1375,11 @@ describe.skip('add/remove models', () => {
 
     // assert
     expect(storeWithRouter.getState().router.path).toBe('/')
+
+    // act
+    store.dispatch.router.push('/foo')
+
+    // assert
+    expect(storeWithRouter.getState().router.path).toBe('/foo')
   })
 })

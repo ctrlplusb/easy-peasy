@@ -86,14 +86,6 @@ const createStoreInternals = ({
       ? memoizerific(maxSelectFnMemoize)(x)
       : x
 
-  const definition = {
-    ...model,
-    logFullState: helpers.thunk((actions, payload, { getState }) => {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(getState(), null, 2))
-    }),
-  }
-
   const defaultState = {}
   const actionThunks = {}
   const actionCreators = {}
@@ -205,12 +197,13 @@ const createStoreInternals = ({
         if (initialParentRef && key in initialParentRef) {
           set(path, defaultState, initialParentRef[key])
         } else {
+          console.log(path, value)
           set(path, defaultState, value)
         }
       }
     })
 
-  extract(definition, [])
+  extract(model, [])
 
   selectorReducers.forEach(selector => {
     selector[selectImpSymbol] = state => wrapFnWithMemoize(selector(state))
@@ -401,6 +394,15 @@ export const createStore = (model, options = {}) => {
     reducerEnhancer = rootReducer => rootReducer,
   } = options
 
+  const definition = {
+    ...model,
+    logFullState: helpers.thunk((actions, payload, { getState }) => {
+      // eslint-disable-next-line no-console
+      console.log(JSON.stringify(getState(), null, 2))
+    }),
+    replaceState: helpers.action((state, payload) => payload),
+  }
+
   const references = {}
 
   const composeEnhancers =
@@ -430,7 +432,7 @@ export const createStore = (model, options = {}) => {
     disableInternalSelectFnMemoize,
     initialState,
     injections,
-    model,
+    model: definition,
     references,
   })
 
@@ -479,18 +481,41 @@ export const createStore = (model, options = {}) => {
     mockedActions = []
   }
 
-  store.addModel = (key, model) => {
-    return store
+  // attach the action creators to dispatch
+  const bindActionCreators = ac => {
+    Object.keys(ac).forEach(key => {
+      store.dispatch[key] = ac[key]
+    })
   }
 
-  // attach the action creators to dispatch
-  Object.keys(actionCreators).forEach(key => {
-    store.dispatch[key] = actionCreators[key]
-  })
+  bindActionCreators(actionCreators)
 
   references.dispatch = store.dispatch
   references.getState = store.getState
   references.getState.getState = store.getState
+
+  store.addModel = (key, modelForKey) => {
+    if (definition[key]) {
+      throw new Error(
+        `The store model already contains a model definition for "${key}"`,
+      )
+    }
+    definition[key] = modelForKey
+    const newInternals = createStoreInternals({
+      disableInternalSelectFnMemoize,
+      initialState: store.getState(),
+      injections,
+      model: definition,
+      references,
+    })
+    store.replaceReducer(newInternals.reducer)
+    store.dispatch.replaceState(newInternals.defaultState)
+    Object.keys(store.dispatch).forEach(actionsKey => {
+      delete store.dispatch[actionsKey]
+    })
+    bindActionCreators(newInternals.actionCreators)
+    return store
+  }
 
   return store
 }
