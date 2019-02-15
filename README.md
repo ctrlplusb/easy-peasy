@@ -11,18 +11,18 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 ```javascript
-import { StoreProvider, createStore, useStore, useActions } from 'easy-peasy';
+import { action, createStore, StoreProvider, useStore, useActions } from 'easy-peasy';
 
 // 👇 create your store, providing the model
 const store = createStore({
   todos: {
     items: ['Install easy-peasy', 'Build app', 'Profit'],
     // 👇 define actions directly on your model
-    add: (state, payload) => {
-      // do simple mutation to update state, and we make it an immutable update
+    add: action((state, payload) => {
+      // simply mutate state to update, and we convert to immutable updates
       state.items.push(payload)
-      // (you can also return a new immutable instance if you prefer)
-    }
+      // (you can also return a new immutable version of state if you prefer)
+    })
   }
 });
 
@@ -208,17 +208,19 @@ store.getState().todos.items;
 In order to mutate your state you need to define an action against your model.
 
 ```javascript
+import { action } from 'easy-peasy'; // 👈 import the helper
+
 const store = createStore({
   todos: {
     items: [],
-    // 👇 our action
-    addTodo: (state, payload) => {
-      //    Mutate the state directly. Under the hood we convert this to an
-      //    an immutable update in the store, but at least you don't need to
-      //    worry about being careful to return new instances etc. This also
-      // 👇 makes it easy to update deeply nested items.
+    //         👇 define the action with the helper
+    addTodo: action((state, payload) => {
+      // Mutate the state directly. Under the hood we convert this to an
+      // an immutable update in the store, but at least you don't need to
+      // worry about being careful to return new instances etc. This also
+      // makes it easy to update deeply nested items.
       state.items.push(payload)
-    }
+    })
   }
 });
 ```
@@ -228,9 +230,9 @@ The action will receive as its first parameter the slice of the state that it wa
 > Note: Some prefer not to use a mutation based API. You can return new "immutable" instances of your state if you prefer:
 >
 > ```javascript
-> addTodo: (state, payload) => {
+> addTodo: action((state, payload) => {
 >   return { ...state, items: [...state.items, payload] };
-> }
+> })
 > ```
 
 ### Dispatching actions directly via the store
@@ -267,13 +269,14 @@ const store = createStore({
       // Notice that the thunk will receive the actions allowing you to dispatch
       // other actions after you have performed your side effect.
       const saved = await todoService.save(payload);
-      // 👇 Now we dispatch an action to add the saved item to our state
+      // Now we dispatch an action to add the saved item to our state
+      //         👇
       actions.todoSaved(saved);
     }),
 
-    todoSaved: (state, payload) => {
+    todoSaved: action((state, payload) => {
       state.items.push(payload)
-    }
+    })
   }
 });
 ```
@@ -554,15 +557,15 @@ const store = createStore<StoreModel>({
     firstItem: select(state =>
       state.items.length > 0 ? state.items[0] : undefined,
     ),
-    addTodo: (state, payload) => {
+    addTodo: action((state, payload) => {
       state.items.push(payload)
-    },
+    }),
   },
   user: {
     token: undefined,
-    loggedIn: (state, payload) => {
+    loggedIn: action((state, payload) => {
       state.token = payload
-    },
+    }),
     login: effect(async (dispatch, payload) => {
       const response = await fetch('/login', {
         method: 'POST',
@@ -734,11 +737,13 @@ Actions are relatively simple to test as they are essentially an immutable updat
 Given the following model under test:
 
 ```typescript
+import { action } from 'easy-peasy'
+
 const todosModel = {
   items: {},
-  add: (state, payload) => {
+  add: action((state, payload) => {
     state.items[payload.id] = payload
-  },
+  }),
 }
 ```
 
@@ -778,11 +783,13 @@ We will demonstrate all of the above within the below example.
 Given the following model under test:
 
 ```typescript
+import { action, thunk } from 'thunk';
+
 const todosModel = {
   items: {},
-  add: (state, payload) => {
+  add: action((state, payload) => {
     state.items[payload.id] = payload
-  },
+  }),
   fetchById: thunk(async (actions, payload, helpers) => {
     const { injections } = helpers
     const todo = await injections.fetch(`/todos/${payload}`).then(r => r.json())
@@ -853,16 +860,11 @@ We could adopt the following strategy to test it.
 
 ```typescript
 import { createStore, StoreProvider } from 'easy-peasy'
+import model from './model';
 
 test('Counter', () => {
   // arrange
-  const store = createStore({
-    count: 0,
-    increment: state => {
-      state.count += 1
-    },
-  })
-
+  const store = createStore(model)
   const app = (
     <StoreProvider store={store}>
       <ComponentUnderTest />
@@ -1014,7 +1016,7 @@ const store = createStore({
 
 ### action
 
-A function assigned to your model will be considered an action, which can be be used to dispatch updates to your store.
+Declares an action on your model. An action allows you to perform updates on your store.
 
 The action will have access to the part of the state tree where it was defined.
 
@@ -1022,13 +1024,17 @@ The action will have access to the part of the state tree where it was defined.
 <summary>Arguments</summary>
 <p>
 
-  - `state` (Object, required)
+  - action (Function, required)
 
-    The part of the state tree that the action is against. You can mutate this state value directly as required by the action. Under the hood we convert these mutations into an update against the Redux store.
+    The action definition. It receives the following arguments:
 
-  - `payload` (Any)
+    - `state` (Object, required)
 
-    The payload, if any, that was provided to the action.
+      The part of the state tree that the action is against. You can mutate this state value directly as required by the action. Under the hood we convert these mutations into an update against the Redux store.
+
+    - `payload` (Any)
+
+      The payload, if any, that was provided to the action.
 
 When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
 </p>
@@ -1039,28 +1045,18 @@ When your model is processed by Easy Peasy to create your store all of your acti
 <p>
 
 ```javascript
-import { createStore } from 'easy-peasy';
+import { action, createStore } from 'easy-peasy';
 
 const store = createStore({
   todos: {
     items: [],
-    add: (state, payload) => {
+    add: action((state, payload) => {
       state.items.push(payload)
-    }
-  },
-  user: {
-    preferences: {
-      backgroundColor: '#000',
-      changeBackgroundColor: (state, payload) => {
-        state.backgroundColor = payload;
-      }
-    }
+    })
   }
 });
 
 store.dispatch.todos.add('Install easy-peasy');
-
-store.dispatch.user.preferences.changeBackgroundColor('#FFF');
 ```
 </p>
 </details>
@@ -1141,7 +1137,7 @@ When your model is processed by Easy Peasy to create your store all of your thun
 <p>
 
 ```javascript
-import { createStore, thunk } from 'easy-peasy'; // 👈 import then helper
+import { action, createStore, thunk } from 'easy-peasy'; // 👈 import then helper
 
 const store = createStore({
   session: {
@@ -1151,9 +1147,9 @@ const store = createStore({
       const user = await loginService(payload)
       actions.loginSucceeded(user)
     }),
-    loginSucceeded: (state, payload) => {
+    loginSucceeded: action((state, payload) => {
       state.user = payload
-    }
+    })
   }
 });
 
@@ -1200,14 +1196,14 @@ store.dispatch.doSomething()
 <p>
 
 ```javascript
-import { createStore, thunk } from 'easy-peasy';
+import { action, createStore, thunk } from 'easy-peasy';
 
 const store = createStore({
   audit: {
     logs: [],
-    add: (state, payload) => {
+    add: action((state, payload) => {
       audit.logs.push(payload);
-    }
+    })
   },
   todos: {
     // dispatch allows you to gain access to the store's dispatch
@@ -1222,7 +1218,7 @@ const store = createStore({
 store.dispatch.todos.saveTodo('foo');
 ```
 
-We don't recommned doing this, and instead encourage you to use the `listeners` helper to invert responsibilites. However, there may be cases in which you need to do the above.
+We don't recommned doing this, and instead encourage you to use the [`listen`](#listenon) helper to invert responsibilites. However, there may exceptional cases in which you need to do the above.
 
 </p>
 </details>
@@ -1424,7 +1420,7 @@ const store = createStore({
 
 ### listen(on)
 
-Allows you to attach listeners to any normal or thunk action. Listeners are themselves thunks, and will be executed after the targetted action successfully completes its execution.
+Allows you to attach listeners to any action or thunk.
 
 This enables parts of your model to respond to actions being fired in other parts of your model. For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
 
@@ -1440,15 +1436,15 @@ Note: If any action being listened to does not complete successfully (i.e. throw
 
     Allows you to attach a listener to an action. It expects the following arguments:
 
-    - `action` (Function | string, required)
+    - `target` (action | thunk | string, required)
 
       The target action you wish to listen to - you provide the direct reference to the action, or the string name of it.
 
-    - `thunk` (Function, required)
+    - `handler` (Function, required)
 
-      The handler thunk to be executed after the target action is fired successfully. It has the same arguments and characteristics of a [thunk](#thunkaction) action. Please refer to the thunk API documentation for more information.
-
-      The only difference is that the `payload` argument will be the payload value that the action being listened to received.
+      The handler thunk to be executed after the target action is fired successfully. It can be an [`action`](#action) or a [`thunk`](#thunkaction). 
+      
+      The payload for the handler will be the same payload that the target action received
 
 </p>
 </details>
@@ -1459,32 +1455,32 @@ Note: If any action being listened to does not complete successfully (i.e. throw
 <p>
 
 ```javascript
-import { listen } from 'easy-peasy'; // 👈 import the helper
+import { action, listen } from 'easy-peasy'; // 👈 import the helper
 
 const userModel = {
   user: null,
-  loggedIn: (state, user) => {
+  loggedIn: action((state, user) => {
     state.user = user;
-  },
-  logOut: (state) => {
+  }),
+  logOut: action((state) => {
     state.user = null;
-  }
+  })
 };
 
 const notificationModel = {
   msg: '',
-  set: (state, payload) => { state.msg = payload; },
 
   // 👇 you can label your listeners as you like, e.g. "userListeners"
   listeners: listen((on) => {
-    //             👇 pass in direct reference to target action
-    on(userModel.loggedIn, (actions, payload) => {
-      actions.set(`${payload.username} logged in`);
-    })
+    // Thunk handler
+    on(userModel.loggedIn, thunk(async (actions, payload) => {
+      const msg = `${payload.username} logged in`
+      await auditService.log(msg)
+    }))
 
-    // you can listen to as many actions as you like in a block
-    on(userModel.logOut, actions => {
-      actions.set('Logged out');
+    // Action handler
+    on(userModel.logOut, action((state) => {
+      state.msg = 'User logged out'
     });
   })
 };
@@ -1814,301 +1810,6 @@ export default {
 
 ---
 
-## Deprecated API
-
-Below is an overview of the deprecated APIs exposed by Easy Peasy. These will be removed in the next major release.
-
-### effect(action)
-
-Declares an action on your model as being effectful. i.e. has asynchronous flow.
-
-<details>
-<summary>Arguments</summary>
-<p>
-
-  - action (Function, required)
-
-    The action function to execute the effects. It can be asynchronous, e.g. return a Promise or use async/await. Effectful actions cannot modify state, however, they can dispatch other actions providing fetched data for example in order to update the state.
-
-    It accepts the following arguments:
-
-    - `dispatch` (required)
-
-      The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
-
-    - `payload` (Any, not required)
-
-      The payload, if any, that was provided to the action.
-
-    - `getState` (Function, required)
-
-      When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
-
-    - `injections` (Any, not required, default=undefined)
-
-      Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
-
-    - `meta` (Object, required)
-
-      This object contains meta information related to the effect. Specifically it contains the following properties:
-
-        - parent (Array, string, required)
-
-          An array representing the path of the parent to the action.
-
-        - path (Array, string, required)
-
-          An array representing the path to the action.
-
-      This can be represented via the following example:
-
-      ```javascript
-      const store = createStore({
-        products: {
-          fetchById: effect((dispatch, payload, getState, injections, meta) => {
-            console.log(meta);
-            // {
-            //   parent: ['products'],
-            //   path: ['products', 'fetchById']
-            // }
-          })
-        }
-      });
-
-      await store.dispatch.products.fetchById()
-      ```
-
-When your model is processed by Easy Peasy to create your store all of your actions will be made available against the store's `dispatch`. They are mapped to the same path as they were defined in your model. You can then simply call the action functions providing any required payload.  See the example below.
-
-</p>
-</details>
-
-<details>
-<summary>Example</summary>
-<p>
-
-```javascript
-import { createStore, effect } from 'easy-peasy'; // 👈 import then helper
-
-const store = createStore({
-  session: {
-    user: undefined,
-    // 👇 define your effectful action
-    login: effect(async (dispatch, payload) => {
-      const user = await loginService(payload)
-      dispatch.session.loginSucceeded(user)
-    }),
-    loginSucceeded: (state, payload) => {
-      state.user = payload
-    }
-  }
-});
-
-// 👇 you can dispatch and await on the effectful actions
-store.dispatch.session.login({
-  username: 'foo',
-  password: 'bar'
-})
-// 👇 effectful actions _always_ return a Promise
-.then(() => console.log('Logged in'));
-
-```
-
-</p>
-</details>
-
-<details>
-<summary>Example accessing State via the getState parameter</summary>
-<p>
-
-```javascript
-import { createStore, effect } from 'easy-peasy';
-
-const store = createStore({
-  foo: 'bar',
-  // getState allows you to gain access to the  store's state
-  //                                               👇
-  doSomething: effect(async (dispatch, payload, getState, injections) => {
-    // Calling it exposes the root state of your store. i.e. the full
-    // store state 👇
-    console.log(getState())
-    // { foo: 'bar' }
-  }),
-});
-
-store.dispatch.doSomething()
-```
-
-</p>
-</details>
-
-
-<details>
-<summary>Example with Dependency Injection</summary>
-<p>
-
-```javascript
-import { createStore, effect } from 'easy-peasy';
-import api from './api' // 👈 a dependency we want to inject
-
-const store = createStore(
-  {
-    foo: 'bar',
-    //                              injections are exposed here 👇
-    doSomething: effect(async (dispatch, payload, getState, injections) => {
-      const { api } = injections
-      await api.foo()
-    }),
-  },
-  {
-    // 👇 specify the injections parameter when creating your store
-    injections: {
-      api,
-    }
-  }
-);
-
-store.dispatch.doSomething()
-```
-
-</p>
-</details>
-
-### listeners(attach)
-
-Allows you to attach listeners to any action from your model, which will then be fired after the targetted action is exectuted.
-
-This enables parts of your model to respond to actions being fired in other parts of your model. For example you could have a "notifications" model that populates based on certain actions being fired (logged in, product added to basket, etc).
-
-Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
-
-```javascript
-const model = {
-  ...,
-  notificationlisteners: listeners((actions, on) => {
-    on(actions.user.loggedIn, (dispatch) => {
-      dispatch.notifications.set('User logged in');
-    })
-  })
-};
-```
-
-<details>
-<summary>Arguments</summary>
-<p>
-
-  - attach (Function, required)
-
-    The attach callback function allows you to attach the listeners to specific actions. It is provided the following arguments:
-
-    - `actions` (Object, required)
-
-      The actions (and effects) of the store.
-
-    - `on` (Function, required)
-
-      Allows you to attach a listener to an action. It expects the following arguments:
-
-      - `action` (Function, required)
-
-        The target action you wish to listen to - you provide the direct reference to the action.
-
-      - `handler` (Function, required)
-
-        The handler function to be executed after the target action is fired successfully. It will receive the following arguments:
-
-        - `dispatch` (required)
-
-          The Redux store `dispatch` instance. This will have all the Easy Peasy actions bound to it allowing you to dispatch additional actions.
-
-        - `payload` (Any, not required)
-
-          The original payload that the targetted action received.
-
-        - `getState` (Function, required)
-
-          When executed it will provide the root state of your model.
-
-        - `injections` (Any, not required, default=undefined)
-
-          Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
-
-</p>
-</details>
-
-
-<details>
-<summary>Example</summary>
-<p>
-
-```javascript
-import { listeners } from 'easy-peasy'; // 👈 import the helper
-
-const store = createStore({
-  user: {
-    token: '',
-    loggedIn: (state, payload) => {
-      state.token = payload;
-    },
-    logIn: effect(async (dispatch, payload) => {
-      const token = await loginService(payload);
-      dispatch.user.loggedIn(token);
-    },
-    logOut: (state) => {
-      state.token = '';
-    }
-  },
-  audit: {
-    logs: [],
-    add: (state, payload) => {
-      state.logs.push(payload)
-    },
-    //  👇 name your listeners
-    userListeners: listeners((actions, on) => {
-      // 👇 we attach a listener to the "logIn" effect
-      on(actions.user.logIn, (dispatch, payload) => {
-        dispatch.audit.add(`${payload.username} logged in`);
-      });
-      // 👇 we attach a listener to the "logOut" action
-      on(actions.user.logOut, dispatch => {
-        dispatch.audit.add('User logged out');
-      });
-    }))
-  }
-});
-
-// 👇 the login effect will fire, and then any listeners will execute after complete
-store.dispatch.user.login({ username: 'mary', password: 'foo123' });
-```
-
-</p>
-</details>
-
-### useAction(mapAction)
-
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions.
-
-<details>
-<summary>Arguments</summary>
-<p>
-
-  - `mapAction` (Function, required)
-
-    The function that is used to resolved the action that your component requires. The function will receive the following arguments:
-
-    - `dispatch` (Object, required)
-
-      The `dispatch` of your store, which has all the actions mapped against it.
-
-Your `mapAction` can either resolve a single action. If you wish to resolve multiple actions then you can either call `useAction` multiple times, or if you like resolve an object within your `mapAction` where each property of the object is a resolved action. The examples below will illustrate these options.
-
-</p>
-</details>
-
-<p>&nbsp;</p>
-
----
-
 ## Tips and Tricks
 
 Below are a few useful tips and tricks when using Easy Peasy.
@@ -2124,11 +1825,11 @@ const store = createStore({
   products: {
     data: {},
     ids: select(state => Object.keys(state.data)),
-    fetched: (state, products) => {
+    fetched: action((state, products) => {
       products.forEach(product => {
         state.data[product.id] = product;
       });
-    },
+    }),
     fetch: thunk((actions) => {
       const data = await fetchProducts();
       actions.fetched(data);
@@ -2137,11 +1838,11 @@ const store = createStore({
   users: {
     data: {},
     ids: select(state => Object.keys(state.data)),
-    fetched: (state, users) => {
+    fetched: action((state, users) => {
       users.forEach(user => {
         state.data[user.id] = user;
       });
-    },
+    }),
     fetch: thunk((dispatch) => {
       const data = await fetchUsers();
       actions.fetched(data);
@@ -2156,11 +1857,11 @@ You will note a distinct pattern between the `products` and `users`. You could c
 const data = (endpoint) => ({
   data: {},
   ids: select(state => Object.keys(state.data)),
-  fetched: (state, items) => {
+  fetched: action((state, items) => {
     items.forEach(item => {
       state.data[item.id] = item;
     });
-  },
+  }),
   fetch: thunk((actions, payload) => {
     const data = await endpoint();
     actions.fetched(data);
