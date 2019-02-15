@@ -6,16 +6,17 @@ import { act } from 'react-dom/test-utils'
 import { render, fireEvent } from 'react-testing-library'
 
 import {
-  StoreProvider,
+  action,
   createStore,
   createTypedHooks,
+  listen,
   reducer,
   select,
+  StoreProvider,
   thunk,
-  useStore,
   useActions,
   useDispatch,
-  listen,
+  useStore,
 } from '../index'
 
 const resolveAfter = (data, ms) =>
@@ -26,9 +27,9 @@ beforeEach(() => {
 })
 
 const trackActionsMiddleware = () => {
-  const middleware = () => next => action => {
-    middleware.actions.push(action)
-    return next(action)
+  const middleware = () => next => _action => {
+    middleware.actions.push(_action)
+    return next(_action)
   }
   middleware.actions = []
   return middleware
@@ -102,9 +103,9 @@ describe('react', () => {
     // arrange
     const store = createStore({
       count: 1,
-      inc: state => {
+      inc: action(state => {
         state.count += 1
-      },
+      }),
     })
     jest.spyOn(store, 'subscribe')
     const renderSpy = jest.fn()
@@ -140,9 +141,9 @@ describe('react', () => {
     // arrange
     const store = createStore({
       count: 1,
-      inc: state => {
+      inc: action(state => {
         state.count += 1
-      },
+      }),
     })
     const unsubscribeSpy = jest.fn()
     store.subscribe = () => unsubscribeSpy
@@ -180,9 +181,9 @@ describe('react', () => {
       // arrange
       const store = createStore({
         count: 1,
-        inc: state => {
+        inc: action(state => {
           state.count += 1
-        },
+        }),
       })
       const renderSpy = jest.fn()
       function Counter() {
@@ -223,9 +224,9 @@ describe('react', () => {
       const store = createStore({
         count: 1,
         somethingElse: null,
-        updateSomethingElse: (state, payload) => {
+        updateSomethingElse: action((state, payload) => {
           state.somethingElse = payload
-        },
+        }),
       })
       const renderSpy = jest.fn()
       function Counter() {
@@ -261,9 +262,9 @@ describe('react', () => {
       // arrange
       const store = createStore({
         count: 1,
-        inc: state => {
+        inc: action(state => {
           state.count += 1
-        },
+        }),
       })
       const renderSpy = jest.fn()
       function Counter() {
@@ -306,9 +307,9 @@ describe('react', () => {
       const store = createStore({
         count: 1,
         somethingElse: null,
-        updateSomethingElse: (state, payload) => {
+        updateSomethingElse: action((state, payload) => {
           state.somethingElse = payload
-        },
+        }),
       })
       const renderSpy = jest.fn()
       function Counter() {
@@ -371,9 +372,9 @@ describe('store', () => {
     const model = {
       session: {
         user: undefined,
-        login: (state, user) => {
+        login: action((state, user) => {
           state.user = user
-        },
+        }),
       },
     }
     // act
@@ -405,11 +406,11 @@ describe('store', () => {
         user: undefined,
         settings: {
           favouriteColor: 'red',
-          setFavouriteColor: (state, color) => {
+          setFavouriteColor: action((state, color) => {
             state.favouriteColor = color
-          },
+          }),
         },
-        login: () => undefined,
+        login: action(() => undefined),
       },
     }
     // act
@@ -442,9 +443,9 @@ describe('store', () => {
       todos: {
         items: { 1: { text: 'foo' } },
       },
-      doSomething: state => {
+      doSomething: action(state => {
         state.todos.items[2] = { text: 'bar' }
-      },
+      }),
     })
     // act
     store.dispatch.doSomething()
@@ -458,9 +459,9 @@ describe('store', () => {
     const model = {
       session: {
         user: undefined,
-        login: (state, user) => {
+        login: action((state, user) => {
           state.user = user
-        },
+        }),
       },
       // No associated actions here
       todos: {
@@ -488,10 +489,10 @@ describe('store', () => {
 
   test('allows custom middleware', done => {
     // arrange
-    const customMiddleware = () => next => action => {
+    const customMiddleware = () => next => _action => {
       // assert
-      expect(action.type).toMatch(/@thunk.logFullState\((started|completed)\)/)
-      next(action)
+      expect(_action.type).toMatch(/@thunk.logFullState\((started|completed)\)/)
+      next(_action)
       done()
     }
     // act
@@ -550,9 +551,9 @@ describe('store', () => {
       },
       session: {
         isInitialised: false,
-        initialised: state => {
+        initialised: action(state => {
           state.isInitialised = true
-        },
+        }),
         initialise: wrappedThunk(async actions => {
           actions.initialised()
           return 'done'
@@ -571,9 +572,9 @@ describe('internals', () => {
     // arrange
     const model = { foo: 'bar' }
     const store = createStore(model)
-    const action = payload => () => Promise.resolve(payload)
+    const thunkAction = payload => () => Promise.resolve(payload)
     // act
-    const result = await store.dispatch(action('foo'))
+    const result = await store.dispatch(thunkAction('foo'))
     // assert
     expect(result).toBe('foo')
   })
@@ -585,9 +586,9 @@ describe('thunks', () => {
     const model = {
       foo: {
         counter: 0,
-        increment: state => {
+        increment: action(state => {
           state.counter += 1
-        },
+        }),
         doSomething: thunk(actions => {
           actions.increment()
           return 'did something'
@@ -645,9 +646,9 @@ describe('thunks', () => {
     const model = {
       session: {
         user: undefined,
-        loginSucceeded: (state, payload) => {
+        loginSucceeded: action((state, payload) => {
           state.user = payload
-        },
+        }),
         login: thunk(async (actions, payload, { getState }) => {
           expect(payload).toEqual({
             username: 'bob',
@@ -703,9 +704,9 @@ describe('thunks', () => {
       },
       stats: {
         loginAttempts: 0,
-        incrementLoginAttempts: state => {
+        incrementLoginAttempts: action(state => {
           state.loginAttempts += 1
-        },
+        }),
       },
     }
     // act
@@ -834,7 +835,7 @@ describe('select', () => {
         callCount += 1
         return Object.keys(state.items).map(key => state.items[key])
       }),
-      doNothing: () => undefined,
+      doNothing: action(() => undefined),
     })
     // act
     store.dispatch.doNothing()
@@ -859,9 +860,9 @@ describe('select', () => {
     const store = createStore({
       items: { 1: { text: 'foo' } },
       itemList: select(selector),
-      doSomething: state => {
+      doSomething: action(state => {
         state.items[2] = { text: 'bar' }
-      },
+      }),
     })
     // act
     store.dispatch.doSomething()
@@ -882,9 +883,9 @@ describe('select', () => {
         items: { 1: { text: 'foo' } },
         itemList: select(selector),
       },
-      doSomething: state => {
+      doSomething: action(state => {
         state.todos.items[2] = { text: 'bar' }
-      },
+      }),
     })
     // act
     store.dispatch.doSomething()
@@ -905,9 +906,9 @@ describe('select', () => {
         items: { 1: { text: 'foo' } },
       },
       itemList: select(selector),
-      doSomething: state => {
+      doSomething: action(state => {
         state.todos.items[2] = { text: 'bar' }
-      },
+      }),
     })
     // act
     store.dispatch.doSomething()
@@ -931,12 +932,12 @@ describe('select', () => {
       products: [{ name: 'Shoes', price: 160 }, { name: 'Hat', price: 40 }],
       totalPrice: totalPriceSelector,
       finalPrice: finalPriceSelector,
-      addProduct: (state, payload) => {
+      addProduct: action((state, payload) => {
         state.products.push(payload)
-      },
-      changeDiscount: (state, payload) => {
+      }),
+      changeDiscount: action((state, payload) => {
         state.discount = payload
-      },
+      }),
     })
     // assert
     expect(store.getState().finalPrice).toBe(150)
@@ -1077,8 +1078,8 @@ describe('reducer', () => {
   it('basic', () => {
     // arrange
     const store = createStore({
-      counter: reducer((state = 1, action) => {
-        if (action.type === 'INCREMENT') {
+      counter: reducer((state = 1, _action) => {
+        if (_action.type === 'INCREMENT') {
           return state + 1
         }
         return state
@@ -1110,8 +1111,8 @@ describe('reducer', () => {
     // arrange
     const store = createStore({
       stuff: {
-        counter: reducer((state = 1, action) => {
-          if (action.type === 'INCREMENT') {
+        counter: reducer((state = 1, _action) => {
+          if (_action.type === 'INCREMENT') {
             return state + 1
           }
           return state
@@ -1166,18 +1167,18 @@ describe('listen', () => {
     const userModel = {
       token: '',
       logIn: thunk(() => {}),
-      logOut: () => undefined,
+      logOut: action(() => undefined),
     }
 
     const store = createStore(
       {
-        doNothing: () => undefined,
+        doNothing: action(() => undefined),
         user: userModel,
         audit: {
           logs: [],
-          add: (state, payload) => {
+          add: action((state, payload) => {
             state.logs.push(payload)
-          },
+          }),
           userListeners: listen(on => {
             on(
               userModel.logIn,
@@ -1249,7 +1250,6 @@ describe('listen', () => {
     const store = createStore({
       audit: {
         routeChangeLogs: [],
-        foo: state => state,
         listeners: listen(on => {
           on('ROUTE_CHANGED', (state, payload) => {
             state.routeChangeLogs.push(payload)
@@ -1272,14 +1272,14 @@ describe('listen', () => {
     // arrange
     const store = createStore({
       routeChangeLogs: [],
-      log: (state, payload) => {
+      log: action((state, payload) => {
         state.routeChangeLogs.push(payload)
-      },
+      }),
       listeners: listen(on => {
         on(
           'ROUTE_CHANGED',
-          thunk((action, payload) => {
-            action.log(payload)
+          thunk((actions, payload) => {
+            actions.log(payload)
           }),
         )
       }),

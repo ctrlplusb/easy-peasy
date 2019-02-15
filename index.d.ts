@@ -53,10 +53,7 @@ type FilterStateTypes<T extends object> = Overwrite<
     T,
     KeysOfType<
       T,
-      | Listen<any, any, any>
-      | Action<any, any>
-      | Thunk<any, any, any, any, any>
-      | Function
+      Action<any, any> | Listen<any, any, any> | Thunk<any, any, any, any, any>
     >
   >,
   Pick<T, KeysOfType<T, Select<any, any> | Reducer<any, any>>>
@@ -306,20 +303,25 @@ export function listen<
   attach: (
     on: <ListenAction extends ActionTypes | string>(
       action: ListenAction,
-      handler: (
-        actions: Actions<Model>,
-        payload: ListenAction extends string
-          ? any
-          : ListenAction extends AsyncActionTypes
-          ? ListenAction['payload']
-          : Param1<ListenAction>,
-        helpers: {
-          dispatch: Dispatch<StoreModel>
-          getState: () => State<StoreModel>
-          injections: Injections
-          meta: Meta
-        },
-      ) => any,
+      handler:
+        | Thunk<
+            Model,
+            ListenAction extends string
+              ? any
+              : ListenAction extends AsyncActionTypes
+              ? ListenAction['payload']
+              : Param1<ListenAction>,
+            Injections,
+            StoreModel
+          >
+        | Action<
+            Model,
+            ListenAction extends string
+              ? any
+              : ListenAction extends AsyncActionTypes
+              ? ListenAction['payload']
+              : Param1<ListenAction>
+          >,
     ) => void,
   ) => void,
 ): Listen<Model, Injections, StoreModel>
@@ -338,10 +340,32 @@ export function listen<
  *   addTodo: Action<Model, Todo>;
  * }
  */
-export type Action<Model extends Object = {}, Payload = any> = (
-  state: State<Model>,
-  payload: Payload,
-) => void | State<Model>
+export type Action<Model extends Object = {}, Payload = any> = {
+  (state: State<Model>, payload: Payload): void | State<Model>
+  type: 'action'
+  payload: Payload
+  result: void | State<Model>
+}
+
+/**
+ * Declares an action type against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#action
+ *
+ * @example
+ *
+ * import { action } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   count: 0,
+ *   increment: action((state)) => {
+ *    state.count += 1;
+ *   })
+ * });
+ */
+export function action<Model extends Object = {}, Payload = any>(
+  action: (state: State<Model>, payload: Payload) => void | State<Model>,
+): Action<Model, Payload>
 
 /**
  * A select type.

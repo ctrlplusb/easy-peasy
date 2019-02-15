@@ -1,7 +1,7 @@
 // index.tsx
 import * as React from 'react'
 import { render } from 'react-dom'
-import { Action, createStore } from 'easy-peasy'
+import { action, Action, createStore } from 'easy-peasy'
 
 interface CartModel {
   products?: string[] | null
@@ -15,9 +15,9 @@ interface Model {
 const model: Model = {
   cart: {
     products: null,
-    setProducts: (state, payload) => {
+    setProducts: action((state, payload) => {
       state.products = payload
-    },
+    }),
   },
 }
 

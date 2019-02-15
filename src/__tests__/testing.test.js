@@ -1,6 +1,7 @@
 import React from 'react'
 import { render, fireEvent } from 'react-testing-library'
 import {
+  action,
   actionName,
   createStore,
   StoreProvider,
@@ -13,9 +14,9 @@ import {
 
 const todosModel = {
   items: {},
-  add: (state, payload) => {
+  add: action((state, payload) => {
     state.items[payload.id] = payload
-  },
+  }),
   fetchById: thunk(async (actions, payload, helpers) => {
     const { injections } = helpers
     const todo = await injections.fetch(`/todos/${payload}`).then(r => r.json())
@@ -84,9 +85,9 @@ it('component "integration" test', () => {
 
   const store = createStore({
     count: 0,
-    increment: state => {
+    increment: action(state => {
       state.count += 1
-    },
+    }),
   })
 
   const app = (
