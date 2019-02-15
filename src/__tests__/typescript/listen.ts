@@ -31,25 +31,34 @@ createStore<StoreModel>({
     logs: [],
     log: (state, payload) => {},
     userListeners: listen(on => {
-      on(userModel.login, (actions, payload, helpers) => {
-        const { dispatch, getState, injections, meta } = helpers
-        actions.log('Logged in ' + payload.username)
-        getState().audit.logs
-        dispatch.audit.log('Foo')
-        injections.id + 7331
-        meta.parent.concat(meta.path)
-      })
-      on(userModel.logout, (actions, payload, helpers) => {
-        const { dispatch, getState, injections, meta } = helpers
-        actions.log('Logged out ' + payload ? 'hard' : 'soft')
-        getState().audit.logs
-        dispatch.audit.log('Foo')
-        injections.id + 7331
-        meta.parent.concat(meta.path)
-      })
-      on('ROUTE_CHANGED', (actions, payload) => {
-        actions.log('Route changed')
-      })
+      on(
+        userModel.login,
+        thunk((actions, payload, helpers) => {
+          const { dispatch, getState, injections, meta } = helpers
+          actions.log('Logged in ' + payload.username)
+          getState().audit.logs
+          dispatch.audit.log('Foo')
+          injections.id + 7331
+          meta.parent.concat(meta.path)
+        }),
+      )
+      on(
+        userModel.logout,
+        thunk((actions, payload, helpers) => {
+          const { dispatch, getState, injections, meta } = helpers
+          actions.log('Logged out ' + payload ? 'hard' : 'soft')
+          getState().audit.logs
+          dispatch.audit.log('Foo')
+          injections.id + 7331
+          meta.parent.concat(meta.path)
+        }),
+      )
+      on(
+        'ROUTE_CHANGED',
+        thunk((actions, payload) => {
+          actions.log('Route changed')
+        }),
+      )
     }),
   },
 })
