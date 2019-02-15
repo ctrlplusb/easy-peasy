@@ -1315,6 +1315,15 @@ describe('listen', () => {
       }),
     })
   })
+
+  it('listening with a function does nothing', () => {
+    // act
+    createStore({
+      listeners: listen(on => {
+        on('FOO_BAR', () => undefined)
+      }),
+    })
+  })
 })
 
 describe('createTypedHooks', () => {
