@@ -1,6 +1,7 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import {
+  action,
   Action,
   Actions,
   createStore,
@@ -62,9 +63,9 @@ interface StoreModel {
  */
 const userModel: UserModel = {
   token: undefined,
-  loggedIn: (state, payload) => {
+  loggedIn: action((state, payload) => {
     state.token = payload
-  },
+  }),
   login: thunk(async (actions, payload) => {
     const response = await fetch('/login', {
       method: 'POST',
@@ -80,16 +81,19 @@ const userModel: UserModel = {
 const store = createStore<StoreModel>({
   audit: {
     logs: [],
-    set: (state, payload) => {
+    set: action((state, payload) => {
       state.logs.push(payload)
-    },
+    }),
     getNLog: select(state => (n: number) =>
       state.logs.length > n ? state.logs[n] : undefined,
     ),
     newUserListeners: listen(on => {
-      on(userModel.login, (actions, payload) => {
-        actions.set(`Logging in ${payload.username}`)
-      })
+      on(
+        userModel.login,
+        thunk((actions, payload) => {
+          actions.set(`Logging in ${payload.username}`)
+        }),
+      )
     }),
   },
   todos: {
@@ -97,9 +101,9 @@ const store = createStore<StoreModel>({
     firstItem: select(state =>
       state.items.length > 0 ? state.items[0] : undefined,
     ),
-    addTodo: (state, payload) => {
+    addTodo: action((state, payload) => {
       state.items.push(payload)
-    },
+    }),
   },
   user: userModel,
   counter: reducer((state = 0, action) => {

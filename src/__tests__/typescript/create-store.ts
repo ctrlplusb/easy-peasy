@@ -1,4 +1,4 @@
-import { createStore, EasyPeasyConfig, Action } from 'easy-peasy'
+import { action, createStore, EasyPeasyConfig, Action } from 'easy-peasy'
 
 interface StoreModel {
   foo: string
@@ -7,9 +7,9 @@ interface StoreModel {
 
 const model: StoreModel = {
   foo: 'bar',
-  update: (state, payload) => {
+  update: action((state, payload) => {
     state.foo = payload
-  },
+  }),
 }
 
 const storeWithoutConfig = createStore(model)
