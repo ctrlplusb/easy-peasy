@@ -580,6 +580,21 @@ describe('internals', () => {
   })
 })
 
+describe('actions', () => {
+  test('deprecated action API does nothing', () => {
+    // act
+    const store = createStore({
+      count: 1,
+      increment: state => {
+        state.count += 1
+      },
+    })
+
+    // assert
+    expect(store.dispatch.increment).toBeUndefined()
+  })
+})
+
 describe('thunks', () => {
   test('dispatches an action to represent the start and end of an thunk', async () => {
     // arrange
