@@ -1086,9 +1086,9 @@ describe('reducer', () => {
       }),
       foo: {
         bar: 'baz',
-        update: state => {
+        update: action(state => {
           state.bar = 'bob'
-        },
+        }),
       },
     })
 
@@ -1251,9 +1251,12 @@ describe('listen', () => {
       audit: {
         routeChangeLogs: [],
         listeners: listen(on => {
-          on('ROUTE_CHANGED', (state, payload) => {
-            state.routeChangeLogs.push(payload)
-          })
+          on(
+            'ROUTE_CHANGED',
+            action((state, payload) => {
+              state.routeChangeLogs.push(payload)
+            }),
+          )
         }),
       },
     })
