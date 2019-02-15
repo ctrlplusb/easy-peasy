@@ -271,25 +271,6 @@ export type Listen<
   Injections = any,
   StoreModel extends Object = {}
 > = {
-  (
-    on: <ListenAction extends ActionTypes | string>(
-      action: ListenAction,
-      handler: (
-        actions: Actions<Model>,
-        payload: ListenAction extends string
-          ? any
-          : ListenAction extends AsyncActionTypes
-          ? ListenAction['payload']
-          : Param1<ListenAction>,
-        helpers: {
-          dispatch: Dispatch<StoreModel>
-          getState: () => State<StoreModel>
-          injections: Injections
-          meta: Meta
-        },
-      ) => any,
-    ) => void,
-  ): void
   type: 'listen'
 }
 
