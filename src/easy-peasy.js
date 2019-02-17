@@ -422,12 +422,7 @@ export const createStore = (model, options = {}) => {
     return next(action)
   }
 
-  const {
-    actionCreators,
-    defaultState,
-    reducer,
-    thunkListenersDict,
-  } = createStoreInternals({
+  references.storeInternals = createStoreInternals({
     disableInternalSelectFnMemoize,
     initialState,
     injections,
@@ -436,12 +431,15 @@ export const createStore = (model, options = {}) => {
   })
 
   const dispatchThunkListeners = (name, payload) => {
-    const listensForAction = thunkListenersDict[name]
+    const listensForAction = references.storeInternals.thunkListenersDict[name]
     return listensForAction && listensForAction.length > 0
       ? Promise.all(
           listensForAction.map(listenForAction =>
             listenForAction(
-              get(listenForAction[metaSymbol].parent, actionCreators),
+              get(
+                listenForAction[metaSymbol].parent,
+                references.storeInternals.actionCreators,
+              ),
               payload,
               {
                 dispatch: references.dispatch,
@@ -456,15 +454,15 @@ export const createStore = (model, options = {}) => {
   }
 
   const dispatchActionStringListeners = () => next => action => {
-    if (thunkListenersDict[action.type]) {
+    if (references.storeInternals.thunkListenersDict[action.type]) {
       dispatchThunkListeners(action.type, action.payload)
     }
     return next(action)
   }
 
   const store = reduxCreateStore(
-    reducerEnhancer(reducer),
-    defaultState,
+    reducerEnhancer(references.storeInternals.reducer),
+    references.storeInternals.defaultState,
     composeEnhancers(
       applyMiddleware(
         reduxThunk,
@@ -481,32 +479,32 @@ export const createStore = (model, options = {}) => {
   }
 
   // attach the action creators to dispatch
-  const bindActionCreators = ac => {
-    Object.keys(ac).forEach(key => {
-      store.dispatch[key] = ac[key]
+  const bindActionCreators = actionCreators => {
+    Object.keys(actionCreators).forEach(key => {
+      store.dispatch[key] = actionCreators[key]
     })
   }
 
-  bindActionCreators(actionCreators)
+  bindActionCreators(references.storeInternals.actionCreators)
 
   references.dispatch = store.dispatch
   references.getState = store.getState
   references.getState.getState = store.getState
 
   const rebuildStore = () => {
-    const newInternals = createStoreInternals({
+    references.storeInternals = createStoreInternals({
       disableInternalSelectFnMemoize,
       initialState: store.getState(),
       injections,
       model: definition,
       references,
     })
-    store.replaceReducer(newInternals.reducer)
-    store.dispatch.replaceState(newInternals.defaultState)
+    store.replaceReducer(references.storeInternals.reducer)
+    store.dispatch.replaceState(references.storeInternals.defaultState)
     Object.keys(store.dispatch).forEach(actionsKey => {
       delete store.dispatch[actionsKey]
     })
-    bindActionCreators(newInternals.actionCreators)
+    bindActionCreators(references.storeInternals.actionCreators)
     return store
   }
 
