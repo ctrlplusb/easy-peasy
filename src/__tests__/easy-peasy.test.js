@@ -1469,3 +1469,26 @@ describe('createTypedHooks', () => {
     expect(typedHooks.useDispatch).toBe(useDispatch)
   })
 })
+
+describe('issues', () => {
+  test('issue 100', () => {
+    // arrange
+    const model = {
+      account: {
+        profile: {
+          // foo: "bar",
+          setProperty: (state, payload) => {
+            state[payload.key] = payload.value
+          },
+        },
+      },
+    }
+    const store = createStore(model)
+
+    // act
+    const actual = store.getState().account.profile
+
+    // assert
+    expect(actual).toBeDefined()
+  })
+})

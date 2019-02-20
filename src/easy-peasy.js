@@ -311,6 +311,7 @@ export const createStore = (model, options = {}) => {
           set(path, actionCreators, actionCreator)
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
+        set(path, defaultState, {})
         extract(value, path)
       } else {
         // State
