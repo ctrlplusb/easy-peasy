@@ -393,7 +393,7 @@ export const createStore = (model, options = {}) => {
     reducerEnhancer = rootReducer => rootReducer,
   } = options
 
-  const definition = {
+  const modelDefinition = {
     ...model,
     logFullState: helpers.thunk((actions, payload, { getState }) => {
       // eslint-disable-next-line no-console
@@ -403,14 +403,6 @@ export const createStore = (model, options = {}) => {
   }
 
   const references = {}
-
-  const composeEnhancers =
-    compose ||
-    (devTools &&
-    typeof window !== 'undefined' &&
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      : reduxCompose)
 
   let mockedActions = []
 
@@ -422,23 +414,15 @@ export const createStore = (model, options = {}) => {
     return next(action)
   }
 
-  references.storeInternals = createStoreInternals({
-    disableInternalSelectFnMemoize,
-    initialState,
-    injections,
-    model: definition,
-    references,
-  })
-
   const dispatchThunkListeners = (name, payload) => {
-    const listensForAction = references.storeInternals.thunkListenersDict[name]
+    const listensForAction = references.internals.thunkListenersDict[name]
     return listensForAction && listensForAction.length > 0
       ? Promise.all(
           listensForAction.map(listenForAction =>
             listenForAction(
               get(
                 listenForAction[metaSymbol].parent,
-                references.storeInternals.actionCreators,
+                references.internals.actionCreators,
               ),
               payload,
               {
@@ -454,15 +438,31 @@ export const createStore = (model, options = {}) => {
   }
 
   const dispatchActionStringListeners = () => next => action => {
-    if (references.storeInternals.thunkListenersDict[action.type]) {
+    if (references.internals.thunkListenersDict[action.type]) {
       dispatchThunkListeners(action.type, action.payload)
     }
     return next(action)
   }
 
+  const composeEnhancers =
+    compose ||
+    (devTools &&
+    typeof window !== 'undefined' &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      : reduxCompose)
+
+  references.internals = createStoreInternals({
+    disableInternalSelectFnMemoize,
+    initialState,
+    injections,
+    model: modelDefinition,
+    references,
+  })
+
   const store = reduxCreateStore(
-    reducerEnhancer(references.storeInternals.reducer),
-    references.storeInternals.defaultState,
+    reducerEnhancer(references.internals.reducer),
+    references.internals.defaultState,
     composeEnhancers(
       applyMiddleware(
         reduxThunk,
@@ -478,6 +478,9 @@ export const createStore = (model, options = {}) => {
     mockedActions = []
   }
 
+  references.dispatch = store.dispatch
+  references.getState = store.getState
+
   // attach the action creators to dispatch
   const bindActionCreators = actionCreators => {
     Object.keys(actionCreators).forEach(key => {
@@ -485,46 +488,42 @@ export const createStore = (model, options = {}) => {
     })
   }
 
-  bindActionCreators(references.storeInternals.actionCreators)
-
-  references.dispatch = store.dispatch
-  references.getState = store.getState
-  references.getState.getState = store.getState
+  bindActionCreators(references.internals.actionCreators)
 
   const rebuildStore = () => {
-    references.storeInternals = createStoreInternals({
+    references.internals = createStoreInternals({
       disableInternalSelectFnMemoize,
       initialState: store.getState(),
       injections,
-      model: definition,
+      model: modelDefinition,
       references,
     })
-    store.replaceReducer(references.storeInternals.reducer)
-    store.dispatch.replaceState(references.storeInternals.defaultState)
+    store.replaceReducer(reducerEnhancer(references.internals.reducer))
+    store.dispatch.replaceState(references.internals.defaultState)
     Object.keys(store.dispatch).forEach(actionsKey => {
       delete store.dispatch[actionsKey]
     })
-    bindActionCreators(references.storeInternals.actionCreators)
+    bindActionCreators(references.internals.actionCreators)
     return store
   }
 
   store.addModel = (key, modelForKey) => {
-    if (definition[key]) {
+    if (modelDefinition[key]) {
       throw new Error(
         `The store model already contains a model definition for "${key}"`,
       )
     }
-    definition[key] = modelForKey
+    modelDefinition[key] = modelForKey
     return rebuildStore()
   }
 
   store.removeModel = key => {
-    if (!definition[key]) {
+    if (!modelDefinition[key]) {
       throw new Error(
         `The store model does not contains a model definition for "${key}"`,
       )
     }
-    delete definition[key]
+    delete modelDefinition[key]
     return rebuildStore()
   }
 

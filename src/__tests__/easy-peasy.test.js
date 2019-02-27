@@ -1353,7 +1353,7 @@ describe('createTypedHooks', () => {
   })
 })
 
-describe.only('add/remove models', () => {
+describe('add/remove models', () => {
   test('addModel', () => {
     // arrange
     const store = createStore({
