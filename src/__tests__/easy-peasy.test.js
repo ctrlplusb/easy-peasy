@@ -1353,7 +1353,6 @@ describe('createTypedHooks', () => {
   })
 })
 
-<<<<<<< HEAD
 describe('issues', () => {
   test('issue 100', () => {
     // arrange
@@ -1377,7 +1376,6 @@ describe('issues', () => {
   })
 })
 
-=======
 describe('add/remove models', () => {
   test('addModel', () => {
     // arrange
@@ -1435,6 +1433,5 @@ describe('add/remove models', () => {
         count: 0,
       },
     })
->>>>>>> Adds ability to dynamically modify store model (#98)
   })
 })
