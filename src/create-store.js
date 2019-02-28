@@ -126,36 +126,37 @@ export default function createStore(model, options = {}) {
 
   bindActionCreators(references.internals.actionCreators)
 
-  const rebuildStore = () => {
+  const rebindStore = () => {
     bindStoreInternals(store.getState())
     store.replaceReducer(references.internals.reducer)
     store.dispatch.replaceState(references.internals.defaultState)
     bindActionCreators(references.internals.actionCreators)
-    return store
   }
 
   store.addModel = (key, modelForKey) => {
-    if (modelDefinition[key]) {
-      throw new Error(
-        process.env.NODE_ENV !== 'production'
-          ? `The store model already contains a model definition for "${key}"`
-          : 'Error',
+    if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `The store model already contains a model definition for "${key}"`,
       )
+      store.removeModel(key)
     }
     modelDefinition[key] = modelForKey
-    return rebuildStore()
+    rebindStore()
   }
 
   store.removeModel = key => {
     if (!modelDefinition[key]) {
-      throw new Error(
-        process.env.NODE_ENV !== 'production'
-          ? `The store model does not contain a model definition for "${key}"`
-          : 'Error',
-      )
+      if (process.env.NODE_ENV !== 'production') {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `The store model does not contain a model definition for "${key}"`,
+        )
+      }
+      return
     }
     delete modelDefinition[key]
-    return rebuildStore()
+    rebindStore()
   }
 
   return store
