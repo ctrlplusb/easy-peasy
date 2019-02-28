@@ -74,7 +74,7 @@ const commonUMD = config =>
 module.exports = [
   // Universal module definition (UMD) build, unminified, development
   produce(commonUMD(baseConfig), draft => {
-    draft.output.file = `dist/${packageJson.name}.js`
+    draft.output.file = `dist/${packageJson.name}.umd.development.js`
     draft.plugins = [
       replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),
       ...draft.plugins,
@@ -82,7 +82,7 @@ module.exports = [
   }),
   // Universal module definition (UMD) build, minified, production
   produce(commonUMD(baseConfig), draft => {
-    draft.output.file = `dist/${packageJson.name}.min.js`
+    draft.output.file = `dist/${packageJson.name}.umd.js`
     draft.plugins = [
       replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
       ...draft.plugins,
