@@ -18,6 +18,19 @@ import * as helpers from './helpers'
 const maxSelectFnMemoize = 100
 const tick = () => new Promise(resolve => setTimeout(resolve))
 
+const errorToPayload = err => {
+  if (err instanceof Error) {
+    return {
+      message: err.message,
+      stack: err.stack,
+    }
+  }
+  if (typeof err === 'string') {
+    return err
+  }
+  return undefined
+}
+
 export default function createStoreInternals({
   disableInternalSelectFnMemoize,
   initialState,
@@ -109,9 +122,10 @@ export default function createStoreInternals({
               .catch(err => {
                 references.dispatch({
                   type: `${name}(failed)`,
-                  payload: err,
+                  payload,
+                  error: errorToPayload(err),
                 })
-                return Promise.reject(err)
+                throw err
               })
 
           actionCreator[actionNameSymbol] = name
