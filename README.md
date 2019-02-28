@@ -1780,6 +1780,34 @@ const AddTodo = () => {
 </p>
 </details>
 
+---
+
+## Typescript API
+
+### Actions
+
+Todo
+
+### Action
+
+Todo
+
+### Listen
+
+Todo
+
+### Reducer
+
+Todo
+
+### Select
+
+Todo
+
+### Thunk
+
+Todo
+
 ### createTypedHooks()
 
 Useful in the context of Typescript. It allows you to create typed versions of all the hooks so that you don't need to constantly apply typing information against them.
@@ -1788,10 +1816,10 @@ Useful in the context of Typescript. It allows you to create typed versions of a
 <summary>Example</summary>
 <p>
 
-```javascript
+```typescript
 // hooks.js
 import { createTypedHooks } from 'easy-peasy';
-import { StoreModel } from './store';
+import { StoreModel } from './model';
 
 const { useActions, useStore, useDispatch } = createTypedHooks<StoreModel>();
 
@@ -1802,9 +1830,21 @@ export default {
 }
 ```
 
+And then use your typed hooks in your components:
+
+```typescript
+import { useStore } from './hooks';
+
+export default MyComponent() {
+  //                          This will be typed
+  //                                       👇
+  const message = useStore(state => state.message);
+  return <div>{message}</div>;
+}
+```
+
 </p>
 </details>
-
 
 <p>&nbsp;</p>
 
