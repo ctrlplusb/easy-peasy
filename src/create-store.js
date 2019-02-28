@@ -86,8 +86,8 @@ export default function createStore(model, options = {}) {
       initialState: state,
       injections,
       model: modelDefinition,
-      references,
       reducerEnhancer,
+      references,
     })
   }
 
@@ -137,7 +137,9 @@ export default function createStore(model, options = {}) {
   store.addModel = (key, modelForKey) => {
     if (modelDefinition[key]) {
       throw new Error(
-        `The store model already contains a model definition for "${key}"`,
+        process.env.NODE_ENV !== 'production'
+          ? `The store model already contains a model definition for "${key}"`
+          : 'Error',
       )
     }
     modelDefinition[key] = modelForKey
@@ -147,7 +149,9 @@ export default function createStore(model, options = {}) {
   store.removeModel = key => {
     if (!modelDefinition[key]) {
       throw new Error(
-        `The store model does not contains a model definition for "${key}"`,
+        process.env.NODE_ENV !== 'production'
+          ? `The store model does not contain a model definition for "${key}"`
+          : 'Error',
       )
     }
     delete modelDefinition[key]

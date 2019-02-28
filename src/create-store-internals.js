@@ -19,10 +19,11 @@ const maxSelectFnMemoize = 100
 const tick = () => new Promise(resolve => setTimeout(resolve))
 
 export default function createStoreInternals({
-  model,
-  injections,
-  initialState,
   disableInternalSelectFnMemoize,
+  initialState,
+  injections,
+  model,
+  reducerEnhancer,
   references,
 }) {
   const wrapFnWithMemoize = x =>
@@ -42,7 +43,7 @@ export default function createStoreInternals({
   const actionReducersDict = {}
   const actionReducersForPath = {}
 
-  const extract = (current, parentPath) =>
+  const recursiveExtractDefsFromModel = (current, parentPath) =>
     Object.keys(current).forEach(key => {
       const value = current[key]
       const path = [...parentPath, key]
@@ -73,10 +74,6 @@ export default function createStoreInternals({
           actionCreator[actionNameSymbol] = name
           actionCreatorDict[name] = actionCreator
           set(path, actionCreators, actionCreator)
-        } else if (value[selectSymbol]) {
-          // skip
-          value[selectStateSymbol] = { parentPath, key, executed: false }
-          selectorReducers.push(value)
         } else if (value[thunkSymbol]) {
           const name = `@thunk.${path.join('.')}`
           value[actionNameSymbol] = name
@@ -120,21 +117,24 @@ export default function createStoreInternals({
           actionCreator[actionNameSymbol] = name
           actionCreatorDict[name] = actionCreator
           set(path, actionCreators, actionCreator)
+        } else if (value[selectSymbol]) {
+          value[selectStateSymbol] = { parentPath, key, executed: false }
+          selectorReducers.push(value)
         } else if (value[reducerSymbol]) {
           customReducers.push({ path, reducer: value })
         } else if (value[listenSymbol]) {
           listenDefinitions.push(value)
           value[metaSymbol] = meta
-        } else {
+        } else if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
           console.warn(
             `Easy Peasy: Found a function at path ${path.join(
               '.',
-            )} in your model. Version 2 required that you wrap functions with the action helper`,
+            )} in your model. Version 2 required that you wrap your action functions with the "action" helper`,
           )
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
-        extract(value, path)
+        recursiveExtractDefsFromModel(value, path)
       } else {
         // State
         const initialParentRef = get(parentPath, initialState)
@@ -146,7 +146,7 @@ export default function createStoreInternals({
       }
     })
 
-  extract(model, [])
+  recursiveExtractDefsFromModel(model, [])
 
   selectorReducers.forEach(selector => {
     selector[selectImpSymbol] = state => wrapFnWithMemoize(selector(state))
@@ -162,12 +162,14 @@ export default function createStoreInternals({
       handler[metaSymbol] = meta
 
       if (!handler[actionSymbol] && !handler[thunkSymbol]) {
-        // eslint-disable-next-line
-        console.warn(
-          `Easy Peasy: you must provide either an "action" or "thunk" to your listeners. Found an invalid handler at "${meta.path.join(
-            '.',
-          )}"`,
-        )
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line
+          console.warn(
+            `Easy Peasy: you must provide either an "action" or "thunk" to your listeners. Found an invalid handler at "${meta.path.join(
+              '.',
+            )}"`,
+          )
+        }
         return
       }
 
@@ -203,7 +205,47 @@ export default function createStoreInternals({
     def(on)
   })
 
-  const createReducers = () => {
+  const runSelectorReducer = (state, selector) => {
+    const { parentPath, key, executed } = selector[selectStateSymbol]
+    if (executed) {
+      return state
+    }
+    const dependencies = selector[selectDependenciesSymbol]
+
+    const stateAfterDependencies = dependencies
+      ? dependencies.reduce(runSelectorReducer, state)
+      : state
+
+    let newState = stateAfterDependencies
+
+    if (parentPath.length > 0) {
+      const target = get(parentPath, stateAfterDependencies)
+      if (target) {
+        if (!selector.prevState || selector.prevState !== state) {
+          const newValue = selector[selectImpSymbol](target)
+          newState = produce(state, draft => {
+            const updateTarget = get(parentPath, draft)
+            updateTarget[key] = newValue
+          })
+          selector.prevState = newState
+        }
+      }
+    } else if (!selector.prevState || selector.prevState !== state) {
+      const newValue = selector[selectImpSymbol](stateAfterDependencies)
+      newState = produce(state, draft => {
+        draft[key] = newValue
+      })
+      selector.prevState = newState
+    }
+
+    selector[selectStateSymbol].executed = true
+    return newState
+  }
+
+  const runSelectors = state =>
+    selectorReducers.reduce(runSelectorReducer, state)
+
+  const createReducer = () => {
     const runActionReducerAtPath = (state, action, actionReducer, path) => {
       const current = get(path, state)
       if (path.length === 0) {
@@ -252,46 +294,6 @@ export default function createStoreInternals({
       })
     }
 
-    const runSelectorReducer = (state, selector) => {
-      const { parentPath, key, executed } = selector[selectStateSymbol]
-      if (executed) {
-        return state
-      }
-      const dependencies = selector[selectDependenciesSymbol]
-
-      const stateAfterDependencies = dependencies
-        ? dependencies.reduce(runSelectorReducer, state)
-        : state
-
-      let newState = stateAfterDependencies
-
-      if (parentPath.length > 0) {
-        const target = get(parentPath, stateAfterDependencies)
-        if (target) {
-          if (!selector.prevState || selector.prevState !== state) {
-            const newValue = selector[selectImpSymbol](target)
-            newState = produce(state, draft => {
-              const updateTarget = get(parentPath, draft)
-              updateTarget[key] = newValue
-            })
-            selector.prevState = newState
-          }
-        }
-      } else if (!selector.prevState || selector.prevState !== state) {
-        const newValue = selector[selectImpSymbol](stateAfterDependencies)
-        newState = produce(state, draft => {
-          draft[key] = newValue
-        })
-        selector.prevState = newState
-      }
-
-      selector[selectStateSymbol].executed = true
-      return newState
-    }
-
-    const runSelectors = state =>
-      selectorReducers.reduce(runSelectorReducer, state)
-
     let isInitial = true
 
     const selectorsReducer = state => {
@@ -303,7 +305,7 @@ export default function createStoreInternals({
       return stateAfterSelectors
     }
 
-    return (state, action) => {
+    const rootReducer = (state, action) => {
       const stateAfterActions = reducerForActions(state, action)
       const stateAfterListeners = reducerForListeners(stateAfterActions, action)
       const stateAfterCustomReducers = reducerForCustomReducers(
@@ -315,10 +317,12 @@ export default function createStoreInternals({
       }
       return stateAfterCustomReducers
     }
+
+    return rootReducer
   }
 
   return {
-    reducer: createReducers(),
+    reducer: reducerEnhancer(createReducer()),
     defaultState,
     actionCreators,
     thunkListenersDict,
