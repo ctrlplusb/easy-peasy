@@ -1,8 +1,8 @@
-import { createStore, helpers } from './easy-peasy'
+import { setAutoFreeze } from 'immer'
 import { createTypedHooks, useStore, useActions, useDispatch } from './hooks'
+import createStore from './create-store'
 import StoreProvider from './provider'
-
-const {
+import {
   action,
   actionName,
   listen,
@@ -11,7 +11,16 @@ const {
   thunk,
   thunkStartName,
   thunkCompleteName,
-} = helpers
+} from './helpers'
+
+/**
+ * immer is an implementation detail, so we are not going to use its auto freeze
+ * behaviour, which throws errors if trying to mutate state. It's also risky
+ * for production builds as has a perf overhead.
+ *
+ * @see https://github.com/mweststrate/immer#auto-freezing
+ */
+setAutoFreeze(false)
 
 export {
   action,
