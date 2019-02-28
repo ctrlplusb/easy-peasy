@@ -1,12 +1,12 @@
-import { action, Action, createStore } from 'easy-peasy'
+import { action, Action, createStore } from 'easy-peasy';
 
 interface IAnimal {
-  name?: string
+  name?: string;
 }
 
 interface IModel {
-  animal: IAnimal
-  setAnimal: Action<IModel, { animal: IAnimal }>
+  animal: IAnimal;
+  setAnimal: Action<IModel, { animal: IAnimal }>;
 }
 
 const model: IModel = {
@@ -14,8 +14,8 @@ const model: IModel = {
     name: 'robert',
   },
   setAnimal: action((state, payload) => {
-    return { ...state, animal: payload.animal }
+    return { ...state, animal: payload.animal };
   }),
-}
+};
 
-const store = createStore(model)
+const store = createStore(model);

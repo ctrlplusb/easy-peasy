@@ -1,29 +1,29 @@
-import { action, createStore, EasyPeasyConfig, Action } from 'easy-peasy'
+import { action, createStore, EasyPeasyConfig, Action } from 'easy-peasy';
 
 interface StoreModel {
-  foo: string
-  update: Action<StoreModel, string>
+  foo: string;
+  update: Action<StoreModel, string>;
 }
 
 const model: StoreModel = {
   foo: 'bar',
   update: action((state, payload) => {
-    state.foo = payload
+    state.foo = payload;
   }),
-}
+};
 
-const storeWithoutConfig = createStore(model)
+const storeWithoutConfig = createStore(model);
 
-storeWithoutConfig.getMockedActions().length
-storeWithoutConfig.clearMockedActions()
-storeWithoutConfig.getState().foo
-storeWithoutConfig.dispatch.update('bar')
+storeWithoutConfig.getMockedActions().length;
+storeWithoutConfig.clearMockedActions();
+storeWithoutConfig.getState().foo;
+storeWithoutConfig.dispatch.update('bar');
 
 const config: EasyPeasyConfig = {
   mockActions: true,
-}
-const storeWithConfig = createStore(model, config)
+};
+const storeWithConfig = createStore(model, config);
 
-storeWithConfig.getMockedActions().length
-storeWithoutConfig.clearMockedActions()
-storeWithConfig.dispatch.update('bar')
+storeWithConfig.getMockedActions().length;
+storeWithoutConfig.clearMockedActions();
+storeWithConfig.dispatch.update('bar');

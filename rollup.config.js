@@ -1,17 +1,17 @@
 /* eslint-disable no-param-reassign */
 
-const { uglify } = require('rollup-plugin-uglify')
-const babel = require('rollup-plugin-babel')
-const changeCase = require('change-case')
-const produce = require('immer').default
-const replace = require('rollup-plugin-replace')
-const fileSize = require('rollup-plugin-filesize')
-const resolve = require('rollup-plugin-node-resolve')
-const commonjs = require('rollup-plugin-commonjs')
+const { uglify } = require('rollup-plugin-uglify');
+const babel = require('rollup-plugin-babel');
+const changeCase = require('change-case');
+const produce = require('immer').default;
+const replace = require('rollup-plugin-replace');
+const fileSize = require('rollup-plugin-filesize');
+const resolve = require('rollup-plugin-node-resolve');
+const commonjs = require('rollup-plugin-commonjs');
 
-const packageJson = require('./package.json')
+const packageJson = require('./package.json');
 
-process.env.BABEL_ENV = 'production'
+process.env.BABEL_ENV = 'production';
 
 const baseConfig = {
   external: [
@@ -52,51 +52,51 @@ const baseConfig = {
       ],
     }),
   ],
-}
+};
 
 const commonUMD = config =>
   produce(config, draft => {
-    draft.external.splice(draft.external.indexOf('shallowequal'), 1)
-    draft.output.format = 'umd'
+    draft.external.splice(draft.external.indexOf('shallowequal'), 1);
+    draft.output.format = 'umd';
     draft.output.globals = {
       memoizerific: 'memoizerific',
       'redux-thunk': 'ReduxThunk',
       immer: 'immer',
       react: 'React',
       redux: 'Redux',
-    }
+    };
     draft.output.name = changeCase
       .titleCase(packageJson.name.replace(/-/g, ' '))
-      .replace(/ /g, '')
-    draft.plugins.push(fileSize(), resolve(), commonjs())
-  })
+      .replace(/ /g, '');
+    draft.plugins.push(fileSize(), resolve(), commonjs());
+  });
 
 module.exports = [
   // Universal module definition (UMD) build, unminified, development
   produce(commonUMD(baseConfig), draft => {
-    draft.output.file = `dist/${packageJson.name}.umd.development.js`
+    draft.output.file = `dist/${packageJson.name}.umd.development.js`;
     draft.plugins = [
       replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),
       ...draft.plugins,
-    ]
+    ];
   }),
   // Universal module definition (UMD) build, minified, production
   produce(commonUMD(baseConfig), draft => {
-    draft.output.file = `dist/${packageJson.name}.umd.js`
+    draft.output.file = `dist/${packageJson.name}.umd.js`;
     draft.plugins = [
       replace({ 'process.env.NODE_ENV': JSON.stringify('production') }),
       ...draft.plugins,
       uglify(),
-    ]
+    ];
   }),
   // ESM build
   produce(baseConfig, draft => {
-    draft.output.format = 'esm'
-    draft.output.file = `dist/${packageJson.name}.esm.js`
+    draft.output.format = 'esm';
+    draft.output.file = `dist/${packageJson.name}.esm.js`;
   }),
   // CJS build
   produce(baseConfig, draft => {
-    draft.output.format = 'cjs'
-    draft.output.file = `dist/${packageJson.name}.cjs.js`
+    draft.output.format = 'cjs';
+    draft.output.file = `dist/${packageJson.name}.cjs.js`;
   }),
-]
+];

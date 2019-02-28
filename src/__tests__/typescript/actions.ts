@@ -1,76 +1,76 @@
-import { Actions, Thunk, Action, Select, Listen, Reducer } from 'easy-peasy'
+import { Actions, Thunk, Action, Select, Listen, Reducer } from 'easy-peasy';
 
 type Model = {
-  stateArray: Array<string>
-  stateBoolean: boolean
-  stateDate: Date
-  stateNull: null
-  stateNumber: number
-  stateRegExp: RegExp
-  stateString: string
-  stateUndefined: undefined
-  stateUnion: string | null
-  actionImp: Action<Model, number>
-  thunkImp: Thunk<Model, string>
-  selectImp: Select<Model, number>
-  listenImp: Listen<Model>
-  reducerImp: Reducer<number>
+  stateArray: Array<string>;
+  stateBoolean: boolean;
+  stateDate: Date;
+  stateNull: null;
+  stateNumber: number;
+  stateRegExp: RegExp;
+  stateString: string;
+  stateUndefined: undefined;
+  stateUnion: string | null;
+  actionImp: Action<Model, number>;
+  thunkImp: Thunk<Model, string>;
+  selectImp: Select<Model, number>;
+  listenImp: Listen<Model>;
+  reducerImp: Reducer<number>;
   nested: {
-    actionImp: Action<Model, number>
-    thunkImp: Thunk<Model, string>
-  }
-}
+    actionImp: Action<Model, number>;
+    thunkImp: Thunk<Model, string>;
+  };
+};
 
-type ModelActions = Actions<Model>
+type ModelActions = Actions<Model>;
 
-const assert = {} as ModelActions
+const assert = {} as ModelActions;
 
 /**
  * State Types
  */
 
 // typings:expect-error
-assert.stateArray
+assert.stateArray;
 // typings:expect-error
-assert.stateBoolean
+assert.stateBoolean;
 // typings:expect-error
-assert.stateDate
+assert.stateDate;
 // typings:expect-error
-assert.stateNull
+assert.stateNull;
 // typings:expect-error
-assert.stateNumber
+assert.stateNumber;
 // typings:expect-error
-assert.stateRegExp
+assert.stateRegExp;
 // typings:expect-error
-assert.stateString
+assert.stateString;
 // typings:expect-error
-assert.stateUndefined
+assert.stateUndefined;
 // typings:expect-error
-assert.stateUnion
+assert.stateUnion;
 // typings:expect-error
-assert.reducerImp
+assert.reducerImp;
 // typings:expect-error
-assert.selectImp
+assert.selectImp;
 
 /**
  * Listener Types
  */
 
 // typings:expect-error
-assert.listenImp
+assert.listenImp;
 // typings:expect-error
-assert.reducerImp
+assert.reducerImp;
 
 /**
  * Action Types
  */
 
-assert.actionImp(1)
-assert.thunkImp('foo')
+assert.actionImp(1);
+assert.thunkImp('foo');
 
 /**
  * Nested Action Types
  */
 
-assert.nested.actionImp(1)
-assert.nested.thunkImp('foo')
+assert.nested.actionImp(1);
+assert.nested.thunkImp('foo');

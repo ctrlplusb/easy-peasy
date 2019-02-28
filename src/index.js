@@ -1,7 +1,7 @@
-import { setAutoFreeze } from 'immer'
-import { createTypedHooks, useStore, useActions, useDispatch } from './hooks'
-import createStore from './create-store'
-import StoreProvider from './provider'
+import { setAutoFreeze } from 'immer';
+import { createTypedHooks, useStore, useActions, useDispatch } from './hooks';
+import createStore from './create-store';
+import StoreProvider from './provider';
 import {
   action,
   actionName,
@@ -11,7 +11,7 @@ import {
   thunk,
   thunkStartName,
   thunkCompleteName,
-} from './helpers'
+} from './helpers';
 
 /**
  * immer is an implementation detail, so we are not going to use its auto freeze
@@ -20,7 +20,7 @@ import {
  *
  * @see https://github.com/mweststrate/immer#auto-freezing
  */
-setAutoFreeze(false)
+setAutoFreeze(false);
 
 export {
   action,
@@ -37,4 +37,4 @@ export {
   useActions,
   useDispatch,
   useStore,
-}
+};
