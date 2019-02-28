@@ -1,86 +1,30 @@
-import {
-  applyMiddleware,
-  compose as reduxCompose,
-  createStore as reduxCreateStore,
-} from 'redux'
 import memoizerific from 'memoizerific'
-import produce, { setAutoFreeze } from 'immer'
-import reduxThunk from 'redux-thunk'
-import { isStateObject } from './lib'
-
-/**
- * immer is an implementation detail, so we are not going to use its auto freeze
- * behaviour, which throws errors if trying to mutate state. It's also risky
- * for production builds as has a perf overhead.
- *
- * @see https://github.com/mweststrate/immer#auto-freezing
- */
-setAutoFreeze(false)
+import produce from 'immer'
+import {
+  actionNameSymbol,
+  actionSymbol,
+  listenSymbol,
+  metaSymbol,
+  reducerSymbol,
+  selectDependenciesSymbol,
+  selectImpSymbol,
+  selectStateSymbol,
+  selectSymbol,
+  thunkSymbol,
+} from './constants'
+import { isStateObject, get, set } from './lib'
+import * as helpers from './helpers'
 
 const maxSelectFnMemoize = 100
-
-const actionSymbol = '__action__'
-const actionNameSymbol = '__actionName__'
-const thunkSymbol = '__thunk__'
-const listenSymbol = '__listen__'
-const metaSymbol = '__meta__'
-const selectSymbol = '__select__'
-const selectImpSymbol = '__selectImp__'
-const selectDependenciesSymbol = '__selectDependencies__'
-const selectStateSymbol = '__selectState__'
-const reducerSymbol = '__reducer__'
-
-const get = (path, target) =>
-  path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
-
-const set = (path, target, value) => {
-  path.reduce((acc, cur, idx) => {
-    if (idx + 1 === path.length) {
-      acc[cur] = value
-    } else {
-      acc[cur] = acc[cur] || {}
-    }
-    return acc[cur]
-  }, target)
-}
-
 const tick = () => new Promise(resolve => setTimeout(resolve))
 
-export const helpers = {
-  actionName: action => action[actionNameSymbol],
-  thunkStartName: action => `${action[actionNameSymbol]}(started)`,
-  thunkCompleteName: action => `${action[actionNameSymbol]}(completed)`,
-  action: fn => {
-    fn[actionSymbol] = true
-    return fn
-  },
-  thunk: fn => {
-    fn[thunkSymbol] = true
-    return fn
-  },
-  select: (fn, dependencies) => {
-    fn[selectSymbol] = true
-    fn[selectDependenciesSymbol] = dependencies
-    fn[selectStateSymbol] = {}
-    return fn
-  },
-  reducer: fn => {
-    fn[reducerSymbol] = true
-    return fn
-  },
-  listen: fn => {
-    fn[listenSymbol] = true
-    return fn
-  },
-}
-
-const createStoreInternals = ({
+export default function createStoreInternals({
   model,
   injections,
   initialState,
   disableInternalSelectFnMemoize,
   references,
-}) => {
+}) {
   const wrapFnWithMemoize = x =>
     !disableInternalSelectFnMemoize && typeof x === 'function'
       ? memoizerific(maxSelectFnMemoize)(x)
@@ -379,153 +323,4 @@ const createStoreInternals = ({
     actionCreators,
     thunkListenersDict,
   }
-}
-
-export const createStore = (model, options = {}) => {
-  const {
-    compose,
-    devTools = true,
-    disableInternalSelectFnMemoize = false,
-    initialState = {},
-    injections,
-    mockActions = false,
-    middleware = [],
-    reducerEnhancer = rootReducer => rootReducer,
-  } = options
-
-  const modelDefinition = {
-    ...model,
-    logFullState: helpers.thunk((actions, payload, { getState }) => {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(getState(), null, 2))
-    }),
-    replaceState: helpers.action((state, payload) => payload),
-  }
-
-  const references = {}
-
-  let mockedActions = []
-
-  const mockActionsMiddlware = () => next => action => {
-    if (mockActions) {
-      mockedActions.push(action)
-      return undefined
-    }
-    return next(action)
-  }
-
-  const dispatchThunkListeners = (name, payload) => {
-    const listensForAction = references.internals.thunkListenersDict[name]
-    return listensForAction && listensForAction.length > 0
-      ? Promise.all(
-          listensForAction.map(listenForAction =>
-            listenForAction(
-              get(
-                listenForAction[metaSymbol].parent,
-                references.internals.actionCreators,
-              ),
-              payload,
-              {
-                dispatch: references.dispatch,
-                getState: references.getState,
-                injections,
-                meta: listenForAction[metaSymbol],
-              },
-            ),
-          ),
-        )
-      : Promise.resolve()
-  }
-
-  const dispatchActionStringListeners = () => next => action => {
-    if (references.internals.thunkListenersDict[action.type]) {
-      dispatchThunkListeners(action.type, action.payload)
-    }
-    return next(action)
-  }
-
-  const composeEnhancers =
-    compose ||
-    (devTools &&
-    typeof window !== 'undefined' &&
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      : reduxCompose)
-
-  references.internals = createStoreInternals({
-    disableInternalSelectFnMemoize,
-    initialState,
-    injections,
-    model: modelDefinition,
-    references,
-  })
-
-  const store = reduxCreateStore(
-    reducerEnhancer(references.internals.reducer),
-    references.internals.defaultState,
-    composeEnhancers(
-      applyMiddleware(
-        reduxThunk,
-        dispatchActionStringListeners,
-        mockActionsMiddlware,
-        ...middleware,
-      ),
-    ),
-  )
-
-  store.getMockedActions = () => [...mockedActions]
-  store.clearMockedActions = () => {
-    mockedActions = []
-  }
-
-  references.dispatch = store.dispatch
-  references.getState = store.getState
-
-  // attach the action creators to dispatch
-  const bindActionCreators = actionCreators => {
-    Object.keys(actionCreators).forEach(key => {
-      store.dispatch[key] = actionCreators[key]
-    })
-  }
-
-  bindActionCreators(references.internals.actionCreators)
-
-  const rebuildStore = () => {
-    references.internals = createStoreInternals({
-      disableInternalSelectFnMemoize,
-      initialState: store.getState(),
-      injections,
-      model: modelDefinition,
-      references,
-    })
-    store.replaceReducer(reducerEnhancer(references.internals.reducer))
-    store.dispatch.replaceState(references.internals.defaultState)
-    Object.keys(store.dispatch).forEach(actionsKey => {
-      delete store.dispatch[actionsKey]
-    })
-    bindActionCreators(references.internals.actionCreators)
-    return store
-  }
-
-  store.addModel = (key, modelForKey) => {
-    if (modelDefinition[key]) {
-      throw new Error(
-        `The store model already contains a model definition for "${key}"`,
-      )
-    }
-    modelDefinition[key] = modelForKey
-    return rebuildStore()
-  }
-
-  store.removeModel = key => {
-    if (!modelDefinition[key]) {
-      throw new Error(
-        `The store model does not contains a model definition for "${key}"`,
-      )
-    }
-    delete modelDefinition[key]
-    return rebuildStore()
-  }
-
-  return store
 }
