@@ -2,12 +2,12 @@ import {
   applyMiddleware,
   compose as reduxCompose,
   createStore as reduxCreateStore,
-} from 'redux'
-import reduxThunk from 'redux-thunk'
-import { get } from './lib'
-import { metaSymbol } from './constants'
-import * as helpers from './helpers'
-import createStoreInternals from './create-store-internals'
+} from 'redux';
+import reduxThunk from 'redux-thunk';
+import { get } from './lib';
+import { metaSymbol } from './constants';
+import * as helpers from './helpers';
+import createStoreInternals from './create-store-internals';
 
 export default function createStore(model, options = {}) {
   const {
@@ -19,31 +19,31 @@ export default function createStore(model, options = {}) {
     mockActions = false,
     middleware = [],
     reducerEnhancer = rootReducer => rootReducer,
-  } = options
+  } = options;
 
   const modelDefinition = {
     ...model,
     logFullState: helpers.thunk((actions, payload, { getState }) => {
       // eslint-disable-next-line no-console
-      console.log(JSON.stringify(getState(), null, 2))
+      console.log(JSON.stringify(getState(), null, 2));
     }),
     replaceState: helpers.action((state, payload) => payload),
-  }
+  };
 
-  const references = {}
+  const references = {};
 
-  let mockedActions = []
+  let mockedActions = [];
 
   const mockActionsMiddlware = () => next => action => {
     if (mockActions) {
-      mockedActions.push(action)
-      return undefined
+      mockedActions.push(action);
+      return undefined;
     }
-    return next(action)
-  }
+    return next(action);
+  };
 
   const dispatchThunkListeners = (name, payload) => {
-    const listensForAction = references.internals.thunkListenersDict[name]
+    const listensForAction = references.internals.thunkListenersDict[name];
     return listensForAction && listensForAction.length > 0
       ? Promise.all(
           listensForAction.map(listenForAction =>
@@ -62,15 +62,15 @@ export default function createStore(model, options = {}) {
             ),
           ),
         )
-      : Promise.resolve()
-  }
+      : Promise.resolve();
+  };
 
   const dispatchActionStringListeners = () => next => action => {
     if (references.internals.thunkListenersDict[action.type]) {
-      dispatchThunkListeners(action.type, action.payload)
+      dispatchThunkListeners(action.type, action.payload);
     }
-    return next(action)
-  }
+    return next(action);
+  };
 
   const composeEnhancers =
     compose ||
@@ -78,7 +78,7 @@ export default function createStore(model, options = {}) {
     typeof window !== 'undefined' &&
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      : reduxCompose)
+      : reduxCompose);
 
   const bindStoreInternals = state => {
     references.internals = createStoreInternals({
@@ -88,10 +88,10 @@ export default function createStore(model, options = {}) {
       model: modelDefinition,
       reducerEnhancer,
       references,
-    })
-  }
+    });
+  };
 
-  bindStoreInternals(initialState)
+  bindStoreInternals(initialState);
 
   const store = reduxCreateStore(
     references.internals.reducer,
@@ -104,46 +104,46 @@ export default function createStore(model, options = {}) {
         ...middleware,
       ),
     ),
-  )
+  );
 
-  store.getMockedActions = () => [...mockedActions]
+  store.getMockedActions = () => [...mockedActions];
   store.clearMockedActions = () => {
-    mockedActions = []
-  }
+    mockedActions = [];
+  };
 
-  references.dispatch = store.dispatch
-  references.getState = store.getState
+  references.dispatch = store.dispatch;
+  references.getState = store.getState;
 
   // attach the action creators to dispatch
   const bindActionCreators = actionCreators => {
     Object.keys(store.dispatch).forEach(actionsKey => {
-      delete store.dispatch[actionsKey]
-    })
+      delete store.dispatch[actionsKey];
+    });
     Object.keys(actionCreators).forEach(key => {
-      store.dispatch[key] = actionCreators[key]
-    })
-  }
+      store.dispatch[key] = actionCreators[key];
+    });
+  };
 
-  bindActionCreators(references.internals.actionCreators)
+  bindActionCreators(references.internals.actionCreators);
 
   const rebindStore = () => {
-    bindStoreInternals(store.getState())
-    store.replaceReducer(references.internals.reducer)
-    store.dispatch.replaceState(references.internals.defaultState)
-    bindActionCreators(references.internals.actionCreators)
-  }
+    bindStoreInternals(store.getState());
+    store.replaceReducer(references.internals.reducer);
+    store.dispatch.replaceState(references.internals.defaultState);
+    bindActionCreators(references.internals.actionCreators);
+  };
 
   store.addModel = (key, modelForKey) => {
     if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.warn(
         `The store model already contains a model definition for "${key}"`,
-      )
-      store.removeModel(key)
+      );
+      store.removeModel(key);
     }
-    modelDefinition[key] = modelForKey
-    rebindStore()
-  }
+    modelDefinition[key] = modelForKey;
+    rebindStore();
+  };
 
   store.removeModel = key => {
     if (!modelDefinition[key]) {
@@ -151,13 +151,13 @@ export default function createStore(model, options = {}) {
         // eslint-disable-next-line no-console
         console.warn(
           `The store model does not contain a model definition for "${key}"`,
-        )
+        );
       }
-      return
+      return;
     }
-    delete modelDefinition[key]
-    rebindStore()
-  }
+    delete modelDefinition[key];
+    rebindStore();
+  };
 
-  return store
+  return store;
 }

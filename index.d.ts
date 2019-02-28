@@ -1,12 +1,12 @@
-import { Component } from 'react'
+import { Component } from 'react';
 import {
   KeysOfType,
   Omit,
   OptionalKeys,
   Overwrite,
   RequiredKeys,
-} from 'typelevel-ts'
-import { Param0, Param1 } from 'type-zoo'
+} from 'typelevel-ts';
+import { Param0, Param1 } from 'type-zoo';
 import {
   compose,
   AnyAction,
@@ -15,25 +15,25 @@ import {
   Reducer as ReduxReducer,
   Store as ReduxStore,
   Middleware,
-} from 'redux'
-import { string } from 'prop-types'
+} from 'redux';
+import { string } from 'prop-types';
 
-type AsyncActionTypes = Thunk<any, any, any, any, any>
+type AsyncActionTypes = Thunk<any, any, any, any, any>;
 
-type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>
+type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
 type Meta = {
-  path: string[]
-  parent: string[]
-}
+  path: string[];
+  parent: string[];
+};
 
-export function actionName(action: Action<any, any>): string
+export function actionName(action: Action<any, any>): string;
 
-export function thunkStartName(action: Thunk<any, any, any, any, any>): string
+export function thunkStartName(action: Thunk<any, any, any, any, any>): string;
 
 export function thunkCompleteName(
   action: Thunk<any, any, any, any, any>,
-): string
+): string;
 
 type FilterActionTypes<T extends object> = Omit<
   T,
@@ -46,7 +46,7 @@ type FilterActionTypes<T extends object> = Omit<
     | Select<any, any>
     | Listen<any, any, any>
   >
->
+>;
 
 type FilterStateTypes<T extends object> = Overwrite<
   Omit<
@@ -57,7 +57,7 @@ type FilterStateTypes<T extends object> = Overwrite<
     >
   >,
   Pick<T, KeysOfType<T, Select<any, any> | Reducer<any, any>>>
->
+>;
 
 /**
  * Filters a model into a type that represents the actions (and effects) only
@@ -80,10 +80,10 @@ export type Actions<Model extends Object> = {
       ? () => void
       : (payload: Param1<Model[P]>) => void
     : Actions<Model[P]>
-}
+};
 
-type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>
-type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>
+type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>;
+type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>;
 
 type RecursiveState<
   RequiredModel extends Object,
@@ -109,7 +109,7 @@ type RecursiveState<
         ? OptionalModel[P]
         : State<OptionalModel[P]>
       : OptionalModel[P]
-  }
+  };
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -121,7 +121,7 @@ type RecursiveState<
 export type State<Model extends Object> = RecursiveState<
   FilterStateTypes<RequiredOnly<Model>>,
   FilterStateTypes<OptionalOnly<Model>>
->
+>;
 
 /**
  * Configuration interface for the createStore
@@ -130,13 +130,13 @@ export interface EasyPeasyConfig<
   InitialState extends Object = {},
   Injections = any
 > {
-  compose?: typeof compose
-  devTools?: boolean
-  initialState?: InitialState
-  injections?: Injections
-  middleware?: Array<Middleware<any, any, any>>
-  mockActions?: boolean
-  reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>
+  compose?: typeof compose;
+  devTools?: boolean;
+  initialState?: InitialState;
+  injections?: Injections;
+  middleware?: Array<Middleware<any, any, any>>;
+  mockActions?: boolean;
+  reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>;
 }
 
 /**
@@ -149,11 +149,11 @@ export interface EasyPeasyConfig<
 export type Dispatch<
   StoreModel,
   Action extends ReduxAction = ReduxAction<any>
-> = Actions<StoreModel> & ReduxDispatch<Action>
+> = Actions<StoreModel> & ReduxDispatch<Action>;
 
 export interface ActionData {
-  type: string
-  [key: string | number]: any
+  type: string;
+  [key: string | number]: any;
 }
 
 /**
@@ -169,11 +169,11 @@ export type Store<
 > = Overwrite<
   ReduxStore<State<StoreModel>>,
   {
-    dispatch: Dispatch<StoreModel>
-    getMockedActions: () => ActionData[]
-    clearMockedActions: () => void
+    dispatch: Dispatch<StoreModel>;
+    getMockedActions: () => ActionData[];
+    clearMockedActions: () => void;
   }
->
+>;
 
 /**
  * A thunk type.
@@ -200,16 +200,16 @@ export type Thunk<
     actions: Actions<Model>,
     payload: Payload,
     helpers: {
-      dispatch: Dispatch<StoreModel>
-      getState: () => State<StoreModel>
-      injections: Injections
-      meta: Meta
+      dispatch: Dispatch<StoreModel>;
+      getState: () => State<StoreModel>;
+      injections: Injections;
+      meta: Meta;
     },
-  ): Result
-  type: 'thunk'
-  payload: Payload
-  result: Result
-}
+  ): Result;
+  type: 'thunk';
+  payload: Payload;
+  result: Result;
+};
 
 /**
  * Declares an thunk action type against your model.
@@ -238,13 +238,13 @@ export function thunk<
     actions: Actions<Model>,
     payload: Payload,
     helpers: {
-      dispatch: Dispatch<StoreModel>
-      getState: () => State<StoreModel>
-      injections: Injections
-      meta: Meta
+      dispatch: Dispatch<StoreModel>;
+      getState: () => State<StoreModel>;
+      injections: Injections;
+      meta: Meta;
     },
   ) => Result,
-): Thunk<Model, Payload, Injections, StoreModel, Result>
+): Thunk<Model, Payload, Injections, StoreModel, Result>;
 
 /**
  * Action listeners type.
@@ -268,8 +268,8 @@ export type Listen<
   Injections = any,
   StoreModel extends Object = {}
 > = {
-  type: 'listen'
-}
+  type: 'listen';
+};
 
 /**
  * Declares action listeners against your model.
@@ -324,7 +324,7 @@ export function listen<
           >,
     ) => void,
   ) => void,
-): Listen<Model, Injections, StoreModel>
+): Listen<Model, Injections, StoreModel>;
 
 /**
  * An action type.
@@ -341,11 +341,11 @@ export function listen<
  * }
  */
 export type Action<Model extends Object = {}, Payload = any> = {
-  (state: State<Model>, payload: Payload): void | State<Model>
-  type: 'action'
-  payload: Payload
-  result: void | State<Model>
-}
+  (state: State<Model>, payload: Payload): void | State<Model>;
+  type: 'action';
+  payload: Payload;
+  result: void | State<Model>;
+};
 
 /**
  * Declares an action type against your model.
@@ -365,7 +365,7 @@ export type Action<Model extends Object = {}, Payload = any> = {
  */
 export function action<Model extends Object = {}, Payload = any>(
   action: (state: State<Model>, payload: Payload) => void | State<Model>,
-): Action<Model, Payload>
+): Action<Model, Payload>;
 
 /**
  * A select type.
@@ -382,10 +382,10 @@ export function action<Model extends Object = {}, Payload = any>(
  * }
  */
 export type Select<Model extends Object = {}, Result = any> = {
-  (state: State<Model>): Result
-  type: 'select'
-  result: Result
-}
+  (state: State<Model>): Result;
+  type: 'select';
+  result: Result;
+};
 
 /**
  * Allows you to declare derived state against your model.
@@ -406,7 +406,7 @@ export type Select<Model extends Object = {}, Result = any> = {
 export function select<Model extends Object = {}, Result = any>(
   select: (state: State<Model>) => Result,
   dependencies?: Array<Select<any, any>>,
-): Select<Model, Result>
+): Select<Model, Result>;
 
 /**
  * A reducer type.
@@ -422,10 +422,10 @@ export function select<Model extends Object = {}, Result = any>(
  * }
  */
 export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
-  (state: State, action: Action): State
-  type: 'reducer'
-  result: State
-}
+  (state: State, action: Action): State;
+  type: 'reducer';
+  result: State;
+};
 
 /**
  * Allows you to declare a custom reducer to manage a bit of your state.
@@ -447,7 +447,7 @@ export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
  */
 export function reducer<State extends Object = {}>(
   state: ReduxReducer<State>,
-): Reducer<State>
+): Reducer<State>;
 
 /**
  * Creates an easy-peasy powered Redux store.
@@ -473,7 +473,7 @@ export function reducer<State extends Object = {}>(
 export function createStore<
   StoreModel extends Object = {},
   StoreConfig extends EasyPeasyConfig<any, any> = void
->(model: StoreModel, config?: StoreConfig): Store<StoreModel, StoreConfig>
+>(model: StoreModel, config?: StoreConfig): Store<StoreModel, StoreConfig>;
 
 /**
  * A React Hook allowing you to use state within your component.
@@ -492,7 +492,7 @@ export function createStore<
 export function useStore<StoreState extends State<any> = {}, Result = any>(
   mapState: (state: StoreState) => Result,
   dependencies?: Array<any>,
-): Result
+): Result;
 
 /**
  * A React Hook allowing you to use actions within your component.
@@ -510,7 +510,7 @@ export function useStore<StoreState extends State<any> = {}, Result = any>(
  */
 export function useActions<StoreModel extends Object = {}, Result = any>(
   mapActions: (actions: Actions<StoreModel>) => Result,
-): Result
+): Result;
 
 /**
  * A React Hook allowing you to use the store's dispatch within your component.
@@ -528,7 +528,7 @@ export function useActions<StoreModel extends Object = {}, Result = any>(
  */
 export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
   StoreModel
->
+>;
 
 /**
  * A utility function used to create pre-typed hooks.
@@ -541,16 +541,16 @@ export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
 export function createTypedHooks<StoreModel extends Object = {}>(): {
   useActions: <Result = any>(
     mapActions: (actions: Actions<StoreModel>) => Result,
-  ) => Result
+  ) => Result;
   useAction: <Result = any>(
     mapAction: (actions: Dispatch<StoreModel>) => Result,
-  ) => Result
-  useDispatch: () => Dispatch<StoreModel>
+  ) => Result;
+  useDispatch: () => Dispatch<StoreModel>;
   useStore: <Result = any>(
     mapState: (state: State<StoreModel>) => Result,
     dependencies?: Array<any>,
-  ) => Result
-}
+  ) => Result;
+};
 
 /**
  * Exposes the store to your app (and hooks).
@@ -568,5 +568,5 @@ export function createTypedHooks<StoreModel extends Object = {}>(): {
  * );
  */
 export class StoreProvider<StoreModel = any> extends Component<{
-  store: Store<StoreModel>
+  store: Store<StoreModel>;
 }> {}

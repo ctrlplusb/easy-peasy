@@ -148,7 +148,7 @@
     "dist/"
   ],
   "prettier": {
-    "semi": false,
+    "semi": true,
     "singleQuote": true,
     "trailingComma": "all",
     "parser": "typescript"
