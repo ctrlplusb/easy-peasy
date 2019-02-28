@@ -1,105 +1,36 @@
-import {
-  applyMiddleware,
-  compose as reduxCompose,
-  createStore as reduxCreateStore,
-} from 'redux'
 import memoizerific from 'memoizerific'
-import produce, { setAutoFreeze } from 'immer'
-import reduxThunk from 'redux-thunk'
-import { isStateObject } from './lib'
-
-/**
- * immer is an implementation detail, so we are not going to use its auto freeze
- * behaviour, which throws errors if trying to mutate state. It's also risky
- * for production builds as has a perf overhead.
- *
- * @see https://github.com/mweststrate/immer#auto-freezing
- */
-setAutoFreeze(false)
+import produce from 'immer'
+import {
+  actionNameSymbol,
+  actionSymbol,
+  listenSymbol,
+  metaSymbol,
+  reducerSymbol,
+  selectDependenciesSymbol,
+  selectImpSymbol,
+  selectStateSymbol,
+  selectSymbol,
+  thunkSymbol,
+} from './constants'
+import { isStateObject, get, set } from './lib'
+import * as helpers from './helpers'
 
 const maxSelectFnMemoize = 100
-
-const actionSymbol = '__action__'
-const actionNameSymbol = '__actionName__'
-const thunkSymbol = '__thunk__'
-const listenSymbol = '__listen__'
-const metaSymbol = '__meta__'
-const selectSymbol = '__select__'
-const selectImpSymbol = '__selectImp__'
-const selectDependenciesSymbol = '__selectDependencies__'
-const selectStateSymbol = '__selectState__'
-const reducerSymbol = '__reducer__'
-
-const get = (path, target) =>
-  path.reduce((acc, cur) => (isStateObject(acc) ? acc[cur] : undefined), target)
-
-const set = (path, target, value) => {
-  path.reduce((acc, cur, idx) => {
-    if (idx + 1 === path.length) {
-      acc[cur] = value
-    } else {
-      acc[cur] = acc[cur] || {}
-    }
-    return acc[cur]
-  }, target)
-}
-
 const tick = () => new Promise(resolve => setTimeout(resolve))
 
-export const helpers = {
-  actionName: action => action[actionNameSymbol],
-  thunkStartName: action => `${action[actionNameSymbol]}(started)`,
-  thunkCompleteName: action => `${action[actionNameSymbol]}(completed)`,
-  action: fn => {
-    fn[actionSymbol] = true
-    return fn
-  },
-  thunk: fn => {
-    fn[thunkSymbol] = true
-    return fn
-  },
-  select: (fn, dependencies) => {
-    fn[selectSymbol] = true
-    fn[selectDependenciesSymbol] = dependencies
-    fn[selectStateSymbol] = {}
-    return fn
-  },
-  reducer: fn => {
-    fn[reducerSymbol] = true
-    return fn
-  },
-  listen: fn => {
-    fn[listenSymbol] = true
-    return fn
-  },
-}
-
-export const createStore = (model, options = {}) => {
-  const {
-    compose,
-    devTools = true,
-    disableInternalSelectFnMemoize = false,
-    initialState = {},
-    injections,
-    mockActions = false,
-    middleware = [],
-    reducerEnhancer = rootReducer => rootReducer,
-  } = options
-
+export default function createStoreInternals({
+  disableInternalSelectFnMemoize,
+  initialState,
+  injections,
+  model,
+  reducerEnhancer,
+  references,
+}) {
   const wrapFnWithMemoize = x =>
     !disableInternalSelectFnMemoize && typeof x === 'function'
       ? memoizerific(maxSelectFnMemoize)(x)
       : x
 
-  const definition = {
-    ...model,
-    logFullState: helpers.thunk((actions, payload, { getState }) => {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(getState(), null, 2))
-    }),
-  }
-
-  const references = {}
   const defaultState = {}
   const actionThunks = {}
   const actionCreators = {}
@@ -112,27 +43,7 @@ export const createStore = (model, options = {}) => {
   const actionReducersDict = {}
   const actionReducersForPath = {}
 
-  const dispatchThunkListeners = (name, payload) => {
-    const listensForAction = thunkListenersDict[name]
-    return listensForAction && listensForAction.length > 0
-      ? Promise.all(
-          listensForAction.map(listenForAction =>
-            listenForAction(
-              get(listenForAction[metaSymbol].parent, actionCreators),
-              payload,
-              {
-                dispatch: references.dispatch,
-                getState: references.getState,
-                injections,
-                meta: listenForAction[metaSymbol],
-              },
-            ),
-          ),
-        )
-      : Promise.resolve()
-  }
-
-  const extract = (current, parentPath) =>
+  const recursiveExtractDefsFromModel = (current, parentPath) =>
     Object.keys(current).forEach(key => {
       const value = current[key]
       const path = [...parentPath, key]
@@ -163,10 +74,6 @@ export const createStore = (model, options = {}) => {
           actionCreator[actionNameSymbol] = name
           actionCreatorDict[name] = actionCreator
           set(path, actionCreators, actionCreator)
-        } else if (value[selectSymbol]) {
-          // skip
-          value[selectStateSymbol] = { parentPath, key, executed: false }
-          selectorReducers.push(value)
         } else if (value[thunkSymbol]) {
           const name = `@thunk.${path.join('.')}`
           value[actionNameSymbol] = name
@@ -210,22 +117,25 @@ export const createStore = (model, options = {}) => {
           actionCreator[actionNameSymbol] = name
           actionCreatorDict[name] = actionCreator
           set(path, actionCreators, actionCreator)
+        } else if (value[selectSymbol]) {
+          value[selectStateSymbol] = { parentPath, key, executed: false }
+          selectorReducers.push(value)
         } else if (value[reducerSymbol]) {
           customReducers.push({ path, reducer: value })
         } else if (value[listenSymbol]) {
           listenDefinitions.push(value)
           value[metaSymbol] = meta
-        } else {
+        } else if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
           console.warn(
             `Easy Peasy: Found a function at path ${path.join(
               '.',
-            )} in your model. Version 2 required that you wrap functions with the action helper`,
+            )} in your model. Version 2 required that you wrap your action functions with the "action" helper`,
           )
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
         set(path, defaultState, {})
-        extract(value, path)
+        recursiveExtractDefsFromModel(value, path)
       } else {
         // State
         const initialParentRef = get(parentPath, initialState)
@@ -237,7 +147,7 @@ export const createStore = (model, options = {}) => {
       }
     })
 
-  extract(definition, [])
+  recursiveExtractDefsFromModel(model, [])
 
   selectorReducers.forEach(selector => {
     selector[selectImpSymbol] = state => wrapFnWithMemoize(selector(state))
@@ -253,12 +163,14 @@ export const createStore = (model, options = {}) => {
       handler[metaSymbol] = meta
 
       if (!handler[actionSymbol] && !handler[thunkSymbol]) {
-        // eslint-disable-next-line
-        console.warn(
-          `Easy Peasy: you must provide either an "action" or "thunk" to your listeners. Found an invalid handler at "${meta.path.join(
-            '.',
-          )}"`,
-        )
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line
+          console.warn(
+            `Easy Peasy: you must provide either an "action" or "thunk" to your listeners. Found an invalid handler at "${meta.path.join(
+              '.',
+            )}"`,
+          )
+        }
         return
       }
 
@@ -294,7 +206,47 @@ export const createStore = (model, options = {}) => {
     def(on)
   })
 
-  const createReducers = () => {
+  const runSelectorReducer = (state, selector) => {
+    const { parentPath, key, executed } = selector[selectStateSymbol]
+    if (executed) {
+      return state
+    }
+    const dependencies = selector[selectDependenciesSymbol]
+
+    const stateAfterDependencies = dependencies
+      ? dependencies.reduce(runSelectorReducer, state)
+      : state
+
+    let newState = stateAfterDependencies
+
+    if (parentPath.length > 0) {
+      const target = get(parentPath, stateAfterDependencies)
+      if (target) {
+        if (!selector.prevState || selector.prevState !== state) {
+          const newValue = selector[selectImpSymbol](target)
+          newState = produce(state, draft => {
+            const updateTarget = get(parentPath, draft)
+            updateTarget[key] = newValue
+          })
+          selector.prevState = newState
+        }
+      }
+    } else if (!selector.prevState || selector.prevState !== state) {
+      const newValue = selector[selectImpSymbol](stateAfterDependencies)
+      newState = produce(state, draft => {
+        draft[key] = newValue
+      })
+      selector.prevState = newState
+    }
+
+    selector[selectStateSymbol].executed = true
+    return newState
+  }
+
+  const runSelectors = state =>
+    selectorReducers.reduce(runSelectorReducer, state)
+
+  const createReducer = () => {
     const runActionReducerAtPath = (state, action, actionReducer, path) => {
       const current = get(path, state)
       if (path.length === 0) {
@@ -343,46 +295,6 @@ export const createStore = (model, options = {}) => {
       })
     }
 
-    const runSelectorReducer = (state, selector) => {
-      const { parentPath, key, executed } = selector[selectStateSymbol]
-      if (executed) {
-        return state
-      }
-      const dependencies = selector[selectDependenciesSymbol]
-
-      const stateAfterDependencies = dependencies
-        ? dependencies.reduce(runSelectorReducer, state)
-        : state
-
-      let newState = stateAfterDependencies
-
-      if (parentPath.length > 0) {
-        const target = get(parentPath, stateAfterDependencies)
-        if (target) {
-          if (!selector.prevState || selector.prevState !== state) {
-            const newValue = selector[selectImpSymbol](target)
-            newState = produce(state, draft => {
-              const updateTarget = get(parentPath, draft)
-              updateTarget[key] = newValue
-            })
-            selector.prevState = newState
-          }
-        }
-      } else if (!selector.prevState || selector.prevState !== state) {
-        const newValue = selector[selectImpSymbol](stateAfterDependencies)
-        newState = produce(state, draft => {
-          draft[key] = newValue
-        })
-        selector.prevState = newState
-      }
-
-      selector[selectStateSymbol].executed = true
-      return newState
-    }
-
-    const runSelectors = state =>
-      selectorReducers.reduce(runSelectorReducer, state)
-
     let isInitial = true
 
     const selectorsReducer = state => {
@@ -394,7 +306,7 @@ export const createStore = (model, options = {}) => {
       return stateAfterSelectors
     }
 
-    return (state, action) => {
+    const rootReducer = (state, action) => {
       const stateAfterActions = reducerForActions(state, action)
       const stateAfterListeners = reducerForListeners(stateAfterActions, action)
       const stateAfterCustomReducers = reducerForCustomReducers(
@@ -406,61 +318,14 @@ export const createStore = (model, options = {}) => {
       }
       return stateAfterCustomReducers
     }
+
+    return rootReducer
   }
 
-  const reducers = createReducers()
-
-  const composeEnhancers =
-    compose ||
-    (devTools &&
-    typeof window !== 'undefined' &&
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      : reduxCompose)
-
-  const dispatchActionStringListeners = () => next => action => {
-    if (thunkListenersDict[action.type]) {
-      dispatchThunkListeners(action.type, action.payload)
-    }
-    return next(action)
-  }
-
-  let mockedActions = []
-
-  const mockActionsMiddlware = () => next => action => {
-    if (mockActions) {
-      mockedActions.push(action)
-      return undefined
-    }
-    return next(action)
-  }
-
-  const store = reduxCreateStore(
-    reducerEnhancer(reducers),
+  return {
+    reducer: reducerEnhancer(createReducer()),
     defaultState,
-    composeEnhancers(
-      applyMiddleware(
-        reduxThunk,
-        dispatchActionStringListeners,
-        mockActionsMiddlware,
-        ...middleware,
-      ),
-    ),
-  )
-
-  store.getMockedActions = () => [...mockedActions]
-  store.clearMockedActions = () => {
-    mockedActions = []
+    actionCreators,
+    thunkListenersDict,
   }
-
-  // attach the action creators to dispatch
-  Object.keys(actionCreators).forEach(key => {
-    store.dispatch[key] = actionCreators[key]
-  })
-
-  references.dispatch = store.dispatch
-  references.getState = store.getState
-  references.getState.getState = store.getState
-
-  return store
 }
