@@ -95,7 +95,8 @@ export default function createStoreInternals({
           const action = payload => {
             return value(get(parentPath, actionCreators), payload, {
               dispatch: references.dispatch,
-              getState: references.getState,
+              getState: () => get(parentPath, references.getState()),
+              getStoreState: references.getState,
               injections,
               meta,
             });

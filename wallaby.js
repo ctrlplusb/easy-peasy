@@ -8,7 +8,10 @@ const babelConfig = JSON.parse(babelConfigContents);
 
 module.exports = wallaby => ({
   files: ['src/**/*.js', { pattern: 'src/**/*.test.js', ignore: true }],
-  tests: ['src/**/*.test.js'],
+  tests: [
+    'src/**/*.test.js',
+    { pattern: 'src/__tests__/typescript/**/*', ignore: true },
+  ],
   testFramework: 'jest',
   env: {
     type: 'node',
