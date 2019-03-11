@@ -55,7 +55,12 @@ export default function createStore(model, options = {}) {
               payload,
               {
                 dispatch: references.dispatch,
-                getState: references.getState,
+                getState: () =>
+                  get(
+                    listenForAction[metaSymbol].parent,
+                    references.getState(),
+                  ),
+                getStoreState: references.getState,
                 injections,
                 meta: listenForAction[metaSymbol],
               },

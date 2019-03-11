@@ -789,10 +789,8 @@ describe('thunks', () => {
           const user = await resolveAfter({ name: 'bob' }, 15);
           actions.loginSucceeded(user);
           expect(getState()).toEqual({
-            session: {
-              user: {
-                name: 'bob',
-              },
+            user: {
+              name: 'bob',
             },
           });
           return 'resolved';
@@ -859,15 +857,33 @@ describe('thunks', () => {
   test('getState is exposed', async () => {
     // arrange
     const store = createStore({
-      count: 1,
-      doSomething: thunk((dispatch, payload, { getState }) => {
-        // assert
-        expect(getState()).toEqual({ count: 1 });
-      }),
+      counter: {
+        count: 1,
+        doSomething: thunk((dispatch, payload, { getState }) => {
+          // assert
+          expect(getState()).toEqual({ count: 1 });
+        }),
+      },
     });
 
     // act
-    await store.dispatch.doSomething();
+    await store.dispatch.counter.doSomething();
+  });
+
+  test('getStoreState is exposed', async () => {
+    // arrange
+    const store = createStore({
+      counter: {
+        count: 1,
+        doSomething: thunk((dispatch, payload, { getStoreState }) => {
+          // assert
+          expect(getStoreState()).toEqual({ counter: { count: 1 } });
+        }),
+      },
+    });
+
+    // act
+    await store.dispatch.counter.doSomething();
   });
 
   test('meta values are exposed', async () => {
@@ -1320,14 +1336,17 @@ describe('listen', () => {
                 (
                   actions,
                   payload,
-                  { dispatch, getState, meta, injections },
+                  { dispatch, getState, getStoreState, meta, injections },
                 ) => {
                   expect(payload).toEqual({ username: 'foo', password: 'bar' });
-                  expect(getState()).toEqual({
+                  expect(getStoreState()).toEqual({
                     user: {
                       token: '',
                     },
                     audit: { logs: [] },
+                  });
+                  expect(getState()).toEqual({
+                    logs: [],
                   });
                   expect(dispatch).toBe(store.dispatch);
                   expect(meta).toEqual({
