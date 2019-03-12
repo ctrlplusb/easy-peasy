@@ -3327,9 +3327,9 @@ iltorb@^2.0.5:
     which-pm-runs "^1.0.0"
 
 immer@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-2.1.0.tgz#d20f903b1f06a673a8040fe6a8b18bc803cd78ca"
-  integrity sha512-YhpS59RNxurPALgBX0bmTo4M04rXzruEgKtGLZ/cANLYc1bB9DjgoyMuuF+fcpA5voD7OOuSwYqmsjhDWX2c0w==
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-2.1.1.tgz#13abfc251e742b7dbc23e7444a3bd288c7394e43"
+  integrity sha512-+S4ktJM7ugEy1aIfpsjTVf7ZLMMuwz8QqSxpJRZaCM+0ujfeU4kWcj57P02qQ/KRGMw7DwUS4lCKNNROHasXkw==
 
 import-fresh@^2.0.0:
   version "2.0.0"
