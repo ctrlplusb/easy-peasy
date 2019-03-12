@@ -153,7 +153,7 @@ export type Dispatch<
 
 export interface ActionData {
   type: string;
-  [key: string | number]: any;
+  [key: string]: any;
 }
 
 /**
@@ -165,7 +165,7 @@ export interface ActionData {
  */
 export type Store<
   StoreModel,
-  StoreConfig extends EasyPeasyConfig<any, any> = void
+  StoreConfig extends EasyPeasyConfig<any, any> = any
 > = Overwrite<
   ReduxStore<State<StoreModel>>,
   {
@@ -472,7 +472,7 @@ export function reducer<State extends Object = {}>(
  */
 export function createStore<
   StoreModel extends Object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = void
+  StoreConfig extends EasyPeasyConfig<any, any> = any
 >(model: StoreModel, config?: StoreConfig): Store<StoreModel, StoreConfig>;
 
 /**
