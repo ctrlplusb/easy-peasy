@@ -201,7 +201,8 @@ export type Thunk<
     payload: Payload,
     helpers: {
       dispatch: Dispatch<StoreModel>;
-      getState: () => State<StoreModel>;
+      getState: () => State<Model>;
+      getStoreState: () => State<StoreModel>;
       injections: Injections;
       meta: Meta;
     },
@@ -239,7 +240,8 @@ export function thunk<
     payload: Payload,
     helpers: {
       dispatch: Dispatch<StoreModel>;
-      getState: () => State<StoreModel>;
+      getState: () => State<Model>;
+      getStoreState: () => State<StoreModel>;
       injections: Injections;
       meta: Meta;
     },
