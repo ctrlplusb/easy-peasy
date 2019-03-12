@@ -197,7 +197,7 @@ You will now have a [Redux store](https://redux.js.org/api/store) - all the stan
 
 ### Accessing state directly via the store
 
-You can access your store's state using the `getState` API of the store.
+You can access your store's state using the `getState` API of the Redux store.
 
 ```javascript
 store.getState().todos.items;
@@ -340,9 +340,9 @@ Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.c
 
 ## Usage with React
 
-With the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature introduced in React v16.7.0 it's never been easier to provide a mechanism to interact with global state in your components. We have provided two hooks, allowing you to access the state and actions from your store.
+With the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature introduced in React v16.8.0 it's never been easier to provide a mechanism to interact with global state in your components. We have provided a few hooks, allowing you to access the state and actions from your store.
 
-If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples). Hooks are truly game changing and will simplify your components dramatically.
+If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
 
 ### Wrap your app with StoreProvider
 
@@ -494,6 +494,8 @@ export default connect(
 </details>
 
 <p>&nbsp;</p>
+
+This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend you give the [API](#API) documentation a quick glance so that you gain an understanding of some of the tools and helpers that Easy Peasy exposes to you.
 
 ---
 
@@ -1820,31 +1822,122 @@ const AddTodo = () => {
 
 ### Actions
 
-Todo
+Creates a type that represents the actions for a model.
+
+```typescript
+import { Actions } from 'easy-peasy';
+
+type ModelActions = Actions<MyStoreModel>;
+```
 
 ### Action
 
-Todo
+Represents an `action`, useful when defining your model interface.
+
+```typescript
+import { Action, action } from 'easy-peasy';
+
+interface Todos {
+  items: string[];
+  add: Action<Todos, string>;
+}
+
+const todos: Todos = {
+  items: [],
+  add: action((state, payload) => {
+    state.items.push(payload);
+  })
+};
+```
 
 ### Listen
 
-Todo
+Represents a `listen`, useful when defining your model interface.
+
+```typescript
+import { Listen, listen } from 'easy-peasy';
+
+interface Audit {
+  logs: string[];
+  listen: Listen<Audit>;
+}
+
+const audit: Audit = {
+  logs: [],
+  listen: (on) => {
+    on('ROUTE_CHANGED', action((state, payload) => {
+      state.logs.push(payload.path);
+    }));
+  },
+};
+```
 
 ### Reducer
 
-Todo
+
+Represents a `reducer`, useful when defining your model interface.
+
+```typescript
+import { Reducer, reducer } from 'easy-peasy';
+import { RouterState, routerReducer } from 'my-router-solution';
+
+interface Model {
+  router: Reducer<RouterState>;
+}
+
+const model: Model = {
+  router: reducer(routerReducer)
+};
+```
 
 ### Select
 
-Todo
+Represents a `select`, useful when defining your model interface.
+
+```typescript
+import { Select, select } from 'easy-peasy';
+
+interface Todos {
+  items: string[];
+  firstTodo: Select<Todos, string | undefined>;
+}
+
+const todos: Todos = {
+  items: [],
+  firstTodo: select((state) => {
+    return state.items.length > 0 ? state.items[0] : undefined;
+  })
+};
+```
 
 ### Thunk
 
-Todo
+Represents a `thunk`, useful when defining your model interface.
+
+```typescript
+import { Thunk, thunk } from 'easy-peasy';
+
+interface Todos {
+  items: string[];
+  saved: Action<Todos, string>;
+  save: Thunk<Todos, string>;
+}
+
+const todos: Todos = {
+  items: [],
+  saved: action((state, payload) => {
+    state.items.push(payload);
+  }),
+  save: thunk(async (actions, payload) => {
+    await saveTodo(payload);
+    actions.saved(payload);
+  })
+};
+```
 
 ### createTypedHooks()
 
-Useful in the context of Typescript. It allows you to create typed versions of all the hooks so that you don't need to constantly apply typing information against them.
+Allows you to create typed versions of all the hooks so that you don't need to constantly apply typing information against them.
 
 <details>
 <summary>Example</summary>
