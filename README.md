@@ -108,10 +108,7 @@ function TodoList() {
     - [useActions(mapActions)](#useactionsmapactions)
     - [useDispatch()](#usedispatch)
     - [createTypedHooks()](#createTypedHooks)
-  - [Deprecated API](#deprecated-api)
-    - [effect(action)](#effectaction)
-    - [listeners(attach)](#listenersattach)
-    - [useAction(mapAction)](#useactionmapaction)
+  - [Typescript API](#typescript-api)
   - [Tips and Tricks](#tips-and-tricks)
     - [Generalising effects/actions/state via helpers](#generalising-effectsactionsstate-via-helpers)
   - [Prior Art](#prior-art)
@@ -1820,7 +1817,7 @@ const AddTodo = () => {
 
 ## Typescript API
 
-### Actions
+### Actions<Model = {}>
 
 Creates a type that represents the actions for a model.
 
@@ -1830,7 +1827,7 @@ import { Actions } from 'easy-peasy';
 type ModelActions = Actions<MyStoreModel>;
 ```
 
-### Action
+### Action<Model = {}, Payload = any>
 
 Represents an `action`, useful when defining your model interface.
 
@@ -1850,7 +1847,7 @@ const todos: Todos = {
 };
 ```
 
-### Listen
+### Listen<Model = {}, Injections = any, StoreModel = {}>
 
 Represents a `listen`, useful when defining your model interface.
 
@@ -1872,7 +1869,7 @@ const audit: Audit = {
 };
 ```
 
-### Reducer
+### Reducer<State = any, Action = ReduxAction>
 
 
 Represents a `reducer`, useful when defining your model interface.
@@ -1890,7 +1887,7 @@ const model: Model = {
 };
 ```
 
-### Select
+### Select<Model = {}, Result = any>
 
 Represents a `select`, useful when defining your model interface.
 
@@ -1910,7 +1907,7 @@ const todos: Todos = {
 };
 ```
 
-### Thunk
+### Thunk<Model = {}, Payload = void, Injections = any, StoreModel = {}, Result = any>
 
 Represents a `thunk`, useful when defining your model interface.
 
@@ -1935,7 +1932,7 @@ const todos: Todos = {
 };
 ```
 
-### createTypedHooks()
+### createTypedHooks<StoreModel = {}>()
 
 Allows you to create typed versions of all the hooks so that you don't need to constantly apply typing information against them.
 
