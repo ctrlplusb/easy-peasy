@@ -43,8 +43,8 @@ createStore<StoreModel>({
         userModel.login,
         thunk((actions, payload, helpers) => {
           const { dispatch, getState, injections, meta } = helpers;
-          actions.log('Logged in ' + payload.username);
-          getState().audit.logs;
+          actions.log(`Logged in ${payload.username}`);
+          getState().logs.length;
           dispatch.audit.log('Foo');
           injections.id + 7331;
           meta.parent.concat(meta.path);
@@ -53,9 +53,16 @@ createStore<StoreModel>({
       on(
         userModel.logout,
         thunk((actions, payload, helpers) => {
-          const { dispatch, getState, injections, meta } = helpers;
-          actions.log('Logged out ' + payload ? 'hard' : 'soft');
-          getState().audit.logs;
+          const {
+            dispatch,
+            getState,
+            getStoreState,
+            injections,
+            meta,
+          } = helpers;
+          actions.log(`Logged out ${payload}` ? 'hard' : 'soft');
+          getStoreState().audit.logs.length;
+          getState().logs.length;
           dispatch.audit.log('Foo');
           injections.id + 7331;
           meta.parent.concat(meta.path);
@@ -70,7 +77,7 @@ createStore<StoreModel>({
       on(
         userModel.login,
         action((state, payload) => {
-          state.logs.push('Logged in ' + payload.username);
+          state.logs.push(`Logged in ${payload.username}`);
         }),
       );
       on(

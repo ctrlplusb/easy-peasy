@@ -1093,7 +1093,11 @@ Declares a thunk action on your model. Allows you to perform effects such as dat
 
       - `getState` (Function, required)
 
-        When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your effectful action.
+        When executed it will provide the local state of where the thunk is attached to your model. This can be useful in the cases where you require state in the execution of your thunk.
+
+      - `getStoreState` (Function, required)
+
+        When executed it will provide the root state of your model. This can be useful in the cases where you require state in the execution of your thunk.
 
       - `injections` (Any, not required, default=undefined)
 
@@ -1167,22 +1171,52 @@ store.dispatch.session.login({
 </details>
 
 <details>
-<summary>Example accessing State via the getState parameter</summary>
+<summary>Example accessing local state via the getState parameter</summary>
 <p>
 
 ```javascript
 import { createStore, thunk } from 'easy-peasy';
 
 const store = createStore({
-  foo: 'bar',
-  // getState allows you to gain access to the  store's state
-  //                                               👇
-  doSomething: thunk(async (dispatch, payload, { getState }) => {
-    // Calling it exposes the root state of your store. i.e. the full
-    // store state 👇
-    console.log(getState())
-    // { foo: 'bar' }
-  }),
+  counter: {
+    count: 1,
+    // getState allows you to gain access to the local state
+    //                                               👇
+    doSomething: thunk(async (dispatch, payload, { getState }) => {
+      // Calling it exposes the local state. i.e. the part of state where the
+      // thunk was attached
+      //            👇
+      console.log(getState())
+      // { count: 1 }
+    }),
+  }
+});
+
+store.dispatch.doSomething()
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example accessing full state via the getStoreState parameter</summary>
+<p>
+
+```javascript
+import { createStore, thunk } from 'easy-peasy';
+
+const store = createStore({
+  counter: {
+    count: 1,
+    // getStoreState allows you to gain access to the  store's state
+    //                                               👇
+    doSomething: thunk(async (dispatch, payload, { getStoreState }) => {
+      // Calling it exposes the root state of your store. i.e. the full
+      // store state 👇
+      console.log(getState())
+      // { counter: { count: 1 } }
+    }),
+  }
 });
 
 store.dispatch.doSomething()
@@ -1442,8 +1476,8 @@ Note: If any action being listened to does not complete successfully (i.e. throw
 
     - `handler` (Function, required)
 
-      The handler thunk to be executed after the target action is fired successfully. It can be an [`action`](#action) or a [`thunk`](#thunkaction). 
-      
+      The handler thunk to be executed after the target action is fired successfully. It can be an [`action`](#action) or a [`thunk`](#thunkaction).
+
       The payload for the handler will be the same payload that the target action received
 
 </p>
@@ -1473,7 +1507,7 @@ const notificationModel = {
   // 👇 you can label your listeners as you like, e.g. "userListeners"
   listeners: listen((on) => {
     // Thunk handler
-    on(userModel.loggedIn, thunk(async (actions, payload) => {
+    on(userModel.loggedIn, thunk(async (actions, payload, helpers) => {
       const msg = `${payload.username} logged in`
       await auditService.log(msg)
     }))
