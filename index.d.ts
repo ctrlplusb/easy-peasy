@@ -86,30 +86,36 @@ type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>;
 type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>;
 
 type RecursiveState<
+  OtherModel extends Object,
   RequiredModel extends Object,
   OptionalModel extends Object
-> = {
-  [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, any>
-    ? RequiredModel[P]['result']
-    : RequiredModel[P] extends Reducer<any, any>
-    ? RequiredModel[P]['result']
-    : RequiredModel[P] extends object
-    ? RequiredModel[P] extends Array<any> | RegExp | Date
-      ? RequiredModel[P]
-      : State<RequiredModel[P]>
-    : RequiredModel[P]
-} &
-  {
-    [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, any>
-      ? OptionalModel[P]['result']
-      : OptionalModel[P] extends Reducer<any, any>
-      ? OptionalModel[P]['result']
-      : OptionalModel[P] extends object
-      ? OptionalModel[P] extends Array<any> | RegExp | Date
-        ? OptionalModel[P]
-        : State<OptionalModel[P]>
-      : OptionalModel[P]
-  };
+> = Overwrite<
+  { [P in keyof OtherModel]: OtherModel[P] },
+  Overwrite<
+    {
+      [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, any>
+        ? RequiredModel[P]['result']
+        : RequiredModel[P] extends Reducer<any, any>
+        ? RequiredModel[P]['result']
+        : RequiredModel[P] extends object
+        ? RequiredModel[P] extends Array<any> | RegExp | Date
+          ? RequiredModel[P]
+          : State<RequiredModel[P]>
+        : RequiredModel[P]
+    },
+    {
+      [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, any>
+        ? OptionalModel[P]['result']
+        : OptionalModel[P] extends Reducer<any, any>
+        ? OptionalModel[P]['result']
+        : OptionalModel[P] extends object
+        ? OptionalModel[P] extends Array<any> | RegExp | Date
+          ? OptionalModel[P]
+          : State<OptionalModel[P]>
+        : OptionalModel[P]
+    }
+  >
+>;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -119,6 +125,7 @@ type RecursiveState<
  * type StateOnly = State<Model>;
  */
 export type State<Model extends Object> = RecursiveState<
+  FilterStateTypes<Omit<Model, RequiredKeys<Model> & OptionalKeys<Model>>>,
   FilterStateTypes<RequiredOnly<Model>>,
   FilterStateTypes<OptionalOnly<Model>>
 >;
