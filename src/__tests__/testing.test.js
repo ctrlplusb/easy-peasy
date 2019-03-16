@@ -8,6 +8,7 @@ import {
   thunk,
   thunkStartName,
   thunkCompleteName,
+  thunkFailName,
   useStore,
   useActions,
 } from '../index';
@@ -56,6 +57,39 @@ it('thunk', async () => {
   // assert
   expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`);
   expect(store.getMockedActions()).toEqual([]);
+});
+
+it('thunk fail', async () => {
+  // arrange
+  const model = {
+    throwing: thunk(() => {
+      throw new Error('poop');
+    }),
+  };
+  const store = createStore(model, {
+    mockActions: true,
+  });
+
+  // act
+  try {
+    await store.dispatch.throwing('A payload');
+  } catch (err) {
+    // assert
+    expect(err.message).toEqual('poop');
+  }
+
+  // assert
+  expect(store.getMockedActions()).toMatchObject([
+    { type: thunkStartName(model.throwing), payload: 'A payload' },
+    {
+      type: thunkFailName(model.throwing),
+      payload: 'A payload',
+      error: {
+        message: 'poop',
+        stack: /Error: poop/g,
+      },
+    },
+  ]);
 });
 
 it('action', () => {

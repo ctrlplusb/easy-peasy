@@ -800,7 +800,7 @@ const todosModel = {
 We could test it like so:
 
 ```typescript
-import { createStore, actionName, thunkStartName, thunkCompleteName } from 'easy-peasy'
+import { createStore, actionName, thunkStartName, thunkCompleteName, thunkFailName } from 'easy-peasy'
 
 const createFetchMock = response =>
   jest.fn(() => Promise.resolve({ json: () => Promise.resolve(response) }))

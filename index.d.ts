@@ -36,6 +36,8 @@ export function thunkCompleteName(
   action: Thunk<any, any, any, any, any>,
 ): string;
 
+export function thunkFailName(action: Thunk<any, any, any, any, any>): string;
+
 type FilterActionTypes<T extends object> = Omit<
   T,
   KeysOfType<
