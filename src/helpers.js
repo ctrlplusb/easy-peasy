@@ -16,6 +16,8 @@ export const thunkStartName = action => `${action[actionNameSymbol]}(started)`;
 export const thunkCompleteName = action =>
   `${action[actionNameSymbol]}(completed)`;
 
+export const thunkFailName = action => `${action[actionNameSymbol]}(failed)`;
+
 export const action = fn => {
   fn[actionSymbol] = true;
   return fn;

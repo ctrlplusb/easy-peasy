@@ -11,6 +11,7 @@ import {
   thunk,
   thunkStartName,
   thunkCompleteName,
+  thunkFailName,
 } from './helpers';
 
 /**
@@ -34,6 +35,7 @@ export {
   thunk,
   thunkStartName,
   thunkCompleteName,
+  thunkFailName,
   useActions,
   useDispatch,
   useStore,
