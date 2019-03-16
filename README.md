@@ -1,5 +1,3 @@
-> V2 has landed. Please see the [release notes](https://github.com/ctrlplusb/easy-peasy/releases/tag/v2.0.0) for full details on how to upgrade from V1.
-
 <p>&nbsp;</p>
 <p align='center'>
   <img src="https://i.imgur.com/KHTgPvA.png" width="320" />
