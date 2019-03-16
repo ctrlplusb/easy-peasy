@@ -349,7 +349,7 @@ export function listen<
  *   addTodo: Action<Model, Todo>;
  * }
  */
-export type Action<Model extends Object = {}, Payload = any> = {
+export type Action<Model extends Object = {}, Payload = void> = {
   (state: State<Model>, payload: Payload): void | State<Model>;
   type: 'action';
   payload: Payload;
