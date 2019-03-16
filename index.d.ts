@@ -14,6 +14,7 @@ import {
   Dispatch as ReduxDispatch,
   Reducer as ReduxReducer,
   Store as ReduxStore,
+  StoreEnhancer,
   Middleware,
 } from 'redux';
 import { string } from 'prop-types';
@@ -139,6 +140,7 @@ export interface EasyPeasyConfig<
 > {
   compose?: typeof compose;
   devTools?: boolean;
+  enhancers?: StoreEnhancer[];
   initialState?: InitialState;
   injections?: Injections;
   middleware?: Array<Middleware<any, any, any>>;

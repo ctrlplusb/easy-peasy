@@ -948,6 +948,10 @@ Creates a Redux store based on the given model. The model must be an object and 
 
       Setting this to `true` will disable the automatic memoisation of a fn that you may return in any of your [`select`](#selectselector) implementations. Please see the [`select`](#selectselector) documentation for more information.
 
+    - `enhancers` (Array, not required, default=[])
+
+      Any custom [store enhancers](https://redux.js.org/glossary#store-enhancer) you would like to apply to your Redux store.
+
     - `initialState` (Object, not required, default=undefined)
 
       Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
@@ -958,7 +962,7 @@ Creates a Redux store based on the given model. The model must be an object and 
 
     - `middleware` (Array, not required, default=[])
 
-      Any additional middleware you would like to attach to your Redux store.
+      Any additional [middleware](https://redux.js.org/glossary#middleware) you would like to attach to your Redux store.
 
     - `mockActions` (boolean, not required, default=false)
 
@@ -1823,15 +1827,26 @@ const AddTodo = () => {
 
 Creates a type that represents the actions for a model.
 
+<details>
+<summary>Example</summary>
+<p>
+
 ```typescript
 import { Actions } from 'easy-peasy';
 
 type ModelActions = Actions<MyStoreModel>;
 ```
 
+</p>
+</details>
+
 ### Action<Model = {}, Payload = any>
 
 Represents an `action`, useful when defining your model interface.
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```typescript
 import { Action, action } from 'easy-peasy';
@@ -1849,9 +1864,16 @@ const todos: Todos = {
 };
 ```
 
+</p>
+</details>
+
 ### Listen<Model = {}, Injections = any, StoreModel = {}>
 
 Represents a `listen`, useful when defining your model interface.
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```typescript
 import { Listen, listen } from 'easy-peasy';
@@ -1871,10 +1893,17 @@ const audit: Audit = {
 };
 ```
 
+</p>
+</details>
+
 ### Reducer<State = any, Action = ReduxAction>
 
 
 Represents a `reducer`, useful when defining your model interface.
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```typescript
 import { Reducer, reducer } from 'easy-peasy';
@@ -1889,9 +1918,16 @@ const model: Model = {
 };
 ```
 
+</p>
+</details>
+
 ### Select<Model = {}, Result = any>
 
 Represents a `select`, useful when defining your model interface.
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```typescript
 import { Select, select } from 'easy-peasy';
@@ -1909,9 +1945,16 @@ const todos: Todos = {
 };
 ```
 
+</p>
+</details>
+
 ### Thunk<Model = {}, Payload = void, Injections = any, StoreModel = {}, Result = any>
 
 Represents a `thunk`, useful when defining your model interface.
+
+<details>
+<summary>Example</summary>
+<p>
 
 ```typescript
 import { Thunk, thunk } from 'easy-peasy';
@@ -1933,6 +1976,9 @@ const todos: Todos = {
   })
 };
 ```
+
+</p>
+</details>
 
 ### createTypedHooks<StoreModel = {}>()
 

@@ -502,6 +502,30 @@ describe('store', () => {
     store.dispatch.logFullState();
   });
 
+  test('allows custom enhancers', () => {
+    // arrange
+    const defaultState = { foo: 'bar' };
+    const rootReducer = (state = defaultState) => state;
+
+    // act
+    createStore(
+      {},
+      {
+        enhancers: [
+          storeCreator => {
+            // assert
+            expect(storeCreator).toBeInstanceOf(Function);
+            const store = storeCreator(rootReducer);
+            expect(store.getState()).toEqual({ foo: 'bar' });
+            return storeCreator;
+          },
+        ],
+      },
+    );
+
+    // assert
+  });
+
   test('supports initial state', () => {
     // arrange
     const model = {

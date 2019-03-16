@@ -19,6 +19,7 @@ export default function createStore(model, options = {}) {
     mockActions = false,
     middleware = [],
     reducerEnhancer = rootReducer => rootReducer,
+    enhancers = [],
   } = options;
 
   const modelDefinition = {
@@ -108,6 +109,7 @@ export default function createStore(model, options = {}) {
         mockActionsMiddlware,
         ...middleware,
       ),
+      ...enhancers,
     ),
   );
 
