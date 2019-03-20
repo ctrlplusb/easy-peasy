@@ -35,7 +35,7 @@ export default function createStore(model, options = {}) {
 
   let mockedActions = [];
 
-  const mockActionsMiddlware = () => next => action => {
+  const mockActionsMiddleware = () => next => action => {
     if (mockActions) {
       mockedActions.push(action);
       return undefined;
@@ -106,8 +106,8 @@ export default function createStore(model, options = {}) {
       applyMiddleware(
         reduxThunk,
         dispatchActionStringListeners,
-        mockActionsMiddlware,
         ...middleware,
+        mockActionsMiddleware,
       ),
       ...enhancers,
     ),
