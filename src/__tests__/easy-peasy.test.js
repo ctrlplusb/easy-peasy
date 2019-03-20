@@ -502,6 +502,52 @@ describe('store', () => {
     store.dispatch.logFullState();
   });
 
+  test('allows custom middleware with mockActions=true', () => {
+    // arrange
+    const customMiddleware = store => next => _action => {
+      if (_action.customMiddleware) {
+        // Unfortunately 'store' is plain Redux store, not easy-peasy's one.
+        // So we have to use string named action listeners.
+        next(store.dispatch({ type: 'API_REQUEST' }));
+        // here is API interaction etc.
+        next(
+          store.dispatch({ type: 'API_RESPONSE', payload: { success: true } }),
+        );
+      }
+      next(_action);
+    };
+    const store = createStore(
+      {
+        error: false,
+        saved: action((state, { success }) => {
+          state.error = !success;
+        }),
+        listeners: listen(on => {
+          on(
+            'API_RESPONSE',
+            thunk(async (actions, payload) => {
+              await actions.saved(payload);
+            }),
+          );
+        }),
+      },
+      { middleware: [customMiddleware], mockActions: true },
+    );
+
+    // act
+    store.dispatch({ customMiddleware: 'operateOnAPI' });
+
+    // assert
+    expect(store.getMockedActions()).toEqual([
+      { type: 'API_REQUEST' },
+      undefined,
+      { type: '@action.saved', payload: { success: true } },
+      { type: 'API_RESPONSE', payload: { success: true } },
+      undefined,
+      { customMiddleware: 'operateOnAPI' },
+    ]);
+  });
+
   test('allows custom enhancers', () => {
     // arrange
     const defaultState = { foo: 'bar' };
