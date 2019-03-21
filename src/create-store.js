@@ -35,16 +35,6 @@ export default function createStore(model, options = {}) {
 
   let mockedActions = [];
 
-  const mockActionsMiddleware = () => next => action => {
-    if (mockActions) {
-      if (action) {
-        mockedActions.push(action);
-      }
-      return undefined;
-    }
-    return next(action);
-  };
-
   const dispatchThunk = (thunk, payload) =>
     thunk(
       get(thunk[metaSymbol].parent, references.internals.actionCreators),
@@ -98,6 +88,18 @@ export default function createStore(model, options = {}) {
   };
 
   bindStoreInternals(initialState);
+
+  const mockActionsMiddleware = () => next => action => {
+    if (mockActions) {
+      if (action && action.type === '@@EP/LISTENER') {
+        // DO NOTHING
+      } else {
+        mockedActions.push(action);
+      }
+      return undefined;
+    }
+    return next(action);
+  };
 
   const store = reduxCreateStore(
     references.internals.reducer,
@@ -219,12 +221,12 @@ export default function createStore(model, options = {}) {
     const actionName = resolveActionName(action);
     if (actionName) {
       const actionListenerHandlers =
-        references.storeInternals.actionListenersDict[actionName];
+        references.internals.actionListenersDict[actionName];
       if (actionListenerHandlers && actionListenerHandlers.length > 0) {
         dispatchActionListener(actionName, payload);
       }
       const thunkListenerHandlers =
-        references.storeInternals.thunkListenersDict[actionName];
+        references.internals.thunkListenersDict[actionName];
       return thunkListenerHandlers && thunkListenerHandlers.length > 0
         ? Promise.all(
             thunkListenerHandlers.map(handler =>
