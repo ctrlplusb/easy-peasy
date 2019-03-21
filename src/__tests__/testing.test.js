@@ -4,6 +4,7 @@ import {
   action,
   actionName,
   createStore,
+  listen,
   StoreProvider,
   thunk,
   thunkStartName,
@@ -104,6 +105,30 @@ it('action', () => {
   expect(store.getState().items).toEqual({ [todo.id]: todo });
 });
 
+it('string action fired in thunk', async () => {
+  // arrange
+  const store = createStore(
+    {
+      items: [],
+      add: thunk((actions, payload, { dispatch }) => {
+        dispatch({
+          type: 'CUSTOM_ACTION',
+          payload: 'the payload',
+        });
+      }),
+    },
+    {
+      mockActions: true,
+    },
+  );
+
+  // act
+  await store.dispatch.add();
+
+  // assert
+  expect(store.getMockedActions()).toEqual([]);
+});
+
 it('component "integration" test', () => {
   // arrange
   function ComponentUnderTest() {
@@ -143,4 +168,193 @@ it('component "integration" test', () => {
 
   // assert
   expect(getByTestId('count').textContent).toEqual('1');
+});
+
+it.skip('fired listeners', () => {
+  // arrange
+  const store = createStore(
+    {
+      items: [],
+      audit: {
+        routeChangeLogs: [],
+        listeners: listen(on => {
+          on(
+            'ROUTE_CHANGED',
+            action((state, payload) => {
+              state.routeChangeLogs.push(payload);
+            }),
+          );
+        }),
+      },
+    },
+    { mockActions: true },
+  );
+
+  // act
+  store.dispatch({
+    type: 'ROUTE_CHANGED',
+    payload: '/about',
+  });
+
+  // assert
+  expect(store.getMockedActions()).toEqual([
+    { type: 'ROUTE_CHANGED', payload: '/about' },
+    { type: '@listen.audit.listeners(ROUTE_CHANGED)', payload: '/about' },
+  ]);
+});
+
+it.skip('action listeners', () => {
+  // arrange
+  const store = createStore({
+    items: [],
+    audit: {
+      routeChangeLogs: [],
+      listeners: listen(on => {
+        on(
+          'ROUTE_CHANGED',
+          action((state, payload) => {
+            state.routeChangeLogs.push(payload);
+          }),
+        );
+      }),
+    },
+  });
+
+  // act
+  store.dispatch({ type: 'ROUTE_CHANGED', payload: '/about' });
+
+  // assert
+  expect(store.getState().audit.routeChangeLogs).toEqual(['/about']);
+});
+
+describe('thunk listeners', () => {
+  it('listening to string action', async () => {
+    // arrange
+    const model = {
+      logs: [],
+      log: action((state, payload) => {
+        state.logs.push(payload);
+      }),
+      listeners: listen(on => {
+        on(
+          'ROUTE_CHANGED',
+          thunk(async (actions, payload) => {
+            // simulate some async to ensure async resolution works as expected
+            await new Promise(resolve => setTimeout(resolve, 1));
+            actions.log(payload);
+          }),
+        );
+      }),
+    };
+
+    const store = createStore(model, {
+      mockActions: true,
+    });
+
+    // act
+    await store.triggerListener(model.listeners, 'ROUTE_CHANGED', '/about');
+
+    // assert
+    expect(store.getMockedActions()).toEqual([
+      { type: actionName(model.log), payload: '/about' },
+    ]);
+  });
+
+  it('listening to action', async () => {
+    // arrange
+    const model = {
+      registerSession: action(() => {}),
+      log: action(() => {}),
+      listeners: listen(on => {
+        on(
+          model.registerSession,
+          thunk(async (actions, payload) => {
+            // simulate some async to ensure async resolution works as expected
+            await new Promise(resolve => setTimeout(resolve, 1));
+            actions.log(`Registered session: ${payload.username}`);
+          }),
+        );
+      }),
+    };
+
+    const store = createStore(model, {
+      mockActions: true,
+    });
+
+    // act
+    await store.triggerListener(model.listeners, model.registerSession, {
+      username: 'bob',
+    });
+
+    // assert
+    expect(store.getMockedActions()).toEqual([
+      {
+        type: actionName(model.log),
+        payload: 'Registered session: bob',
+      },
+    ]);
+  });
+
+  it('listening to thunk', async () => {
+    // arrange
+    const model = {
+      registerSession: thunk(async () => {}),
+      log: action(() => {}),
+      listeners: listen(on => {
+        on(
+          model.registerSession,
+          thunk(async (actions, payload) => {
+            // simulate some async to ensure async resolution works as expected
+            await new Promise(resolve => setTimeout(resolve, 1));
+            actions.log(`Registered session: ${payload.username}`);
+          }),
+        );
+      }),
+    };
+
+    const store = createStore(model, {
+      mockActions: true,
+    });
+
+    // act
+    await store.triggerListener(model.listeners, model.registerSession, {
+      username: 'bob',
+    });
+
+    // assert
+    expect(store.getMockedActions()).toEqual([
+      {
+        type: actionName(model.log),
+        payload: 'Registered session: bob',
+      },
+    ]);
+  });
+});
+
+it.skip('issue#129', async () => {
+  // arrange
+  const store = createStore({
+    routeChangeLogs: [],
+    log: action((state, payload) => {
+      state.routeChangeLogs.push(payload);
+    }),
+    listeners: listen(on => {
+      on(
+        'ROUTE_CHANGED',
+        thunk(async (actions, payload) => {
+          await new Promise(resolve => setTimeout(resolve, 10));
+          actions.log(payload);
+        }),
+      );
+    }),
+  });
+
+  // act
+  store.dispatch({
+    type: 'ROUTE_CHANGED',
+    payload: '/about',
+  });
+
+  // assert
+  expect(store.getState().routeChangeLogs).toEqual(['/about']);
 });

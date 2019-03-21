@@ -5,7 +5,12 @@ import {
 } from 'redux';
 import reduxThunk from 'redux-thunk';
 import { get } from './lib';
-import { metaSymbol } from './constants';
+import {
+  metaSymbol,
+  actionNameSymbol,
+  actionSymbol,
+  thunkSymbol,
+} from './constants';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
 
@@ -45,29 +50,25 @@ export default function createStore(model, options = {}) {
     return next(action);
   };
 
+  const dispatchThunk = (thunk, payload) =>
+    thunk(
+      get(thunk[metaSymbol].parent, references.internals.actionCreators),
+      payload,
+      {
+        dispatch: references.dispatch,
+        getState: () => get(thunk[metaSymbol].parent, references.getState()),
+        getStoreState: references.getState,
+        injections,
+        meta: thunk[metaSymbol],
+      },
+    );
+
   const dispatchThunkListeners = (name, payload) => {
     const listensForAction = references.internals.thunkListenersDict[name];
     return listensForAction && listensForAction.length > 0
       ? Promise.all(
           listensForAction.map(listenForAction =>
-            listenForAction(
-              get(
-                listenForAction[metaSymbol].parent,
-                references.internals.actionCreators,
-              ),
-              payload,
-              {
-                dispatch: references.dispatch,
-                getState: () =>
-                  get(
-                    listenForAction[metaSymbol].parent,
-                    references.getState(),
-                  ),
-                getStoreState: references.getState,
-                injections,
-                meta: listenForAction[metaSymbol],
-              },
-            ),
+            dispatchThunk(listenForAction, payload),
           ),
         )
       : Promise.resolve();
@@ -168,6 +169,50 @@ export default function createStore(model, options = {}) {
     }
     delete modelDefinition[key];
     rebindStore();
+  };
+
+  store.triggerListener = (listener, action, payload) => {
+    const actionName =
+      typeof action === 'function' && action[actionSymbol]
+        ? helpers.actionName(action)
+        : typeof action === 'function' && action[thunkSymbol]
+        ? helpers.thunkCompleteName(action)
+        : typeof action === 'string'
+        ? action
+        : '@@INVALID_LISTENER_TRIGGER';
+    if (
+      listener.listeners[actionName] &&
+      listener.listeners[actionName].length > 0
+    ) {
+      return Promise.all(
+        listener.listeners[actionName].map(handler =>
+          dispatchThunk(handler, payload),
+        ),
+      );
+    }
+    return Promise.resolve();
+  };
+
+  store.triggerListeners = (listeners, action, payload) => {
+    const actionName =
+      typeof action === 'function' && action[actionSymbol]
+        ? helpers.actionName(action)
+        : typeof action === 'function' && action[thunkSymbol]
+        ? helpers.thunkCompleteName(action)
+        : typeof action === 'string'
+        ? action
+        : '@@INVALID_LISTENER_TRIGGER';
+    if (
+      listeners.listeners[actionName] &&
+      listeners.listeners[actionName].length > 0
+    ) {
+      return Promise.all(
+        listeners.listeners[actionName].map(handler =>
+          dispatchThunk(handler, payload),
+        ),
+      );
+    }
+    return Promise.resolve();
   };
 
   return store;
