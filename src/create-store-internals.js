@@ -214,10 +214,6 @@ export default function createStoreInternals({
           thunkListenersDict[targetActionName] =
             thunkListenersDict[targetActionName] || [];
           thunkListenersDict[targetActionName].push(handler);
-          def.listeners = def.listeners || {};
-          def.listeners[targetActionName] =
-            def.listeners[targetActionName] || [];
-          def.listeners[targetActionName].push(handler);
         } else {
           actionListenersDict[targetActionName] =
             actionListenersDict[targetActionName] || [];
@@ -226,6 +222,9 @@ export default function createStoreInternals({
             handler,
           });
         }
+        def.listeners = def.listeners || {};
+        def.listeners[targetActionName] = def.listeners[targetActionName] || [];
+        def.listeners[targetActionName].push(handler);
       }
     };
     def(on);
@@ -303,11 +302,17 @@ export default function createStoreInternals({
     };
 
     const reducerForListeners = (state, action) => {
-      const actionListeners = actionListenersDict[action.type];
+      const target =
+        action.type === '@@EP/LISTENER' ? action.actionName : action.type;
+      const actionListeners = actionListenersDict[target];
       if (actionListeners) {
+        const targetAction =
+          action.type === '@@EP/LISTENER'
+            ? { type: target, payload: action.payload }
+            : action;
         return actionListeners.reduce(
           (newState, { path, handler }) =>
-            runActionReducerAtPath(newState, action, handler, path),
+            runActionReducerAtPath(newState, targetAction, handler, path),
           state,
         );
       }
@@ -355,6 +360,7 @@ export default function createStoreInternals({
 
   return {
     actionCreators,
+    actionListenersDict,
     defaultState,
     listenDefinitions,
     reducer: reducerEnhancer(createReducer()),

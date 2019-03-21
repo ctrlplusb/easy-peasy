@@ -5,12 +5,7 @@ import {
 } from 'redux';
 import reduxThunk from 'redux-thunk';
 import { get } from './lib';
-import {
-  metaSymbol,
-  actionNameSymbol,
-  actionSymbol,
-  thunkSymbol,
-} from './constants';
+import { metaSymbol, actionSymbol, thunkSymbol } from './constants';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
 
@@ -171,46 +166,72 @@ export default function createStore(model, options = {}) {
     rebindStore();
   };
 
-  store.triggerListener = (listener, action, payload) => {
-    const actionName =
-      typeof action === 'function' && action[actionSymbol]
+  const dispatchActionListener = (actionName, payload) =>
+    store.dispatch({
+      type: '@@EP/LISTENER',
+      payload,
+      actionName,
+    });
+
+  const resolveActionName = action =>
+    typeof action === 'function'
+      ? action[actionSymbol]
         ? helpers.actionName(action)
-        : typeof action === 'function' && action[thunkSymbol]
+        : action[thunkSymbol]
         ? helpers.thunkCompleteName(action)
-        : typeof action === 'string'
-        ? action
-        : '@@INVALID_LISTENER_TRIGGER';
+        : undefined
+      : typeof action === 'string'
+      ? action
+      : undefined;
+
+  const dispatchHandler = (handler, actionName, payload) => {
+    if (handler[thunkSymbol]) {
+      return dispatchThunk(handler, payload);
+    }
+  };
+
+  store.triggerListener = (listener, action, payload) => {
+    const actionName = resolveActionName(action);
     if (
       listener.listeners[actionName] &&
       listener.listeners[actionName].length > 0
     ) {
-      return Promise.all(
-        listener.listeners[actionName].map(handler =>
-          dispatchThunk(handler, payload),
-        ),
+      if (
+        listener.listeners[actionName].some(handler => handler[actionSymbol])
+      ) {
+        dispatchActionListener(actionName, payload);
+      }
+      const thunkHandlers = listener.listeners[actionName].filter(
+        handler => handler[thunkSymbol],
       );
+      return thunkHandlers.length > 0
+        ? Promise.all(
+            thunkHandlers.map(handler =>
+              dispatchHandler(handler, actionName, payload),
+            ),
+          ).then(() => undefined)
+        : Promise.resolve();
     }
     return Promise.resolve();
   };
 
-  store.triggerListeners = (listeners, action, payload) => {
-    const actionName =
-      typeof action === 'function' && action[actionSymbol]
-        ? helpers.actionName(action)
-        : typeof action === 'function' && action[thunkSymbol]
-        ? helpers.thunkCompleteName(action)
-        : typeof action === 'string'
-        ? action
-        : '@@INVALID_LISTENER_TRIGGER';
-    if (
-      listeners.listeners[actionName] &&
-      listeners.listeners[actionName].length > 0
-    ) {
-      return Promise.all(
-        listeners.listeners[actionName].map(handler =>
-          dispatchThunk(handler, payload),
-        ),
-      );
+  store.triggerListeners = (action, payload) => {
+    const actionName = resolveActionName(action);
+    if (actionName) {
+      const actionListenerHandlers =
+        references.storeInternals.actionListenersDict[actionName];
+      if (actionListenerHandlers && actionListenerHandlers.length > 0) {
+        dispatchActionListener(actionName, payload);
+      }
+      const thunkListenerHandlers =
+        references.storeInternals.thunkListenersDict[actionName];
+      return thunkListenerHandlers && thunkListenerHandlers.length > 0
+        ? Promise.all(
+            thunkListenerHandlers.map(handler =>
+              dispatchThunk(handler, payload),
+            ),
+          ).then(() => undefined)
+        : Promise.resolve();
     }
     return Promise.resolve();
   };

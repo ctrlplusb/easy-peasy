@@ -126,7 +126,11 @@ it('string action fired in thunk', async () => {
   await store.dispatch.add();
 
   // assert
-  expect(store.getMockedActions()).toEqual([]);
+  expect(store.getMockedActions()).toEqual([
+    { type: '@thunk.add(started)', payload: undefined },
+    { type: 'CUSTOM_ACTION', payload: 'the payload' },
+    { type: '@thunk.add(completed)', payload: undefined },
+  ]);
 });
 
 it('component "integration" test', () => {
@@ -170,7 +174,7 @@ it('component "integration" test', () => {
   expect(getByTestId('count').textContent).toEqual('1');
 });
 
-it.skip('fired listeners', () => {
+it('listeners do not fire when mockActions=true', () => {
   // arrange
   const store = createStore(
     {
@@ -199,11 +203,10 @@ it.skip('fired listeners', () => {
   // assert
   expect(store.getMockedActions()).toEqual([
     { type: 'ROUTE_CHANGED', payload: '/about' },
-    { type: '@listen.audit.listeners(ROUTE_CHANGED)', payload: '/about' },
   ]);
 });
 
-it.skip('action listeners', () => {
+it('listeners fire when mockActions=false', () => {
   // arrange
   const store = createStore({
     items: [],
@@ -225,6 +228,83 @@ it.skip('action listeners', () => {
 
   // assert
   expect(store.getState().audit.routeChangeLogs).toEqual(['/about']);
+});
+
+describe('action listeners', () => {
+  it('listening to string action', async () => {
+    // arrange
+    const model = {
+      logs: [],
+      listeners: listen(on => {
+        on(
+          'ROUTE_CHANGED',
+          action((state, payload) => {
+            state.logs.push(payload);
+          }),
+        );
+      }),
+    };
+
+    const store = createStore(model);
+
+    // act
+    store.triggerListener(model.listeners, 'ROUTE_CHANGED', '/about');
+
+    // assert
+    expect(store.getState().logs).toEqual(['/about']);
+  });
+
+  it('listening to action', async () => {
+    // arrange
+    const model = {
+      registerSession: action(() => {}),
+      logs: [],
+      listeners: listen(on => {
+        on(
+          model.registerSession,
+          action((state, payload) => {
+            state.logs.push(`Registered session for ${payload.username}`);
+          }),
+        );
+      }),
+    };
+
+    const store = createStore(model);
+
+    // act
+    store.triggerListener(model.listeners, model.registerSession, {
+      username: 'bob',
+    });
+
+    // assert
+    expect(store.getState().logs).toEqual(['Registered session for bob']);
+  });
+
+  it('listening to thunk', async () => {
+    // arrange
+    const model = {
+      registerSession: thunk(() => {}),
+      logs: [],
+      listeners: listen(on => {
+        on(
+          model.registerSession,
+          action((state, payload) => {
+            state.logs.push(`Registered session for ${payload.username}`);
+          }),
+        );
+      }),
+    };
+
+    const store = createStore(model);
+
+    // act
+    store.triggerListener(model.listeners, model.registerSession, {
+      username: 'bob',
+    });
+
+    // assert
+    expect(store.getState().logs).toEqual(['Registered session for bob']);
+  });
 });
 
 describe('thunk listeners', () => {
@@ -329,32 +409,4 @@ describe('thunk listeners', () => {
       },
     ]);
   });
-});
-
-it.skip('issue#129', async () => {
-  // arrange
-  const store = createStore({
-    routeChangeLogs: [],
-    log: action((state, payload) => {
-      state.routeChangeLogs.push(payload);
-    }),
-    listeners: listen(on => {
-      on(
-        'ROUTE_CHANGED',
-        thunk(async (actions, payload) => {
-          await new Promise(resolve => setTimeout(resolve, 10));
-          actions.log(payload);
-        }),
-      );
-    }),
-  });
-
-  // act
-  store.dispatch({
-    type: 'ROUTE_CHANGED',
-    payload: '/about',
-  });
-
-  // assert
-  expect(store.getState().routeChangeLogs).toEqual(['/about']);
 });
