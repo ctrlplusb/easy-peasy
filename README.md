@@ -1513,7 +1513,7 @@ const notificationModel = {
     on(userModel.loggedIn, thunk(async (actions, payload, helpers) => {
       const msg = `${payload.username} logged in`
       await auditService.log(msg)
-    }))
+    }));
 
     // Action handler
     on(userModel.logOut, action((state) => {
@@ -1544,13 +1544,13 @@ const model = {
 
   listeners: listen((on) => {
     //      👇 passing in action name
-    on('ROUTE_CHANGED', (actions, payload) => {
+    on('ROUTE_CHANGED', action(actions, payload) => {
       //                            👆
       // We won't know the type of payload, so it will be "any".
       // You will have to annotate it manually if you are using
       // Typescript and care about the payload type.
       actions.set(`Route was changed`);
-    });
+    }));
   })
 };
 ```
