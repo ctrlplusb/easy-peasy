@@ -1216,7 +1216,7 @@ const store = createStore({
     doSomething: thunk(async (dispatch, payload, { getStoreState }) => {
       // Calling it exposes the root state of your store. i.e. the full
       // store state 👇
-      console.log(getState())
+      console.log(getStoreState())
       // { counter: { count: 1 } }
     }),
   }
