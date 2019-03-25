@@ -19,9 +19,19 @@ export function useStore(mapState, dependencies = []) {
       if (!isActive.current) {
         return;
       }
-      let newState;
       try {
-        newState = mapState(store.getState());
+        const newState = mapState(store.getState());
+        if (
+          newState === stateRef.current ||
+          (isStateObject(newState) &&
+            isStateObject(stateRef.current) &&
+            shallowEqual(newState, stateRef.current))
+        ) {
+          // Do nothing
+          return;
+        }
+        stateRef.current = newState;
+        setState(stateRef.current);
       } catch (err) {
         isActive.current = false;
         // see https://github.com/reduxjs/react-redux/issues/1179
@@ -34,22 +44,12 @@ export function useStore(mapState, dependencies = []) {
         // This is by no means a robust solution. We should track the
         // associated issue in the hope for a more dependable solution.
         setTimeout(() => {
+          isActive.current = false;
           if (!unmounted.current && !isActive.current) {
             throw err;
           }
         }, 16); // give a frames worth of opportunity
       }
-      if (
-        newState === stateRef.current ||
-        (isStateObject(newState) &&
-          isStateObject(stateRef.current) &&
-          shallowEqual(newState, stateRef.current))
-      ) {
-        // Do nothing
-        return;
-      }
-      stateRef.current = newState;
-      setState(stateRef.current);
     };
     calculateState();
     const unsubscribe = store.subscribe(calculateState);
