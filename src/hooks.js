@@ -33,7 +33,6 @@ export function useStore(mapState, dependencies = []) {
         stateRef.current = newState;
         setState(stateRef.current);
       } catch (err) {
-        isActive.current = false;
         // see https://github.com/reduxjs/react-redux/issues/1179
         // There is a possibility mapState will fail as the props/state that
         // the component has received is stale. Therefore we will afford the
@@ -43,8 +42,12 @@ export function useStore(mapState, dependencies = []) {
         // throw an error.
         // This is by no means a robust solution. We should track the
         // associated issue in the hope for a more dependable solution.
+
+        // Setting the listener as "inactive", this can only be changed if the
+        // incoming dependencies are different (i.e. props have changed)
+        isActive.current = false;
+
         setTimeout(() => {
-          isActive.current = false;
           if (!unmounted.current && !isActive.current) {
             throw err;
           }
