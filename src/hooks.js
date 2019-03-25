@@ -1,10 +1,16 @@
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext, useRef, useMemo } from 'react';
 import shallowEqual from 'shallowequal';
 import EasyPeasyContext from './context';
 import { isStateObject } from './lib';
 
+let idx = 0;
+
 export function useStore(mapState, dependencies = []) {
-  const store = useContext(EasyPeasyContext);
+  const id = useMemo(() => {
+    idx += 1;
+    return idx;
+  }, []);
+  const { store, addListener, removeListener } = useContext(EasyPeasyContext);
   const [state, setState] = useState(mapState(store.getState()));
   // As our effect only fires on mount and unmount it won't have the state
   // changes visible to it, therefore we use a mutable ref to track this.
@@ -12,9 +18,8 @@ export function useStore(mapState, dependencies = []) {
   // Helps avoid firing of events when unsubscribed, i.e. unmounted
   const isActive = useRef(true);
   useEffect(() => {
-    const calculateState = () => {
-      const newState = mapState(store.getState());
-      isActive.current = true;
+    const handleStoreUpdate = storeState => {
+      const newState = mapState(storeState);
       if (
         newState === stateRef.current ||
         (isStateObject(newState) &&
@@ -29,23 +34,24 @@ export function useStore(mapState, dependencies = []) {
         setState(stateRef.current);
       }
     };
-    calculateState();
-    const unsubscribe = store.subscribe(calculateState);
+    isActive.current = true;
+    handleStoreUpdate(store.getState());
+    addListener(id, handleStoreUpdate);
     return () => {
-      unsubscribe();
       isActive.current = false;
+      removeListener(id);
     };
   }, dependencies);
   return state;
 }
 
 export function useActions(mapActions) {
-  const store = useContext(EasyPeasyContext);
+  const { store } = useContext(EasyPeasyContext);
   return mapActions(store.dispatch);
 }
 
 export function useDispatch() {
-  const store = useContext(EasyPeasyContext);
+  const { store } = useContext(EasyPeasyContext);
   return store.dispatch;
 }
 
