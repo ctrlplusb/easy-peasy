@@ -11,10 +11,34 @@ export function useStore(mapState, dependencies = []) {
   const stateRef = useRef(state);
   // Helps avoid firing of events when unsubscribed, i.e. unmounted
   const isActive = useRef(true);
+  // Tracks when a hooked component is unmounting
+  const unmounted = useRef(false);
   useEffect(() => {
+    isActive.current = true;
     const calculateState = () => {
-      const newState = mapState(store.getState());
-      isActive.current = true;
+      if (!isActive.current) {
+        return;
+      }
+      let newState;
+      try {
+        newState = mapState(store.getState());
+      } catch (err) {
+        isActive.current = false;
+        // see https://github.com/reduxjs/react-redux/issues/1179
+        // There is a possibility mapState will fail as the props/state that
+        // the component has received is stale. Therefore we will afford the
+        // application a small window of opportunity, where if they unmount
+        // the component or provide it with new "valid" props (which will
+        // subsequently cause a refreshed subscription cycle) then we will not
+        // throw an error.
+        // This is by no means a robust solution. We should track the
+        // associated issue in the hope for a more dependable solution.
+        setTimeout(() => {
+          if (!unmounted.current && !isActive.current) {
+            throw err;
+          }
+        }, 16); // give a frames worth of opportunity
+      }
       if (
         newState === stateRef.current ||
         (isStateObject(newState) &&
@@ -25,17 +49,20 @@ export function useStore(mapState, dependencies = []) {
         return;
       }
       stateRef.current = newState;
-      if (isActive.current) {
-        setState(stateRef.current);
-      }
+      setState(stateRef.current);
     };
     calculateState();
     const unsubscribe = store.subscribe(calculateState);
     return () => {
-      unsubscribe();
       isActive.current = false;
+      unsubscribe();
     };
   }, dependencies);
+  useEffect(() => {
+    return () => {
+      unmounted.current = true;
+    };
+  }, []);
   return state;
 }
 
