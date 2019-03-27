@@ -6,6 +6,7 @@ import { isStateObject } from './lib';
 export function useStore(mapState, dependencies = []) {
   const store = useContext(EasyPeasyContext);
   const [state, setState] = useState(mapState(store.getState()));
+  const [error, setError] = useState(null);
   // As our effect only fires on mount and unmount it won't have the state
   // changes visible to it, therefore we use a mutable ref to track this.
   const stateRef = useRef(state);
@@ -13,6 +14,11 @@ export function useStore(mapState, dependencies = []) {
   const isActive = useRef(true);
   // Tracks when a hooked component is unmounting
   const unmounted = useRef(false);
+  // Throwing the error inline allows error boundaries the opportunity to
+  // catch the error
+  if (error) {
+    throw error;
+  }
   useEffect(() => {
     isActive.current = true;
     const calculateState = () => {
@@ -49,9 +55,9 @@ export function useStore(mapState, dependencies = []) {
 
         setTimeout(() => {
           if (!unmounted.current && !isActive.current) {
-            throw err;
+            setError(err);
           }
-        }, 16); // give a frames worth of opportunity
+        }, 200); // give a window of opportunity
       }
     };
     calculateState();
@@ -61,6 +67,8 @@ export function useStore(mapState, dependencies = []) {
       unsubscribe();
     };
   }, dependencies);
+  // This effect will set the ref value to indicate that the component has
+  // unmounted
   useEffect(() => {
     return () => {
       unmounted.current = true;
