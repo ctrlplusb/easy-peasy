@@ -95,7 +95,9 @@ describe('mapState errors', () => {
       expect(getByTestId('items').innerHTML).toBe('AC');
 
       // act
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
 
       // assert
       expect(getByTestId('items').innerHTML).toBe('AC');
@@ -169,7 +171,9 @@ describe('mapState errors', () => {
       expect(getByTestId('todo').textContent).toEqual('write some tests');
 
       // act
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
 
       // assert
       expect(getByTestId('error').textContent).toEqual(
@@ -197,7 +201,9 @@ describe('mapState errors', () => {
           </ErrorBoundary>
         </StoreProvider>,
       );
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
 
       // assert
       expect(getByTestId('no-todo').textContent).toEqual('No todo');
@@ -223,7 +229,9 @@ describe('mapState errors', () => {
           </ErrorBoundary>
         </StoreProvider>,
       );
-      jest.runAllTimers();
+      act(() => {
+        jest.runAllTimers();
+      });
 
       // assert
       expect(getByTestId('todo').textContent).toEqual('ensure hooks work');
