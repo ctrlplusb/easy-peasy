@@ -540,10 +540,8 @@ describe('store', () => {
     // assert
     expect(store.getMockedActions()).toEqual([
       { type: 'API_REQUEST' },
-      undefined,
-      { type: '@action.saved', payload: { success: true } },
       { type: 'API_RESPONSE', payload: { success: true } },
-      undefined,
+      { type: '@action.saved', payload: { success: true } },
       { customMiddleware: 'operateOnAPI' },
     ]);
   });

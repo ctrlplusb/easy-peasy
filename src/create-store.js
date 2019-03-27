@@ -37,7 +37,9 @@ export default function createStore(model, options = {}) {
 
   const mockActionsMiddleware = () => next => action => {
     if (mockActions) {
-      mockedActions.push(action);
+      if (action) {
+        mockedActions.push(action);
+      }
       return undefined;
     }
     return next(action);
@@ -72,10 +74,11 @@ export default function createStore(model, options = {}) {
   };
 
   const dispatchActionStringListeners = () => next => action => {
+    const result = next(action);
     if (references.internals.thunkListenersDict[action.type]) {
       dispatchThunkListeners(action.type, action.payload);
     }
-    return next(action);
+    return result;
   };
 
   const composeEnhancers =
