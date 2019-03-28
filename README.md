@@ -16,7 +16,7 @@ import { action, createStore, StoreProvider, useStore, useActions } from 'easy-p
 // 👇 create your store, providing the model
 const store = createStore({
   todos: {
-    items: ['Install easy-peasy', 'Build app', 'Profit'],
+    items: ['Install easy-peasy', 'Define your model', 'Have fun'],
     // 👇 define actions directly on your model
     add: action((state, payload) => {
       // simply mutate state to update, and we convert to immutable updates
@@ -48,22 +48,21 @@ function TodoList() {
 
 ## Features
 
-  - Quick, easy, fun
-  - Supports Typescript
-  - Update state via mutations that auto convert to immutable updates
-  - Derived state
-  - Thunks for data fetching/persisting
-  - Auto memoisation for performance
-  - Includes hooks for React integration
-  - Testing utils baked in
+  - Intuitive API that allows rapid development
+  - Full Typescript support
+  - Mutate state, we do the hard work for you, auto converting mutations to immutable updates
+  - Derived state with auto memoisation
+  - Thunks for data fetching and side effects
+  - Listeners to respond to updates across your model
+  - React Hook based API
+  - Testing helpers baked in
   - Supports React Native
-  - Tiny, 3.2 KB gzipped
-  - Powered by Redux with full interop
-    - All the best of Redux, without the boilerplate
-    - Redux Dev Tools support
+  - Redux under the hood
+    - The power of Redux, without the boilerplate
+    - Redux Dev Tools out of the box
     - Custom middleware
     - Customise root reducer enhancer
-    - Easy migration path for traditional styled Redux apps
+    - Easy migration path for `react-redux` based apps
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -78,24 +77,21 @@ function TodoList() {
   - [Examples](#examples)
     - [Easy Peasy Typescript](#easy-peasy-typescript)
     - [React Todo List](#react-todo-list)
-  - [Core Concepts](#core-concepts)
-    - [Creating the store](#creating-the-store)
-    - [Accessing state directly via the store](#accessing-state-directly-via-the-store)
-    - [Modifying state via actions](#modifying-state-via-actions)
-    - [Dispatching actions directly via the store](#dispatching-actions-directly-via-the-store)
-    - [Creating a `thunk` action](#creating-a-thunk-action)
-    - [Dispatching a `thunk` action directly via the store](#dispatching-a-thunk-action-directly-via-the-store)
-    - [Deriving state via `select`](#deriving-state-via-select)
-    - [Accessing Derived State directly via the store](#accessing-derived-state)
-    - [Final notes](#final-notes)
-  - [Usage with React](#usage-with-react)
-    - [Wrap your app with StoreProvider](#wrap-your-app-with-storeprovider)
-    - [Consuming state in your Components](#consuming-state-in-your-components)
-    - [Firing actions in your Components](#firing-actions-in-your-components)
-    - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
-  - [Usage with Typescript](#usage-with-typescript)
-  - [Usage with React Native](#usage-with-react-native)
-  - [Writing Tests](#writing-tests)
+  - [Tutorial](#tutorial)
+    - [Core Concepts](#core-concepts)
+      - [Creating the store](#creating-the-store)
+      - [Accessing state directly via the store](#accessing-state-directly-via-the-store)
+      - [Modifying state via actions](#modifying-state-via-actions)
+      - [Dispatching actions directly via the store](#dispatching-actions-directly-via-the-store)
+      - [Creating a `thunk` action](#creating-a-thunk-action)
+      - [Dispatching a `thunk` action directly via the store](#dispatching-a-thunk-action-directly-via-the-store)
+      - [Deriving state via `select`](#deriving-state-via-select)
+      - [Accessing Derived State directly via the store](#accessing-derived-state)
+    - [Usage with React](#usage-with-react)
+      - [Wrap your app with StoreProvider](#wrap-your-app-with-storeprovider)
+      - [Consuming state in your Components](#consuming-state-in-your-components)
+      - [Firing actions in your Components](#firing-actions-in-your-components)
+      - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
@@ -108,6 +104,9 @@ function TodoList() {
     - [useActions(mapActions)](#useactionsmapactions)
     - [useDispatch()](#usedispatch)
     - [createTypedHooks()](#createTypedHooks)
+  - [Usage with Typescript](#usage-with-typescript)
+  - [Usage with React Native](#usage-with-react-native)
+  - [Writing Tests](#writing-tests)
   - [Typescript API](#typescript-api)
   - [Tips and Tricks](#tips-and-tricks)
     - [Generalising effects/actions/state via helpers](#generalising-effectsactionsstate-via-helpers)
@@ -119,7 +118,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a full Redux store by defining a model that describes your state and its actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, memoisation, or integration with React.
+Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a Redux store by defining a model that describes your state and its actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, memoisation, or integration with React.
 
 <p>&nbsp;</p>
 
@@ -166,11 +165,13 @@ https://codesandbox.io/s/woyn8xqk15
 
 ---
 
-## Core Concepts
+## Tutorial
 
 The below will introduce you to the core concepts of Easy Peasy, where we will interact with the Redux store directly. In a following section we shall illustrate how to integrate [Easy Peasy within a React application](#usage-with-react).
 
-### Creating the store
+### Core Concepts
+
+#### Creating the store
 
 Firstly you need to define your model. This represents the structure of your Redux state along with its default values. Your model can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
 
@@ -192,7 +193,7 @@ const store = createStore(model);
 
 You will now have a [Redux store](https://redux.js.org/api/store) - all the standard APIs of a Redux store is available to you. 👍
 
-### Accessing state directly via the store
+#### Accessing state directly via the store
 
 You can access your store's state using the `getState` API of the Redux store.
 
@@ -200,7 +201,7 @@ You can access your store's state using the `getState` API of the Redux store.
 store.getState().todos.items;
 ```
 
-### Modifying state via actions
+#### Modifying state via actions
 
 In order to mutate your state you need to define an action against your model.
 
@@ -232,7 +233,7 @@ The action will receive as its first parameter the slice of the state that it wa
 > })
 > ```
 
-### Dispatching actions directly via the store
+#### Dispatching actions directly via the store
 
 Easy Peasy will bind your actions against the store's `dispatch` using paths that match the location of the action on your model. This allows you to easily dispatch your actions, providing any payload that they may require.
 
@@ -249,7 +250,7 @@ store.getState().todos.items;
 // ['Install easy-peasy']
 ```
 
-### Creating a `thunk` action
+#### Creating a `thunk` action
 
 If you wish to perform side effects, such as fetching or persisting data from your server then you can use the `thunk` helper to declare a thunk action.
 
@@ -282,7 +283,7 @@ As you can see in the example above you can't modify the state directly within a
 
 > Note: If you want to dispatch actions that live within other branches of your model you can use the `dispatch` which is provided inside the `helper` argument. See the `thunk` API docs for more information.
 
-### Dispatching a `thunk` action directly via the store
+#### Dispatching a `thunk` action directly via the store
 
 You can dispatch a thunk action in the same manner as a normal action. However, a `thunk` action always returns a `Promise` allowing you to chain in order to execute after the `thunk` has completed.
 
@@ -292,7 +293,7 @@ store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
 })
 ```
 
-### Deriving state via `select`
+#### Deriving state via `select`
 
 If you have state that can be derived from state then you can use the [`select`](#selectselector) helper. Simply attach it to any part of your model.
 
@@ -315,7 +316,7 @@ This can be really helpful to avoid unnecessary re-renders in your react compone
 
 You can attach selectors to any part of your state. Similar to actions they will receive the local state that they are attached to and can access all the state down that branch of state.
 
-### Accessing Derived State directly via the store
+#### Accessing Derived State directly via the store
 
 You can access derived state as though it were a standard piece of state.
 
@@ -325,25 +326,15 @@ store.getState().shoppingBasket.totalPrice
 
 > Note! See how we don't call the derived state as a function. You access it as a simple property.
 
-### Final notes
+### Usage with React
 
-Now that you have gained an understanding of the store we suggest you read the section on [Usage with React](#usage-with-react) to learn how to use Easy Peasy in your React apps.
+We will now cover how to interact with your store from your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
 
-Oh! And don't forget to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) to visualise your actions firing along with the associated state updates. 👍
+> If you haven't done so already we highly recommend that you install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This will allow you to visualise your actions firing along with the associated state updates.
 
-<p>&nbsp;</p>
+#### Wrap your app with StoreProvider
 
----
-
-## Usage with React
-
-With the new [Hooks](https://reactjs.org/docs/hooks-intro.html) feature introduced in React v16.8.0 it's never been easier to provide a mechanism to interact with global state in your components. We have provided a few hooks, allowing you to access the state and actions from your store.
-
-If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
-
-### Wrap your app with StoreProvider
-
-Firstly we will need to create your store and wrap your application with the `StoreProvider`.
+Firstly you need to create your store then wrap your application with the `StoreProvider`.
 
 ```javascript
 import { StoreProvider, createStore } from 'easy-peasy';
@@ -358,7 +349,7 @@ const App = () => (
 )
 ```
 
-### Consuming state in your Components
+#### Consuming state in your Components
 
 To access state within your components you can use the `useStore` hook.
 
@@ -375,7 +366,7 @@ const TodoList = () => {
 };
 ```
 
-In the case that your `useStore` implementation depends on an "external" value when mapping state. Then you should provide the respective "external" within the second argument to the `useStore`. The `useStore` hook will then track the external value and ensure to recalculate the mapped state if any of the external values change.
+In the case that your `useStore` implementation depends on an "external" value when mapping state, you should provide the respective "external" within the second argument to the `useStore`. This is a similar requirement to some of the official hooks that are bundled with React. The `useStore` hook will then track the external value and ensure that the state is remapped every time the external value(s) change.
 
 ```javascript
 import { useStore } from 'easy-peasy';
@@ -397,7 +388,7 @@ const Product = ({ id }) => {
 
 We recommend that you read the API docs for the [`useStore` hook](#usestoremapstate) to gain a full understanding of the behaviours and pitfalls of the hook.
 
-### Firing actions in your Components
+#### Firing actions in your Components
 
 In order to fire actions in your components you can use the `useActions` hook.
 
@@ -419,9 +410,14 @@ const AddTodo = () => {
 
 For more on how you can use this hook please ready the API docs for the [`useActions` hook](#useactionsmapactions).
 
-### Alternative usage via react-redux
+#### Alternative usage via react-redux
 
 As Easy Peasy outputs a standard Redux store it is entirely possible to use Easy Peasy with the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
+
+This allows you to do a few things:
+
+ - Slowly migrate a legacy application that is built using `react-redux`
+ - Connect your store to Class components via `connect` 
 
 <details>
 <summary>First, install the `react-redux` package</summary>
@@ -492,423 +488,7 @@ export default connect(
 
 <p>&nbsp;</p>
 
-This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend you give the [API](#API) documentation a quick glance so that you gain an understanding of some of the tools and helpers that Easy Peasy exposes to you.
-
----
-
-## Usage with Typescript
-
-Easy Peasy has full support for Typescript, via its bundled definitions.
-
-We announced our support for Typescript via [this Medium post](https://medium.com/@ctrlplusb/easy-typed-state-in-react-with-hooks-and-typescript-eacd32901f05).
-
-The documentation below will be expanded into higher detail soon, but the combination of the Medium post and the below examples should be enough to get you up and running for now. If anything is unclear please feel free to post and issue and we would be happy to help.
-
-We also have an [example repository](https://github.com/ctrlplusb/easy-peasy-typescript) which you can clone and run for a more interactive run through.
-
-<details>
-<summary>Firstly, you need to define a type that represents your model.</summary>
-<p>
-
-Easy Peasy exports numerous types to help you declare your model correctly.
-
-```typescript
-
-import { Action, Reducer, Thunk, Select } from 'easy-peasy'
-
-interface TodosModel {
-  items: Array<string>
-  // represents a "select"
-  firstItem: Select<TodosModel, string | void>
-  // represents an "action"
-  addTodo: Action<TodosModel, string>
-}
-
-interface UserModel {
-  token?: string
-  loggedIn: Action<UserModel, string>
-  // represents a "thunk"
-  login: Thunk<UserModel, { username: string; password: string }>
-}
-
-interface StoreModel {
-  todos: TodosModel
-  user: UserModel
-  // represents a custom reducer
-  counter: Reducer<number>
-}
-```
-
-</p>
-</details>
-
-<details>
-<summary>Then you create your store.</summary>
-<p>
-
-```typescript
-// Note that as we pass the Model into the `createStore` function. This allows
-// full type checking along with auto complete to take place
-//                          👇
-const store = createStore<StoreModel>({
-  todos: {
-    items: [],
-    firstItem: select(state =>
-      state.items.length > 0 ? state.items[0] : undefined,
-    ),
-    addTodo: action((state, payload) => {
-      state.items.push(payload)
-    }),
-  },
-  user: {
-    token: undefined,
-    loggedIn: action((state, payload) => {
-      state.token = payload
-    }),
-    login: effect(async (dispatch, payload) => {
-      const response = await fetch('/login', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      })
-      const { token } = await response.json()
-      dispatch.user.loggedIn(token)
-    }),
-  },
-  counter: reducer((state = 0, action) => {
-    switch (action.type) {
-      case 'COUNTER_INCREMENT':
-        return state + 1
-      default:
-        return state
-    }
-  }),
-})
-```
-
-</p>
-</details>
-
-<details>
-<summary>The store's APIs will be typed</summary>
-<p>
-
-```typescript
-console.log(store.getState().todos.firstItem)
-
-store.dispatch({ type: 'COUNTER_INCREMENT' })
-
-store.dispatch.todos.addTodo('Install typescript')
-```
-
-</p>
-</details>
-
-<details>
-<summary>You can type your hooks too.</summary>
-<p>
-
-``` typescript
-import { useStore, useActions, Actions, State } from 'easy-peasy';
-import { StoreModel } from './your-store';
-
-function MyComponent() {
-  const token = useStore((state: State<StoreModel>) =>
-    state.user.token
-  )
-  const login = useActions((actions: Actions<StoreModel>) =>
-	  actions.user.login,
-  )
-  return (
-    <button onClick={() => login({ username: 'foo', password: 'bar' })}>
-      {token || 'Log in'}
-    </button>
-  )
-}
-```
-
-The above can become a bit cumbersome - having to constantly provide your types to the hooks. Therefore we recommend using the bundled `createTypedHooks` helper in order to create pre-typed versions of the hooks.
-
-```typescript
-// hooks.js
-
-import { createTypedHooks } from "easy-peasy";
-import { StoreModel } from "./model";
-
-export default createTypedHooks<StoreModel>();
-```
-
-We could then revise our previous example.
-
-``` typescript
-import { useStore, useActions } from './hooks';
-
-function MyComponent() {
-  const token = useStore((state) => state.user.token)
-  const login = useActions((actions) => actions.user.login)
-  return (
-    <button onClick={() => login({ username: 'foo', password: 'bar' })}>
-      {token || 'Log in'}
-    </button>
-  )
-}
-```
-
-That's far cleaner - and it's still fully type checked.
-
-</p>
-</details>
-
-<details>
-<summary>We also support typing `react-redux` based integrations.</summary>
-<p>
-
-```typescript
-const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
-  <div>{counter}</div>
-)
-
-connect((state: State<StoreModel>) => ({
-  counter: state.counter,
-}))(Counter)
-```
-
-</p>
-</details>
-
-<p>&nbsp;</p>
-
----
-
-## Usage with React Native
-
-Easy Peasy is platform agnostic but makes use of features that may not be available in all environments.
-
-<details>
-<summary>How to enable remote Redux dev tools</summary>
-<p>
-React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
-
-To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
-
-```javascript
-import { createStore } from 'easy-peasy';
-import { composeWithDevTools } from 'remote-redux-devtools';
-import model from './model';
-
-/**
- * model, is used for passing through the base model
- * the second argument takes an object for additional configuration
- */
-
-const store = createStore(model, {
-  compose: composeWithDevTools({ realtime: true, trace: true })
-  // initialState: {}
-});
-
-export default store;
-```
-
-See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
-</p>
-</details>
-
-<p>&nbsp;</p>
-
----
-
-## Writing Tests
-
-The below covers some strategies for testing your store / components. If you have any useful test strategies please consider making a pull request so that we can expand this section.
-
-All the below examples are using [Jest](https://jestjs.io) as the test framework, but the ideas should hopefully translate easily onto your test framework of choice.
-
-In the examples below you will see that we are testing specific parts of our model in isolation. This makes it far easier to do things like bootstrapping initial state for testing purposes, whilst making your tests less brittle to changes in your full store model structure.
-
-<details>
-<summary>Testing an action</summary>
-<p>
-
-Actions are relatively simple to test as they are essentially an immutable update to the store. We can therefore test the difference.
-
-Given the following model under test:
-
-```typescript
-import { action } from 'easy-peasy'
-
-const todosModel = {
-  items: {},
-  add: action((state, payload) => {
-    state.items[payload.id] = payload
-  }),
-}
-```
-
-We could test it like so:
-
-```typescript
-test('add action', async () => {
-  // arrange
-  const todo = { id: 1, text: 'foo' }
-  const store = createStore(todosModel)
-
-  // act
-  store.dispatch.add(todo)
-
-  // assert
-  expect(store.getState().items).toEqual({ [todo.id]: todo })
-})
-```
-
-</p>
-</details>
-
-<details>
-<summary>Testing a thunk</summary>
-<p>
-
-Thunks are more complicated to test than actions as they can invoke network requests and other actions.
-
-There will likely be seperate tests for our actions, therefore it is recommended that you don't test for the state changes of actions fired by your thunk. We rather recommend that you test for what actions were fired from your thunk under test.
-
-To do this we expose an additional configuration value on the `createStore` API, specifically `mockActions`. If you set the `mockActions` configuration value, then all actions that are dispatched will not affect state, and will instead be mocked and recorded. You can get access to the recorded actions via the `getMockedActions` function that is available on the store instance. We took inspiration for this functionality from the awesome [`redux-mock-store`](https://github.com/dmitry-zaets/redux-mock-store) package.
-
-In addition to this approach, if you perform side effects such as network requests within your thunks, we highly recommend that you expose the modules you use to do so via the `injections` configuration variable of your store. If you do this then it makes it significantly easier to provide mocked instances to your thunks when testing.
-
-We will demonstrate all of the above within the below example.
-
-Given the following model under test:
-
-```typescript
-import { action, thunk } from 'thunk';
-
-const todosModel = {
-  items: {},
-  add: action((state, payload) => {
-    state.items[payload.id] = payload
-  }),
-  fetchById: thunk(async (actions, payload, helpers) => {
-    const { injections } = helpers
-    const todo = await injections.fetch(`/todos/${payload}`).then(r => r.json())
-    actions.add(todo)
-  }),
-}
-```
-
-We could test it like so:
-
-```typescript
-import { createStore, actionName, thunkStartName, thunkCompleteName, thunkFailName } from 'easy-peasy'
-
-const createFetchMock = response =>
-  jest.fn(() => Promise.resolve({ json: () => Promise.resolve(response) }))
-
-test('fetchById', async () => {
-  // arrange
-  const todo = { id: 1, text: 'Test my store' }
-  const fetch = createFetchMock(todo)
-  const store = createStore(todosModel, {
-    injections: { fetch },
-    mockActions: true,
-  })
-
-  // act
-  await store.dispatch.fetchById(todo.id)
-
-  // assert
-  expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`)
-  expect(store.getMockedActions()).toEqual([
-    { type: thunkStartName(todosModel.fetchById), payload: todo.id },
-    { type: actionName(todosModel.add), payload: todo },
-    { type: thunkCompleteName(todosModel.fetchById), payload: todo.id },
-  ])
-})
-```
-
-</p>
-</details>
-
-<details>
-<summary>Testing components</summary>
-<p>
-
-When testing your components I strongly recommend the approach recommended by Kent C. Dodd's awesome [Testing Javascript](https://testingjavascript.com/) course, where you try to test the behaviour of your components using a natural DOM API, rather than reaching into the internals of your components. He has published a very useful package by the name of [`react-testing-library`](https://github.com/kentcdodds/react-testing-library) to help us do so. The tests below shall be adopting this package and strategy.
-
-Imagine we were trying to test the following component.
-
-```typescript
-function Counter() {
-  const count = useStore(state => state.count)
-  const increment = useActions(actions => actions.increment)
-  return (
-    <div>
-      Count: <span data-testid="count">{count}</span>
-      <button type="button" onClick={increment}>
-        +
-      </button>
-    </div>
-  )
-}
-```
-
-As you can see it is making use of our hooks to gain access to state and actions of our store.
-
-We could adopt the following strategy to test it.
-
-```typescript
-import { createStore, StoreProvider } from 'easy-peasy'
-import model from './model';
-
-test('Counter', () => {
-  // arrange
-  const store = createStore(model)
-  const app = (
-    <StoreProvider store={store}>
-      <ComponentUnderTest />
-    </StoreProvider>
-  )
-
-  // act
-  const { getByTestId, getByText } = render(app)
-
-  // assert
-  expect(getByTestId('count').textContent).toEqual('0')
-
-  // act
-  fireEvent.click(getByText('+'))
-
-  // assert
-  expect(getByTestId('count').textContent).toEqual('1')
-})
-```
-
-As you can see we create a store instance in the context of our test and wrap the component under test with the `StoreProvider`. This allows our component to act against our store.
-
-We then interact with our component using the DOM API exposed by the render.
-
-This grants us great power in being able to test our components with a great degree of confidence that they will behave as expected.
-
-Some other strategies that you could employ whilst using this pattern include:
-
-  - Providing an initial state to your store within the test.
-
-    ```typescript
-    test('Counter', () => {
-      // arrange
-      const store = createStore(model, { initialState: initialStateForTest })
-
-      // ...
-    })
-    ```
-
-  - Utilising the `injections` and `mockActions` configurations of the `createStore` to avoid performing actions with side effects in your test.
-
-There is no one way to test your components, but it is good to know of the tools available to you. However you choose to test your components, I do recommend that you try to test them as close to their real behaviour as possible - i.e. try your best to prevent implementation details leaking into your tests.
-
-</p>
-</details>
+This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend you read through the [API](#API) documentation to gain a more full understanding of the tools and helpers that Easy Peasy exposes to you.
 
 <p>&nbsp;</p>
 
@@ -1817,7 +1397,428 @@ const AddTodo = () => {
 </p>
 </details>
 
+<p>&nbsp;</p>
+
 ---
+
+## Usage with Typescript
+
+Easy Peasy has full support for Typescript, via its bundled definitions.
+
+We announced our support for Typescript via [this Medium post](https://medium.com/@ctrlplusb/easy-typed-state-in-react-with-hooks-and-typescript-eacd32901f05).
+
+The documentation below will be expanded into higher detail soon, but the combination of the Medium post and the below examples should be enough to get you up and running for now. If anything is unclear please feel free to post and issue and we would be happy to help.
+
+We also have an [example repository](https://github.com/ctrlplusb/easy-peasy-typescript) which you can clone and run for a more interactive run through.
+
+<details>
+<summary>Firstly, you need to define a type that represents your model.</summary>
+<p>
+
+Easy Peasy exports numerous types to help you declare your model correctly.
+
+```typescript
+
+import { Action, Reducer, Thunk, Select } from 'easy-peasy'
+
+interface TodosModel {
+  items: Array<string>
+  // represents a "select"
+  firstItem: Select<TodosModel, string | void>
+  // represents an "action"
+  addTodo: Action<TodosModel, string>
+}
+
+interface UserModel {
+  token?: string
+  loggedIn: Action<UserModel, string>
+  // represents a "thunk"
+  login: Thunk<UserModel, { username: string; password: string }>
+}
+
+interface StoreModel {
+  todos: TodosModel
+  user: UserModel
+  // represents a custom reducer
+  counter: Reducer<number>
+}
+```
+
+</p>
+</details>
+
+<details>
+<summary>Then you create your store.</summary>
+<p>
+
+```typescript
+// Note that as we pass the Model into the `createStore` function. This allows
+// full type checking along with auto complete to take place
+//                          👇
+const store = createStore<StoreModel>({
+  todos: {
+    items: [],
+    firstItem: select(state =>
+      state.items.length > 0 ? state.items[0] : undefined,
+    ),
+    addTodo: action((state, payload) => {
+      state.items.push(payload)
+    }),
+  },
+  user: {
+    token: undefined,
+    loggedIn: action((state, payload) => {
+      state.token = payload
+    }),
+    login: effect(async (dispatch, payload) => {
+      const response = await fetch('/login', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      const { token } = await response.json()
+      dispatch.user.loggedIn(token)
+    }),
+  },
+  counter: reducer((state = 0, action) => {
+    switch (action.type) {
+      case 'COUNTER_INCREMENT':
+        return state + 1
+      default:
+        return state
+    }
+  }),
+})
+```
+
+</p>
+</details>
+
+<details>
+<summary>The store's APIs will be typed</summary>
+<p>
+
+```typescript
+console.log(store.getState().todos.firstItem)
+
+store.dispatch({ type: 'COUNTER_INCREMENT' })
+
+store.dispatch.todos.addTodo('Install typescript')
+```
+
+</p>
+</details>
+
+<details>
+<summary>You can type your hooks too.</summary>
+<p>
+
+``` typescript
+import { useStore, useActions, Actions, State } from 'easy-peasy';
+import { StoreModel } from './your-store';
+
+function MyComponent() {
+  const token = useStore((state: State<StoreModel>) =>
+    state.user.token
+  )
+  const login = useActions((actions: Actions<StoreModel>) =>
+	  actions.user.login,
+  )
+  return (
+    <button onClick={() => login({ username: 'foo', password: 'bar' })}>
+      {token || 'Log in'}
+    </button>
+  )
+}
+```
+
+The above can become a bit cumbersome - having to constantly provide your types to the hooks. Therefore we recommend using the bundled `createTypedHooks` helper in order to create pre-typed versions of the hooks.
+
+```typescript
+// hooks.js
+
+import { createTypedHooks } from "easy-peasy";
+import { StoreModel } from "./model";
+
+export default createTypedHooks<StoreModel>();
+```
+
+We could then revise our previous example.
+
+``` typescript
+import { useStore, useActions } from './hooks';
+
+function MyComponent() {
+  const token = useStore((state) => state.user.token)
+  const login = useActions((actions) => actions.user.login)
+  return (
+    <button onClick={() => login({ username: 'foo', password: 'bar' })}>
+      {token || 'Log in'}
+    </button>
+  )
+}
+```
+
+That's far cleaner - and it's still fully type checked.
+
+</p>
+</details>
+
+<details>
+<summary>We also support typing `react-redux` based integrations.</summary>
+<p>
+
+```typescript
+const Counter: React.SFC<{ counter: number }> = ({ counter }) => (
+  <div>{counter}</div>
+)
+
+connect((state: State<StoreModel>) => ({
+  counter: state.counter,
+}))(Counter)
+```
+
+</p>
+</details>
+
+<p>&nbsp;</p>
+
+---
+
+## Usage with React Native
+
+Easy Peasy is platform agnostic but makes use of features that may not be available in all environments.
+
+<details>
+<summary>How to enable remote Redux dev tools</summary>
+<p>
+React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
+
+To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
+
+```javascript
+import { createStore } from 'easy-peasy';
+import { composeWithDevTools } from 'remote-redux-devtools';
+import model from './model';
+
+/**
+ * model, is used for passing through the base model
+ * the second argument takes an object for additional configuration
+ */
+
+const store = createStore(model, {
+  compose: composeWithDevTools({ realtime: true, trace: true })
+  // initialState: {}
+});
+
+export default store;
+```
+
+See [https://github.com/zalmoxisus/remote-redux-devtools#parameters](https://github.com/zalmoxisus/remote-redux-devtools#parameters) for all configuration options.
+</p>
+</details>
+
+<p>&nbsp;</p>
+
+---
+
+## Writing Tests
+
+The below covers some strategies for testing your store / components. If you have any useful test strategies please consider making a pull request so that we can expand this section.
+
+All the below examples are using [Jest](https://jestjs.io) as the test framework, but the ideas should hopefully translate easily onto your test framework of choice.
+
+In the examples below you will see that we are testing specific parts of our model in isolation. This makes it far easier to do things like bootstrapping initial state for testing purposes, whilst making your tests less brittle to changes in your full store model structure.
+
+<details>
+<summary>Testing an action</summary>
+<p>
+
+Actions are relatively simple to test as they are essentially an immutable update to the store. We can therefore test the difference.
+
+Given the following model under test:
+
+```typescript
+import { action } from 'easy-peasy'
+
+const todosModel = {
+  items: {},
+  add: action((state, payload) => {
+    state.items[payload.id] = payload
+  }),
+}
+```
+
+We could test it like so:
+
+```typescript
+test('add action', async () => {
+  // arrange
+  const todo = { id: 1, text: 'foo' }
+  const store = createStore(todosModel)
+
+  // act
+  store.dispatch.add(todo)
+
+  // assert
+  expect(store.getState().items).toEqual({ [todo.id]: todo })
+})
+```
+
+</p>
+</details>
+
+<details>
+<summary>Testing a thunk</summary>
+<p>
+
+Thunks are more complicated to test than actions as they can invoke network requests and other actions.
+
+There will likely be seperate tests for our actions, therefore it is recommended that you don't test for the state changes of actions fired by your thunk. We rather recommend that you test for what actions were fired from your thunk under test.
+
+To do this we expose an additional configuration value on the `createStore` API, specifically `mockActions`. If you set the `mockActions` configuration value, then all actions that are dispatched will not affect state, and will instead be mocked and recorded. You can get access to the recorded actions via the `getMockedActions` function that is available on the store instance. We took inspiration for this functionality from the awesome [`redux-mock-store`](https://github.com/dmitry-zaets/redux-mock-store) package.
+
+In addition to this approach, if you perform side effects such as network requests within your thunks, we highly recommend that you expose the modules you use to do so via the `injections` configuration variable of your store. If you do this then it makes it significantly easier to provide mocked instances to your thunks when testing.
+
+We will demonstrate all of the above within the below example.
+
+Given the following model under test:
+
+```typescript
+import { action, thunk } from 'thunk';
+
+const todosModel = {
+  items: {},
+  add: action((state, payload) => {
+    state.items[payload.id] = payload
+  }),
+  fetchById: thunk(async (actions, payload, helpers) => {
+    const { injections } = helpers
+    const todo = await injections.fetch(`/todos/${payload}`).then(r => r.json())
+    actions.add(todo)
+  }),
+}
+```
+
+We could test it like so:
+
+```typescript
+import { createStore, actionName, thunkStartName, thunkCompleteName, thunkFailName } from 'easy-peasy'
+
+const createFetchMock = response =>
+  jest.fn(() => Promise.resolve({ json: () => Promise.resolve(response) }))
+
+test('fetchById', async () => {
+  // arrange
+  const todo = { id: 1, text: 'Test my store' }
+  const fetch = createFetchMock(todo)
+  const store = createStore(todosModel, {
+    injections: { fetch },
+    mockActions: true,
+  })
+
+  // act
+  await store.dispatch.fetchById(todo.id)
+
+  // assert
+  expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`)
+  expect(store.getMockedActions()).toEqual([
+    { type: thunkStartName(todosModel.fetchById), payload: todo.id },
+    { type: actionName(todosModel.add), payload: todo },
+    { type: thunkCompleteName(todosModel.fetchById), payload: todo.id },
+  ])
+})
+```
+
+</p>
+</details>
+
+<details>
+<summary>Testing components</summary>
+<p>
+
+When testing your components I strongly recommend the approach recommended by Kent C. Dodd's awesome [Testing Javascript](https://testingjavascript.com/) course, where you try to test the behaviour of your components using a natural DOM API, rather than reaching into the internals of your components. He has published a very useful package by the name of [`react-testing-library`](https://github.com/kentcdodds/react-testing-library) to help us do so. The tests below shall be adopting this package and strategy.
+
+Imagine we were trying to test the following component.
+
+```typescript
+function Counter() {
+  const count = useStore(state => state.count)
+  const increment = useActions(actions => actions.increment)
+  return (
+    <div>
+      Count: <span data-testid="count">{count}</span>
+      <button type="button" onClick={increment}>
+        +
+      </button>
+    </div>
+  )
+}
+```
+
+As you can see it is making use of our hooks to gain access to state and actions of our store.
+
+We could adopt the following strategy to test it.
+
+```typescript
+import { createStore, StoreProvider } from 'easy-peasy'
+import model from './model';
+
+test('Counter', () => {
+  // arrange
+  const store = createStore(model)
+  const app = (
+    <StoreProvider store={store}>
+      <ComponentUnderTest />
+    </StoreProvider>
+  )
+
+  // act
+  const { getByTestId, getByText } = render(app)
+
+  // assert
+  expect(getByTestId('count').textContent).toEqual('0')
+
+  // act
+  fireEvent.click(getByText('+'))
+
+  // assert
+  expect(getByTestId('count').textContent).toEqual('1')
+})
+```
+
+As you can see we create a store instance in the context of our test and wrap the component under test with the `StoreProvider`. This allows our component to act against our store.
+
+We then interact with our component using the DOM API exposed by the render.
+
+This grants us great power in being able to test our components with a great degree of confidence that they will behave as expected.
+
+Some other strategies that you could employ whilst using this pattern include:
+
+  - Providing an initial state to your store within the test.
+
+    ```typescript
+    test('Counter', () => {
+      // arrange
+      const store = createStore(model, { initialState: initialStateForTest })
+
+      // ...
+    })
+    ```
+
+  - Utilising the `injections` and `mockActions` configurations of the `createStore` to avoid performing actions with side effects in your test.
+
+There is no one way to test your components, but it is good to know of the tools available to you. However you choose to test your components, I do recommend that you try to test them as close to their real behaviour as possible - i.e. try your best to prevent implementation details leaking into your tests.
+
+</p>
+</details>
+
+<p>&nbsp;</p>
+
+---
+
 
 ## Typescript API
 
