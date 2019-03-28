@@ -1,5 +1,26 @@
 import { createStore, action, listen, thunk } from '../index';
 
+test('issue 100', () => {
+  // arrange
+  const model = {
+    account: {
+      profile: {
+        // foo: "bar",
+        setProperty: (state, payload) => {
+          state[payload.key] = payload.value;
+        },
+      },
+    },
+  };
+  const store = createStore(model);
+
+  // act
+  const actual = store.getState().account.profile;
+
+  // assert
+  expect(actual).toBeDefined();
+});
+
 test('issue#139', done => {
   // arrange
   const model = {

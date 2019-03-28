@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from 'react-testing-library';
