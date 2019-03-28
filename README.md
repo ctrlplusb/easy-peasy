@@ -214,36 +214,38 @@ const store = createStore({
     //         👇 define the action with the helper
     addTodo: action((state, payload) => {
       // Mutate the state directly. Under the hood we convert this to an
-      // an immutable update in the store, but at least you don't need to
-      // worry about being careful to return new instances etc. This also
-      // makes it easy to update deeply nested items.
+      // an immutable update.
       state.items.push(payload)
     })
   }
 });
 ```
 
-The action will receive as its first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for `state`. It will also receive any `payload` that may have been provided when the action was triggered.
+The action will receive as its first parameter the slice of the state that it was added to. So in the example above our action would receive `{ items: [] }` as the value for its `state` argument. It will also receive any `payload` that may have been provided when the action was triggered.
 
-> Note: Some prefer not to use a mutation based API. You can return new "immutable" instances of your state if you prefer:
+> Note: Some prefer not to use a mutation based API. You can alternatively return new instances of your state:
 >
 > ```javascript
 > addTodo: action((state, payload) => {
 >   return { ...state, items: [...state.items, payload] };
 > })
 > ```
+>
+> Personally I find the above harder to read and more prone to error.
 
 #### Dispatching actions directly via the store
 
-Easy Peasy will bind your actions against the store's `dispatch` using paths that match the location of the action on your model. This allows you to easily dispatch your actions, providing any payload that they may require.
+Easy Peasy will bind your actions against the stores `dispatch`. They will be bound using paths that match the location of the action on your model.
 
 ```javascript
+//                                    |-- payload
+//                           |------------------|
 store.dispatch.todos.addTodo('Install easy-peasy');
 //            |-------------|
 //                  |-- path matches our model (todos.addTodo)
 ```
 
-Check your state and you should see that it is updated.
+Call `getState` to see the updated state.
 
 ```javascript
 store.getState().todos.items;
