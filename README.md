@@ -281,13 +281,11 @@ const store = createStore({
 });
 ```
 
-As you can see in the example above you can't modify the state directly within an `thunk` action, however, the `thunk` action is provided `actions`, which contains all the actions scoped to where the `thunk` exists on your model. This allows you to delegate to state updates to "normal" actions where required.
-
-> Note: If you want to dispatch actions that live within other branches of your model you can use the `dispatch` which is provided inside the `helper` argument. See the `thunk` API docs for more information.
+You cannot modify the state within a `thunk`, however, the `thunk` is provided the `actions` that are local to it. This allows you to delegate state updates via your actions (an experience similar to that of `redux-thunk`). 
 
 #### Dispatching a `thunk` action directly via the store
 
-You can dispatch a thunk action in the same manner as a normal action. However, a `thunk` action always returns a `Promise` allowing you to chain in order to execute after the `thunk` has completed.
+You can dispatch a thunk action in the same manner as a normal action. A `thunk` action always returns a `Promise` allowing you to execute any process after the `thunk` has completed.
 
 ```javascript
 store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
@@ -316,11 +314,11 @@ The derived data will be cached and will only be recalculated when the associate
 
 This can be really helpful to avoid unnecessary re-renders in your react components, especially when you do things like converting an object map to an array in your `connect`. Typically people would use [`reselect`](https://github.com/reduxjs/reselect) to alleviate this issue, however, with Easy Peasy it's this feature is baked right in.
 
-You can attach selectors to any part of your state. Similar to actions they will receive the local state that they are attached to and can access all the state down that branch of state.
+> Note: we don't recommend attaching selectors to the root of your store, as those will be executed for _every_ change to your store. If you absolutely need to, try to attach as few selectors to the root as you can.
 
 #### Accessing Derived State directly via the store
 
-You can access derived state as though it were a standard piece of state.
+You can access derived state as though it were a normal piece of state.
 
 ```javascript
 store.getState().shoppingBasket.totalPrice
