@@ -237,13 +237,16 @@ export default function createStoreInternals({
     if (parentPath.length > 0) {
       const target = get(parentPath, stateAfterDependencies);
       if (target) {
-        if (!selector.prevState || selector.prevState !== state) {
+        if (
+          !selector.prevState ||
+          selector.prevState !== get(parentPath, state)
+        ) {
           const newValue = selector[selectImpSymbol](target);
           newState = produce(state, draft => {
             const updateTarget = get(parentPath, draft);
             updateTarget[key] = newValue;
           });
-          selector.prevState = newState;
+          selector.prevState = get(parentPath, newState);
         }
       }
     } else if (!selector.prevState || selector.prevState !== state) {
