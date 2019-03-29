@@ -89,9 +89,9 @@ function TodoList() {
       - [Accessing Derived State directly via the store](#accessing-derived-state)
     - [Usage with React](#usage-with-react)
       - [Wrap your app with StoreProvider](#wrap-your-app-with-storeprovider)
-      - [Consuming state in your Components](#consuming-state-in-your-components)
-      - [Firing actions in your Components](#firing-actions-in-your-components)
-      - [Alternative usage via react-redux](#alternative-usage-via-react-redux)
+      - [Accessing state in your Components](#accessing-state-in-your-components)
+      - [Dispatching actions in your Components](#dispatching-actions-in-your-components)
+      - [Usage via react-redux](#usage-via-react-redux)
   - [API](#api)
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
@@ -103,7 +103,6 @@ function TodoList() {
     - [useStore(mapState, externals)](#usestoremapstate-externals)
     - [useActions(mapActions)](#useactionsmapactions)
     - [useDispatch()](#usedispatch)
-    - [createTypedHooks()](#createTypedHooks)
   - [Usage with Typescript](#usage-with-typescript)
   - [Usage with React Native](#usage-with-react-native)
   - [Writing Tests](#writing-tests)
@@ -326,9 +325,53 @@ store.getState().shoppingBasket.totalPrice
 
 > Note! See how we don't call the derived state as a function. You access it as a simple property.
 
+#### Updating multiple parts of your state in response to a thunk/action
+
+When firing an action you may want multiple parts of your model to respond to it. For example, you may want to clear certain parts of your state when a user logs out. Or perhaps you want an audit log that tracks specific events.
+
+Easy Peasy provides you with the `listen` helper to do this.
+
+```javascript
+import { listen } from 'easy-peasy'; // 👈 import then helper
+
+const todosModel = {
+  items: [],
+  // 👇 the action we wish to respond to / track
+  addTodo: action((state, payload) => {
+    state.items.push(payload)
+  })
+};
+
+const auditModel = {
+  logs: [],
+  //          👇 declare listeners via the helper
+  listeners: listen((on) => {
+    on(
+      //           👇 pass in the reference to the action we wish to listen to
+      todosModel.addTodo, 
+      // 👇 the action we wish to execute after `addTodo` has completed
+      action((state, payload) => {
+        state.logs.push(`Added a new todo: ${payload}`);
+      })
+    );
+  })
+};
+
+const model = {
+  todos: todosModel,
+  audit: auditModel
+};
+```
+
+This is a more advanced feature, however, using this method allows a clearer seperation of concerns and promotes reactive programming.
+
+You can do more than this with the `listen` helper. You can listen to an `action` or a `thunk`, and can execute either an `action` or a `thunk` in response. Please read the [docs](#listenon) for more information.
+
 ### Usage with React
 
-We will now cover how to interact with your store from your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
+We will now cover how to integrate your store with your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
+
+> If you want to be able to use your Easy Peasy store with Class components then you can utilise the `react-redux` package - this is covered further down in the tutorial.
 
 > If you haven't done so already we highly recommend that you install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This will allow you to visualise your actions firing along with the associated state updates.
 
@@ -349,7 +392,7 @@ const App = () => (
 )
 ```
 
-#### Consuming state in your Components
+#### Accessing state in your Components
 
 To access state within your components you can use the `useStore` hook.
 
@@ -388,7 +431,7 @@ const Product = ({ id }) => {
 
 We recommend that you read the API docs for the [`useStore` hook](#usestoremapstate) to gain a full understanding of the behaviours and pitfalls of the hook.
 
-#### Firing actions in your Components
+#### Dispatching actions in your Components
 
 In order to fire actions in your components you can use the `useActions` hook.
 
@@ -410,7 +453,7 @@ const AddTodo = () => {
 
 For more on how you can use this hook please ready the API docs for the [`useActions` hook](#useactionsmapactions).
 
-#### Alternative usage via react-redux
+#### Usage via react-redux
 
 As Easy Peasy outputs a standard Redux store it is entirely possible to use Easy Peasy with the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
 
