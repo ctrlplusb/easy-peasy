@@ -35,6 +35,7 @@ export default function createStoreInternals({
   disableInternalSelectFnMemoize,
   initialState,
   injections,
+  isRebind,
   model,
   reducerEnhancer,
   references,
@@ -44,7 +45,7 @@ export default function createStoreInternals({
       ? memoizerific(maxSelectFnMemoize)(x)
       : x;
 
-  const defaultState = {};
+  const defaultState = isRebind ? {} : initialState || {};
   const actionThunks = {};
   const actionCreators = {};
   const actionCreatorDict = {};
@@ -149,12 +150,15 @@ export default function createStoreInternals({
           );
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
-        set(path, defaultState, {});
+        const existing = get(parentPath, defaultState);
+        if (!existing || isRebind) {
+          set(path, defaultState, {});
+        }
         recursiveExtractDefsFromModel(value, path);
       } else {
         // State
         const initialParentRef = get(parentPath, initialState);
-        if (initialParentRef && key in initialParentRef) {
+        if (!isRebind && initialParentRef && key in initialParentRef) {
           set(path, defaultState, initialParentRef[key]);
         } else {
           set(path, defaultState, value);

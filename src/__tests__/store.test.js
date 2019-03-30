@@ -237,7 +237,7 @@ test('supports initial state', () => {
     foo: {
       bar: {
         stuff: [3, 4],
-        invalid: 'qux',
+        quxx: 'qux',
       },
     },
   };
@@ -248,6 +248,7 @@ test('supports initial state', () => {
     foo: {
       bar: {
         stuff: [3, 4],
+        quxx: 'qux',
       },
       color: 'red',
     },
@@ -297,4 +298,19 @@ test('redux thunk configured', async () => {
   const result = await store.dispatch(thunkAction('foo'));
   // assert
   expect(result).toBe('foo');
+});
+
+test('initialState is respected even if not in model', () => {
+  // act
+  const store = createStore(
+    {},
+    {
+      initialState: {
+        foo: 'bar',
+      },
+    },
+  );
+
+  // assert
+  expect(store.getState().foo).toEqual('bar');
 });
