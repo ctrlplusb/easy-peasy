@@ -45,7 +45,7 @@ export default function createStoreInternals({
       ? memoizerific(maxSelectFnMemoize)(x)
       : x;
 
-  const defaultState = isRebind ? {} : initialState || {};
+  const defaultState = initialState || {};
   const actionThunks = {};
   const actionCreators = {};
   const actionCreatorDict = {};
@@ -150,8 +150,8 @@ export default function createStoreInternals({
           );
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
-        const existing = get(parentPath, defaultState);
-        if (!existing || isRebind) {
+        const existing = get(path, defaultState);
+        if (existing == null) {
           set(path, defaultState, {});
         }
         recursiveExtractDefsFromModel(value, path);

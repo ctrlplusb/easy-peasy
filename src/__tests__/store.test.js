@@ -314,3 +314,20 @@ test('initialState is respected even if not in model', () => {
   // assert
   expect(store.getState().foo).toEqual('bar');
 });
+
+test('nested empty model', () => {
+  // arrange
+  const store = createStore({
+    counters: {
+      add: action(state => {
+        state[Date.now()] = true;
+      }),
+    },
+  });
+
+  // act
+  store.dispatch.counters.add();
+
+  // assert
+  expect(Object.keys(store.getState().counters).length).toBe(1);
+});
