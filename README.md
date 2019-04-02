@@ -2085,7 +2085,7 @@ const store = createStore({
         state.data[product.id] = product;
       });
     }),
-    fetch: thunk((actions) => {
+    fetch: thunk(async (actions) => {
       const data = await fetchProducts();
       actions.fetched(data);
     })
@@ -2098,7 +2098,7 @@ const store = createStore({
         state.data[user.id] = user;
       });
     }),
-    fetch: thunk((dispatch) => {
+    fetch: thunk(async (dispatch) => {
       const data = await fetchUsers();
       actions.fetched(data);
     })
@@ -2117,7 +2117,7 @@ const data = (endpoint) => ({
       state.data[item.id] = item;
     });
   }),
-  fetch: thunk((actions, payload) => {
+  fetch: thunk(async (actions, payload) => {
     const data = await endpoint();
     actions.fetched(data);
   })
