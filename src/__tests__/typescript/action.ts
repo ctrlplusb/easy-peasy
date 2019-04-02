@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { createStore, action, Action } from 'easy-peasy';
 
 interface TodosModel {

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { Actions, Thunk, Action, Select, Listen, Reducer } from 'easy-peasy';
 
 type Model = {

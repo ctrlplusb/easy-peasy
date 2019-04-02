@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { action, Action, createStore } from 'easy-peasy';
 
 interface IAnimal {

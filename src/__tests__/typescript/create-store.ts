@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { action, createStore, EasyPeasyConfig, Action } from 'easy-peasy';
 
 interface StoreModel {
