@@ -21,8 +21,6 @@ import {
 } from 'redux';
 import { string } from 'prop-types';
 
-type AsyncActionTypes = Thunk<any, any, any, any, any>;
-
 type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
 type Meta = {
@@ -74,12 +72,10 @@ type FilterStateTypes<T extends object> = Overwrite<
 export type Actions<Model extends Object> = {
   [P in keyof FilterActionTypes<
     Pick<Model, KeysOfType<Model, object>>
-  >]: Model[P] extends AsyncActionTypes
-    ? (
-        payload: Model[P]['payload'],
-      ) => Model[P]['result'] extends Promise<any>
-        ? Model[P]['result']
-        : Promise<Model[P]['result']>
+  >]: Model[P] extends Thunk<any, any, any, any, infer R>
+    ? Param1<Model[P]> extends void
+      ? () => R extends Promise<any> ? R : Promise<R>
+      : (payload: Param1<Model[P]>) => R extends Promise<any> ? R : Promise<R>
     : Model[P] extends Action<any, any>
     ? Param1<Model[P]> extends void
       ? () => void
@@ -98,10 +94,10 @@ type RecursiveState<
   { [P in keyof OtherModel]: OtherModel[P] },
   Overwrite<
     {
-      [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, any>
-        ? RequiredModel[P]['result']
-        : RequiredModel[P] extends Reducer<any, any>
-        ? RequiredModel[P]['result']
+      [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, infer R>
+        ? R
+        : RequiredModel[P] extends Reducer<infer R, any>
+        ? R
         : RequiredModel[P] extends object
         ? RequiredModel[P] extends Array<any> | RegExp | Date
           ? RequiredModel[P]
@@ -109,10 +105,10 @@ type RecursiveState<
         : RequiredModel[P]
     },
     {
-      [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, any>
-        ? OptionalModel[P]['result']
-        : OptionalModel[P] extends Reducer<any, any>
-        ? OptionalModel[P]['result']
+      [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, infer R>
+        ? R
+        : OptionalModel[P] extends Reducer<infer R, any>
+        ? R
         : OptionalModel[P] extends object
         ? OptionalModel[P] extends Array<any> | RegExp | Date
           ? OptionalModel[P]
@@ -323,7 +319,7 @@ export function listen<
             Model,
             ListenAction extends string
               ? any
-              : ListenAction extends AsyncActionTypes
+              : ListenAction extends Thunk<any, any, any, any, any>
               ? ListenAction['payload']
               : Param1<ListenAction>,
             Injections,
@@ -333,7 +329,7 @@ export function listen<
             Model,
             ListenAction extends string
               ? any
-              : ListenAction extends AsyncActionTypes
+              : ListenAction extends Thunk<any, any, any, any, any>
               ? ListenAction['payload']
               : Param1<ListenAction>
           >,
