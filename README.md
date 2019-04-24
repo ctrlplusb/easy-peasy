@@ -430,7 +430,7 @@ const Product = ({ id }) => {
 };
 ```
 
-We recommend that you read the API docs for the [`useStore` hook](#usestoremapstate) to gain a full understanding of the behaviours and pitfalls of the hook.
+We recommend that you read the API docs for the [`useStore` hook](#usestoremapstate-externals) to gain a full understanding of the behaviours and pitfalls of the hook.
 
 #### Dispatching actions in your Components
 
