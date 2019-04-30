@@ -368,6 +368,11 @@ This is a more advanced feature, however, using this method allows a clearer sep
 
 You can do more than this with the `listen` helper. You can listen to an `action` or a `thunk`, and can execute either an `action` or a `thunk` in response. Please read the [docs](#listenon) for more information.
 
+#### A note on Nesting State
+`action` and `select` 'state' and `thunk` 'actions' operate only on the local part of the tree in which they are defined.
+The rule of thumb is to consider that every object introduced into your state is in fact it's own namespaced model.
+Therefore for the helpers (select, thunk, action etc), all have to be applied on an interface without nesting.
+
 ### Usage with React
 
 We will now cover how to integrate your store with your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
