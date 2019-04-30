@@ -13,6 +13,40 @@
 ```javascript
 import { action, createStore, StoreProvider, useStore, useActions } from 'easy-peasy';
 
+const store = createStore({
+  todos: {
+    items: ['Install easy-peasy', 'Define your model', 'Have fun'],
+    add: action((state, payload) => {
+      state.items.push(payload)
+    })
+  }
+});
+
+const App = () => (
+  <StoreProvider store={store}>
+    <TodoList />
+  </StoreProvider>
+)
+
+function TodoList() {
+  const todos = useStore(state => state.todos.items)
+  const add = useActions(actions => actions.todos.add)
+  return (
+    <div>
+      {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
+      <AddTodo onAdd={add} />
+    </div>
+  )
+}
+```
+
+<details>
+<summary>View the above code snippet with comments</summary>
+<p>
+
+```javascript
+import { action, createStore, StoreProvider, useStore, useActions } from 'easy-peasy';
+
 // 👇 create your store, providing the model
 const store = createStore({
   todos: {
@@ -45,6 +79,9 @@ function TodoList() {
   )
 }
 ```
+
+</p>
+</details>
 
 ## Features
 
