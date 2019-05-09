@@ -91,7 +91,10 @@ export default function createStore(model, options = {}) {
 
   const mockActionsMiddleware = () => next => action => {
     if (mockActions) {
-      if (action && action.type === '@@EP/LISTENER') {
+      if (
+        action == null ||
+        (typeof action === 'object' && action.type === '@@EP/LISTENER')
+      ) {
         // DO NOTHING
       } else {
         mockedActions.push(action);
