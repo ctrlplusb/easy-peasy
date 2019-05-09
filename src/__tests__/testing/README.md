@@ -1,8 +1,7 @@
-# Testing Examples
+# Testing Showcase
 
-This test suite provides examples of how to test applications using
-easy-peasy. They are included as actual tests of easy-peasy so that we can
-assert that all the test helpers work as expected.
+This test suite showcases different strategies for testing your `easy-peasy` 
+store as well as components that are consuming your store.
 
 When testing your models, we recommend testing each model slice in isolation
 rather than testing the entire store. You can import your model under test
