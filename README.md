@@ -1,6 +1,6 @@
 <p>&nbsp;</p>
 <p align='center'>
-  <img src="https://i.imgur.com/kU5lnNu.png" width="130" />
+  <img src="https://i.imgur.com/mnSqjit.png" width="130" />
 </p>
 <p align='center'>Easy peasy global state for React</p>
 <p>&nbsp;</p>
