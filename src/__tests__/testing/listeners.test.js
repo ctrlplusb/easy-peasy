@@ -678,3 +678,19 @@ it('listeners fire when when actions are NOT mocked', () => {
   // assert
   expect(store.getState().audit.routeChangeLogs).toEqual(['/about']);
 });
+
+it('triggering with no matches or invalid action type does nothing', async () => {
+  // arrange
+  const model = {
+    listeners: listen(() => {}),
+  };
+  const store = createStore(model);
+
+  // act
+  await store.triggerListener(model.listeners, 'FOO');
+  await store.triggerListener(model.listeners, () => {});
+  await store.triggerListeners('FOO');
+  await store.triggerListeners(() => {});
+
+  // no errors hopefully 🤞
+});
