@@ -181,14 +181,22 @@ export type Store<
     dispatch: Dispatch<StoreModel>;
     getMockedActions: () => ActionData[];
     clearMockedActions: () => void;
-    triggerListener: <Action extends ActionTypes | string>(
+    triggerListener: <TriggerAction extends ActionTypes | string>(
       listener: Listen<any>,
-      action: Action,
-      payload: Action extends ActionTypes ? Action['payload'] : any,
+      action: TriggerAction,
+      payload: TriggerAction extends Action<any, infer ActionPayload>
+        ? ActionPayload
+        : TriggerAction extends Thunk<any, infer ThunkPayload>
+        ? ThunkPayload
+        : any,
     ) => Promise<void>;
-    triggerListeners: <Action extends ActionTypes | string>(
-      action: Action,
-      payload: Action extends ActionTypes ? Action['payload'] : any,
+    triggerListeners: <TriggerAction extends ActionTypes | string>(
+      action: TriggerAction,
+      payload: TriggerAction extends Action<any, infer ActionPayload>
+        ? ActionPayload
+        : TriggerAction extends Thunk<any, infer ThunkPayload>
+        ? ThunkPayload
+        : any,
     ) => Promise<void>;
   }
 >;
