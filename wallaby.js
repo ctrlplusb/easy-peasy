@@ -14,7 +14,7 @@ module.exports = wallaby => ({
   ],
   tests: [
     'src/**/*.test.js',
-    { pattern: 'src/__tests__/typescript/**/*', ignore: true },
+    { pattern: 'src/__tests__/typescript.test.js', ignore: true },
   ],
   testFramework: 'jest',
   env: {

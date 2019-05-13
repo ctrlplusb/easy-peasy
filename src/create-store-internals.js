@@ -173,6 +173,8 @@ export default function createStoreInternals({
   });
 
   listenDefinitions.forEach(def => {
+    def.listeners = def.listeners || {};
+
     const on = (target, handler) => {
       if (typeof handler !== 'function') {
         return;
@@ -193,7 +195,7 @@ export default function createStoreInternals({
         return;
       }
 
-      let name;
+      let targetActionName;
 
       if (
         typeof target === 'function' &&
@@ -201,25 +203,29 @@ export default function createStoreInternals({
         actionCreatorDict[target[actionNameSymbol]]
       ) {
         if (target[thunkSymbol]) {
-          name = helpers.thunkCompleteName(target);
+          targetActionName = helpers.thunkCompleteName(target);
         } else {
-          name = target[actionNameSymbol];
+          targetActionName = target[actionNameSymbol];
         }
       } else if (typeof target === 'string') {
-        name = target;
+        targetActionName = target;
       }
 
-      if (name) {
+      if (targetActionName) {
         if (handler[thunkSymbol]) {
-          thunkListenersDict[name] = thunkListenersDict[name] || [];
-          thunkListenersDict[name].push(handler);
+          thunkListenersDict[targetActionName] =
+            thunkListenersDict[targetActionName] || [];
+          thunkListenersDict[targetActionName].push(handler);
         } else {
-          actionListenersDict[name] = actionListenersDict[name] || [];
-          actionListenersDict[name].push({
+          actionListenersDict[targetActionName] =
+            actionListenersDict[targetActionName] || [];
+          actionListenersDict[targetActionName].push({
             path: meta.parent,
             handler,
           });
         }
+        def.listeners[targetActionName] = def.listeners[targetActionName] || [];
+        def.listeners[targetActionName].push(handler);
       }
     };
     def(on);
@@ -297,11 +303,17 @@ export default function createStoreInternals({
     };
 
     const reducerForListeners = (state, action) => {
-      const actionListeners = actionListenersDict[action.type];
+      const target =
+        action.type === '@@EP/LISTENER' ? action.actionName : action.type;
+      const actionListeners = actionListenersDict[target];
       if (actionListeners) {
+        const targetAction =
+          action.type === '@@EP/LISTENER'
+            ? { type: target, payload: action.payload }
+            : action;
         return actionListeners.reduce(
           (newState, { path, handler }) =>
-            runActionReducerAtPath(newState, action, handler, path),
+            runActionReducerAtPath(newState, targetAction, handler, path),
           state,
         );
       }
@@ -348,9 +360,11 @@ export default function createStoreInternals({
   };
 
   return {
-    reducer: reducerEnhancer(createReducer()),
-    defaultState,
     actionCreators,
+    actionListenersDict,
+    defaultState,
+    listenDefinitions,
+    reducer: reducerEnhancer(createReducer()),
     thunkListenersDict,
   };
 }
