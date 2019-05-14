@@ -28,11 +28,15 @@
     "build": "rollup -c",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "lint": "eslint src",
-    "precommit": "lint-staged && npm run test",
-    "prepublish": "npm run build",
     "test": "jest",
     "test:coverage": "npm run test -- --coverage",
     "test:coverage:deploy": "npm run test:coverage && codecov"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run test",
+      "pre-publish": "npm run build"
+    }
   },
   "resolutions": {
     "@types/react": "16.8.17"
