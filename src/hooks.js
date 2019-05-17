@@ -5,7 +5,7 @@ import { isStateObject } from './lib';
 
 export function useStore(mapState, dependencies = []) {
   const store = useContext(EasyPeasyContext);
-  const [state, setState] = useState(mapState(store.getState()));
+  const [state, setState] = useState(() => mapState(store.getState()));
   const [error, setError] = useState(null);
   // As our effect only fires on mount and unmount it won't have the state
   // changes visible to it, therefore we use a mutable ref to track this.
@@ -37,7 +37,7 @@ export function useStore(mapState, dependencies = []) {
           return;
         }
         stateRef.current = newState;
-        setState(stateRef.current);
+        setState(() => stateRef.current);
       } catch (err) {
         // see https://github.com/reduxjs/react-redux/issues/1179
         // There is a possibility mapState will fail as the props/state that
@@ -67,6 +67,7 @@ export function useStore(mapState, dependencies = []) {
       unsubscribe();
     };
   }, dependencies);
+
   // This effect will set the ref value to indicate that the component has
   // unmounted
   useEffect(() => {
