@@ -1,6 +1,8 @@
 import {
   actionNameSymbol,
   actionSymbol,
+  derivedSymbol,
+  derivedConfigSymbol,
   listenSymbol,
   reducerSymbol,
   selectDependenciesSymbol,
@@ -20,6 +22,15 @@ export const thunkFailName = action => `${action[actionNameSymbol]}(failed)`;
 
 export const action = fn => {
   fn[actionSymbol] = true;
+  return fn;
+};
+
+export const derived = (args, fn, config) => {
+  fn[derivedSymbol] = true;
+  fn[derivedConfigSymbol] = {
+    args,
+    config,
+  };
   return fn;
 };
 

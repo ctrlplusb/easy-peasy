@@ -1,10 +1,19 @@
-export const actionNameSymbol = '__actionName__';
-export const actionSymbol = '__action__';
-export const listenSymbol = '__listen__';
-export const metaSymbol = '__meta__';
-export const reducerSymbol = '__reducer__';
-export const selectDependenciesSymbol = '__selectDependencies__';
-export const selectImpSymbol = '__selectImp__';
-export const selectStateSymbol = '__selectState__';
-export const selectSymbol = '__select__';
-export const thunkSymbol = '__thunk__';
+export const actionNameSymbol = '🙈actionName🙈';
+export const actionSymbol = '🙈action🙈';
+
+export const derivedSymbol = '🙈derived🙈';
+export const derivedConfigSymbol = '🙈derivedConfig🙈';
+export const derivedStateSymbol = '🙈derivedState🙈';
+
+export const listenSymbol = '🙈listen🙈';
+
+export const metaSymbol = '🙈meta🙈';
+
+export const reducerSymbol = '🙈reducer🙈';
+
+export const selectDependenciesSymbol = '🙈selectDependencies🙈';
+export const selectImpSymbol = '🙈selectImp🙈';
+export const selectStateSymbol = '🙈selectState🙈';
+export const selectSymbol = '🙈select🙈';
+
+export const thunkSymbol = '🙈thunk🙈';
