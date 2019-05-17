@@ -63,6 +63,7 @@ type FilterActionTypes<T extends object> = Omit<
     | RegExp
     | Reducer<any, any>
     | Select<any, any>
+    | Derived<any, any, any, any, any>
     | Listen<any, any, any>
   >
 >;
@@ -75,7 +76,13 @@ type FilterStateTypes<T extends object> = Overwrite<
       Action<any, any> | Listen<any, any, any> | Thunk<any, any, any, any, any>
     >
   >,
-  Pick<T, KeysOfType<T, Select<any, any> | Reducer<any, any>>>
+  Pick<
+    T,
+    KeysOfType<
+      T,
+      Select<any, any> | Reducer<any, any> | Derived<any, any, any, any, any>
+    >
+  >
 >;
 
 /**
@@ -107,6 +114,8 @@ type StateModelValues<
   P extends keyof Model
 > = Model[P] extends Select<any, infer R>
   ? R
+  : Model[P] extends Derived<any, any, any, any, any>
+  ? Selector<Model[P]>
   : Model[P] extends Reducer<infer R, any>
   ? R
   : Model[P] extends object
@@ -414,6 +423,291 @@ export type Action<Model extends Object = {}, Payload = void> = {
 export function action<Model extends Object = {}, Payload = any>(
   action: (state: State<Model>, payload: Payload) => void | State<Model>,
 ): Action<Model, Payload>;
+
+type Arguments =
+  | [any]
+  | [any, any]
+  | [any, any, any]
+  | [any, any, any, any]
+  | [any, any, any, any, any];
+
+type OptionalArguments = void | Arguments;
+
+// Forgive me for I have sinned...
+type JoinedArgs<
+  Args extends Arguments = [any],
+  RunTimeArgs extends OptionalArguments = void
+> = RunTimeArgs extends void
+  ? Args
+  : Args extends [any]
+  ? RunTimeArgs extends [any]
+    ? [Args[0], RunTimeArgs[0]]
+    : RunTimeArgs extends [any, any]
+    ? [Args[0], RunTimeArgs[0], RunTimeArgs[1]]
+    : RunTimeArgs extends [any, any, any]
+    ? [Args[0], RunTimeArgs[0], RunTimeArgs[1], RunTimeArgs[2]]
+    : RunTimeArgs extends [any, any, any, any]
+    ? [Args[0], RunTimeArgs[0], RunTimeArgs[1], RunTimeArgs[2], RunTimeArgs[3]]
+    : RunTimeArgs extends [any, any, any, any, any]
+    ? [
+        Args[0],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3],
+        RunTimeArgs[4]
+      ]
+    : Args
+  : Args extends [any, any]
+  ? RunTimeArgs extends [any]
+    ? [Args[0], Args[1], RunTimeArgs[0]]
+    : RunTimeArgs extends [any, any]
+    ? [Args[0], Args[1], RunTimeArgs[0], RunTimeArgs[1]]
+    : RunTimeArgs extends [any, any, any]
+    ? [Args[0], Args[1], RunTimeArgs[0], RunTimeArgs[1], RunTimeArgs[2]]
+    : RunTimeArgs extends [any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3]
+      ]
+    : RunTimeArgs extends [any, any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3],
+        RunTimeArgs[4]
+      ]
+    : Args
+  : Args extends [any, any, any]
+  ? RunTimeArgs extends [any]
+    ? [Args[0], Args[1], Args[2], RunTimeArgs[0]]
+    : RunTimeArgs extends [any, any]
+    ? [Args[0], Args[1], Args[2], RunTimeArgs[0], RunTimeArgs[1]]
+    : RunTimeArgs extends [any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2]
+      ]
+    : RunTimeArgs extends [any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3]
+      ]
+    : RunTimeArgs extends [any, any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3],
+        RunTimeArgs[4]
+      ]
+    : Args
+  : Args extends [any, any, any, any]
+  ? RunTimeArgs extends [any]
+    ? [Args[0], Args[1], Args[2], Args[3], RunTimeArgs[0]]
+    : RunTimeArgs extends [any, any]
+    ? [Args[0], Args[1], Args[2], Args[3], RunTimeArgs[0], RunTimeArgs[1]]
+    : RunTimeArgs extends [any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        Args[3],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2]
+      ]
+    : RunTimeArgs extends [any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        Args[3],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3]
+      ]
+    : RunTimeArgs extends [any, any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        Args[3],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3],
+        RunTimeArgs[4]
+      ]
+    : Args
+  : Args extends [any, any, any, any, any]
+  ? RunTimeArgs extends [any]
+    ? [Args[0], Args[1], Args[2], Args[3], Args[4], RunTimeArgs[0]]
+    : RunTimeArgs extends [any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        Args[3],
+        Args[4],
+        RunTimeArgs[0],
+        RunTimeArgs[1]
+      ]
+    : RunTimeArgs extends [any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        Args[3],
+        Args[4],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2]
+      ]
+    : RunTimeArgs extends [any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        Args[3],
+        Args[4],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3]
+      ]
+    : RunTimeArgs extends [any, any, any, any, any]
+    ? [
+        Args[0],
+        Args[1],
+        Args[2],
+        Args[3],
+        Args[4],
+        RunTimeArgs[0],
+        RunTimeArgs[1],
+        RunTimeArgs[2],
+        RunTimeArgs[3],
+        RunTimeArgs[4]
+      ]
+    : Args
+  : Args;
+
+/**
+ * A derived type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Derived } from 'easy-peasy';
+ *
+ * interface Model {
+ *   products: Array<Product>;
+ *   totalPrice: Derived<Model, number>;
+ * }
+ */
+export type Derived<
+  Model extends Object = {},
+  Result = any,
+  Args extends Arguments = [any],
+  RunTimeArgs extends OptionalArguments = void,
+  StoreModel extends Object = {}
+> = {
+  (...args: JoinedArgs<Args, RunTimeArgs>): Result;
+  type: 'derived';
+  result: Result;
+};
+
+type ArgumentSelector<
+  Model extends Object = {},
+  StoreModel extends Object = {},
+  Result = any
+> = (state: State<Model>, storeState: State<StoreModel>) => Result;
+
+export type Selector<
+  DerivedImp extends Derived<any, any, any, any, any>
+> = DerivedImp extends Derived<any, infer R, any, infer RTArgs, any>
+  ? RTArgs extends Arguments
+    ? (...args: RTArgs) => R
+    : () => R
+  : () => any;
+
+/**
+ * Allows you to declare derived state against your model.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#derived
+ *
+ * @example
+ *
+ * import { derived } from 'easy-peasy';
+ *
+ * const store = createStore({
+ *   products: [],
+ *   totalPrice: derived(
+ *     [state => state.products],
+ *     products => products.reduce((acc, cur) => acc + cur.price, 0),
+ *   )
+ * });
+ */
+export function derived<
+  Model extends Object = {},
+  Result = any,
+  Args extends Arguments = [any],
+  RunTimeArgs extends OptionalArguments = void,
+  StoreModel extends Object = {}
+>(
+  argumentSelectors: Args extends [any]
+    ? [ArgumentSelector<Model, StoreModel, Args[0]>]
+    : Args extends [any, any]
+    ? [
+        ArgumentSelector<Model, StoreModel, Args[0]>,
+        ArgumentSelector<Model, StoreModel, Args[1]>
+      ]
+    : Args extends [any, any, any]
+    ? [
+        ArgumentSelector<Model, StoreModel, Args[0]>,
+        ArgumentSelector<Model, StoreModel, Args[1]>,
+        ArgumentSelector<Model, StoreModel, Args[2]>
+      ]
+    : Args extends [any, any, any, any]
+    ? [
+        ArgumentSelector<Model, StoreModel, Args[0]>,
+        ArgumentSelector<Model, StoreModel, Args[1]>,
+        ArgumentSelector<Model, StoreModel, Args[2]>,
+        ArgumentSelector<Model, StoreModel, Args[3]>
+      ]
+    : Args extends [any, any, any, any]
+    ? [
+        ArgumentSelector<Model, StoreModel, Args[0]>,
+        ArgumentSelector<Model, StoreModel, Args[1]>,
+        ArgumentSelector<Model, StoreModel, Args[2]>,
+        ArgumentSelector<Model, StoreModel, Args[3]>,
+        ArgumentSelector<Model, StoreModel, Args[4]>
+      ]
+    : any,
+  selector: (...args: JoinedArgs<Args, RunTimeArgs>) => Result,
+  memoizeLimit?: number,
+): Derived<Model, Result, Args, RunTimeArgs, StoreModel>;
 
 /**
  * A select type.
