@@ -67,6 +67,7 @@ export function useStore(mapState, dependencies = []) {
       unsubscribe();
     };
   }, dependencies);
+
   // This effect will set the ref value to indicate that the component has
   // unmounted
   useEffect(() => {
