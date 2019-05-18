@@ -142,7 +142,8 @@ export default function createStoreInternals({
           derivedSelectorId += 1;
           const selectorId = derivedSelectorId;
           const { args, config } = value[derivedConfigSymbol];
-          const argSelectors = args && Array.isArray(args) ? args : [];
+          const argSelectors =
+            args && Array.isArray(args) ? args : [state => state];
           const limit =
             typeof config === 'object' &&
             typeof config.limit === 'number' &&
@@ -173,23 +174,17 @@ export default function createStoreInternals({
             const selector = (...runtimeArgs) => {
               const storeState = references.getState();
               const localState = get(parentPath, storeState);
-              const selectorArgs =
-                argSelectors.length > 0
-                  ? argSelectors.reduce(
-                      (acc, argSelector) => [
-                        ...acc,
-                        argSelector(localState, storeState),
-                      ],
-                      [],
-                    )
-                  : [localState];
+              const selectorArgs = argSelectors.reduce(
+                (acc, argSelector) => [
+                  ...acc,
+                  argSelector(localState, storeState),
+                ],
+                [],
+              );
               return internalSelect(...selectorArgs.concat(runtimeArgs));
             };
             selector[derivedStateSymbol] = {
-              argumentChangeTracker:
-                argSelectors.length > 0
-                  ? createArgumentChangeTracker()
-                  : undefined,
+              argumentChangeTracker: createArgumentChangeTracker(),
               createSelector,
               meta,
               selectorId,
@@ -418,22 +413,14 @@ export default function createStoreInternals({
             derivedSelectorsDict[derivedState.selectorId] = newSelector;
             set(derivedState.meta.path, draft, newSelector);
           };
-          if (derivedState.argumentChangeTracker) {
-            if (derivedState.prevState == null) {
-              derivedState.prevState = derivedState.argumentChangeTracker(
-                state,
-              );
-            } else {
-              const nextId = derivedState.argumentChangeTracker(state);
-              if (derivedState.prevState !== nextId) {
-                derivedState.prevState = nextId;
-                rebindSelector();
-              }
+          if (derivedState.prevState == null) {
+            derivedState.prevState = derivedState.argumentChangeTracker(state);
+          } else {
+            const nextId = derivedState.argumentChangeTracker(state);
+            if (derivedState.prevState !== nextId) {
+              derivedState.prevState = nextId;
+              rebindSelector();
             }
-          } else if (derivedState.prevState == null) {
-            derivedState.prevState = parentState;
-          } else if (derivedState.prevState !== parentState) {
-            rebindSelector();
           }
         });
       });
