@@ -3,7 +3,7 @@ import shallowEqual from 'shallowequal';
 import EasyPeasyContext from './context';
 import { isStateObject } from './lib';
 
-export function useStore(mapState, dependencies = []) {
+export function useStoreState(mapState, dependencies = []) {
   const store = useContext(EasyPeasyContext);
   const [state, setState] = useState(() => mapState(store.getState()));
   const [error, setError] = useState(null);
@@ -78,20 +78,28 @@ export function useStore(mapState, dependencies = []) {
   return state;
 }
 
-export function useActions(mapActions) {
+export function useStoreActions(mapActions) {
   const store = useContext(EasyPeasyContext);
   return mapActions(store.dispatch);
 }
 
-export function useDispatch() {
+export function useStoreDispatch() {
   const store = useContext(EasyPeasyContext);
   return store.dispatch;
 }
+
+/* Aliased hooks. These are deprecated */
+export const useActions = useStoreActions;
+export const useDispatch = useStoreDispatch;
+export const useStore = useStoreState;
 
 export function createTypedHooks() {
   return {
     useActions,
     useDispatch,
     useStore,
+    useStoreActions,
+    useStoreDispatch,
+    useStoreState,
   };
 }
