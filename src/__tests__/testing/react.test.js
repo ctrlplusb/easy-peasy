@@ -4,8 +4,8 @@ import {
   action,
   createStore,
   StoreProvider,
-  useStore,
-  useActions,
+  useStoreState,
+  useStoreActions,
 } from '../../index';
 
 const model = {
@@ -19,8 +19,8 @@ describe('react', () => {
   it('component integration test', () => {
     // arrange
     function ComponentUnderTest() {
-      const count = useStore(state => state.count);
-      const increment = useActions(actions => actions.increment);
+      const count = useStoreState(state => state.count);
+      const increment = useStoreActions(actions => actions.increment);
       return (
         <div>
           Count: <span data-testid="count">{count}</span>
