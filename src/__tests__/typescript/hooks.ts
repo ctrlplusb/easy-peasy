@@ -9,8 +9,9 @@ import {
   Reducer,
   State,
   createTypedHooks,
-  useActions,
-  useStore,
+  useStoreActions,
+  useStoreDispatch,
+  useStoreState,
 } from 'easy-peasy';
 
 interface Model {
@@ -34,15 +35,22 @@ interface Model {
   };
 }
 
-let useStoreResult = useStore((state: State<Model>) => state.stateNumber);
+const dispatch = useStoreDispatch();
+dispatch({ type: 'FOO' });
+
+let useStoreResult = useStoreState((state: State<Model>) => state.stateNumber);
 useStoreResult + 1;
-let useActionResult = useActions(
+let useActionResult = useStoreActions(
   (actions: Actions<Model>) => actions.actionImp,
 );
 useActionResult(1);
 
 const typedHooks = createTypedHooks<Model>();
 
+useStoreResult = typedHooks.useStoreState(state => state.stateNumber);
+useStoreResult + 1;
+useActionResult = typedHooks.useStoreActions(actions => actions.actionImp);
+useActionResult(1);
 useStoreResult = typedHooks.useStore(state => state.stateNumber);
 useStoreResult + 1;
 useActionResult = typedHooks.useActions(actions => actions.actionImp);

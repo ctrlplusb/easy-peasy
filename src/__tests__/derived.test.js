@@ -6,8 +6,8 @@ import {
   createStore,
   derived,
   StoreProvider,
-  useStore,
-  useActions,
+  useStoreState,
+  useStoreActions,
 } from '../index';
 
 it('deriving against local state', () => {
@@ -237,8 +237,8 @@ describe('react', () => {
     // arrange
     let renderCount = 0;
     function ComponentUnderTest() {
-      const count = useStore(state => state.todos.count);
-      const addTodo = useActions(actions => actions.todos.addTodo);
+      const count = useStoreState(state => state.todos.count);
+      const addTodo = useStoreActions(actions => actions.todos.addTodo);
       useEffect(() => {
         renderCount += 1;
       });
@@ -302,7 +302,9 @@ describe('react', () => {
     // arrange
     let renderCount = 0;
     function ComponentUnderTest() {
-      const favouriteTodo = useStore(state => state.settings.favouriteTodo);
+      const favouriteTodo = useStoreState(
+        state => state.settings.favouriteTodo,
+      );
       useEffect(() => {
         renderCount += 1;
       });
@@ -372,8 +374,8 @@ describe('react', () => {
     // arrange
     let renderCount = 0;
     function ComponentUnderTest() {
-      const count = useStore(state => state.todos.count);
-      const addTodo = useActions(actions => actions.todos.addTodo);
+      const count = useStoreState(state => state.todos.count);
+      const addTodo = useStoreActions(actions => actions.todos.addTodo);
       useEffect(() => {
         renderCount += 1;
       });
