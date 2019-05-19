@@ -1,5 +1,13 @@
 import { setAutoFreeze } from 'immer';
-import { createTypedHooks, useStore, useActions, useDispatch } from './hooks';
+import {
+  createTypedHooks,
+  useActions,
+  useDispatch,
+  useStore,
+  useStoreActions,
+  useStoreDispatch,
+  useStoreState,
+} from './hooks';
 import createStore from './create-store';
 import StoreProvider from './provider';
 import {
@@ -38,6 +46,9 @@ export {
   thunkStartName,
   thunkCompleteName,
   thunkFailName,
+  useStoreActions,
+  useStoreDispatch,
+  useStoreState,
   useActions,
   useDispatch,
   useStore,
