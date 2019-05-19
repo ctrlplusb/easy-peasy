@@ -807,12 +807,20 @@ export function createStore<
  *
  * @example
  *
- * import { useStore, State } from 'easy-peasy';
+ * import { useStoreState, State } from 'easy-peasy';
  *
  * function MyComponent() {
- *   const todos = useStore((state: State<StoreModel>) => state.todos.items);
+ *   const todos = useStoreState((state: State<StoreModel>) => state.todos.items);
  *   return todos.map(todo => <Todo todo={todo} />);
  * }
+ */
+export function useStoreState<StoreState extends State<any> = {}, Result = any>(
+  mapState: (state: StoreState) => Result,
+  dependencies?: Array<any>,
+): Result;
+
+/**
+ * @deprecated Use useStoreState instead
  */
 export function useStore<StoreState extends State<any> = {}, Result = any>(
   mapState: (state: StoreState) => Result,
@@ -826,12 +834,19 @@ export function useStore<StoreState extends State<any> = {}, Result = any>(
  *
  * @example
  *
- * import { useActions, Actions } from 'easy-peasy';
+ * import { useStoreActions, Actions } from 'easy-peasy';
  *
  * function MyComponent() {
- *   const addTodo = useAction((actions: Actions<StoreModel>) => actions.todos.add);
+ *   const addTodo = useStoreActions((actions: Actions<StoreModel>) => actions.todos.add);
  *   return <AddTodoForm save={addTodo} />;
  * }
+ */
+export function useStoreActions<StoreModel extends Object = {}, Result = any>(
+  mapActions: (actions: Actions<StoreModel>) => Result,
+): Result;
+
+/**
+ * @deprecated Use useStoreActions instead
  */
 export function useActions<StoreModel extends Object = {}, Result = any>(
   mapActions: (actions: Actions<StoreModel>) => Result,
@@ -844,12 +859,19 @@ export function useActions<StoreModel extends Object = {}, Result = any>(
  *
  * @example
  *
- * import { useDispatch } from 'easy-peasy';
+ * import { useStoreDispatch } from 'easy-peasy';
  *
  * function MyComponent() {
- *   const dispatch = useDispatch();
+ *   const dispatch = useStoreDispatch();
  *   return <AddTodoForm save={(todo) => dispatch({ type: 'ADD_TODO', payload: todo })} />;
  * }
+ */
+export function useStoreDispatch<StoreModel extends Object = {}>(): Dispatch<
+  StoreModel
+>;
+
+/**
+ * @deprecated Use useStoreDispatch instead
  */
 export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
   StoreModel
@@ -859,16 +881,21 @@ export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
  * A utility function used to create pre-typed hooks.
  *
  * @example
- * const { useActions, useStore, useDispatch } = createTypedHooks<StoreModel>();
+ * const { useStoreActions, useStoreState, useStoreDispatch } = createTypedHooks<StoreModel>();
  *
- * useActions(actions => actions.todo.add); // fully typed
+ * useStoreActions(actions => actions.todo.add); // fully typed
  */
 export function createTypedHooks<StoreModel extends Object = {}>(): {
-  useActions: <Result = any>(
+  useStoreActions: <Result = any>(
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
-  useAction: <Result = any>(
-    mapAction: (actions: Dispatch<StoreModel>) => Result,
+  useStoreDispatch: () => Dispatch<StoreModel>;
+  useStoreState: <Result = any>(
+    mapState: (state: State<StoreModel>) => Result,
+    dependencies?: Array<any>,
+  ) => Result;
+  useActions: <Result = any>(
+    mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
   useDispatch: () => Dispatch<StoreModel>;
   useStore: <Result = any>(

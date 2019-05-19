@@ -7,9 +7,9 @@ import { render, fireEvent } from 'react-testing-library';
 import {
   action,
   createStore,
-  useStore,
+  useStoreState,
   StoreProvider,
-  useActions,
+  useStoreActions,
 } from '../index';
 
 class ErrorBoundary extends React.Component {
@@ -52,13 +52,13 @@ describe('mapState errors', () => {
       });
 
       const ListItem = ({ id }) => {
-        const name = useStore(s => s.items[id].name, [id]);
+        const name = useStoreState(s => s.items[id].name, [id]);
         return name;
       };
 
       function App() {
-        const itemIds = useStore(s => Object.keys(s.items));
-        const deleteItem = useActions(a => a.deleteItem);
+        const itemIds = useStoreState(s => Object.keys(s.items));
+        const deleteItem = useStoreActions(a => a.deleteItem);
         const items = itemIds.map(id => <ListItem key={id} id={id} />);
         return (
           <>
@@ -125,12 +125,12 @@ describe('mapState errors', () => {
       });
 
       function Todo({ id }) {
-        const text = useStore(s => s.todos[id].text, [id]);
+        const text = useStoreState(s => s.todos[id].text, [id]);
         return <div data-testid="todo">{text}</div>;
       }
 
       App = ({ activeTodo = 1, displayTodo = true }) => {
-        const removeTodo = useActions(a => a.removeTodo);
+        const removeTodo = useStoreActions(a => a.removeTodo);
         return (
           <>
             {displayTodo ? (
