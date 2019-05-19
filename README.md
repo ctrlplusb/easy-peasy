@@ -16,7 +16,7 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 ```javascript
-import { action, createStore, StoreProvider, useStore, useActions } from 'easy-peasy';
+import { action, createStore, StoreProvider, useStoreState, useStoreActions } from 'easy-peasy';
 
 const store = createStore({
   todos: {
@@ -34,8 +34,8 @@ const App = () => (
 )
 
 function TodoList() {
-  const todos = useStore(state => state.todos.items)
-  const add = useActions(actions => actions.todos.add)
+  const todos = useStoreState(state => state.todos.items)
+  const add = useStoreActions(actions => actions.todos.add)
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
@@ -50,7 +50,7 @@ function TodoList() {
 <p>
 
 ```javascript
-import { action, createStore, StoreProvider, useStore, useActions } from 'easy-peasy';
+import { action, createStore, StoreProvider, useStoreState, useStoreActions } from 'easy-peasy';
 
 // 👇 create your store, providing the model
 const store = createStore({
@@ -74,8 +74,8 @@ const App = () => (
 
 function TodoList() {
   // 👇  use hooks to get state or actions
-  const todos = useStore(state => state.todos.items)
-  const add = useActions(actions => actions.todos.add)
+  const todos = useStoreState(state => state.todos.items)
+  const add = useStoreActions(actions => actions.todos.add)
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
@@ -139,9 +139,9 @@ function TodoList() {
     - [select(selector)](#selectselector)
     - [listen(on)](#listenon)
     - [StoreProvider](#storeprovider)
-    - [useStore(mapState, externals)](#usestoremapstate-externals)
-    - [useActions(mapActions)](#useactionsmapactions)
-    - [useDispatch()](#usedispatch)
+    - [useStoreState(mapState, externals)](#usestorestatemapstate-externals)
+    - [useStoreActions(mapActions)](#usestoreactionsmapactions)
+    - [useStoreDispatch()](#usestoredispatch)
   - [Usage with Typescript](#usage-with-typescript)
   - [Usage with React Native](#usage-with-react-native)
   - [Writing Tests](#writing-tests)
@@ -319,7 +319,7 @@ const store = createStore({
 });
 ```
 
-You cannot modify the state within a `thunk`, however, the `thunk` is provided the `actions` that are local to it. This allows you to delegate state updates via your actions (an experience similar to that of `redux-thunk`). 
+You cannot modify the state within a `thunk`, however, the `thunk` is provided the `actions` that are local to it. This allows you to delegate state updates via your actions (an experience similar to that of `redux-thunk`).
 
 #### Dispatching a `thunk` action directly via the store
 
@@ -387,7 +387,7 @@ const auditModel = {
   listeners: listen((on) => {
     on(
       //           👇 pass in the reference to the action we wish to listen to
-      todosModel.addTodo, 
+      todosModel.addTodo,
       // 👇 the action we wish to execute after `addTodo` has completed
       action((state, payload) => {
         state.logs.push(`Added a new todo: ${payload}`);
@@ -433,13 +433,13 @@ const App = () => (
 
 #### Accessing state in your Components
 
-To access state within your components you can use the `useStore` hook.
+To access state within your components you can use the `useStoreState` hook.
 
 ```javascript
-import { useStore } from 'easy-peasy';
+import { useStoreState } from 'easy-peasy';
 
 const TodoList = () => {
-  const todos = useStore(state => state.todos.items);
+  const todos = useStoreState(state => state.todos.items);
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo.text}</div>)}
@@ -448,15 +448,15 @@ const TodoList = () => {
 };
 ```
 
-In the case that your `useStore` implementation depends on an "external" value when mapping state, you should provide the respective "external" within the second argument to the `useStore`. This is a similar requirement to some of the official hooks that are bundled with React. The `useStore` hook will then track the external value and ensure that the state is remapped every time the external value(s) change.
+In the case that your `useStoreState` implementation depends on an "external" value when mapping state, you should provide the respective "external" within the second argument to the `useStoreState`. This is a similar requirement to some of the official hooks that are bundled with React. The `useStoreState` hook will then track the external value and ensure that the state is remapped every time the external value(s) change.
 
 ```javascript
-import { useStore } from 'easy-peasy';
+import { useStoreState } from 'easy-peasy';
 
 const Product = ({ id }) => {
-  const product = useStore(
+  const product = useStoreState(
     state => state.products[id], // 👈 we are using an external value: "id"
-    [id] // 👈 we provide "id" so our useStore knows to re-execute mapState
+    [id] // 👈 we provide "id" so our useStoreState knows to re-execute mapState
          //    if the "id" value changes
   );
   return (
@@ -468,19 +468,19 @@ const Product = ({ id }) => {
 };
 ```
 
-We recommend that you read the API docs for the [`useStore` hook](#usestoremapstate-externals) to gain a full understanding of the behaviours and pitfalls of the hook.
+We recommend that you read the API docs for the [`useStoreState` hook](#usestorestatemapstate-externals) to gain a full understanding of the behaviours and pitfalls of the hook.
 
 #### Dispatching actions in your Components
 
-In order to fire actions in your components you can use the `useActions` hook.
+In order to fire actions in your components you can use the `useStoreActions` hook.
 
 ```javascript
 import { useState } from 'react';
-import { useActions } from 'easy-peasy';
+import { useStoreActions } from 'easy-peasy';
 
 const AddTodo = () => {
   const [text, setText] = useState('');
-  const addTodo = useActions(actions => actions.todos.add);
+  const addTodo = useStoreActions(actions => actions.todos.add);
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -490,7 +490,7 @@ const AddTodo = () => {
 };
 ```
 
-For more on how you can use this hook please ready the API docs for the [`useActions` hook](#useactionsmapactions).
+For more on how you can use this hook please ready the API docs for the [`useStoreActions` hook](#usestoreactionsmapactions).
 
 #### Usage via react-redux
 
@@ -499,7 +499,7 @@ As Easy Peasy outputs a standard Redux store it is entirely possible to use Easy
 This allows you to do a few things:
 
  - Slowly migrate a legacy application that is built using `react-redux`
- - Connect your store to Class components via `connect` 
+ - Connect your store to Class components via `connect`
 
 <details>
 <summary>First, install the `react-redux` package</summary>
@@ -1222,7 +1222,7 @@ const model = {
 
 ### StoreProvider
 
-Initialises your React application with the store so that your components will be able to consume and interact with the state via the `useStore` and `useActions` hooks.
+Initialises your React application with the store so that your components will be able to consume and interact with the state via the `useStoreState` and `useStoreActions` hooks.
 
 <details>
 <summary>Example</summary>
@@ -1244,7 +1244,7 @@ const App = () => (
 </p>
 </details>
 
-### useStore(mapState, externals)
+### useStoreState(mapState, externals)
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state.
 
@@ -1262,9 +1262,9 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
 
   - `externals` (Array of any, not required)
 
-    If your `useStore` function depends on an external value (for example a property of your component), then you should provide the respective value within this argument so that the `useStore` knows to remap your state when the respective externals change in value.
+    If your `useStoreState` function depends on an external value (for example a property of your component), then you should provide the respective value within this argument so that the `useStoreState` knows to remap your state when the respective externals change in value.
 
-Your `mapState` can either resolve a single piece of state. If you wish to resolve multiple pieces of state then you can either call `useStore` multiple times, or if you like resolve an object within your `mapState` where each property of the object is a resolved piece of state (similar to the `connect` from `react-redux`). The examples will illustrate the various forms.
+Your `mapState` can either resolve a single piece of state. If you wish to resolve multiple pieces of state then you can either call `useStoreState` multiple times, or if you like resolve an object within your `mapState` where each property of the object is a resolved piece of state (similar to the `connect` from `react-redux`). The examples will illustrate the various forms.
 
 </p>
 </details>
@@ -1274,10 +1274,10 @@ Your `mapState` can either resolve a single piece of state. If you wish to resol
 <p>
 
 ```javascript
-import { useStore } from 'easy-peasy';
+import { useStoreState } from 'easy-peasy';
 
 const TodoList = () => {
-  const todos = useStore(state => state.todos.items);
+  const todos = useStoreState(state => state.todos.items);
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo.text}</div>)}
@@ -1294,11 +1294,11 @@ const TodoList = () => {
 <p>
 
 ```javascript
-import { useStore } from 'easy-peasy';
+import { useStoreState } from 'easy-peasy';
 
 const BasketTotal = () => {
-  const totalPrice = useStore(state => state.basket.totalPrice);
-  const netPrice = useStore(state => state.basket.netPrice);
+  const totalPrice = useStoreState(state => state.basket.totalPrice);
+  const netPrice = useStoreState(state => state.basket.netPrice);
   return (
     <div>
       <div>Total: {totalPrice}</div>
@@ -1316,10 +1316,10 @@ const BasketTotal = () => {
 <p>
 
 ```javascript
-import { useStore } from 'easy-peasy';
+import { useStoreState } from 'easy-peasy';
 
 const BasketTotal = () => {
-  const { totalPrice, netPrice } = useStore(state => ({
+  const { totalPrice, netPrice } = useStoreState(state => ({
     totalPrice: state.basket.totalPrice,
     netPrice: state.basket.netPrice
   }));
@@ -1348,7 +1348,7 @@ Therefore deriving state within your `mapState` in a manner that will always pro
 ```javascript
 // ❗️ Using .map will produce a new array instance every time mapState is called
 //                                                     👇
-const productNames = useStore(state => state.products.map(x => x.name))
+const productNames = useStoreState(state => state.products.map(x => x.name))
 ```
 
 You have two options to solve the above.
@@ -1356,7 +1356,7 @@ You have two options to solve the above.
 Firstly, you could just return the products and then do the `.map` outside of your `mapState`:
 
 ```javascript
-const products = useStore(state => state.products)
+const products = useStoreState(state => state.products)
 const productNames = products.map(x => x.name)
 ```
 
@@ -1374,7 +1374,7 @@ const createStore = ({
 Note, the same rule applies when you are using the object result form of `mapState`:
 
 ```javascript
-const { productNames, total } = useStore(state => ({
+const { productNames, total } = useStoreState(state => ({
   productNames: state.products.map(x => x.name), // ❗️ new array every time
   total: state.basket.total
 }));
@@ -1383,7 +1383,7 @@ const { productNames, total } = useStore(state => ({
 </p>
 </details>
 
-### useActions(mapActions)
+### useStoreActions(mapActions)
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions.
 
@@ -1408,11 +1408,11 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
 
 ```javascript
 import { useState } from 'react';
-import { useActions } from 'easy-peasy';
+import { useStoreActions } from 'easy-peasy';
 
 const AddTodo = () => {
   const [text, setText] = useState('');
-  const addTodo = useActions(actions => actions.todos.add);
+  const addTodo = useStoreActions(actions => actions.todos.add);
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -1431,11 +1431,11 @@ const AddTodo = () => {
 
 ```javascript
 import { useState } from 'react';
-import { useActions } from 'easy-peasy';
+import { useStoreActions } from 'easy-peasy';
 
 const EditTodo = ({ todo }) => {
   const [text, setText] = useState(todo.text);
-  const { saveTodo, removeTodo } = useActions(actions => ({
+  const { saveTodo, removeTodo } = useStoreActions(actions => ({
     saveTodo: actions.todos.save,
     removeTodo: actions.todo.toggle
   }));
@@ -1452,7 +1452,7 @@ const EditTodo = ({ todo }) => {
 </p>
 </details>
 
-### useDispatch()
+### useStoreDispatch()
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's dispatch.
 
@@ -1462,11 +1462,11 @@ A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components acc
 
 ```javascript
 import { useState } from 'react';
-import { useDispatch } from 'easy-peasy';
+import { useStoreDispatch } from 'easy-peasy';
 
 const AddTodo = () => {
   const [text, setText] = useState('');
-  const dispatch = useDispatch();
+  const dispatch = useStoreDispatch();
   return (
     <div>
       <input value={text} onChange={(e) => setText(e.target.value)} />
@@ -1598,14 +1598,14 @@ store.dispatch.todos.addTodo('Install typescript')
 <p>
 
 ``` typescript
-import { useStore, useActions, Actions, State } from 'easy-peasy';
+import { useStoreState, useStoreActions, Actions, State } from 'easy-peasy';
 import { StoreModel } from './your-store';
 
 function MyComponent() {
-  const token = useStore((state: State<StoreModel>) =>
+  const token = useStoreState((state: State<StoreModel>) =>
     state.user.token
   )
-  const login = useActions((actions: Actions<StoreModel>) =>
+  const login = useStoreActions((actions: Actions<StoreModel>) =>
 	  actions.user.login,
   )
   return (
@@ -1630,11 +1630,11 @@ export default createTypedHooks<StoreModel>();
 We could then revise our previous example.
 
 ``` typescript
-import { useStore, useActions } from './hooks';
+import { useStoreState, useStoreActions } from './hooks';
 
 function MyComponent() {
-  const token = useStore((state) => state.user.token)
-  const login = useActions((actions) => actions.user.login)
+  const token = useStoreState((state) => state.user.token)
+  const login = useStoreActions((actions) => actions.user.login)
   return (
     <button onClick={() => login({ username: 'foo', password: 'bar' })}>
       {token || 'Log in'}
@@ -1827,8 +1827,8 @@ Imagine we were trying to test the following component.
 
 ```typescript
 function Counter() {
-  const count = useStore(state => state.count)
-  const increment = useActions(actions => actions.increment)
+  const count = useStoreState(state => state.count)
+  const increment = useStoreActions(actions => actions.increment)
   return (
     <div>
       Count: <span data-testid="count">{count}</span>
@@ -2074,24 +2074,24 @@ Allows you to create typed versions of all the hooks so that you don't need to c
 import { createTypedHooks } from 'easy-peasy';
 import { StoreModel } from './model';
 
-const { useActions, useStore, useDispatch } = createTypedHooks<StoreModel>();
+const { useStoreActions, useStoreState, useStoreDispatch } = createTypedHooks<StoreModel>();
 
 export default {
-  useActions,
-  useStore,
-  useDispatch
+  useStoreActions,
+  useStoreState,
+  useStoreDispatch
 }
 ```
 
 And then use your typed hooks in your components:
 
 ```typescript
-import { useStore } from './hooks';
+import { useStoreState } from './hooks';
 
 export default MyComponent() {
   //                          This will be typed
   //                                       👇
-  const message = useStore(state => state.message);
+  const message = useStoreState(state => state.message);
   return <div>{message}</div>;
 }
 ```
