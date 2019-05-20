@@ -1,3 +1,11 @@
+> Hi 👋
+>
+> We are baking up the next version (v2.3.0). You can see all the details within the [PR](https://github.com/ctrlplusb/easy-peasy/pull/181) and view the updated docs [here](https://github.com/ctrlplusb/easy-peasy/tree/next).
+>
+> Some of the important changes include introducing a new `selector` helper which deprecates `select` and the aliasing of the hooks to avoid some ambiguity.
+>
+> Early testing and feedback would be super appreciated. 🙏
+
 <p>&nbsp;</p>
 <p align='center'>
   <img src="https://i.imgur.com/F6WfRFI.png" width="130" />
