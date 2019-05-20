@@ -185,7 +185,7 @@ npm install react-dom
 Then install Easy Peasy.
 
 ```bash
-npm install easy-peasy
+npm install easy-peasy@next
 ```
 
 You're off to the races.
