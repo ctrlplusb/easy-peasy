@@ -25,15 +25,6 @@ export const action = fn => {
   return fn;
 };
 
-export const derived = (args, fn, config) => {
-  fn[derivedSymbol] = true;
-  fn[derivedConfigSymbol] = {
-    args,
-    config,
-  };
-  return fn;
-};
-
 export const listen = fn => {
   fn[listenSymbol] = true;
   return fn;
