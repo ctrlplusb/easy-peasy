@@ -94,13 +94,14 @@ function TodoList() {
   - Intuitive API allowing rapid development
   - Mutate state, we do the hard work for you, auto converting mutations to immutable updates
   - Thunks for data fetching and side effects
+  - Selectors for derived data
   - React Hook based API
   - Testing helpers baked in
-  - Supports Typescript (ships with definitions)
+  - Supports Typescript
   - Supports React Native
-  - Compatible with most of the Redux ecosystem:
+  - Compatible with the Redux ecosystem:
     - Redux Dev Tools support out of the box
-    - Store customisation, e.g. middleware
+    - Supports custom middleware and other Redux enhancers
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -123,8 +124,8 @@ function TodoList() {
       - [Dispatching actions directly via the store](#dispatching-actions-directly-via-the-store)
       - [Creating a `thunk` action](#creating-a-thunk-action)
       - [Dispatching a `thunk` action directly via the store](#dispatching-a-thunk-action-directly-via-the-store)
-      - [Deriving state via `select`](#deriving-state-via-select)
-      - [Accessing Derived State directly via the store](#accessing-derived-state-directly-via-the-store)
+      - [Creating selectors for derived state](#creating-selectors-for-derived-state)
+      - [Accessing your selectors directly via the store](#accessing-your-selectors-directly-via-the-store)
       - [Updating multiple parts of your state in response to a thunk/action](#updating-multiple-parts-of-your-state-in-response-to-a-thunkaction)
     - [Usage with React](#usage-with-react)
       - [Wrap your app with StoreProvider](#wrap-your-app-with-storeprovider)
@@ -135,13 +136,15 @@ function TodoList() {
     - [createStore(model, config)](#createstoremodel-config)
     - [action](#action)
     - [thunk(action)](#thunkaction)
-    - [reducer(fn)](#reducerfn)
-    - [select(selector)](#selectselector)
+    - [selector](#selector)
     - [listen(on)](#listenon)
+    - [reducer(fn)](#reducerfn)
     - [StoreProvider](#storeprovider)
     - [useStoreState(mapState, externals)](#usestorestatemapstate-externals)
     - [useStoreActions(mapActions)](#usestoreactionsmapactions)
     - [useStoreDispatch()](#usestoredispatch)
+  - [Deprecated API](#deprecated-api)
+    - [select(selector)](#selectselector)
   - [Usage with Typescript](#usage-with-typescript)
   - [Usage with React Native](#usage-with-react-native)
   - [Writing Tests](#writing-tests)
@@ -156,7 +159,13 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy gives you the power of Redux (and its tooling) whilst avoiding the boilerplate. It allows you to create a Redux store by defining a model that describes your state and its actions. Batteries are included - you don't need to configure any additional packages to support derived state, side effects, memoisation, or integration with React.
+Easy Peasy provides you with an intuitive and easy to use API that allows rapid development. Batteries are included - you don't need to configure any additional packages to support derived state, API calls, memoisation, or integration with React.
+
+Under the hood we are abstracting Redux, taking advantage of the amazing architecture and guarantees it provides which has made it so popular within the React ecosystem. We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing applications. 
+
+In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This allows the opportunity to interface with existing Redux based libraries.
+
+All that being said, no prior Redux experience is required.
 
 <p>&nbsp;</p>
 
@@ -205,13 +214,13 @@ https://codesandbox.io/s/woyn8xqk15
 
 ## Tutorial
 
-The below will introduce you to the core concepts of Easy Peasy, where we will interact with the Redux store directly. In a following section we shall illustrate how to integrate [Easy Peasy within a React application](#usage-with-react).
+The below will introduce you to the core concepts of Easy Peasy, where we will interact with the store directly. In a following section we shall illustrate how to integrate [Easy Peasy within a React application](#usage-with-react).
 
 ### Core Concepts
 
 #### Creating the store
 
-Firstly you need to define your model. This represents the structure of your Redux state along with its default values. Your model can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
+Firstly you need to define your model. This represents the structure of your state along with its default values. Your model can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
 
 ```javascript
 const model = {
@@ -233,7 +242,7 @@ You will now have a [Redux store](https://redux.js.org/api/store) - all the stan
 
 #### Accessing state directly via the store
 
-You can access your store's state using the `getState` API of the Redux store.
+You can access your store's state using the `getState` API of the store.
 
 ```javascript
 store.getState().todos.items;
@@ -276,11 +285,13 @@ The action will receive as its first parameter the slice of the state that it wa
 Easy Peasy will bind your actions against the stores `dispatch`. They will be bound using paths that match the location of the action on your model.
 
 ```javascript
-//                                    |-- payload
+//                                 payload
+//                                    |
 //                           |------------------|
 store.dispatch.todos.addTodo('Install easy-peasy');
 //            |-------------|
-//                  |-- path matches our model (todos.addTodo)
+//                  |
+//  path matches our model (todos.addTodo)
 ```
 
 Call `getState` to see the updated state.
@@ -323,46 +334,50 @@ You cannot modify the state within a `thunk`, however, the `thunk` is provided t
 
 #### Dispatching a `thunk` action directly via the store
 
-You can dispatch a thunk action in the same manner as a normal action. A `thunk` action always returns a `Promise` allowing you to execute any process after the `thunk` has completed.
+You can dispatch a thunk action in the same manner as a normal action. A `thunk` action is asynchronous and always returns a `Promise`. This allows you chain execution for when the `thunk` has completed.
 
 ```javascript
-store.dispatch.todos.saveTodo('Install easy-peasy').then(() => {
-  console.log('Todo saved');
-})
+store.dispatch.todos.saveTodo('Install easy-peasy')
+  .then(() => {  // 👈 chain onto the returned promise
+    console.log('Todo saved');
+  });
 ```
 
-#### Deriving state via `select`
+#### Creating selectors for derived state
 
-If you have state that can be derived from state then you can use the [`select`](#selectselector) helper. Simply attach it to any part of your model.
+If you have state that can be derived from state then you can use the [`selector`](#selector) helper. Simply attach the selector to your model.
 
 ```javascript
-import { select } from 'easy-peasy'; // 👈 import the helper
+import { selector } from 'easy-peasy'; // 👈 import the helper
 
 const store = createStore({
   shoppingBasket: {
     products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
-    totalPrice: select(state =>
-      state.products.reduce((acc, cur) => acc + cur.price, 0)
+    totalPrice: selector(
+      // Firstly you provide an array of "argumentResolvers" which resolve the
+      // parts of your state that will be used in the derive process
+      [state => state.products],
+      // Then define the deriving selector function
+      (products) => products.reduce((acc, cur) => acc + cur.price, 0)
     )
   }
 }
 ```
 
-The derived data will be cached and will only be recalculated when the associated state changes.
+The selector results will be cached and will only be recalculated when the associated state changes. This provides a nice level of performance optimisation, avoiding unneccessary work when rerendering your React components.
 
-This can be really helpful to avoid unnecessary re-renders in your react components, especially when you do things like converting an object map to an array in your `connect`. Typically people would use [`reselect`](https://github.com/reduxjs/reselect) to alleviate this issue, however, with Easy Peasy this feature is baked right in.
+Those familiar with Redux will find this similar to the benefits provided by [`reselect`](https://github.com/reduxjs/reselect).
 
-> Note: we don't recommend attaching selectors to the root of your store, as those will be executed for _every_ change to your store. If you absolutely need to, try to attach as few selectors to the root as you can.
 
-#### Accessing Derived State directly via the store
+#### Accessing your selectors directly via the store
 
-You can access derived state as though it were a normal piece of state.
+You can access your selector similar to state.
 
 ```javascript
-store.getState().shoppingBasket.totalPrice
-```
+store.getState().shoppingBasket.totalPrice(); // fresh hit
 
-> Note! See how we don't call the derived state as a function. You access it as a simple property.
+store.getState().shoppingBasket.totalPrice(); // cached result
+```
 
 #### Updating multiple parts of your state in response to a thunk/action
 
@@ -410,8 +425,6 @@ You can do more than this with the `listen` helper. You can listen to an `action
 
 We will now cover how to integrate your store with your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
 
-> If you want to be able to use your Easy Peasy store with Class components then you can utilise the `react-redux` package - this is covered further down in the tutorial.
-
 > If you haven't done so already we highly recommend that you install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This will allow you to visualise your actions firing along with the associated state updates.
 
 #### Wrap your app with StoreProvider
@@ -448,7 +461,7 @@ const TodoList = () => {
 };
 ```
 
-In the case that your `useStoreState` implementation depends on an "external" value when mapping state, you should provide the respective "external" within the second argument to the `useStoreState`. This is a similar requirement to some of the official hooks that are bundled with React. The `useStoreState` hook will then track the external value and ensure that the state is remapped every time the external value(s) change.
+In the case that your `useStoreState` implementation depends on an "external" value when mapping state, you should provide the respective external within the "dependencies" second argument to the `useStoreState`. This is a similar requirement to some of the official hooks that are bundled with React. The `useStoreState` hook will then track the dependency and ensure that the state is remapped every time they change.
 
 ```javascript
 import { useStoreState } from 'easy-peasy';
@@ -953,165 +966,247 @@ store.dispatch.doSomething()
 </p>
 </details>
 
-### reducer(fn)
+### selector
 
-Declares a section of state to be calculated via a "standard" reducer function - as typical in Redux. This was specifically added to allow for integrations with existing libraries, or legacy Redux code.
-
-Some 3rd party libraries, for example [`connected-react-router`](https://github.com/supasate/connected-react-router), require you to attach a reducer that they provide to your state. This helper will you achieve this.
+The `selector` helper is intended to allow you to create state selectors, i.e. functions that take in state and then return derived new state. We have decided to incorporate this helper within the library, as we can ensure that performance optimisations such as memoization are automatically performed against your selectors. Your selectors will automatically manage cache invalidation when updates to related state occurs.
 
 <details>
 <summary>Arguments</summary>
 <p>
 
-  - fn (Function, required)
+  - argumentResolvers (Array<Function>. required)
 
-    The reducer function. It receives the following arguments.
+    An array of functions responsible for resolving the slices of state that the selector will act against. Each function receives the following arguments:
 
-    - `state` (Object, required)
+    - `state` (Object)
 
-      The current value of the property that the reducer was attached to.
+      The local state against which your `selector` is bound.
 
-    - `action` (Object, required)
+    - `storeState` (Object)
 
-      The action object, typically with the following shape.
+      The entire state of your store.
 
-      - `type` (string, required)
+    ```javascript
+    (state, storeState) => state.foo
+    ```
 
-        The name of the action.
-
-      - `payload` (any)
-
-        Any payload that was provided to the action.
-
-</p>
-</details>
-
-<details>
-<summary>Example</summary>
-<p>
-
-```javascript
-import { createStore, reducer } from 'easy-peasy';
-
-const store = createStore({
-  counter: reducer((state = 1, action) => {
-    switch (action.type) {
-      case 'INCREMENT': state + 1;
-      default: return state;
-    }
-  })
-});
-
-store.dispatch({ type: 'INCREMENT' });
-
-store.getState().counter;
-// 2
-```
-
-</p>
-</details>
-
-### select(selector)
-
-Attach derived state (i.e. is calculated from other parts of your state) to your store.
-
-The results of your selectors will be cached, and will only be recomputed if the state that they depend on changes. You may be familiar with `reselect` - this feature provides you with the same benefits.
-
-<details>
-<summary>Arguments</summary>
-<p>
+    > Note: You should keep your argument resolvers very straight forward. Don't do any transformation of the state. They are meant to isolate the parts of your state that your selector will run against. Doing this allows us to provide performance optimisations where we can quickly check if the state you are operating against has changed. If it hasn't there is no need to re-run your selector for a call, we can then return a cached result.
 
   - selector (Function, required)
 
-    The selector function responsible for resolving the derived state. It will be provided the following arguments:
+    The selector function responsible for resolving the derived state. It will be provided arguments that match the length of the `argumentResolvers`. Where each argument matches the index position of the `argumentResolver`.
 
-    - `state` (Object, required)
+    If any runtime arguments are provided to the selector during execution, these will be appended as additional arguments.
 
-      The local part of state that the `select` property was attached to.
+    Please see the examples to make this clearer.
 
-    You can return any derived state you like.
+  - configuration (Object, not required)
 
-    It also supports returning a function. This allows you to support creating a "dynamic" selector that accepts arguments (e.g. `productById(1)`). We will automatically optimise the function that you return - ensuring that any calls to the function will be automatically be memoised - i.e. calls to it with the same arguments will return cached results. This automatic memoisation of the function can be disabled via the `disableInternalSelectFnMemoize` setting on the `createStore`'s config argument.
+    The configuration for your selector. It currently supports the following properties:
 
-  - dependencies (Array, not required)
+    - `limit` (number, not required, default=1)
 
-    If this selector depends on data from other selectors then you should provide the respective selectors within an array to indicate the case. This allows us to make guarantees of execution order so that your state is derived in the manner you expect it to.
+      The size of the cache of your selector. By default only the most recent result of your selector will be cached. Every time your selector gets executed with selector arguments that do not match the arguments that were provided for the previous execution the cache will be invalidated and your selector will be rerun with the new result cached.
+
+      This configuration value is typically useful when your selector will accept runtime arguments. For example, imagine a `productById` selector. You may make multiple calls to this selector across a render cycle of your React application. It would be wasteful to have a maximum cache size of 1, especially in cases where you render multiple products to a page. For these cases it is highly recommended to increase the cache limit. For example you could choose to increase the cache limit to 100, in which case the 100 most recent unique argument calls to `productById` would be cached.
 
 </p>
 </details>
 
 <details>
-<summary>Example</summary>
+<summary>Example defining a simple selector</summary>
 <p>
 
 ```javascript
-import { select } from 'easy-peasy'; // 👈 import the helper
+import { selector } from 'easy-peasy';
 
 const store = createStore({
-  shoppingBasket: {
-    products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
-    // 👇 define your derived state
-    totalPrice: select(state =>
-      state.products.reduce((acc, cur) => acc + cur.price, 0)
+  todos: {
+    items: [],
+    count: selector(
+      [(state) => state.items], 
+      //                  👆
+      //  |---------------|
+      // 👇
+      (items) => items.length,
+    }),
+  }
+});
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example defining a multi argument selector</summary>
+<p>
+
+```javascript
+import { selector } from 'easy-peasy';
+
+const store = createStore({
+  profile: {
+    firstName: 'Isla', 
+    lastName: 'Rose',
+    fullName: selector(
+      [(state) => state.firstName, (state) => state.lastName], 
+      (firstName, lastName) => firstName + ' ' + lastName,
+    }),
+  }
+});
+
+store.getState().profile.fullName();
+// "Isla Rose"
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example using a selector within a component</summary>
+<p>
+
+```javascript
+import { useStoreState } from 'easy-peasy';
+
+function TotalTodos() {
+  // Notice how we execute the count                    👇
+  const todoCount = useStoreState(state => state.todos.count());
+  return <div>Total: {todoCount}</div>;
+}
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example defining a selector that uses global store state</summary>
+<p>
+
+```javascript
+const store = createStore({
+  todos: {
+    items: {
+      1: { id: 1, text: 'Win the lottery' ]
+    }
+  },
+  profile: {
+    favouriteTodoId: 1,
+    favouriteTodo: selector(
+     [
+       (state) => state.favouriteTodoId,
+       // Using global store state 👇
+       (state, storeState) => storeState.todos.items
+     ],
+     (todoId, todos) => todos[todoId]
     )
   }
-};
-
-// 👇 access the derived state as you would normal state
-store.getState().shoppingBasket.totalPrice;
-```
-
-</p>
-</details>
-
-<details>
-<summary>Example with arguments</summary>
-<p>
-
-```javascript
-import { select } from 'easy-peasy'; // 👈 import the helper
-
-const store = createStore({
-  products: [{ id: 1, name: 'Shoes', price: 123 }, { id: 2, name: 'Hat', price: 75 }],
-
-  productById: select(state =>
-    // 👇 return a function that accepts the arguments
-    id => state.products.find(x => x.id === id)
-  )
-};
-
-// 👇 access the select fn and provide its required arguments
-store.getState().productById(1);
-
-// This next call will return a cached result
-store.getState().productById(1);
-```
-
-</p>
-</details>
-
-<details>
-<summary>Example with Dependencies</summary>
-<p>
-
-```javascript
-import { select } from 'easy-peasy';
-
-const totalPriceSelector = select(state =>
-  state.products.reduce((acc, cur) => acc + cur.price, 0),
-)
-
-const netPriceSelector = select(
-  state => state.totalPrice * ((100 - state.discount) / 100),
-  [totalPriceSelector] // 👈 declare that this selector depends on totalPrice
-)
-
-const store = createStore({
-  discount: 25,
-  products: [{ name: 'Shoes', price: 160 }, { name: 'Hat', price: 40 }],
-  totalPrice: totalPriceSelector,
-  netPrice: netPriceSelector // price after discount applied
 });
+
+store.getState().profile.favouriteTodo();
+// { id: 1, text: "Win the lottery" }
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example using runtime arguments within a selector</summary>
+<p>
+
+```javascript
+const store = createStore({
+  todos: {
+    items: {
+      1: { id: 1, text: 'Win the lottery' ]
+    },
+    getById: selector(
+      [(state) => state.items], 
+      // Note this second argument. It wasn't defined within our argumentSelectors. 
+      // We therefore expect it to be provided at runtime.
+      //      👇
+      (items, id) => items[id]
+  },
+});
+
+store.getState().todos.getById(1);
+// { id: 1, text: "Win the lottery" }
+```
+
+And here is an example using it within a React component:
+
+```javascript
+import { useStoreState } from 'easy-peasy';
+
+function Todo({ id }) {
+  const todo = useStoreState(
+    state => state.todos.getById(id),
+    [id],
+  );
+  return todo ? <div>{todo.text}</div> : null;
+}
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example customising the cache limit</summary>
+<p>
+
+```javascript
+const store = createStore({
+  todos: {
+    items: {
+      1: { id: 1, text: 'Win the lottery' ]
+    },
+    getById: selector(
+      [(state) => state.items], 
+      (items, id) => items[id],
+      { limit: 100 }
+  },
+});
+
+store.getState().todos.getById(1); // new hit
+store.getState().todos.getById(2); // new hit
+store.getState().todos.getById(1); // cache hit
+store.getState().todos.getById(2); // cache hit
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example referencing other selectors</summary>
+<p>
+
+You can reference selectors from any part of your tree when defining one.
+
+```javascript
+const store = createStore({
+  todos: {
+    items: {
+      1: { id: 1, text: 'Win the lottery' ]
+    },
+    getById: selector(
+      [(state) => state.items], 
+      (items, id) => items[id],
+      { limit: 100 }
+    ),
+    textFor: selector(
+      // Referencing another selector
+      //                  👇
+      [(state) => state.getById],
+      (getById, id) => {
+        const todo = getById(id);
+        return todo ? todo.text : undefined;
+      }
+    )
+  },
+});
+
+store.getState().todos.textFor(1);
+// "Win the lottery"
 ```
 
 </p>
@@ -1219,6 +1314,63 @@ const model = {
 </p>
 </details>
 
+### reducer(fn)
+
+Declares a section of state to be calculated via a "standard" reducer function - as typical in Redux. This was specifically added to allow for integrations with existing libraries, or legacy Redux code.
+
+Some 3rd party libraries, for example [`connected-react-router`](https://github.com/supasate/connected-react-router), require you to attach a reducer that they provide to your state. This helper will you achieve this.
+
+<details>
+<summary>Arguments</summary>
+<p>
+
+  - fn (Function, required)
+
+    The reducer function. It receives the following arguments.
+
+    - `state` (Object, required)
+
+      The current value of the property that the reducer was attached to.
+
+    - `action` (Object, required)
+
+      The action object, typically with the following shape.
+
+      - `type` (string, required)
+
+        The name of the action.
+
+      - `payload` (any)
+
+        Any payload that was provided to the action.
+
+</p>
+</details>
+
+<details>
+<summary>Example</summary>
+<p>
+
+```javascript
+import { createStore, reducer } from 'easy-peasy';
+
+const store = createStore({
+  counter: reducer((state = 1, action) => {
+    switch (action.type) {
+      case 'INCREMENT': state + 1;
+      default: return state;
+    }
+  })
+});
+
+store.dispatch({ type: 'INCREMENT' });
+
+store.getState().counter;
+// 2
+```
+
+</p>
+</details>
 
 ### StoreProvider
 
@@ -1474,6 +1626,118 @@ const AddTodo = () => {
     </div>
   );
 };
+```
+
+</p>
+</details>
+
+<p>&nbsp;</p>
+
+---
+
+## Deprecated API
+
+### select(selector)
+
+Attach derived state (i.e. is calculated from other parts of your state) to your store.
+
+The results of your selectors will be cached, and will only be recomputed if the state that they depend on changes. You may be familiar with `reselect` - this feature provides you with the same benefits.
+
+<details>
+<summary>Arguments</summary>
+<p>
+
+  - selector (Function, required)
+
+    The selector function responsible for resolving the derived state. It will be provided the following arguments:
+
+    - `state` (Object, required)
+
+      The local part of state that the `select` property was attached to.
+
+    You can return any derived state you like.
+
+    It also supports returning a function. This allows you to support creating a "dynamic" selector that accepts arguments (e.g. `productById(1)`). We will automatically optimise the function that you return - ensuring that any calls to the function will be automatically be memoised - i.e. calls to it with the same arguments will return cached results. This automatic memoisation of the function can be disabled via the `disableInternalSelectFnMemoize` setting on the `createStore`'s config argument.
+
+  - dependencies (Array, not required)
+
+    If this selector depends on data from other selectors then you should provide the respective selectors within an array to indicate the case. This allows us to make guarantees of execution order so that your state is derived in the manner you expect it to.
+
+</p>
+</details>
+
+<details>
+<summary>Example</summary>
+<p>
+
+```javascript
+import { select } from 'easy-peasy'; // 👈 import the helper
+
+const store = createStore({
+  shoppingBasket: {
+    products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
+    // 👇 define your derived state
+    totalPrice: select(state =>
+      state.products.reduce((acc, cur) => acc + cur.price, 0)
+    )
+  }
+};
+
+// 👇 access the derived state as you would normal state
+store.getState().shoppingBasket.totalPrice;
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example with arguments</summary>
+<p>
+
+```javascript
+import { select } from 'easy-peasy'; // 👈 import the helper
+
+const store = createStore({
+  products: [{ id: 1, name: 'Shoes', price: 123 }, { id: 2, name: 'Hat', price: 75 }],
+
+  productById: select(state =>
+    // 👇 return a function that accepts the arguments
+    id => state.products.find(x => x.id === id)
+  )
+};
+
+// 👇 access the select fn and provide its required arguments
+store.getState().productById(1);
+
+// This next call will return a cached result
+store.getState().productById(1);
+```
+
+</p>
+</details>
+
+<details>
+<summary>Example with Dependencies</summary>
+<p>
+
+```javascript
+import { select } from 'easy-peasy';
+
+const totalPriceSelector = select(state =>
+  state.products.reduce((acc, cur) => acc + cur.price, 0),
+)
+
+const netPriceSelector = select(
+  state => state.totalPrice * ((100 - state.discount) / 100),
+  [totalPriceSelector] // 👈 declare that this selector depends on totalPrice
+)
+
+const store = createStore({
+  discount: 25,
+  products: [{ name: 'Shoes', price: 160 }, { name: 'Hat', price: 40 }],
+  totalPrice: totalPriceSelector,
+  netPrice: netPriceSelector // price after discount applied
+});
 ```
 
 </p>
