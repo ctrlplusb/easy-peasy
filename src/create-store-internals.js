@@ -3,9 +3,9 @@ import produce from 'immer';
 import {
   actionNameSymbol,
   actionSymbol,
-  derivedSymbol,
-  derivedConfigSymbol,
-  derivedStateSymbol,
+  selectorSymbol,
+  selectorConfigSymbol,
+  selectorStateSymbol,
   listenSymbol,
   metaSymbol,
   reducerSymbol,
@@ -59,8 +59,8 @@ export default function createStoreInternals({
   const actionListenersDict = {};
   const actionReducersDict = {};
   const actionReducersForPath = {};
-  let derivedSelectorId = 0;
-  const derivedSelectorsDict = {};
+  let selectorId = 0;
+  const selectorsDict = {};
 
   const recursiveExtractDefsFromModel = (current, parentPath) =>
     Object.keys(current).forEach(key => {
@@ -138,10 +138,10 @@ export default function createStoreInternals({
           actionCreator[actionNameSymbol] = name;
           actionCreatorDict[name] = actionCreator;
           set(path, actionCreators, actionCreator);
-        } else if (value[derivedSymbol]) {
-          derivedSelectorId += 1;
-          const selectorId = derivedSelectorId;
-          const { args, config } = value[derivedConfigSymbol];
+        } else if (value[selectorSymbol]) {
+          selectorId += 1;
+          const selectorInstanceId = selectorId;
+          const { args, config } = value[selectorConfigSymbol];
           const argSelectors =
             args && Array.isArray(args) ? args : [state => state];
           const limit =
@@ -183,16 +183,16 @@ export default function createStoreInternals({
               );
               return internalSelect(...selectorArgs.concat(runtimeArgs));
             };
-            selector[derivedStateSymbol] = {
+            selector[selectorStateSymbol] = {
               argumentChangeTracker: createArgumentChangeTracker(),
               createSelector,
               meta,
-              selectorId,
+              selectorId: selectorInstanceId,
             };
             return selector;
           };
           const selector = createSelector();
-          derivedSelectorsDict[derivedSelectorId] = selector;
+          selectorsDict[selectorId] = selector;
           set(path, defaultState, selector);
         } else if (value[selectSymbol]) {
           value[selectStateSymbol] = { parentPath, key, executed: false };
@@ -392,7 +392,7 @@ export default function createStoreInternals({
 
     let isInitial = true;
 
-    const selectorsReducer = state => {
+    const selectsReducer = state => {
       const stateAfterSelectors = runSelectors(state);
       isInitial = false;
       selectorReducers.forEach(selector => {
@@ -401,25 +401,27 @@ export default function createStoreInternals({
       return stateAfterSelectors;
     };
 
-    const derivedSelectorsReducer = state => {
-      const selectors = Object.values(derivedSelectorsDict);
+    const selectorsReducer = state => {
+      const selectors = Object.values(selectorsDict);
       return produce(state, draft => {
         selectors.forEach(selector => {
-          const derivedState = selector[derivedStateSymbol];
-          const parentState = get(derivedState.meta.parent, state);
-          const rebindSelector = () => {
-            const newSelector = derivedState.createSelector();
-            newSelector[derivedState.prevState] = parentState;
-            derivedSelectorsDict[derivedState.selectorId] = newSelector;
-            set(derivedState.meta.path, draft, newSelector);
+          const selectorState = selector[selectorStateSymbol];
+          const parentState = get(selectorState.meta.parent, state);
+          const recreateSelector = () => {
+            const newSelector = selectorState.createSelector();
+            newSelector[selectorState.prevState] = parentState;
+            selectorsDict[selectorState.selectorId] = newSelector;
+            set(selectorState.meta.path, draft, newSelector);
           };
-          if (derivedState.prevState == null) {
-            derivedState.prevState = derivedState.argumentChangeTracker(state);
+          if (selectorState.prevState == null) {
+            selectorState.prevState = selectorState.argumentChangeTracker(
+              state,
+            );
           } else {
-            const nextId = derivedState.argumentChangeTracker(state);
-            if (derivedState.prevState !== nextId) {
-              derivedState.prevState = nextId;
-              rebindSelector();
+            const nextId = selectorState.argumentChangeTracker(state);
+            if (selectorState.prevState !== nextId) {
+              selectorState.prevState = nextId;
+              recreateSelector();
             }
           }
         });
@@ -436,13 +438,11 @@ export default function createStoreInternals({
         stateAfterListeners,
         action,
       );
-      const stateAfterDerivedSelectors = derivedSelectorsReducer(
-        stateAfterCustomReducers,
-      );
-      if (state !== stateAfterDerivedSelectors || isInitial) {
-        return selectorsReducer(stateAfterDerivedSelectors);
-      }
-      return stateAfterDerivedSelectors;
+      const stateAfterSelect =
+        state !== stateAfterCustomReducers || isInitial
+          ? selectsReducer(stateAfterCustomReducers)
+          : stateAfterCustomReducers;
+      return selectorsReducer(stateAfterSelect);
     };
 
     return rootReducer;

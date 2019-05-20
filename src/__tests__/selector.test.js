@@ -4,18 +4,18 @@ import { render, fireEvent } from 'react-testing-library';
 import {
   action,
   createStore,
-  derived,
+  selector,
   StoreProvider,
   useStoreState,
   useStoreActions,
 } from '../index';
 
-it('deriving against local state', () => {
+it('selecting against local state', () => {
   // arrange
   const store = createStore({
     todos: {
       items: ['foo'],
-      count: derived([state => state.items], items => items.length),
+      count: selector([state => state.items], items => items.length),
     },
   });
 
@@ -23,13 +23,13 @@ it('deriving against local state', () => {
   expect(store.getState().todos.count()).toBe(1);
 });
 
-it('supports multiple derived state arguments', () => {
+it('supports multiple selector state arguments', () => {
   // arrange
   const store = createStore({
     todos: {
       countLabel: 'Count',
       items: ['foo'],
-      count: derived(
+      count: selector(
         [state => state.items, state => state.countLabel],
         (items, label) => `${label}: ${items.length}`,
       ),
@@ -48,7 +48,7 @@ it('has a memoisation limit of 1 by default', () => {
   const store = createStore({
     todos: {
       items: [todoOne, todoTwo],
-      getById: derived([state => state.items], (items, id) => {
+      getById: selector([state => state.items], (items, id) => {
         runCount += 1;
         return items.find(x => x.id === id);
       }),
@@ -99,7 +99,7 @@ it('supports customisation on the memoisation limit', () => {
   const store = createStore({
     todos: {
       items: [todoOne, todoTwo],
-      getById: derived(
+      getById: selector(
         [state => state.items],
         (items, id) => {
           runCount += 1;
@@ -151,7 +151,7 @@ it('supports execution time arguments', () => {
   const store = createStore({
     todos: {
       items: [{ id: 1, text: 'foo' }],
-      getById: derived([state => state.items], (items, id) => {
+      getById: selector([state => state.items], (items, id) => {
         return items.find(x => x.id === id);
       }),
     },
@@ -161,13 +161,13 @@ it('supports execution time arguments', () => {
   expect(store.getState().todos.getById(1)).toEqual({ id: 1, text: 'foo' });
 });
 
-it('supports multiple execution time arguments and multiple custom derived state arguments', () => {
+it('supports multiple execution time arguments and multiple custom selector state arguments', () => {
   // arrange
   const store = createStore({
     todos: {
       countLabel: 'Count',
       items: ['foo'],
-      count: derived(
+      count: selector(
         [state => state.items, state => state.countLabel],
         (items, label, runtimeArg1, runtimeArg2) =>
           `${label}: ${items.length} ${runtimeArg1}${runtimeArg2}`,
@@ -189,7 +189,7 @@ it('supports accessing state across the model', () => {
     },
     settings: {
       favouriteTodoId: 1,
-      favouriteTodo: derived(
+      favouriteTodo: selector(
         [
           state => state.favouriteTodoId,
           (state, storeState) => storeState.todos.items,
@@ -206,16 +206,16 @@ it('supports accessing state across the model', () => {
   });
 });
 
-it('supports accessing a derived state from another', () => {
+it('supports accessing a selector state from another', () => {
   // arrange
   const store = createStore({
     todos: {
       items: { 1: { id: 1, text: 'foo' } },
-      getById: derived([state => state.items], (items, id) => items[id]),
+      getById: selector([state => state.items], (items, id) => items[id]),
     },
     settings: {
       favouriteTodoId: 1,
-      favouriteTodo: derived(
+      favouriteTodo: selector(
         [
           state => state.favouriteTodoId,
           (state, storeState) => storeState.todos.getById,
@@ -255,7 +255,7 @@ describe('react', () => {
     const store = createStore({
       todos: {
         items: [{ id: 1, text: 'foo' }],
-        count: derived([state => state.items], items => items.length),
+        count: selector([state => state.items], items => items.length),
         addTodo: action(state => {
           state.items.push({
             id: 2,
@@ -325,7 +325,7 @@ describe('react', () => {
       },
       settings: {
         favouriteTodoId: 1,
-        favouriteTodo: derived(
+        favouriteTodo: selector(
           [
             state => state.favouriteTodoId,
             (state, storeState) => storeState.todos.items,
@@ -392,7 +392,7 @@ describe('react', () => {
     const store = createStore({
       todos: {
         items: [{ id: 1, text: 'foo' }],
-        count: derived([state => state.items], items => items.length),
+        count: selector([state => state.items], items => items.length),
         addTodo: action(state => {
           state.items.push({
             id: 2,

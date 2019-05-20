@@ -47,7 +47,7 @@ type FilterActionTypes<T extends object> = Omit<
     | RegExp
     | Reducer<any, any>
     | Select<any, any>
-    | Derived<any, any, any, any, any>
+    | Selector<any, any, any, any, any>
     | Listen<any, any, any>
   >
 >;
@@ -64,7 +64,7 @@ type FilterStateTypes<T extends object> = Overwrite<
     T,
     KeysOfType<
       T,
-      Select<any, any> | Reducer<any, any> | Derived<any, any, any, any, any>
+      Select<any, any> | Reducer<any, any> | Selector<any, any, any, any, any>
     >
   >
 >;
@@ -103,8 +103,8 @@ type RecursiveState<
     {
       [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, infer R>
         ? R
-        : RequiredModel[P] extends Derived<any, any, any, any, any>
-        ? Selector<RequiredModel[P]>
+        : RequiredModel[P] extends Selector<any, any, any, any, any>
+        ? SelectorRef<RequiredModel[P]>
         : RequiredModel[P] extends Reducer<infer R, any>
         ? R
         : RequiredModel[P] extends object
@@ -116,8 +116,8 @@ type RecursiveState<
     {
       [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, infer R>
         ? R
-        : OptionalModel[P] extends Derived<any, any, any, any, any>
-        ? Selector<OptionalModel[P]>
+        : OptionalModel[P] extends Selector<any, any, any, any, any>
+        ? SelectorRef<OptionalModel[P]>
         : OptionalModel[P] extends Reducer<infer R, any>
         ? R
         : OptionalModel[P] extends object
@@ -596,20 +596,20 @@ type JoinedArgs<
   : Args;
 
 /**
- * A derived type.
+ * A selector type.
  *
  * Useful when declaring your model.
  *
  * @example
  *
- * import { Derived } from 'easy-peasy';
+ * import { Selector } from 'easy-peasy';
  *
  * interface Model {
  *   products: Array<Product>;
- *   totalPrice: Derived<Model, number>;
+ *   totalPrice: Selector<Model, number>;
  * }
  */
-export type Derived<
+export type Selector<
   Model extends Object = {},
   Result = any,
   Args extends Arguments = [any],
@@ -617,42 +617,48 @@ export type Derived<
   StoreModel extends Object = {}
 > = {
   (...args: JoinedArgs<Args, RunTimeArgs>): Result;
-  type: 'derived';
+  type: 'selector';
   result: Result;
 };
 
-type ArgumentSelector<
+type SelectorArgument<
   Model extends Object = {},
   StoreModel extends Object = {},
   Result = any
 > = (state: State<Model>, storeState: State<StoreModel>) => Result;
 
-export type Selector<
-  DerivedImp extends Derived<any, any, any, any, any>
-> = DerivedImp extends Derived<any, infer R, any, infer RTArgs, any>
-  ? RTArgs extends Arguments
-    ? (...args: RTArgs) => R
-    : () => R
+export type SelectorRef<
+  TargetSelector extends Selector<any, any, any, any, any>
+> = TargetSelector extends Selector<
+  any,
+  infer Result,
+  any,
+  infer RunTimeArgs,
+  any
+>
+  ? RunTimeArgs extends Arguments
+    ? (...args: RunTimeArgs) => Result
+    : () => Result
   : () => any;
 
 /**
- * Allows you to declare derived state against your model.
+ * Allows you to declare a selector against your model.
  *
- * https://github.com/ctrlplusb/easy-peasy#derived
+ * https://github.com/ctrlplusb/easy-peasy#selector
  *
  * @example
  *
- * import { derived } from 'easy-peasy';
+ * import { selector } from 'easy-peasy';
  *
  * const store = createStore({
  *   products: [],
- *   totalPrice: derived(
+ *   totalPrice: selector(
  *     [state => state.products],
  *     products => products.reduce((acc, cur) => acc + cur.price, 0),
  *   )
  * });
  */
-export function derived<
+export function selector<
   Model extends Object = {},
   Result = any,
   Args extends Arguments = [any],
@@ -660,37 +666,37 @@ export function derived<
   StoreModel extends Object = {}
 >(
   argumentSelectors: Args extends [any]
-    ? [ArgumentSelector<Model, StoreModel, Args[0]>]
+    ? [SelectorArgument<Model, StoreModel, Args[0]>]
     : Args extends [any, any]
     ? [
-        ArgumentSelector<Model, StoreModel, Args[0]>,
-        ArgumentSelector<Model, StoreModel, Args[1]>
+        SelectorArgument<Model, StoreModel, Args[0]>,
+        SelectorArgument<Model, StoreModel, Args[1]>
       ]
     : Args extends [any, any, any]
     ? [
-        ArgumentSelector<Model, StoreModel, Args[0]>,
-        ArgumentSelector<Model, StoreModel, Args[1]>,
-        ArgumentSelector<Model, StoreModel, Args[2]>
+        SelectorArgument<Model, StoreModel, Args[0]>,
+        SelectorArgument<Model, StoreModel, Args[1]>,
+        SelectorArgument<Model, StoreModel, Args[2]>
       ]
     : Args extends [any, any, any, any]
     ? [
-        ArgumentSelector<Model, StoreModel, Args[0]>,
-        ArgumentSelector<Model, StoreModel, Args[1]>,
-        ArgumentSelector<Model, StoreModel, Args[2]>,
-        ArgumentSelector<Model, StoreModel, Args[3]>
+        SelectorArgument<Model, StoreModel, Args[0]>,
+        SelectorArgument<Model, StoreModel, Args[1]>,
+        SelectorArgument<Model, StoreModel, Args[2]>,
+        SelectorArgument<Model, StoreModel, Args[3]>
       ]
     : Args extends [any, any, any, any]
     ? [
-        ArgumentSelector<Model, StoreModel, Args[0]>,
-        ArgumentSelector<Model, StoreModel, Args[1]>,
-        ArgumentSelector<Model, StoreModel, Args[2]>,
-        ArgumentSelector<Model, StoreModel, Args[3]>,
-        ArgumentSelector<Model, StoreModel, Args[4]>
+        SelectorArgument<Model, StoreModel, Args[0]>,
+        SelectorArgument<Model, StoreModel, Args[1]>,
+        SelectorArgument<Model, StoreModel, Args[2]>,
+        SelectorArgument<Model, StoreModel, Args[3]>,
+        SelectorArgument<Model, StoreModel, Args[4]>
       ]
     : any,
   selector: (...args: JoinedArgs<Args, RunTimeArgs>) => Result,
   memoizeLimit?: number,
-): Derived<Model, Result, Args, RunTimeArgs, StoreModel>;
+): Selector<Model, Result, Args, RunTimeArgs, StoreModel>;
 
 /**
  * A select type.

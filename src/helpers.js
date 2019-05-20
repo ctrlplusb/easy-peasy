@@ -1,8 +1,8 @@
 import {
   actionNameSymbol,
   actionSymbol,
-  derivedSymbol,
-  derivedConfigSymbol,
+  selectorSymbol,
+  selectorConfigSymbol,
   listenSymbol,
   reducerSymbol,
   selectDependenciesSymbol,
@@ -25,15 +25,6 @@ export const action = fn => {
   return fn;
 };
 
-export const derived = (args, fn, config) => {
-  fn[derivedSymbol] = true;
-  fn[derivedConfigSymbol] = {
-    args,
-    config,
-  };
-  return fn;
-};
-
 export const listen = fn => {
   fn[listenSymbol] = true;
   return fn;
@@ -48,6 +39,15 @@ export const select = (fn, dependencies) => {
   fn[selectSymbol] = true;
   fn[selectDependenciesSymbol] = dependencies;
   fn[selectStateSymbol] = {};
+  return fn;
+};
+
+export const selector = (args, fn, config) => {
+  fn[selectorSymbol] = true;
+  fn[selectorConfigSymbol] = {
+    args,
+    config,
+  };
   return fn;
 };
 

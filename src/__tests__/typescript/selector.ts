@@ -1,25 +1,25 @@
 /* eslint-disable */
 
-import { createStore, derived, Derived, Selector } from 'easy-peasy';
+import { createStore, selector, Selector, SelectorRef } from 'easy-peasy';
 
 interface Todo {
   id: number;
   text: string;
 }
 
-type DerivedCount = Derived<TodosModel, number, [Array<Todo>]>;
+type CountSelector = Selector<TodosModel, number, [Array<Todo>], void>;
 
 interface TodosModel {
   items: Array<Todo>;
-  count: DerivedCount;
-  getById: Derived<TodosModel, Todo | undefined, [Array<Todo>], [number]>;
+  count: CountSelector;
+  getById: Selector<TodosModel, Todo | undefined, [Array<Todo>], [number]>;
 }
 
 interface StatusModel {
-  totalTodos: Derived<
+  totalTodos: Selector<
     StatusModel,
     number,
-    [Selector<DerivedCount>],
+    [SelectorRef<CountSelector>],
     void,
     StoreModel
   >;
@@ -33,15 +33,15 @@ interface StoreModel {
 const model: StoreModel = {
   todos: {
     items: [],
-    count: derived([state => state.items], items => {
+    count: selector([state => state.items], items => {
       return items.length;
     }),
-    getById: derived([state => state.items], (items, id) => {
+    getById: selector([state => state.items], (items, id) => {
       return items.find(x => x.id === id);
     }),
   },
   status: {
-    totalTodos: derived(
+    totalTodos: selector(
       [(state, storeState) => storeState.todos.count],
       count => count(),
     ),
