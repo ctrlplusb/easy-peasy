@@ -1,5 +1,6 @@
 >
 > This is the v2.4.0 branch. Your early testing and [feedback](https://github.com/ctrlplusb/easy-peasy/pull/181) would be greatly appreacitated. 🙏
+>
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -89,6 +90,7 @@ function TodoList() {
 ## Highlights
 
   - Simple and intuitive API allowing rapid development
+  - Immutable data store under the hood
   - Thunks for data fetching and side effects
   - Selectors for derived data
   - React Hook based API
