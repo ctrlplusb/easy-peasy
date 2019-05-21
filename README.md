@@ -1,10 +1,6 @@
 > Hi 👋
 >
-> We are baking up the next version (v2.3.0). You can see all the details within the [PR](https://github.com/ctrlplusb/easy-peasy/pull/181) and view the updated docs [here](https://github.com/ctrlplusb/easy-peasy/tree/next).
->
-> Some of the important changes include introducing a new `selector` helper which deprecates the `select` helper, and the aliasing of the hooks to avoid some ambiguity.
->
-> Early testing and feedback would be super appreciated. 🙏
+> This is the v2.3.0 branch. Your early testing and [feedback](https://github.com/ctrlplusb/easy-peasy/pull/181) would be greatly appreacitated. 🙏
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -93,15 +89,15 @@ function TodoList() {
 
 ## Highlights
 
-  - Wraps Redux, all the radness, without the boilerplate
-  - Intuitive API allowing rapid development
-  - Mutate state, we do the hard work for you, auto converting mutations to immutable updates
+  - Simple and intuitive API allowing rapid development
+  - Immutable data store under the hood
   - Thunks for data fetching and side effects
   - Selectors for derived data
   - React Hook based API
   - Testing helpers baked in
   - Supports Typescript
   - Supports React Native
+  - Wraps Redux, all the radness, without the boilerplate
   - Compatible with the Redux ecosystem:
     - Redux Dev Tools support out of the box
     - Supports custom middleware and other Redux enhancers
@@ -164,7 +160,7 @@ function TodoList() {
 
 Easy Peasy provides you with an intuitive and easy to use API that allows rapid development. Batteries are included - you don't need to configure any additional packages to support derived state, API calls, memoisation, or integration with React.
 
-Under the hood we are abstracting Redux, taking advantage of the amazing architecture and guarantees it provides which has made it so popular within the React ecosystem. We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing applications. 
+Under the hood we are abstracting Redux, taking advantage of the amazing architecture and guarantees it provides which has made it so popular within the React ecosystem. We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing applications.
 
 In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This allows the opportunity to interface with existing Redux based libraries.
 
@@ -1027,7 +1023,7 @@ const store = createStore({
   todos: {
     items: [],
     count: selector(
-      [(state) => state.items], 
+      [(state) => state.items],
       //                  👆
       //  |---------------|
       // 👇
@@ -1049,10 +1045,10 @@ import { selector } from 'easy-peasy';
 
 const store = createStore({
   profile: {
-    firstName: 'Isla', 
+    firstName: 'Isla',
     lastName: 'Rose',
     fullName: selector(
-      [(state) => state.firstName, (state) => state.lastName], 
+      [(state) => state.firstName, (state) => state.lastName],
       (firstName, lastName) => firstName + ' ' + lastName,
     }),
   }
@@ -1124,8 +1120,8 @@ const store = createStore({
       1: { id: 1, text: 'Win the lottery' ]
     },
     getById: selector(
-      [(state) => state.items], 
-      // Note this second argument. It wasn't defined within our argumentSelectors. 
+      [(state) => state.items],
+      // Note this second argument. It wasn't defined within our argumentSelectors.
       // We therefore expect it to be provided at runtime.
       //      👇
       (items, id) => items[id]
@@ -1164,7 +1160,7 @@ const store = createStore({
       1: { id: 1, text: 'Win the lottery' ]
     },
     getById: selector(
-      [(state) => state.items], 
+      [(state) => state.items],
       (items, id) => items[id],
       { limit: 100 }
   },
@@ -1192,7 +1188,7 @@ const store = createStore({
       1: { id: 1, text: 'Win the lottery' ]
     },
     getById: selector(
-      [(state) => state.items], 
+      [(state) => state.items],
       (items, id) => items[id],
       { limit: 100 }
     ),
