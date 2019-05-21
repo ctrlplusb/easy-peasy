@@ -90,10 +90,10 @@ function TodoList() {
 ## Highlights
 
   - Simple and intuitive API allowing rapid development
-  - Immutable data store under the hood
   - Thunks for data fetching and side effects
   - Selectors for derived data
   - React Hook based API
+  - Immutable data store under the hood
   - Testing helpers baked in
   - Supports Typescript
   - Supports React Native
