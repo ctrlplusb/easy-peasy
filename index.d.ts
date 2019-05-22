@@ -145,6 +145,7 @@ export interface EasyPeasyConfig<
   injections?: Injections;
   middleware?: Array<Middleware<any, any, any>>;
   mockActions?: boolean;
+  name?: string;
   reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>;
 }
 

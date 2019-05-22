@@ -14,12 +14,13 @@ export default function createStore(model, options = {}) {
     compose,
     devTools = true,
     disableInternalSelectFnMemoize = false,
+    enhancers = [],
     initialState = {},
     injections,
-    mockActions = false,
     middleware = [],
+    mockActions = false,
+    name: storeName = `EasyPeasyStore`,
     reducerEnhancer = rootReducer => rootReducer,
-    enhancers = [],
   } = options;
 
   const modelDefinition = {
@@ -72,7 +73,9 @@ export default function createStore(model, options = {}) {
     (devTools &&
     typeof window !== 'undefined' &&
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+          name: storeName,
+        })
       : reduxCompose);
 
   const bindStoreInternals = (state, isRebind = false) => {
