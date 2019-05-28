@@ -354,7 +354,7 @@ const store = createStore({
   shoppingBasket: {
     products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
     totalPrice: selector(
-      // Firstly you provide an array of "argumentResolvers" which resolve the
+      // Firstly you provide an array of "stateSelectors" which resolve the
       // parts of your state that will be used in the derive process
       [state => state.products],
       // Then define the deriving selector function
@@ -974,7 +974,7 @@ The `selector` helper is intended to allow you to create state selectors, i.e. f
 <summary>Arguments</summary>
 <p>
 
-  - argumentResolvers (Array<Function>. required)
+  - stateSelectors (Array<Function>. required)
 
     An array of functions responsible for resolving the slices of state that the selector will act against. Each function receives the following arguments:
 
@@ -990,13 +990,19 @@ The `selector` helper is intended to allow you to create state selectors, i.e. f
     (state, storeState) => state.foo
     ```
 
-    > Note: You should keep your argument resolvers very straight forward. Don't do any transformation of the state. They are meant to isolate the parts of your state that your selector will run against. Doing this allows us to provide performance optimisations where we can quickly check if the state you are operating against has changed. If it hasn't there is no need to re-run your selector for a call, we can then return a cached result.
+    > Note: You should keep your state selectors very straight forward. Don't do any transformation of the state. They are meant to isolate the parts of your state that your selector depends on. Doing this allows us to provide performance optimisations where we can quickly check if the state you are operating against has changed. If it hasn't there is no need to re-run your selector for a call, we can then return a cached result.
 
   - selector (Function, required)
 
-    The selector function responsible for resolving the derived state. It will be provided arguments that match the length of the `argumentResolvers`. Where each argument matches the index position of the `argumentResolver`.
+    The selector function responsible for resolving the derived state. It is provided the following arguments:
 
-    If any runtime arguments are provided to the selector during execution, these will be appended as additional arguments.
+    - `selectedState` (Array<any>, required)
+
+      These are the results of your defined `stateSelectors`. Where each value matches the idx of the respective state selector.
+
+    - `runtimeArguments` (Array<any>, required)
+
+      If any runtime arguments were provided to your selector
 
     Please see the examples to make this clearer.
 
