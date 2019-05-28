@@ -1,16 +1,16 @@
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
-import { createContainerStore, action } from '../index';
+import { createLocalStore, action } from '../index';
 
-const Counter = createContainerStore({
+const useCounter = createLocalStore({
   count: 0,
   inc: action(state => {
     state.count += 1;
   }),
 });
 
-function CountDisplayUseStore() {
-  const [state, actions] = Counter.useStore();
+function CountDisplay() {
+  const [state, actions] = useCounter();
   return (
     <>
       <div data-testid="count">{state.count}</div>
@@ -21,26 +21,9 @@ function CountDisplayUseStore() {
   );
 }
 
-function CountDisplay() {
-  const count = Counter.useState(state => state.count);
-  const inc = Counter.useActions(actions => actions.inc);
-  return (
-    <>
-      <div data-testid="count">{count}</div>
-      <button data-testid="button" onClick={inc} type="button">
-        +
-      </button>
-    </>
-  );
-}
-
-it('single consumer', () => {
+it('used in component', () => {
   // arrange
-  const app = (
-    <Counter.Provider>
-      <CountDisplay />
-    </Counter.Provider>
-  );
+  const app = <CountDisplay />;
 
   // act
   const { getByTestId } = render(app);
@@ -58,13 +41,13 @@ it('single consumer', () => {
   expect(count.firstChild.textContent).toBe('1');
 });
 
-it('multiple consumers', async () => {
+it('multiple instances', async () => {
   // arrange
   const app = (
-    <Counter.Provider>
+    <>
       <CountDisplay />
       <CountDisplay />
-    </Counter.Provider>
+    </>
   );
 
   // act
@@ -82,36 +65,19 @@ it('multiple consumers', async () => {
 
   // assert
   expect(count[0].firstChild.textContent).toBe('1');
+  expect(count[1].firstChild.textContent).toBe('0');
+
+  // act
+  fireEvent.click(button[1]);
+
+  // assert
+  expect(count[0].firstChild.textContent).toBe('1');
   expect(count[1].firstChild.textContent).toBe('1');
-});
-
-it('useStore hook', () => {
-  // arrange
-  const app = (
-    <Counter.Provider>
-      <CountDisplayUseStore />
-    </Counter.Provider>
-  );
-
-  // act
-  const { getByTestId } = render(app);
-
-  const count = getByTestId('count');
-  const button = getByTestId('button');
-
-  // assert
-  expect(count.firstChild.textContent).toBe('0');
-
-  // act
-  fireEvent.click(button);
-
-  // assert
-  expect(count.firstChild.textContent).toBe('1');
 });
 
 it('with initial data', () => {
   // arrange
-  const Counter = createContainerStore(data => ({
+  const useCounter = createLocalStore(data => ({
     count: data.count || 0,
     inc: action(state => {
       state.count += 1;
@@ -119,23 +85,18 @@ it('with initial data', () => {
   }));
 
   function CountDisplay() {
-    const count = Counter.useState(state => state.count);
-    const inc = Counter.useActions(actions => actions.inc);
+    const [state, actions] = useCounter({ count: 1 });
     return (
       <>
-        <div data-testid="count">{count}</div>
-        <button data-testid="button" onClick={inc} type="button">
+        <div data-testid="count">{state.count}</div>
+        <button data-testid="button" onClick={actions.inc} type="button">
           +
         </button>
       </>
     );
   }
 
-  const app = (
-    <Counter.Provider initialData={{ count: 1 }}>
-      <CountDisplay />
-    </Counter.Provider>
-  );
+  const app = <CountDisplay />;
 
   // act
   const { getByTestId } = render(app);
