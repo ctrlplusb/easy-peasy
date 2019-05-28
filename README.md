@@ -1030,8 +1030,8 @@ const store = createStore({
   todos: {
     items: [],
     count: selector(
-      [(state) => state.items],
-   // |----------------------|
+      [state => state.items],
+   // |--------------------|
    //     |
    //     V
    //  |-----|
@@ -1056,8 +1056,8 @@ const store = createStore({
     firstName: 'Isla',
     lastName: 'Rose',
     fullName: selector(
-      [(state) => state.firstName, (state) => state.lastName],
-    // |------------------------|  |-----------------------|
+      [state => state.firstName, state => state.lastName],
+    // |----------------------|  |---------------------|
     //     |                                |
     //     |           |---------------------
     //     V           V
