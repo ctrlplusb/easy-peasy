@@ -40,6 +40,19 @@ it('supports multiple state selectors', () => {
   expect(store.getState().todos.count()).toBe('Count: 1');
 });
 
+it('operates against the local state by default for invalid state selectors', () => {
+  // arrange
+  const store = createStore({
+    todos: {
+      items: ['foo'],
+      count: selector('what?', ([todos]) => `Count: ${todos.items.length}`),
+    },
+  });
+
+  // assert
+  expect(store.getState().todos.count()).toBe('Count: 1');
+});
+
 it('has a memoisation limit of 1 by default for runtime arguments', () => {
   // arrange
   let runCount = 0;
