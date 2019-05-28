@@ -357,8 +357,9 @@ const store = createStore({
       // Firstly you provide an array of "stateSelectors" which resolve the
       // parts of your state that will be used in the derive process
       [state => state.products],
-      // Then define the deriving selector function
-      (products) => products.reduce((acc, cur) => acc + cur.price, 0)
+      // Then define the deriving selector function, which receives the resolve
+      // state from your state selectors as the its first argument.
+      ([products]) => products.reduce((acc, cur) => acc + cur.price, 0)
     )
   }
 }
@@ -597,6 +598,17 @@ Below is an overview of the API exposed by Easy Peasy.
 
 Creates a Redux store based on the given model. The model must be an object and can be any depth. It also accepts an optional configuration parameter for customisations.
 
+```javascript
+createStore({
+  todos: {
+    items: [],
+    addTodo: (state, text) => {
+      state.items.push(text)
+    }
+  }
+});
+```
+
 <details>
 <summary>Arguments</summary>
 <p>
@@ -698,6 +710,12 @@ Declares an action on your model. An action allows you to perform updates on you
 
 The action will have access to the part of the state tree where it was defined.
 
+```javascript
+action((state, payload) => {
+  state.items.push(payload);
+})
+```
+
 <details>
 <summary>Arguments</summary>
 <p>
@@ -742,6 +760,13 @@ store.dispatch.todos.add('Install easy-peasy');
 ### thunk(action)
 
 Declares a thunk action on your model. Allows you to perform effects such as data fetching and persisting.
+
+```javascript
+thunk(async (actions, payload) => {
+  const user = await loginService(payload);
+  actions.loginSucceeded(user);
+})
+```
 
 <details>
 <summary>Arguments</summary>
@@ -969,6 +994,13 @@ store.dispatch.doSomething()
 ### selector
 
 The `selector` helper is intended to allow you to create state selectors, i.e. functions that take in state and then return derived new state. We have decided to incorporate this helper within the library, as we can ensure that performance optimisations such as memoization are automatically performed against your selectors. Your selectors will automatically manage cache invalidation when updates to related state occurs.
+
+```javascript
+selector(
+  [state => state.products],
+  ([products]) => products.length
+)
+```
 
 <details>
 <summary>Arguments</summary>
@@ -1234,6 +1266,14 @@ It also supports attach listeners to a "string" named action. This allows with i
 
 Note: If any action being listened to does not complete successfully (i.e. throws an exception), then no listeners will be fired.
 
+```javascript
+listen((on) => {
+  on(userModel.loggedIn, action((state, payload) => {
+    state.logs.push(`${payload.username} logged in`);
+  }));
+})
+```
+
 <details>
 <summary>Arguments</summary>
 <p>
@@ -1332,6 +1372,15 @@ Declares a section of state to be calculated via a "standard" reducer function -
 
 Some 3rd party libraries, for example [`connected-react-router`](https://github.com/supasate/connected-react-router), require you to attach a reducer that they provide to your state. This helper will you achieve this.
 
+```javascript
+reducer((state = 1, action) => {
+  switch (action.type) {
+    case 'INCREMENT': state + 1;
+    default: return state;
+  }
+})
+```
+
 <details>
 <summary>Arguments</summary>
 <p>
@@ -1388,6 +1437,12 @@ store.getState().counter;
 
 Initialises your React application with the store so that your components will be able to consume and interact with the state via the `useStoreState` and `useStoreActions` hooks.
 
+```javascript
+<StoreProvider store={store}>
+  <App />
+</StoreProvider>
+```
+
 <details>
 <summary>Example</summary>
 <p>
@@ -1411,6 +1466,12 @@ const App = () => (
 ### useStoreState(mapState, externals)
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state.
+
+```javascript
+const todos = useStoreState(state => state.todos.items);
+```
+
+> Note: this hook also has an alias of `useStore` to backward support the previous Easy Peasy API
 
 <details>
 <summary>Argument</summary>
@@ -1551,6 +1612,12 @@ const { productNames, total } = useStoreState(state => ({
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's actions.
 
+```javascript
+const addTodo = useStoreActions(actions => actions.todos.add);
+```
+
+> Note: this hook also has an alias of `useActions` to backward support the previous Easy Peasy API
+
 <details>
 <summary>Arguments</summary>
 <p>
@@ -1619,6 +1686,12 @@ const EditTodo = ({ todo }) => {
 ### useStoreDispatch()
 
 A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's dispatch.
+
+```javascript
+const dispatch = useStoreDispatch();
+```
+
+> Note: this hook also has an alias of `useDispatch` to backward support the previous Easy Peasy API
 
 <details>
 <summary>Example</summary>
