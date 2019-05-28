@@ -990,7 +990,7 @@ The `selector` helper is intended to allow you to create state selectors, i.e. f
     (state, storeState) => state.foo
     ```
 
-    > Note: You should keep your state selectors very straight forward. Don't do any transformation of the state. They are meant to isolate the parts of your state that your selector depends on. Doing this allows us to provide performance optimisations where we can quickly check if the state you are operating against has changed. If it hasn't there is no need to re-run your selector for a call, we can then return a cached result.
+    > Note: It is best to keep your state selectors as simple as possible. Keep the heavy lifting  / transforms to your actual selector function.
 
   - selector (Function, required)
 
@@ -1020,7 +1020,7 @@ The `selector` helper is intended to allow you to create state selectors, i.e. f
 </details>
 
 <details>
-<summary>Example defining a simple selector</summary>
+<summary>Example</summary>
 <p>
 
 ```javascript
@@ -1031,11 +1031,12 @@ const store = createStore({
     items: [],
     count: selector(
       [(state) => state.items],
-      //                  👆
-      //  |---------------|
-      // 👇
-      (items) => items.length,
-    }),
+   // |----------------------|
+   //     |
+   //     V
+   //  |-----|
+      ([items]) => items.length,
+    ),
   }
 });
 ```
@@ -1044,7 +1045,7 @@ const store = createStore({
 </details>
 
 <details>
-<summary>Example defining a multi argument selector</summary>
+<summary>Example containing multiple state selectors</summary>
 <p>
 
 ```javascript
@@ -1056,8 +1057,12 @@ const store = createStore({
     lastName: 'Rose',
     fullName: selector(
       [(state) => state.firstName, (state) => state.lastName],
-      (firstName, lastName) => firstName + ' ' + lastName,
-    }),
+    // |------------------------|  |-----------------------|
+    //     |                                |
+    //     |           |---------------------
+    //     V           V
+      ([firstName, lastName]) => firstName + ' ' + lastName,
+    ),
   }
 });
 
@@ -1069,14 +1074,14 @@ store.getState().profile.fullName();
 </details>
 
 <details>
-<summary>Example using a selector within a component</summary>
+<summary>Example using a selector from a component</summary>
 <p>
 
 ```javascript
 import { useStoreState } from 'easy-peasy';
 
 function TotalTodos() {
-  // Notice how we execute the count                    👇
+  // Note how we execute the selector                    👇
   const todoCount = useStoreState(state => state.todos.count());
   return <div>Total: {todoCount}</div>;
 }
@@ -1093,18 +1098,19 @@ function TotalTodos() {
 const store = createStore({
   todos: {
     items: {
-      1: { id: 1, text: 'Win the lottery' ]
+      1: { id: 1, text: 'Win the lottery' }
     }
   },
   profile: {
     favouriteTodoId: 1,
     favouriteTodo: selector(
      [
-       (state) => state.favouriteTodoId,
-       // Using global store state 👇
+       state => state.favouriteTodoId,
+       // 2nd parameter to a state selector exposes global state
+       //         👇
        (state, storeState) => storeState.todos.items
      ],
-     (todoId, todos) => todos[todoId]
+     ([todoId, todos]) => todos[todoId]
     )
   }
 });
@@ -1117,24 +1123,26 @@ store.getState().profile.favouriteTodo();
 </details>
 
 <details>
-<summary>Example using runtime arguments within a selector</summary>
+<summary>Example using runtime arguments against a selector</summary>
 <p>
 
 ```javascript
 const store = createStore({
   todos: {
     items: {
-      1: { id: 1, text: 'Win the lottery' ]
+      1: { id: 1, text: 'Win the lottery' }
     },
     getById: selector(
-      [(state) => state.items],
-      // Note this second argument. It wasn't defined within our argumentSelectors.
-      // We therefore expect it to be provided at runtime.
-      //      👇
-      (items, id) => items[id]
-  },
-});
-
+      [state => state.items],
+      // The second argument to our selector is an array containing any runtime 
+      // args that were provided
+      //         👇
+      ([items], [id]) => items[id]
+    )
+  },//           ^
+}); //           |--------------
+//                             |
+//                             V
 store.getState().todos.getById(1);
 // { id: 1, text: "Win the lottery" }
 ```
@@ -1164,12 +1172,13 @@ function Todo({ id }) {
 const store = createStore({
   todos: {
     items: {
-      1: { id: 1, text: 'Win the lottery' ]
+      1: { id: 1, text: 'Win the lottery' }
     },
     getById: selector(
-      [(state) => state.items],
-      (items, id) => items[id],
+      [state => state.items],
+      ([items], [id]) => items[id],
       { limit: 100 }
+    )
   },
 });
 
@@ -1191,27 +1200,24 @@ You can reference selectors from any part of your tree when defining one.
 ```javascript
 const store = createStore({
   todos: {
-    items: {
-      1: { id: 1, text: 'Win the lottery' ]
-    },
-    getById: selector(
-      [(state) => state.items],
-      (items, id) => items[id],
-      { limit: 100 }
+    items: [{ id: 1, text: 'Win the lottery' }],
+    getFirst: selector(
+      [state => state.items],
+      ([items]) => items.length > 0 items[0] : undefined,
     ),
-    textFor: selector(
+    textForFirst: selector(
       // Referencing another selector
       //                  👇
-      [(state) => state.getById],
-      (getById, id) => {
-        const todo = getById(id);
+      [state => state.getFirst],
+      ([getFirst]) => {
+        const todo = getFirst();
         return todo ? todo.text : undefined;
       }
     )
   },
 });
 
-store.getState().todos.textFor(1);
+store.getState().todos.textForFirst();
 // "Win the lottery"
 ```
 
