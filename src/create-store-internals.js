@@ -141,7 +141,7 @@ export default function createStoreInternals({
           selectorId += 1;
           const selectorInstanceId = selectorId;
           const { args, config } = value[selectorConfigSymbol];
-          const argSelectors =
+          const stateSelectors =
             args && Array.isArray(args) ? args : [state => state];
           const limit =
             typeof config === 'object' &&
@@ -149,41 +149,59 @@ export default function createStoreInternals({
             config.limit > 0
               ? config.number
               : 1;
-          const internalSelect = memoizerific(limit)(value);
+          const internalSelector = memoizerific(limit)((...a) =>
+            value(
+              a.slice(0, stateSelectors.length),
+              a.slice(stateSelectors.length),
+            ),
+          );
           let changeIdx = 0;
 
-          const createArgumentChangeTracker = () => {
+          /**
+           * This allows us to track whether the state we are depending on
+           * (resolved via the state selectors), has changed. If so then we know
+           * that we should create a new instance of our selector function so
+           * that updates are propagated and memoization caches are cleared.
+           */
+          const createDependentStateChangeTracker = () => {
             const internalChecker = memoizerific(1)(() => {
               changeIdx += 1;
               return changeIdx;
             });
-            const argumentChangeTracker = storeState => {
+            const dependentStateChangeTracker = storeState => {
               const localState = get(parentPath, storeState);
-              const resolvedArgs = argSelectors.reduce((acc, argSelector) => {
-                acc.push(argSelector(localState, storeState));
-                return acc;
-              }, []);
-              return internalChecker(...resolvedArgs);
+              const resolvedStateArgs = stateSelectors.reduce(
+                (acc, argSelector) => {
+                  acc.push(argSelector(localState, storeState));
+                  return acc;
+                },
+                [],
+              );
+              return internalChecker(...resolvedStateArgs);
             };
-
-            return argumentChangeTracker;
+            return dependentStateChangeTracker;
           };
 
+          /**
+           * We create a function allowing us to create new selector instances.
+           * We will need this ability to reinitialise a selector of the state
+           * it depends on changes.
+           */
           const createSelector = () => {
             const selector = (...runtimeArgs) => {
               const storeState = references.getState();
               const localState = get(parentPath, storeState);
-              const selectorArgs = argSelectors.reduce(
+              const selectedStateArgs = stateSelectors.reduce(
                 (acc, argSelector) => [
                   ...acc,
                   argSelector(localState, storeState),
                 ],
                 [],
               );
-              return internalSelect(...selectorArgs.concat(runtimeArgs));
+              return internalSelector(...selectedStateArgs.concat(runtimeArgs));
             };
             selector[selectorStateSymbol] = {
-              argumentChangeTracker: createArgumentChangeTracker(),
+              dependentStateChangeTracker: createDependentStateChangeTracker(),
               createSelector,
               meta,
               selectorId: selectorInstanceId,
@@ -405,22 +423,19 @@ export default function createStoreInternals({
       return produce(state, draft => {
         selectors.forEach(selector => {
           const selectorState = selector[selectorStateSymbol];
-          const parentState = get(selectorState.meta.parent, state);
-          const recreateSelector = () => {
-            const newSelector = selectorState.createSelector();
-            newSelector[selectorState.prevState] = parentState;
-            selectorsDict[selectorState.selectorId] = newSelector;
-            set(selectorState.meta.path, draft, newSelector);
-          };
-          if (selectorState.prevState == null) {
-            selectorState.prevState = selectorState.argumentChangeTracker(
+          if (selectorState.prevStateCheckId == null) {
+            selectorState.prevStateCheckId = selectorState.dependentStateChangeTracker(
               state,
             );
           } else {
-            const nextId = selectorState.argumentChangeTracker(state);
-            if (selectorState.prevState !== nextId) {
-              selectorState.prevState = nextId;
-              recreateSelector();
+            const nextStateCheckId = selectorState.dependentStateChangeTracker(
+              state,
+            );
+            if (selectorState.prevStateCheckId !== nextStateCheckId) {
+              const newSelector = selectorState.createSelector();
+              newSelector[selectorState.prevStateCheckId] = nextStateCheckId;
+              selectorsDict[selectorState.selectorId] = newSelector;
+              set(selectorState.meta.path, draft, newSelector);
             }
           }
         });
