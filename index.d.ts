@@ -767,14 +767,22 @@ export class StoreProvider<StoreModel = any> extends Component<{
   store: Store<StoreModel>;
 }> {}
 
+interface StoreModelInitializer<
+  StoreModel extends Object = {},
+  InitialData = any
+> {
+  (initialData?: InitialData): StoreModel;
+}
+
 export function createContainerStore<
   StoreModel extends Object = {},
+  InitialData = any,
   StoreConfig extends EasyPeasyConfig<any, any> = any
 >(
-  model: StoreModel,
+  model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
   config?: StoreConfig,
 ): {
-  Provider: React.SFC<{ initialData?: any }>;
+  Provider: React.SFC<{ initialData?: InitialData }>;
   useStore: () => [State<StoreModel>, Actions<StoreModel>];
   useState: <Result = any>(
     mapState: (state: State<StoreModel>) => Result,
@@ -785,3 +793,19 @@ export function createContainerStore<
   ) => Result;
   useDispatch: () => Dispatch<StoreModel>;
 };
+
+export interface UseLocalStore<
+  StoreModel extends Object = {},
+  InitialData = any
+> {
+  (initialData?: InitialData): [State<StoreModel>, Actions<StoreModel>];
+}
+
+export function createLocalStore<
+  StoreModel extends Object = {},
+  InitialData = any,
+  StoreConfig extends EasyPeasyConfig<any, any> = any
+>(
+  model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
+  config?: StoreConfig,
+): UseLocalStore<StoreModel, InitialData>;

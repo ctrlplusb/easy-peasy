@@ -10,6 +10,7 @@ import {
 } from './hooks';
 import createStore from './create-store';
 import createContainerStore from './create-container-store';
+import createLocalStore from './create-local-store';
 import StoreProvider from './provider';
 import {
   action,
@@ -37,6 +38,7 @@ export {
   action,
   actionName,
   createContainerStore,
+  createLocalStore,
   createStore,
   createTypedHooks,
   listen,

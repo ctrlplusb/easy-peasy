@@ -18,11 +18,11 @@ import createStore from './create-store';
 export default function createContainerStore(model, config) {
   const StoreContext = createContext();
 
-  function Provider({ children, initialState }) {
+  function Provider({ children, initialData }) {
     const store = useMemo(
       () =>
         createStore(
-          typeof model === 'function' ? model(initialState) : model,
+          typeof model === 'function' ? model(initialData) : model,
           config,
         ),
       [],
