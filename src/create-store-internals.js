@@ -143,7 +143,9 @@ export default function createStoreInternals({
           const selectorInstanceId = selectorId;
           const { args, config } = value[selectorConfigSymbol];
           const stateSelectors =
-            args && Array.isArray(args) ? args : [state => state];
+            args && Array.isArray(args)
+              ? args.map(s => memoizerific(1)(s))
+              : [state => state];
           const limit =
             typeof config === 'object' &&
             typeof config.limit === 'number' &&
