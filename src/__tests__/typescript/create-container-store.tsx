@@ -8,12 +8,25 @@ interface StoreModel {
   inc: Action<StoreModel>;
 }
 
+interface InitialData {
+  count: number;
+}
+
 const Counter = createContainerStore<StoreModel>({
   count: 0,
   inc: action(state => {
     state.count += 1;
   }),
 });
+
+const CounterWithInitializer = createContainerStore<StoreModel, InitialData>(
+  data => ({
+    count: data ? data.count + 1 : 0,
+    inc: action(state => {
+      state.count += 1;
+    }),
+  }),
+);
 
 function CountDisplay() {
   const count = Counter.useState(state => state.count);
@@ -49,10 +62,11 @@ function TestDispatch() {
   return null;
 }
 
-const app = (
-  <Counter.Provider initialData={{ count: 1 }}>
-    <CountDisplay />
-    <CountDisplayUseStore />
-    <TestDispatch />
-  </Counter.Provider>
-);
+<CounterWithInitializer.Provider initialData={{ count: 1 }}>
+  <CountDisplay />
+</CounterWithInitializer.Provider>;
+
+// typings:expect-error
+<CounterWithInitializer.Provider initialData={{ count: 'foo' }}>
+  <CountDisplay />
+</CounterWithInitializer.Provider>;
