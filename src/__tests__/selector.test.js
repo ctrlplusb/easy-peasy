@@ -10,12 +10,12 @@ import {
   useStoreActions,
 } from '../index';
 
-it('selecting against local state', () => {
+it('supports a state selector', () => {
   // arrange
   const store = createStore({
     todos: {
       items: ['foo'],
-      count: selector([state => state.items], items => items.length),
+      count: selector([state => state.items], ([items]) => items.length),
     },
   });
 
@@ -23,7 +23,7 @@ it('selecting against local state', () => {
   expect(store.getState().todos.count()).toBe(1);
 });
 
-it('supports multiple selector state arguments', () => {
+it('supports multiple state selectors', () => {
   // arrange
   const store = createStore({
     todos: {
@@ -31,7 +31,7 @@ it('supports multiple selector state arguments', () => {
       items: ['foo'],
       count: selector(
         [state => state.items, state => state.countLabel],
-        (items, label) => `${label}: ${items.length}`,
+        ([items, label]) => `${label}: ${items.length}`,
       ),
     },
   });
@@ -40,7 +40,7 @@ it('supports multiple selector state arguments', () => {
   expect(store.getState().todos.count()).toBe('Count: 1');
 });
 
-it('has a memoisation limit of 1 by default', () => {
+it('has a memoisation limit of 1 by default for runtime arguments', () => {
   // arrange
   let runCount = 0;
   const todoOne = { id: 1, text: 'foo' };
@@ -48,7 +48,7 @@ it('has a memoisation limit of 1 by default', () => {
   const store = createStore({
     todos: {
       items: [todoOne, todoTwo],
-      getById: selector([state => state.items], (items, id) => {
+      getById: selector([state => state.items], ([items], [id]) => {
         runCount += 1;
         return items.find(x => x.id === id);
       }),
@@ -91,7 +91,7 @@ it('has a memoisation limit of 1 by default', () => {
   expect(todo).toEqual(todoOne);
 });
 
-it('supports customisation on the memoisation limit', () => {
+it('supports customisation on the memoisation limit for runtime arguments', () => {
   // arrange
   let runCount = 0;
   const todoOne = { id: 1, text: 'foo' };
@@ -101,7 +101,7 @@ it('supports customisation on the memoisation limit', () => {
       items: [todoOne, todoTwo],
       getById: selector(
         [state => state.items],
-        (items, id) => {
+        ([items], [id]) => {
           runCount += 1;
           return items.find(x => x.id === id);
         },
@@ -146,12 +146,12 @@ it('supports customisation on the memoisation limit', () => {
   expect(todo).toEqual(todoOne);
 });
 
-it('supports execution time arguments', () => {
+it('supports runtime arguments', () => {
   // arrange
   const store = createStore({
     todos: {
       items: [{ id: 1, text: 'foo' }],
-      getById: selector([state => state.items], (items, id) => {
+      getById: selector([state => state.items], ([items], [id]) => {
         return items.find(x => x.id === id);
       }),
     },
@@ -161,7 +161,7 @@ it('supports execution time arguments', () => {
   expect(store.getState().todos.getById(1)).toEqual({ id: 1, text: 'foo' });
 });
 
-it('supports multiple execution time arguments and multiple custom selector state arguments', () => {
+it('supports multiple runtime arguments and multiple state selectors', () => {
   // arrange
   const store = createStore({
     todos: {
@@ -169,7 +169,7 @@ it('supports multiple execution time arguments and multiple custom selector stat
       items: ['foo'],
       count: selector(
         [state => state.items, state => state.countLabel],
-        (items, label, runtimeArg1, runtimeArg2) =>
+        ([items, label], [runtimeArg1, runtimeArg2]) =>
           `${label}: ${items.length} ${runtimeArg1}${runtimeArg2}`,
       ),
     },
@@ -181,7 +181,7 @@ it('supports multiple execution time arguments and multiple custom selector stat
   );
 });
 
-it('supports accessing state across the model', () => {
+it('supports selecting global state', () => {
   // arrange
   const store = createStore({
     todos: {
@@ -194,7 +194,7 @@ it('supports accessing state across the model', () => {
           state => state.favouriteTodoId,
           (state, storeState) => storeState.todos.items,
         ],
-        (favouriteTodoId, todos) => todos[favouriteTodoId],
+        ([favouriteTodoId, todos]) => todos[favouriteTodoId],
       ),
     },
   });
@@ -206,12 +206,12 @@ it('supports accessing state across the model', () => {
   });
 });
 
-it('supports accessing a selector state from another', () => {
+it('supports using another selector', () => {
   // arrange
   const store = createStore({
     todos: {
       items: { 1: { id: 1, text: 'foo' } },
-      getById: selector([state => state.items], (items, id) => items[id]),
+      getById: selector([state => state.items], ([items], [id]) => items[id]),
     },
     settings: {
       favouriteTodoId: 1,
@@ -220,7 +220,7 @@ it('supports accessing a selector state from another', () => {
           state => state.favouriteTodoId,
           (state, storeState) => storeState.todos.getById,
         ],
-        (favouriteTodoId, getTodoById) => getTodoById(favouriteTodoId),
+        ([favouriteTodoId, getTodoById]) => getTodoById(favouriteTodoId),
       ),
     },
   });
@@ -255,7 +255,7 @@ describe('react', () => {
     const store = createStore({
       todos: {
         items: [{ id: 1, text: 'foo' }],
-        count: selector([state => state.items], items => items.length),
+        count: selector([state => state.items], ([items]) => items.length),
         addTodo: action(state => {
           state.items.push({
             id: 2,
@@ -330,7 +330,7 @@ describe('react', () => {
             state => state.favouriteTodoId,
             (state, storeState) => storeState.todos.items,
           ],
-          (favouriteTodoId, todos) => todos[favouriteTodoId],
+          ([favouriteTodoId, todos]) => todos[favouriteTodoId],
         ),
       },
       other: 'foo',
@@ -392,7 +392,7 @@ describe('react', () => {
     const store = createStore({
       todos: {
         items: [{ id: 1, text: 'foo' }],
-        count: selector([state => state.items], items => items.length),
+        count: selector([state => state.items], ([items]) => items.length),
         addTodo: action(state => {
           state.items.push({
             id: 2,

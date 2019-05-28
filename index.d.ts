@@ -114,7 +114,7 @@ type StateModelValues<
   P extends keyof Model
 > = Model[P] extends Select<any, infer R>
   ? R
-  : Model[P] extends Selector<any, any, any, any, any>
+  : Model[P] extends Selector<any, infer R, any, any, any>
   ? SelectorRef<Model[P]>
   : Model[P] extends Reducer<infer R, any>
   ? R
@@ -433,185 +433,6 @@ type Arguments =
 
 type OptionalArguments = void | Arguments;
 
-// Forgive me for I have sinned...
-type JoinedArgs<
-  Args extends Arguments = [any],
-  RunTimeArgs extends OptionalArguments = void
-> = RunTimeArgs extends void
-  ? Args
-  : Args extends [any]
-  ? RunTimeArgs extends [any]
-    ? [Args[0], RunTimeArgs[0]]
-    : RunTimeArgs extends [any, any]
-    ? [Args[0], RunTimeArgs[0], RunTimeArgs[1]]
-    : RunTimeArgs extends [any, any, any]
-    ? [Args[0], RunTimeArgs[0], RunTimeArgs[1], RunTimeArgs[2]]
-    : RunTimeArgs extends [any, any, any, any]
-    ? [Args[0], RunTimeArgs[0], RunTimeArgs[1], RunTimeArgs[2], RunTimeArgs[3]]
-    : RunTimeArgs extends [any, any, any, any, any]
-    ? [
-        Args[0],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3],
-        RunTimeArgs[4]
-      ]
-    : Args
-  : Args extends [any, any]
-  ? RunTimeArgs extends [any]
-    ? [Args[0], Args[1], RunTimeArgs[0]]
-    : RunTimeArgs extends [any, any]
-    ? [Args[0], Args[1], RunTimeArgs[0], RunTimeArgs[1]]
-    : RunTimeArgs extends [any, any, any]
-    ? [Args[0], Args[1], RunTimeArgs[0], RunTimeArgs[1], RunTimeArgs[2]]
-    : RunTimeArgs extends [any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3]
-      ]
-    : RunTimeArgs extends [any, any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3],
-        RunTimeArgs[4]
-      ]
-    : Args
-  : Args extends [any, any, any]
-  ? RunTimeArgs extends [any]
-    ? [Args[0], Args[1], Args[2], RunTimeArgs[0]]
-    : RunTimeArgs extends [any, any]
-    ? [Args[0], Args[1], Args[2], RunTimeArgs[0], RunTimeArgs[1]]
-    : RunTimeArgs extends [any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2]
-      ]
-    : RunTimeArgs extends [any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3]
-      ]
-    : RunTimeArgs extends [any, any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3],
-        RunTimeArgs[4]
-      ]
-    : Args
-  : Args extends [any, any, any, any]
-  ? RunTimeArgs extends [any]
-    ? [Args[0], Args[1], Args[2], Args[3], RunTimeArgs[0]]
-    : RunTimeArgs extends [any, any]
-    ? [Args[0], Args[1], Args[2], Args[3], RunTimeArgs[0], RunTimeArgs[1]]
-    : RunTimeArgs extends [any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        Args[3],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2]
-      ]
-    : RunTimeArgs extends [any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        Args[3],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3]
-      ]
-    : RunTimeArgs extends [any, any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        Args[3],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3],
-        RunTimeArgs[4]
-      ]
-    : Args
-  : Args extends [any, any, any, any, any]
-  ? RunTimeArgs extends [any]
-    ? [Args[0], Args[1], Args[2], Args[3], Args[4], RunTimeArgs[0]]
-    : RunTimeArgs extends [any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        Args[3],
-        Args[4],
-        RunTimeArgs[0],
-        RunTimeArgs[1]
-      ]
-    : RunTimeArgs extends [any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        Args[3],
-        Args[4],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2]
-      ]
-    : RunTimeArgs extends [any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        Args[3],
-        Args[4],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3]
-      ]
-    : RunTimeArgs extends [any, any, any, any, any]
-    ? [
-        Args[0],
-        Args[1],
-        Args[2],
-        Args[3],
-        Args[4],
-        RunTimeArgs[0],
-        RunTimeArgs[1],
-        RunTimeArgs[2],
-        RunTimeArgs[3],
-        RunTimeArgs[4]
-      ]
-    : Args
-  : Args;
-
 /**
  * A selector type.
  *
@@ -629,11 +450,11 @@ type JoinedArgs<
 export type Selector<
   Model extends Object = {},
   Result = any,
-  Args extends Arguments = [any],
-  RunTimeArgs extends OptionalArguments = void,
+  Args extends Arguments = any,
+  RunTimeArgs extends OptionalArguments = any,
   StoreModel extends Object = {}
 > = {
-  (...args: JoinedArgs<Args, RunTimeArgs>): Result;
+  (resolvedArgs: Args, runTimeArgs: RunTimeArgs): Result;
   type: 'selector';
   result: Result;
 };
@@ -678,8 +499,8 @@ export type SelectorRef<
 export function selector<
   Model extends Object = {},
   Result = any,
-  Args extends Arguments = [any],
-  RunTimeArgs extends OptionalArguments = void,
+  Args extends Arguments = any,
+  RunTimeArgs extends OptionalArguments = any,
   StoreModel extends Object = {}
 >(
   argumentSelectors: Args extends [any]
@@ -710,8 +531,8 @@ export function selector<
         SelectorArgument<Model, StoreModel, Args[3]>,
         SelectorArgument<Model, StoreModel, Args[4]>
       ]
-    : any,
-  selector: (...args: JoinedArgs<Args, RunTimeArgs>) => Result,
+    : Array<any>,
+  selector: (resolvedArgs: Args, runTimeArgs: RunTimeArgs) => Result,
   memoizeLimit?: number,
 ): Selector<Model, Result, Args, RunTimeArgs, StoreModel>;
 

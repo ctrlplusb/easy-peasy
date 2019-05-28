@@ -13,6 +13,7 @@ interface TodosModel {
   items: Array<Todo>;
   count: CountSelector;
   getById: Selector<TodosModel, Todo | undefined, [Array<Todo>], [number]>;
+  unTypedArgs: Selector<TodosModel>;
 }
 
 interface StatusModel {
@@ -33,17 +34,18 @@ interface StoreModel {
 const model: StoreModel = {
   todos: {
     items: [],
-    count: selector([state => state.items], items => {
+    count: selector([state => state.items], ([items]) => {
       return items.length;
     }),
-    getById: selector([state => state.items], (items, id) => {
+    getById: selector([state => state.items], ([items], [id]) => {
       return items.find(x => x.id === id);
     }),
+    unTypedArgs: selector([state => state.items], ([items]) => items.length),
   },
   status: {
     totalTodos: selector(
       [(state, storeState) => storeState.todos.count],
-      count => count(),
+      ([count]) => count(),
     ),
   },
 };
@@ -71,3 +73,7 @@ if (todo) {
   // typings:expect-error
   todo.id + true;
 }
+
+store.getState().todos.unTypedArgs('1');
+
+store.getState().todos.unTypedArgs();
