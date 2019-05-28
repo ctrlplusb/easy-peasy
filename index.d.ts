@@ -766,3 +766,22 @@ export function createTypedHooks<StoreModel extends Object = {}>(): {
 export class StoreProvider<StoreModel = any> extends Component<{
   store: Store<StoreModel>;
 }> {}
+
+export function createContainerStore<
+  StoreModel extends Object = {},
+  StoreConfig extends EasyPeasyConfig<any, any> = any
+>(
+  model: StoreModel,
+  config?: StoreConfig,
+): {
+  Provider: React.SFC<{ initialData?: any }>;
+  useStore: () => [State<StoreModel>, Actions<StoreModel>];
+  useState: <Result = any>(
+    mapState: (state: State<StoreModel>) => Result,
+    dependencies?: Array<any>,
+  ) => Result;
+  useActions: <Result = any>(
+    mapActions: (actions: Actions<StoreModel>) => Result,
+  ) => Result;
+  useDispatch: () => Dispatch<StoreModel>;
+};
