@@ -133,7 +133,8 @@ function TodoList() {
       - [Dispatching actions in your Components](#dispatching-actions-in-your-components)
       - [Usage via react-redux](#usage-via-react-redux)
   - [API](#api)
-    - [createStore(model, config)](#createstoremodel-config)
+    - [createStore](#createstore)
+    - [StoreConfig](#storeconfig)
     - [action](#action)
     - [thunk(action)](#thunkaction)
     - [selector](#selector)
@@ -594,7 +595,67 @@ This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend 
 
 Below is an overview of the API exposed by Easy Peasy.
 
-### createStore(model, config)
+### createContainerStore
+
+Creates a container store, allowing you to expose the store to specific parts of your React application. This allows you to create multiple stores to encapsulate different features of your application, and can be useful in larger scale applications and when employing code splitting techniques.
+
+```javascript
+createContainerStore({
+  count: 0,
+  inc: action(state => {
+    state.count += 1;
+  })
+})
+```
+
+<details>
+<summary>Arguments</summary>
+<p>
+
+  - `model` (Object | (any) => Object, required)
+
+    The model representing your store.
+
+    Alternatively this can be a function that accepts `initialData`, which is provided when using the store within your components. The function should then return the model. This allows additional runtime configuration/overrides.
+
+  - `config` (Object, not required)
+
+    Provides custom configuration options for your store. Please see the [StoreConfig](#StoreConfig) API documentation for a full list of configuration options.
+
+</p>
+</details>
+
+<details>
+<summary>Example</summary>
+<p>
+
+```javascript
+const Counter = createContainerStore({
+  count: 0,
+  inc: action(state => {
+    state.count += 1;
+  })
+})
+
+function CountDisplay() {
+  const [state, actions] = Counter.useStore();
+  return (
+    <>
+      <div>{state.count}</div>
+      <button onClick={actions.inc} type="button"> + </button>
+    </>
+  )
+}
+
+<Counter.Provider>
+  <CountDisplay />
+</Counter.Provider>
+```
+
+</p>
+</details>
+
+### createStore
 
 Creates a Redux store based on the given model. The model must be an object and can be any depth. It also accepts an optional configuration parameter for customisations.
 
@@ -602,9 +663,9 @@ Creates a Redux store based on the given model. The model must be an object and 
 createStore({
   todos: {
     items: [],
-    addTodo: (state, text) => {
+    addTodo: action((state, text) => {
       state.items.push(text)
-    }
+    })
   }
 });
 ```
@@ -619,43 +680,7 @@ createStore({
 
   - `config` (Object, not required)
 
-    Provides custom configuration options for your store. It supports the following options:
-
-    - `compose` (Function, not required, default=undefined)
-
-       Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux or Redux Dev Tools. This is especially useful in the context of React Native and other environments. See the Usage with React Native notes.
-
-    - `devTools` (bool, not required, default=true)
-
-       Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
-
-    - `disableInternalSelectFnMemoize` (bool, not required, default=false)
-
-      Setting this to `true` will disable the automatic memoisation of a fn that you may return in any of your [`select`](#selectselector) implementations. Please see the [`select`](#selectselector) documentation for more information.
-
-    - `enhancers` (Array, not required, default=[])
-
-      Any custom [store enhancers](https://redux.js.org/glossary#store-enhancer) you would like to apply to your Redux store.
-
-    - `initialState` (Object, not required, default=undefined)
-
-      Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
-
-    - `injections` (Any, not required, default=undefined)
-
-      Any dependencies you would like to inject, making them available to your effect actions. They will become available as the 4th parameter to the effect handler. See the [effect](#effectaction) docs for more.
-
-    - `middleware` (Array, not required, default=[])
-
-      Any additional [middleware](https://redux.js.org/glossary#middleware) you would like to attach to your Redux store.
-
-    - `mockActions` (boolean, not required, default=false)
-
-      Useful when testing your store, especially in the context of thunks. When set to `true` none of the actions dispatched will update the state, they will be instead recorded and can be accessed via the `getMockedActions` API that is added to the store.  Please see the ["Writing Tests"](#writing-tests) section for more information.
-
-    - `reducerEnhancer` (Function, not required, default=(reducer => reducer))
-
-      Any additional reducerEnhancer you would like to enhance to your root reducer (for example you want to use [redux-persist](https://github.com/rt2zz/redux-persist)).
+    Provides custom configuration options for your store. Please see the [StoreConfig](#StoreConfig) API documentation for a full list of configuration options.
 
 </p>
 </details>
@@ -691,9 +716,9 @@ import { createStore } from 'easy-peasy';
 const store = createStore({
   todos: {
     items: [],
-    addTodo: (state, text) => {
+    addTodo: action((state, text) => {
       state.items.push(text)
-    }
+    })
   },
   session: {
     user: undefined,
@@ -703,6 +728,52 @@ const store = createStore({
 
 </p>
 </details>
+
+### StoreConfig
+
+When creating your stores you can provide configuration for more advanced scenarios. In most cases you shouldn't need to reach for these configuration options, however, they can be useful so it is good to familiarise yourself with them.
+
+The store config is an object that accepts the following properties:
+
+- `name` (string, not required, default=EasyPeasyStore)
+
+  Allows you to customise the name of the store. This is especially useful when you are creating multiple stores as you will easily be able to distinguish and toggle between the different store instances within the Redux dev tools.
+
+- `devTools` (bool, not required, default=true)
+
+  Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+
+- `initialState` (Object, not required, default=undefined)
+
+  Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
+
+- `injections` (Any, not required, default=undefined)
+
+  Any dependencies you would like to inject, making them available to your effect actions. They will become available as the 4th parameter to the effect handler. See the [effect](#effectaction) docs for more.
+
+- `mockActions` (boolean, not required, default=false)
+
+  Useful when testing your store, especially in the context of thunks. When set to `true` none of the actions dispatched will update the state, they will be instead recorded and can be accessed via the `getMockedActions` API that is added to the store.  Please see the ["Writing Tests"](#writing-tests) section for more information.
+
+**Super Advanced Redux Specific Configuration Properties**
+
+Under the hood we use Redux. You can customise the Redux store via the following Redux-specific configuration properties:
+
+- `compose` (Function, not required, default=undefined)
+
+  Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux. This is especially useful in the context of React Native and other environments. See the Usage with React Native notes.
+
+- `enhancers` (Array, not required, default=[])
+
+  Any custom [store enhancers](https://redux.js.org/glossary#store-enhancer) you would like to apply to your Redux store.
+
+- `middleware` (Array, not required, default=[])
+
+  An array of Redux [middleware](https://redux.js.org/glossary#middleware) you would like to attach to your store.
+
+- `reducerEnhancer` (Function, not required, default=(reducer => reducer))
+
+  Any additional reducerEnhancer you would like to enhance to your root reducer (for example you want to use [redux-persist](https://github.com/rt2zz/redux-persist)).
 
 ### action
 
@@ -804,7 +875,7 @@ thunk(async (actions, payload) => {
 
       - `injections` (Any, not required, default=undefined)
 
-        Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`createStore`](#createstoremodel-config) docs on how to specify them.
+        Any dependencies that were provided to the `createStore` configuration will be exposed as this argument. See the [`StoreConfig`](#storeconfig) docs on how to specify them.
 
       - `meta` (Object, required)
 
@@ -1166,7 +1237,7 @@ const store = createStore({
     },
     getById: selector(
       [state => state.items],
-      // The second argument to our selector is an array containing any runtime 
+      // The second argument to our selector is an array containing any runtime
       // args that were provided
       //         👇
       ([items], [id]) => items[id]
@@ -2027,7 +2098,7 @@ Easy Peasy is platform agnostic but makes use of features that may not be availa
 <p>
 React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
 
-To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstoremodel-config) to `createStore`
+To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstore) to `createStore`
 
 ```javascript
 import { createStore } from 'easy-peasy';
