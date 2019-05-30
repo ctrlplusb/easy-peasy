@@ -90,8 +90,7 @@ type RecursiveState<
   OtherModel extends Object,
   RequiredModel extends Object,
   OptionalModel extends Object
-> = Overwrite<
-  { [P in keyof OtherModel]: OtherModel[P] },
+> = { [P in keyof OtherModel]: OtherModel[P] } &
   Overwrite<
     {
       [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, infer R>
@@ -115,8 +114,7 @@ type RecursiveState<
           : State<OptionalModel[P]>
         : OptionalModel[P]
     }
-  >
->;
+  >;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -126,7 +124,7 @@ type RecursiveState<
  * type StateOnly = State<Model>;
  */
 export type State<Model extends Object> = RecursiveState<
-  FilterStateTypes<Omit<Model, RequiredKeys<Model> & OptionalKeys<Model>>>,
+  Omit<Model, keyof RequiredOnly<Model> | keyof OptionalOnly<Model>>,
   FilterStateTypes<RequiredOnly<Model>>,
   FilterStateTypes<OptionalOnly<Model>>
 >;
