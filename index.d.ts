@@ -124,6 +124,7 @@ type RecursiveState<
  * type StateOnly = State<Model>;
  */
 export type State<Model extends Object> = RecursiveState<
+  // Doing this allows us to handle index type signatures
   Omit<Model, keyof RequiredOnly<Model> | keyof OptionalOnly<Model>>,
   FilterStateTypes<RequiredOnly<Model>>,
   FilterStateTypes<OptionalOnly<Model>>
