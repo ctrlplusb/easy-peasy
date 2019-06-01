@@ -132,7 +132,7 @@ export type State<Model extends Object> = RecursiveState<
   // Doing this allows us to handle index type signatures
   Omit<
     Pick<
-      Pick<Model, keyof FilterStateTypes<Model>>,
+      FilterStateTypes<Model>,
       KeysOfType<FilterStateTypes<Model>, { [key: string]: any }>
     >,
     KeysOfType<Model, Function>
