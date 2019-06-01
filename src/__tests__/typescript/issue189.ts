@@ -18,14 +18,17 @@ interface IMyStoreModel<T extends IMyInterface> {
 const generateModel = <T extends IMyInterface>(): IMyStoreModel<T> => {
   return {
     myMap: {},
-    values: select(state =>
-      Object.keys(state.myMap).map(key => state.myMap[key]),
-    ),
+    values: select(state => {
+      return Object.keys(state.myMap).map(key => state.myMap[key]);
+    }),
   };
 };
 
 const store = createStore(generateModel<Person>());
 
+const foo = Object.values(store.getState().myMap);
+foo[0].name = 'bob';
+
 store.getState().myMap['foo'] = { name: 'bob' };
 
-store.getState().myMap['foo'].name = 'bob';
+store.getState().myMap['foo'].name + 'foo';

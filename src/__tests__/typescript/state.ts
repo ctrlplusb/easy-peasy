@@ -3,6 +3,7 @@
 import { State, Thunk, Action, Select, Listen, Reducer } from 'easy-peasy';
 
 type Model = {
+  stateMap: { [key: string]: Array<string> };
   stateArray: Array<string>;
   stateBoolean: boolean;
   stateDate: Date;
@@ -19,6 +20,7 @@ type Model = {
   listenImp: Listen<Model>;
   reducerImp: Reducer<number>;
   nested: {
+    stateMap: { [key: string]: Array<string> };
     stateArray: Array<string>;
     stateBoolean: boolean;
     stateDate: Date;
@@ -34,6 +36,9 @@ type Model = {
 };
 
 const assert: State<Model> = {
+  stateMap: {
+    foo: ['bar'],
+  },
   stateArray: [],
   stateBoolean: true,
   stateDate: new Date(),
@@ -47,6 +52,9 @@ const assert: State<Model> = {
   selectImp: 1,
   reducerImp: 1,
   nested: {
+    stateMap: {
+      foo: ['bar'],
+    },
     stateArray: [],
     stateBoolean: true,
     stateDate: new Date(),

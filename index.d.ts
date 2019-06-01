@@ -2,6 +2,7 @@
 
 import { Component } from 'react';
 import {
+  Diff,
   KeysOfType,
   Omit,
   OptionalKeys,
@@ -90,7 +91,11 @@ type RecursiveState<
   OtherModel extends Object,
   RequiredModel extends Object,
   OptionalModel extends Object
-> = { [P in keyof OtherModel]: OtherModel[P] } &
+> = {
+  [P in keyof OtherModel]: OtherModel[P] extends { [key: string]: infer R }
+    ? { [key: string]: R }
+    : OtherModel[P]
+} &
   Overwrite<
     {
       [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, infer R>
@@ -125,7 +130,13 @@ type RecursiveState<
  */
 export type State<Model extends Object> = RecursiveState<
   // Doing this allows us to handle index type signatures
-  Omit<Model, keyof RequiredOnly<Model> | keyof OptionalOnly<Model>>,
+  Omit<
+    Pick<
+      Pick<Model, keyof FilterStateTypes<Model>>,
+      KeysOfType<FilterStateTypes<Model>, { [key: string]: any }>
+    >,
+    KeysOfType<Model, Function>
+  >,
   FilterStateTypes<RequiredOnly<Model>>,
   FilterStateTypes<OptionalOnly<Model>>
 >;
