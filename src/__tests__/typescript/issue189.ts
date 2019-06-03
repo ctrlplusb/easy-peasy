@@ -12,6 +12,7 @@ interface IMyStoreModel<T extends IMyInterface> {
   myMap: Record<string, T>;
   setMyMap: Action<IMyStoreModel<T>, Record<string, T>>;
   values: Select<IMyStoreModel<T>, Array<T>>;
+  names: Select<IMyStoreModel<T>, Array<string>>;
 }
 
 const generateModel = <T extends IMyInterface>(): IMyStoreModel<T> => {
@@ -23,6 +24,7 @@ const generateModel = <T extends IMyInterface>(): IMyStoreModel<T> => {
     values: select(state => {
       return Object.keys(state.myMap).map(key => state.myMap[key]);
     }),
+    names: select(state => state.values.map(x => name)),
   };
 };
 
@@ -34,6 +36,8 @@ foo[0].name = 'bob';
 store.getState().myMap = {
   foo: { name: 'bob' },
 };
+
+store.getState().values.map(x => x.name);
 
 store.getState().myMap['foo'] = { name: 'bob' };
 

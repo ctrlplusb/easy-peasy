@@ -23,15 +23,14 @@ import {
 import { string } from 'prop-types';
 
 /**
- * This saved me much much pain. This allows me to narrow types that are
- * index signatures.
+ * This allows you to narrow keys of an object type that are index signature
+ * based.
  *
- * To be honest the type could probably be cleaned up a bit.
- *
+ * Based on answer from here:
  * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
  */
-type IndexKeysOfType<A extends object, B extends { [key: string]: any }> = {
-  [K in keyof A]: A[K] extends B
+type IndexSignatureKeysOfType<A extends Object> = {
+  [K in keyof A]: A[K] extends { [key: string]: any }
     ? string extends keyof A[K]
       ? K
       : never
@@ -111,7 +110,7 @@ type StateModelValues<
   : Model[P] extends Reducer<infer R, any>
   ? R
   : Model[P] extends object
-  ? Model[P] extends Array<any> | RegExp | Date
+  ? Model[P] extends Array<any> | RegExp | Date | Function
     ? Model[P]
     : State<Model[P]>
   : Model[P];
@@ -133,15 +132,9 @@ type FilterIndexSignatures<
   RequiredStateModel extends Object,
   OptionalStateModel extends Object
 > = RecursiveState<
-  Pick<StateModel, IndexKeysOfType<StateModel, { [key: string]: any }>>,
-  Omit<
-    RequiredStateModel,
-    IndexKeysOfType<RequiredStateModel, { [key: string]: any }>
-  >,
-  Omit<
-    OptionalStateModel,
-    IndexKeysOfType<OptionalStateModel, { [key: string]: any }>
-  >
+  StateModel,
+  Omit<RequiredStateModel, keyof StateModel>,
+  Omit<OptionalStateModel, keyof StateModel>
 >;
 
 /**
@@ -152,7 +145,7 @@ type FilterIndexSignatures<
  * type StateOnly = State<Model>;
  */
 export type State<Model extends Object> = FilterIndexSignatures<
-  FilterStateTypes<Model>,
+  Pick<Model, IndexSignatureKeysOfType<Model>>,
   FilterStateTypes<RequiredOnly<Model>>,
   FilterStateTypes<OptionalOnly<Model>>
 >;
