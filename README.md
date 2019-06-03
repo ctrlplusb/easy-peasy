@@ -89,19 +89,18 @@ function TodoList() {
 
 ## Highlights
 
-  - Simple and intuitive API allowing rapid development
-  - Immutable data store under the hood
+  - React hooks based API
+  - Create global, shared, or local stores
+  - Simple, intuitive API focusing on speed of development
   - Thunks for data fetching and side effects
   - Selectors for derived data
-  - React Hook based API
   - Immutable data store under the hood
   - Testing helpers baked in
   - Supports Typescript
   - Supports React Native
   - Wraps Redux, all the radness, without the boilerplate
-  - Compatible with the Redux ecosystem:
-    - Redux Dev Tools support out of the box
-    - Supports custom middleware and other Redux enhancers
+  - Redux Dev Tools support built in
+  - Supports Redux middleware and enhancers
 
 <p>&nbsp;</p>
 <p align='center'>
@@ -134,16 +133,18 @@ function TodoList() {
       - [Usage via react-redux](#usage-via-react-redux)
   - [API](#api)
     - [createStore](#createstore)
-    - [StoreConfig](#storeconfig)
+    - [createContainerStore](#createcontainerstore)
     - [action](#action)
     - [thunk(action)](#thunkaction)
     - [selector](#selector)
     - [listen(on)](#listenon)
     - [reducer(fn)](#reducerfn)
     - [StoreProvider](#storeprovider)
-    - [useStoreState(mapState, externals)](#usestorestatemapstate-externals)
-    - [useStoreActions(mapActions)](#usestoreactionsmapactions)
-    - [useStoreDispatch()](#usestoredispatch)
+    - [useStoreState](#usestorestate)
+    - [useStoreActions](#usestoreactions)
+    - [useStoreDispatch](#usestoredispatch)
+    - [StoreConfig](#storeconfig)
+    - [Store](#store)
   - [Deprecated API](#deprecated-api)
     - [select(selector)](#selectselector)
   - [Usage with Typescript](#usage-with-typescript)
@@ -595,22 +596,76 @@ This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend 
 
 Below is an overview of the API exposed by Easy Peasy.
 
+### createStore
+
+Creates a Redux store based on the given model. The model must be an object and can be any depth. It also accepts an optional configuration parameter for customisations.
+
+```javascript
+createStore({
+  todos: {
+    items: [],
+    addTodo: action((state, text) => {
+      state.items.push(text)
+    })
+  }
+});
+```
+
+**Arguments**
+
+The following arguments are accepted:
+
+  - `model` (Object, required)
+
+    Your model representing your state tree, and optionally containing action functions.
+
+  - `config` (Object, not required)
+
+    Provides custom configuration options for your store. Please see the [StoreConfig](#storeconfig) API documentation for a full list of configuration options.
+
+**Returns**
+
+When executed, you will receive a [store](#store) instance back. Please refer to the [docs](#store) for details of the store's API.
+
+<details>
+<summary>Example</summary>
+<p>
+
+```javascript
+import { createStore } from 'easy-peasy';
+
+const store = createStore({
+  todos: {
+    items: [],
+    addTodo: action((state, text) => {
+      state.items.push(text)
+    })
+  },
+  session: {
+    user: undefined,
+  }
+})
+```
+
+</p>
+</details>
+
 ### createContainerStore
 
 Creates a container store, allowing you to expose the store to specific parts of your React application. This allows you to create multiple stores to encapsulate different features of your application, and can be useful in larger scale applications and when employing code splitting techniques.
 
 ```javascript
-createContainerStore({
+const Counter = createContainerStore({
   count: 0,
-  inc: action(state => {
+  increment: action(state => {
     state.count += 1;
   })
 })
 ```
 
-<details>
-<summary>Arguments</summary>
-<p>
+**Arguments**
+
+The following arguments are accepted:
 
   - `model` (Object | (any) => Object, required)
 
@@ -622,8 +677,51 @@ createContainerStore({
 
     Provides custom configuration options for your store. Please see the [StoreConfig](#StoreConfig) API documentation for a full list of configuration options.
 
-</p>
-</details>
+**Returns**
+
+When executed you will receive a store container that contains the following properties:
+
+ - `Provider` (Component, required)
+
+   The React component that allows you to wrap a specific part of your React app in order to expose the store state to it. You can wrap as much or as little of your React app as you like.
+
+   If you render multiple instances of this provider component each instance will have it's own unique state. This may be handy in some cases, but in most cases you will likely only have one instance of your provider rendered.
+
+   ```javascript
+   <Counter.Provider>
+    <App />
+   </Counter.Provider>
+   ```
+
+   The provider accepts the following props:
+
+   - `initialData` (Any, not required)
+
+     Allows you to provide additional data to instantiate your store's model with. This needs to be used in conjunction with the function form of defining your model. See the examples below.
+
+ - `useState` (Function, required)
+
+   A hook allowing you to access the state of your store.
+
+   ```javascript
+   function CountDisplay() {
+     const count = Counter.useState(state => state.count);
+     return <div>{count}</div>
+   }
+   ```
+
+ - `useActions` (Function, required)
+
+   A hook allowing you to access the actions of your store.
+
+   ```javascript
+   function CountIncButton() {
+     const increment = Counter.useActions(actions => actions.increment);
+     return <button onClick={increment}>+</button>
+   }
+   ```
+
+ - `useStore` (Function, required)
 
 <details>
 <summary>Example</summary>
@@ -654,126 +752,6 @@ function CountDisplay() {
 
 </p>
 </details>
-
-### createStore
-
-Creates a Redux store based on the given model. The model must be an object and can be any depth. It also accepts an optional configuration parameter for customisations.
-
-```javascript
-createStore({
-  todos: {
-    items: [],
-    addTodo: action((state, text) => {
-      state.items.push(text)
-    })
-  }
-});
-```
-
-<details>
-<summary>Arguments</summary>
-<p>
-
-  - `model` (Object, required)
-
-    Your model representing your state tree, and optionally containing action functions.
-
-  - `config` (Object, not required)
-
-    Provides custom configuration options for your store. Please see the [StoreConfig](#StoreConfig) API documentation for a full list of configuration options.
-
-</p>
-</details>
-
-<details>
-<summary>Store Instance API</summary>
-<p>
-
-When you have created a store all the standard APIs of a [Redux Store](https://redux.js.org/api/store) are available. Please reference [their docs](https://redux.js.org/api/store) for more information. In addition to the standard APIs, Easy Peasy enhances the instance to contain the following:
-
-  - `dispatch` (Function & Object, required)
-
-    The Redux store `dispatch` behaves as normal, however, it also has the actions from your model directly mounted against it - allowing you to easily dispatch actions. Please see the docs on actions/thunks for examples.
-
-  - `getMockedActions` (Function, required)
-
-    When the `mockActions` configuration value was passed to the `createStore` then calling this function will return the actions that have been dispatched (and mocked). This is useful in the context of testing - especially thunks.
-
-  - `clearMockedActions` (Function, required)
-
-    When the `mockActions` configuration value was passed to the `createStore` then calling this function clears the list of mocked actions that have been tracked by the store. This is useful in the context of testing - especially thunks.
-
-</p>
-</details>
-
-<details>
-<summary>Example</summary>
-<p>
-
-```javascript
-import { createStore } from 'easy-peasy';
-
-const store = createStore({
-  todos: {
-    items: [],
-    addTodo: action((state, text) => {
-      state.items.push(text)
-    })
-  },
-  session: {
-    user: undefined,
-  }
-})
-```
-
-</p>
-</details>
-
-### StoreConfig
-
-When creating your stores you can provide configuration for more advanced scenarios. In most cases you shouldn't need to reach for these configuration options, however, they can be useful so it is good to familiarise yourself with them.
-
-The store config is an object that accepts the following properties:
-
-- `name` (string, not required, default=EasyPeasyStore)
-
-  Allows you to customise the name of the store. This is especially useful when you are creating multiple stores as you will easily be able to distinguish and toggle between the different store instances within the Redux dev tools.
-
-- `devTools` (bool, not required, default=true)
-
-  Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
-
-- `initialState` (Object, not required, default=undefined)
-
-  Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
-
-- `injections` (Any, not required, default=undefined)
-
-  Any dependencies you would like to inject, making them available to your effect actions. They will become available as the 4th parameter to the effect handler. See the [effect](#effectaction) docs for more.
-
-- `mockActions` (boolean, not required, default=false)
-
-  Useful when testing your store, especially in the context of thunks. When set to `true` none of the actions dispatched will update the state, they will be instead recorded and can be accessed via the `getMockedActions` API that is added to the store.  Please see the ["Writing Tests"](#writing-tests) section for more information.
-
-**Super Advanced Redux Specific Configuration Properties**
-
-Under the hood we use Redux. You can customise the Redux store via the following Redux-specific configuration properties:
-
-- `compose` (Function, not required, default=undefined)
-
-  Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux. This is especially useful in the context of React Native and other environments. See the Usage with React Native notes.
-
-- `enhancers` (Array, not required, default=[])
-
-  Any custom [store enhancers](https://redux.js.org/glossary#store-enhancer) you would like to apply to your Redux store.
-
-- `middleware` (Array, not required, default=[])
-
-  An array of Redux [middleware](https://redux.js.org/glossary#middleware) you would like to attach to your store.
-
-- `reducerEnhancer` (Function, not required, default=(reducer => reducer))
-
-  Any additional reducerEnhancer you would like to enhance to your root reducer (for example you want to use [redux-persist](https://github.com/rt2zz/redux-persist)).
 
 ### action
 
@@ -1786,6 +1764,72 @@ const AddTodo = () => {
 
 </p>
 </details>
+
+### StoreConfig
+
+When creating your stores you can provide configuration for more advanced scenarios. In most cases you shouldn't need to reach for these configuration options, however, they can be useful so it is good to familiarise yourself with them.
+
+The store config is an object that accepts the following properties:
+
+- `name` (string, not required, default=EasyPeasyStore)
+
+  Allows you to customise the name of the store. This is especially useful when you are creating multiple stores as you will easily be able to distinguish and toggle between the different store instances within the Redux dev tools.
+
+- `devTools` (bool, not required, default=true)
+
+  Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+
+- `initialState` (Object, not required, default=undefined)
+
+  Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
+
+- `injections` (Any, not required, default=undefined)
+
+  Any dependencies you would like to inject, making them available to your effect actions. They will become available as the 4th parameter to the effect handler. See the [effect](#effectaction) docs for more.
+
+- `mockActions` (boolean, not required, default=false)
+
+  Useful when testing your store, especially in the context of thunks. When set to `true` none of the actions dispatched will update the state, they will be instead recorded and can be accessed via the `getMockedActions` API that is added to the store.  Please see the ["Writing Tests"](#writing-tests) section for more information.
+
+**Super Advanced Redux Specific Configuration Properties**
+
+Under the hood we use Redux. You can customise the Redux store via the following Redux-specific configuration properties:
+
+- `compose` (Function, not required, default=undefined)
+
+  Custom [`compose`](https://redux.js.org/api/compose) function that will be used in place of the one from Redux. This is especially useful in the context of React Native and other environments. See the Usage with React Native notes.
+
+- `enhancers` (Array, not required, default=[])
+
+  Any custom [store enhancers](https://redux.js.org/glossary#store-enhancer) you would like to apply to your Redux store.
+
+- `middleware` (Array, not required, default=[])
+
+  An array of Redux [middleware](https://redux.js.org/glossary#middleware) you would like to attach to your store.
+
+- `reducerEnhancer` (Function, not required, default=(reducer => reducer))
+
+  Any additional reducerEnhancer you would like to enhance to your root reducer (for example you want to use [redux-persist](https://github.com/rt2zz/redux-persist)).
+
+### Store
+
+A store instance contains the following properties:
+
+  - `dispatch` (Function & Object, required)
+
+    The Redux store `dispatch` behaves as normal, however, it also has the actions from your model directly mounted against it - allowing you to easily dispatch actions. Please see the docs on actions/thunks for examples.
+
+  - `getState` (Function, required)
+
+    Returns the full state of the store.
+
+  - `getMockedActions` (Function, required)
+
+    If the `mockActions` configuration value was passed to the `createStore` then calling this function will return the actions that have been dispatched (and mocked). This is useful in the context of testing - especially thunks.
+
+  - `clearMockedActions` (Function, required)
+
+    If the `mockActions` configuration value was passed to the `createStore` then calling this function clears the list of mocked actions that have been tracked by the store. This is useful in the context of testing - especially thunks.
 
 <p>&nbsp;</p>
 
