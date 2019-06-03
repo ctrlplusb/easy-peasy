@@ -22,6 +22,22 @@ import {
 } from 'redux';
 import { string } from 'prop-types';
 
+/**
+ * This saved me much much pain. This allows me to narrow types that are
+ * index signatures.
+ *
+ * To be honest the type could probably be cleaned up a bit.
+ *
+ * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
+ */
+type IndexKeysOfType<A extends object, B extends { [key: string]: any }> = {
+  [K in keyof A]: A[K] extends B
+    ? string extends keyof A[K]
+      ? K
+      : never
+    : never
+}[keyof A];
+
 type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
 type Meta = {
@@ -87,39 +103,46 @@ export type Actions<Model extends Object> = {
 type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>;
 type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>;
 
+type StateModelValues<
+  Model extends Object,
+  P extends keyof Model
+> = Model[P] extends Select<any, infer R>
+  ? R
+  : Model[P] extends Reducer<infer R, any>
+  ? R
+  : Model[P] extends object
+  ? Model[P] extends Array<any> | RegExp | Date
+    ? Model[P]
+    : State<Model[P]>
+  : Model[P];
+
 type RecursiveState<
   OtherModel extends Object,
   RequiredModel extends Object,
   OptionalModel extends Object
-> = {
-  [P in keyof OtherModel]: OtherModel[P] extends { [key: string]: infer R }
-    ? { [key: string]: R }
-    : OtherModel[P]
-} &
+> = Overwrite<
+  { [P in keyof OtherModel]: OtherModel[P] },
   Overwrite<
-    {
-      [P in keyof RequiredModel]: RequiredModel[P] extends Select<any, infer R>
-        ? R
-        : RequiredModel[P] extends Reducer<infer R, any>
-        ? R
-        : RequiredModel[P] extends object
-        ? RequiredModel[P] extends Array<any> | RegExp | Date
-          ? RequiredModel[P]
-          : State<RequiredModel[P]>
-        : RequiredModel[P]
-    },
-    {
-      [P in keyof OptionalModel]?: OptionalModel[P] extends Select<any, infer R>
-        ? R
-        : OptionalModel[P] extends Reducer<infer R, any>
-        ? R
-        : OptionalModel[P] extends object
-        ? OptionalModel[P] extends Array<any> | RegExp | Date
-          ? OptionalModel[P]
-          : State<OptionalModel[P]>
-        : OptionalModel[P]
-    }
-  >;
+    { [P in keyof RequiredModel]: StateModelValues<RequiredModel, P> },
+    { [P in keyof OptionalModel]?: StateModelValues<OptionalModel, P> }
+  >
+>;
+
+type FilterIndexSignatures<
+  StateModel extends Object,
+  RequiredStateModel extends Object,
+  OptionalStateModel extends Object
+> = RecursiveState<
+  Pick<StateModel, IndexKeysOfType<StateModel, { [key: string]: any }>>,
+  Omit<
+    RequiredStateModel,
+    IndexKeysOfType<RequiredStateModel, { [key: string]: any }>
+  >,
+  Omit<
+    OptionalStateModel,
+    IndexKeysOfType<OptionalStateModel, { [key: string]: any }>
+  >
+>;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -128,15 +151,8 @@ type RecursiveState<
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends Object> = RecursiveState<
-  // Doing this allows us to handle index type signatures
-  Omit<
-    Pick<
-      FilterStateTypes<Model>,
-      KeysOfType<FilterStateTypes<Model>, { [key: string]: any }>
-    >,
-    KeysOfType<Model, Function>
-  >,
+export type State<Model extends Object> = FilterIndexSignatures<
+  FilterStateTypes<Model>,
   FilterStateTypes<RequiredOnly<Model>>,
   FilterStateTypes<OptionalOnly<Model>>
 >;
