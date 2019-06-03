@@ -114,7 +114,7 @@ type StateModelValues<
   P extends keyof Model
 > = Model[P] extends Select<any, infer R>
   ? R
-  : Model[P] extends extends Selector<any, any, any, any, any>
+  : Model[P] extends Selector<any, any, any, any, any>
   ? SelectorRef<Model[P]>
   : Model[P] extends Reducer<infer R, any>
   ? R
