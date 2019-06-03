@@ -103,9 +103,6 @@ test('removeModel', () => {
     counter: {
       count: 0,
     },
-    router: {
-      path: '/',
-    },
   });
 });
 
@@ -122,4 +119,26 @@ test('removeModel does nothing when model does not exist', () => {
 
   // assert
   expect(store.getState()).toEqual({ counter: { count: 0 } });
+});
+
+test('adding and removing model maintains existing state - issue#184', () => {
+  // arrange
+  const store = createStore({
+    counter: {
+      count: 0,
+      inc: action(state => {
+        state.count += 1;
+      }),
+    },
+  });
+
+  store.dispatch.counter.inc(1);
+
+  // act
+  store.addModel('router', 'router', {
+    path: '/',
+  });
+
+  // assert
+  expect(store.getState().counter.count).toBe(1);
 });

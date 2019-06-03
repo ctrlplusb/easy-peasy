@@ -35,7 +35,6 @@ export default function createStoreInternals({
   disableInternalSelectFnMemoize,
   initialState,
   injections,
-  isRebind,
   model,
   reducerEnhancer,
   references,
@@ -158,7 +157,7 @@ export default function createStoreInternals({
       } else {
         // State
         const initialParentRef = get(parentPath, initialState);
-        if (!isRebind && initialParentRef && key in initialParentRef) {
+        if (initialParentRef && key in initialParentRef) {
           set(path, defaultState, initialParentRef[key]);
         } else {
           set(path, defaultState, value);
