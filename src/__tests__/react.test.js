@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent } from '@testing-library/react';
 
 import {
   action,

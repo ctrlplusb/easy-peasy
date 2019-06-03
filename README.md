@@ -1821,7 +1821,7 @@ test('fetchById', async () => {
 <summary>Testing components</summary>
 <p>
 
-When testing your components I strongly recommend the approach recommended by Kent C. Dodd's awesome [Testing Javascript](https://testingjavascript.com/) course, where you try to test the behaviour of your components using a natural DOM API, rather than reaching into the internals of your components. He has published a very useful package by the name of [`react-testing-library`](https://github.com/kentcdodds/react-testing-library) to help us do so. The tests below shall be adopting this package and strategy.
+When testing your components I strongly recommend the approach recommended by Kent C. Dodd's awesome [Testing Javascript](https://testingjavascript.com/) course, where you try to test the behaviour of your components using a natural DOM API, rather than reaching into the internals of your components. He has published a very useful package by the name of [`@testing-library/react`](https://github.com/testing-library/react-testing-library) to help us do so. The tests below shall be adopting this package and strategy.
 
 Imagine we were trying to test the following component.
 
