@@ -421,7 +421,7 @@ You can do more than this with the `listen` helper. You can listen to an `action
 
 ### Usage with React
 
-We will now cover how to integrate your store with your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks yet we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
+We will now cover how to integrate your store with your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks, we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
 
 > If you haven't done so already we highly recommend that you install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This will allow you to visualise your actions firing along with the associated state updates.
 
@@ -501,7 +501,7 @@ const AddTodo = () => {
 };
 ```
 
-For more on how you can use this hook please ready the API docs for the [`useStoreActions` hook](#usestoreactionsmapactions).
+For more on how you can use this hook please read the API docs for the [`useStoreActions` hook](#usestoreactionsmapactions).
 
 #### Usage via react-redux
 
