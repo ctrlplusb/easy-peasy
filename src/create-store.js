@@ -155,7 +155,7 @@ export default function createStore(model, options = {}) {
     if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
       // eslint-disable-next-line no-console
       console.warn(
-        `The store model already contains a model definition for "${key}"`,
+        `easy-peasy: The store model already contains a model definition for "${key}"`,
       );
       store.removeModel(key);
     }
@@ -168,7 +168,7 @@ export default function createStore(model, options = {}) {
       if (process.env.NODE_ENV !== 'production') {
         // eslint-disable-next-line no-console
         console.warn(
-          `The store model does not contain a model definition for "${key}"`,
+          `easy-peasy: The store model does not contain a model definition for "${key}"`,
         );
       }
       return;

@@ -9,6 +9,9 @@ import {
   action,
   createStore,
   StoreProvider,
+  useStore,
+  useActions,
+  useDispatch,
   useStoreActions,
   useStoreDispatch,
   useStoreState,
@@ -20,6 +23,34 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.useRealTimers();
+});
+
+test('deprecated hooks still work', () => {
+  // arrange
+  const store = createStore({
+    count: 1,
+    inc: action(state => {
+      state.count += 1;
+    }),
+  });
+
+  function MyComponent() {
+    const dispatch = useDispatch();
+    const count = useStore(state => state.count);
+    const inc = useActions(actions => actions.inc);
+    // assert
+    expect(dispatch).toBe(store.dispatch);
+    expect(count).toBe(1);
+    expect(inc).toBe(store.dispatch.inc);
+    return null;
+  }
+
+  // act
+  render(
+    <StoreProvider store={store}>
+      <MyComponent />
+    </StoreProvider>,
+  );
 });
 
 test('exposes dispatch', () => {
