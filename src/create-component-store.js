@@ -6,7 +6,7 @@ import createStore from './create-store';
  * - https://github.com/facebook/react/issues/14830
  */
 
-export default function createLocalStore(model, config) {
+export default function createComponentStore(model, config) {
   return function useLocalStore(initialData) {
     const store = useMemo(
       () =>

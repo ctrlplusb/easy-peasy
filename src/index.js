@@ -9,8 +9,8 @@ import {
   useStoreState,
 } from './hooks';
 import createStore from './create-store';
-import createContainerStore from './create-container-store';
-import createLocalStore from './create-local-store';
+import createContextStore from './create-context-store';
+import createComponentStore from './create-component-store';
 import StoreProvider from './provider';
 import {
   action,
@@ -37,8 +37,8 @@ setAutoFreeze(false);
 export {
   action,
   actionName,
-  createContainerStore,
-  createLocalStore,
+  createContextStore,
+  createComponentStore,
   createStore,
   createTypedHooks,
   listen,

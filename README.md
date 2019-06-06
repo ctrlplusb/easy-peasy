@@ -6,7 +6,7 @@
 <p align='center'>
   <img src="https://i.imgur.com/F6WfRFI.png" width="130" />
 </p>
-<p align='center'>Easy peasy global state for React</p>
+<p align='center'>Easy peasy state for React</p>
 <p>&nbsp;</p>
 
 [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
@@ -130,10 +130,10 @@ function TodoList() {
       - [Wrap your app with StoreProvider](#wrap-your-app-with-storeprovider)
       - [Accessing state in your Components](#accessing-state-in-your-components)
       - [Dispatching actions in your Components](#dispatching-actions-in-your-components)
-      - [Usage via react-redux](#usage-via-react-redux)
   - [API](#api)
     - [createStore](#createstore)
-    - [createContainerStore](#createcontainerstore)
+    - [createContextStore](#createcontextstore)
+    - [createComponentStore](#createcomponentstore)
     - [action](#action)
     - [thunk(action)](#thunkaction)
     - [selector](#selector)
@@ -151,8 +151,9 @@ function TodoList() {
   - [Usage with React Native](#usage-with-react-native)
   - [Writing Tests](#writing-tests)
   - [Typescript API](#typescript-api)
-  - [Tips and Tricks](#tips-and-tricks)
+  - [Tips, Tricks and FAQS](#tips-tricks-and-faqs)
     - [Generalising effects/actions/state via helpers](#generalising-effectsactionsstate-via-helpers)
+    - [Usage with class components / Using with react-redux](#usage-with-class-components--using-with-react-redux)
   - [Prior Art](#prior-art)
 
 <p>&nbsp;</p>
@@ -336,7 +337,7 @@ You cannot modify the state within a `thunk`, however, the `thunk` is provided t
 
 #### Dispatching a `thunk` action directly via the store
 
-You can dispatch a thunk action in the same manner as a normal action. A `thunk` action is asynchronous and always returns a `Promise`. This allows you chain execution for when the `thunk` has completed.
+You can dispatch a thunk action in the same manner as a normal action. A `thunk` action is asynchronous and _always_ returns a `Promise`. This allows you chain execution for when the `thunk` has completed.
 
 ```javascript
 store.dispatch.todos.saveTodo('Install easy-peasy')
@@ -347,7 +348,7 @@ store.dispatch.todos.saveTodo('Install easy-peasy')
 
 #### Creating selectors for derived state
 
-If you have state that can be derived from state then you can use the [`selector`](#selector) helper. Simply attach the selector to your model.
+If you wish to derive state you can use the [`selector`](#selector) helper to define selectors.
 
 ```javascript
 import { selector } from 'easy-peasy'; // 👈 import the helper
@@ -356,25 +357,23 @@ const store = createStore({
   shoppingBasket: {
     products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
     totalPrice: selector(
-      // Firstly you provide an array of "stateSelectors" which resolve the
-      // parts of your state that will be used in the derive process
+      // Firstly you provide an array of "stateResolvers" which resolve the
+      // parts of your state that will be used by your selector
       [state => state.products],
-      // Then define the deriving selector function, which receives the resolve
-      // state from your state selectors as the its first argument.
+      // Then define the selector, which receives the resolved
       ([products]) => products.reduce((acc, cur) => acc + cur.price, 0)
     )
   }
 }
 ```
 
-The selector results will be cached and will only be recalculated when the associated state changes. This provides a nice level of performance optimisation, avoiding unneccessary work when rerendering your React components.
+The results of selectors are memoized and will only be recalculated when the resolved state that they operate against changes. This provides a nice level of performance optimisation, avoiding unneccessary work when rerendering your React components. We highly recommend you make use of selectors rather than doing frequent state deriving within your components.
 
-Those familiar with Redux will find this similar to the benefits provided by [`reselect`](https://github.com/reduxjs/reselect).
-
+> You may be familiar with [`reselect`](https://github.com/reduxjs/reselect), which was the inspiration for this helper.
 
 #### Accessing your selectors directly via the store
 
-You can access your selector similar to state.
+You can access your selector similar to state, however, selectors are functions.
 
 ```javascript
 store.getState().shoppingBasket.totalPrice(); // fresh hit
@@ -382,18 +381,20 @@ store.getState().shoppingBasket.totalPrice(); // fresh hit
 store.getState().shoppingBasket.totalPrice(); // cached result
 ```
 
+> We intentionally made selectors be functions as it provides a mechanism of lazy resolution, and also opens the doors to providing runtime arguments to your selectors. See the [selector](#selector) API docs for more information.
+
 #### Updating multiple parts of your state in response to a thunk/action
 
-When firing an action you may want multiple parts of your model to respond to it. For example, you may want to clear certain parts of your state when a user logs out. Or perhaps you want an audit log that tracks specific events.
+You may want one part of your model respond to actions fired on different parts of it. For example, you may want to clear certain parts of your state when a user logs out, or perhaps you need an audit log that tracks specific actions.
 
-Easy Peasy provides you with the `listen` helper to do this.
+You can use the `listen` helper to achieve this.
 
 ```javascript
 import { listen } from 'easy-peasy'; // 👈 import the helper
 
 const todosModel = {
   items: [],
-  // 👇 the action we wish to respond to / track
+  // 👇 this is the action we wish to listen to
   addTodo: action((state, payload) => {
     state.items.push(payload)
   })
@@ -401,16 +402,20 @@ const todosModel = {
 
 const auditModel = {
   logs: [],
-  //          👇 declare listeners via the helper
+  // Declare listeners on your model
+  //          👇
   listeners: listen((on) => {
     on(
-      //           👇 pass in the reference to the action we wish to listen to
+      // Pass in the _reference_ to the action we wish to listen to
+      //           👇
       todosModel.addTodo,
       // 👇 the action we wish to execute after `addTodo` has completed
       action((state, payload) => {
         state.logs.push(`Added a new todo: ${payload}`);
       })
     );
+
+    // You can define as many listeners as you like using the provided `on`
   })
 };
 
@@ -420,15 +425,15 @@ const model = {
 };
 ```
 
-This is a more advanced feature, however, using this method allows a clearer seperation of concerns and promotes reactive programming.
+This is a more advanced feature, however, using this method allows a clearer separation of concerns and promotes a more reactive programming model.
 
-You can do more than this with the `listen` helper. You can listen to an `action` or a `thunk`, and can execute either an `action` or a `thunk` in response. Please read the [docs](#listenon) for more information.
+You can listen to any action type (`action`/`thunk`), and can execute any action type in response. Please read the [docs](#listenon) for more information.
 
 ### Usage with React
 
-We will now cover how to integrate your store with your React components. We leverage [Hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks, we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
+We will now cover how to integrate your store with your React components. We leverage React [hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks, we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
 
-> If you haven't done so already we highly recommend that you install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This will allow you to visualise your actions firing along with the associated state updates.
+> Be sure to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This extension will allow you to view your actions being fired along with the associated updates to state. Easy Peasy is preconfigured to work with it.
 
 #### Wrap your app with StoreProvider
 
@@ -447,7 +452,7 @@ const App = () => (
 )
 ```
 
-#### Accessing state in your Components
+#### Accessing state within your Components
 
 To access state within your components you can use the `useStoreState` hook.
 
@@ -486,7 +491,7 @@ const Product = ({ id }) => {
 
 We recommend that you read the API docs for the [`useStoreState` hook](#usestorestatemapstate-externals) to gain a full understanding of the behaviours and pitfalls of the hook.
 
-#### Dispatching actions in your Components
+#### Dispatching actions within your Components
 
 In order to fire actions in your components you can use the `useStoreActions` hook.
 
@@ -508,83 +513,7 @@ const AddTodo = () => {
 
 For more on how you can use this hook please read the API docs for the [`useStoreActions` hook](#usestoreactionsmapactions).
 
-#### Usage via react-redux
-
-As Easy Peasy outputs a standard Redux store it is entirely possible to use Easy Peasy with the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
-
-This allows you to do a few things:
-
- - Slowly migrate a legacy application that is built using `react-redux`
- - Connect your store to Class components via `connect`
-
-<details>
-<summary>First, install the `react-redux` package</summary>
-<p>
-
-```bash
-npm install react-redux
-```
-
-</p>
-</details>
-
-<details>
-<summary>Then wrap your app with the `Provider`</summary>
-<p>
-
-```javascript
-import React from 'react';
-import { render } from 'react-dom';
-import { createStore } from 'easy-peasy';
-import { Provider } from 'react-redux'; // 👈 import the provider
-import model from './model';
-import TodoList from './components/TodoList';
-
-// 👇 then create your store
-const store = createStore(model);
-
-const App = () => (
-  // 👇 then pass it to the Provider
-  <Provider store={store}>
-    <TodoList />
-  </Provider>
-)
-
-render(<App />, document.querySelector('#app'));
-```
-
-</p>
-</details>
-
-<details>
-<summary>Finally, use `connect` against your components</summary>
-<p>
-
-```javascript
-import React, { Component } from 'react';
-import { connect } from 'react-redux'; // 👈 import the connect
-
-function TodoList({ todos, addTodo }) {
-  return (
-    <div>
-      {todos.map(({id, text }) => <Todo key={id} text={text} />)}
-      <AddTodo onSubmit={addTodo} />
-    </div>
-  )
-}
-
-export default connect(
-  // 👇 Map to your required state
-  state => ({ todos: state.todos.items }
-  // 👇 Map your required actions
-  dispatch => ({ addTodo: dispatch.todos.addTodo })
-)(EditTodo)
-```
-
-</p>
-</details>
-
-<p>&nbsp;</p>
+#### Final notes
 
 This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend you read through the [API](#API) documentation to gain a more full understanding of the tools and helpers that Easy Peasy exposes to you.
 
@@ -594,11 +523,11 @@ This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend 
 
 ## API
 
-Below is an overview of the API exposed by Easy Peasy.
+Below is a full breakdown of the API exposed by Easy Peasy. We highly recommend you make yourself with it in order to best make use of the API.
 
 ### createStore
 
-Creates a Redux store based on the given model. The model must be an object and can be any depth. It also accepts an optional configuration parameter for customisations.
+Creates a global [store](#store) based on the given model. It also supports an additional [configuration](#storeconfig) parameter allowing customisation of your [store](#store)'s behaviour.
 
 ```javascript
 createStore({
@@ -627,35 +556,45 @@ The following arguments are accepted:
 
 When executed, you will receive a [store](#store) instance back. Please refer to the [docs](#store) for details of the store's API.
 
+Once you have a store you provide it to the [StoreProvider](#storeprovider) in order to expose it to your application.
+
 <details>
-<summary>Example</summary>
+<summary>Full Example</summary>
 <p>
 
 ```javascript
-import { createStore } from 'easy-peasy';
+import { createStore, StoreProvider, action } from 'easy-peasy';
 
-const store = createStore({
+const model = {
   todos: {
     items: [],
     addTodo: action((state, text) => {
       state.items.push(text)
     })
   },
-  session: {
-    user: undefined,
-  }
-})
+};
+
+const store = createStore(model, { });
+
+ReactDOM.render(
+  <StoreProvider store={store}>
+    <App />
+  </StoreProvider>,
+  document.querySelector('#app')
+);
 ```
 
 </p>
 </details>
 
-### createContainerStore
+### createContextStore
 
-Creates a container store, allowing you to expose the store to specific parts of your React application. This allows you to create multiple stores to encapsulate different features of your application, and can be useful in larger scale applications and when employing code splitting techniques.
+Creates a store powered by context, allowing you to expose state to specific parts of your React application.
+
+Using this approach over the global [createStore](#createstore) approach allows you to create multiple stores, encapsulating the specific state needs for various branches of your application. This introduces a higher degree of portability for your features an may be especially useful for larger scale applications, or when employing code splitting techniques.
 
 ```javascript
-const Counter = createContainerStore({
+const Counter = createContextStore({
   count: 0,
   increment: action(state => {
     state.count += 1;
@@ -710,6 +649,8 @@ When executed you will receive a store container that contains the following pro
    }
    ```
 
+   This hook shares all the same properties and features of the global [`useStoreState`](#usestorestate) hook.
+
  - `useActions` (Function, required)
 
    A hook allowing you to access the actions of your store.
@@ -721,33 +662,327 @@ When executed you will receive a store container that contains the following pro
    }
    ```
 
+   This hook shares all the same properties and features of the global [`useStoreActions`](#usestoreactions) hook.
+
  - `useStore` (Function, required)
 
+   A hook allowing you to access the state and actions of your store.
+
+   ```javascript
+   function MyCounter() {
+     const [state, actions] = Counter.useStore();
+     return (
+       <div>
+         {state.count}
+         <button onClick={() => actions.inc()} type="button"> + </button>
+       </div>
+     );
+   }
+   ```
+
+ - `useDispatch` (Function, required)
+
+   A hook allowing you to access the dispatch of your store.
+
+   ```javascript
+   function CountIncButton() {
+     const dispatch = Counter.useDispatch();
+     return <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
+   }
+   ```
+
+   This hook shares all the same properties and features of the global [`useStoreDispatch`](#usestoredispatch) hook.
+
 <details>
-<summary>Example</summary>
+<summary>Full example</summary>
 <p>
 
 ```javascript
-const Counter = createContainerStore({
+const Counter = createContextStore({
   count: 0,
   inc: action(state => {
     state.count += 1;
   })
 })
 
-function CountDisplay() {
-  const [state, actions] = Counter.useStore();
+function MyCounter() {
+  const count = Counter.useState(state => state.count);
+  const actions = Counter.useActions(actions => actions.inc);
   return (
     <>
-      <div>{state.count}</div>
-      <button onClick={actions.inc} type="button"> + </button>
+      <div>{count}</div>
+      <button onClick={() => actions.inc()} type="button"> + </button>
     </>
   )
 }
 
-<Counter.Provider>
-  <CountDisplay />
-</Counter.Provider>
+ReactDOM.render(
+  <Counter.Provider>
+    <MyCounter />
+  </Counter.Provider>,
+  document.querySelector('#app')
+);
+```
+
+</p>
+</details>
+
+<details>
+<summary>Using multiple stores</summary>
+<p>
+
+```javascript
+const Counter = createContextStore({
+  count: 0,
+  inc: action(state => {
+    state.count += 1;
+  })
+})
+
+const Todos = createContextStore({
+  items: [],
+  addTodo: action((state, text) => {
+    state.items.push(text)
+  })
+})
+
+ReactDOM.render(
+  <>
+    <Counter.Provider>
+      <CounterApp />
+    </Counter.Provider>
+    <Todos.Provider>
+      <TodosApp />
+    </Todos.Provider>
+  </>,
+  document.querySelector('#app')
+);
+```
+
+</p>
+</details>
+
+<details>
+<summary>Nesting stores</summary>
+<p>
+
+```javascript
+const Counter = createContextStore({
+  count: 0,
+  inc: action(state => {
+    state.count += 1;
+  })
+})
+
+const Todos = createContextStore({
+  items: [],
+  addTodo: action((state, text) => {
+    state.items.push(text)
+  })
+})
+
+ReactDOM.render(
+  <Counter.Provider>
+    <Todos.Provider>
+      <App />
+    </Todos.Provider>
+  </Counter.Provider>,
+  document.querySelector('#app')
+);
+```
+
+</p>
+</details>
+
+<details>
+<summary>Accessing a store within a component</summary>
+<p>
+
+```javascript
+import Counter from './stores/counter';
+
+export default function MyCounter() {
+  const count = Counter.useState(state => state.count);
+  const actions = Counter.useActions(actions => actions.inc);
+  return (
+    <>
+      <div>{count}</div>
+      <button onClick={() => actions.inc()} type="button"> + </button>
+    </>
+  )
+}
+```
+
+_Or_, you could use the shorthand version exposed by `useStore`:
+
+```javascript
+import Counter from './stores/counter';
+
+export default function MyCounter() {
+  const [state, actions] = Counter.useStore();
+  return (
+    <>
+      <div>{state.count}</div>
+      <button onClick={() => actions.inc()} type="button"> + </button>
+    </>
+  )
+}
+```
+
+</p>
+</details>
+
+<details>
+<summary>Providing initialData to customise your model at runtime</summary>
+<p>
+
+```javascript
+// The initial data will be received here
+//                                      👇
+const Counter = createContextStore(initialData => ({
+  count: initialData.count,
+  inc: action(state => {
+    state.count += 1;
+  })
+}));
+
+ReactDOM.render(
+  // Provide some initial data to your model instantiation
+  //                                 👇
+  <Counter.Provider initialData={{ count: 1 }}>
+    <CounterApp />
+  </Counter.Provider>,
+  document.querySelector('#app')
+);
+```
+
+</p>
+</details>
+
+<details>
+<summary>Using a store multiple times</summary>
+<p>
+
+It is entirely possible to use a store multiple times. Although this should
+be managed carefully. Each provider instance will have its own state.
+
+```javascript
+const Counter = createContextStore(initialData => ({
+  name: initialData.name,
+  count: 0,
+  inc: action(state => {
+    state.count += 1;
+  })
+}));
+
+ReactDOM.render(
+  <>
+    <Counter.Provider initialData={{ name: 'counter1' }}>
+      <CounterApp />
+    </Counter.Provider>
+    <Counter.Provider initialData={{ name: 'counter2' }}>
+      <CounterApp />
+    </Counter.Provider>
+  </>,
+  document.querySelector('#app')
+);
+```
+
+</p>
+</details>
+
+### createComponentStore
+
+Creates a store meant to manage the state for a single component.
+
+```javascript
+const useCounter = createComponentStore({
+  count: 0,
+  increment: action(state => {
+    state.count += 1;
+  })
+})
+```
+
+**Arguments**
+
+The following arguments are accepted:
+
+  - `model` (Object | (any) => Object, required)
+
+    The model representing your store.
+
+    Alternatively this can be a function that accepts `initialData`, which is provided when using the store within your components. The function should then return the model. This allows additional runtime configuration/overrides.
+
+  - `config` (Object, not required)
+
+    Provides custom configuration options for your store. Please see the [StoreConfig](#StoreConfig) API documentation for a full list of configuration options.
+
+**Returns**
+
+When executed you will receive a hook that allows you to use the store within your component.
+
+<details>
+<summary>Full example</summary>
+<p>
+
+```javascript
+const useCounter = createComponentStore({
+  count: 0,
+  inc: action(state => {
+    state.count += 1;
+  })
+})
+
+function MyCounter() {
+  const [state, actions] = useCounter();
+  return (
+    <>
+      <div>{state.count}</div>
+      <button onClick={() => actions.inc()} type="button"> + </button>
+    </>
+  );
+}
+```
+
+</p>
+</details>
+
+<details>
+<summary>Providing initialData to customise your model at runtime</summary>
+<p>
+
+```javascript
+// The initial data will be received here
+//
+const useCounter = createComponentStore(initialData => ({
+  count: initialData.count,
+  inc: action(state => {
+    state.count += 1;
+  })
+}));
+
+                                    👇
+const Counter = createContextStore(initialData => ({
+  count: initialData.count,
+  inc: action(state => {
+    state.count += 1;
+  })
+}));
+
+ReactDOM.render(
+  // Provide some initial data to your model instantiation
+  //
+
+function MyCounter() {
+  const [state, actions] = useCounter();
+  return (
+    <>
+      <div>{state.count}</div>
+      <button onClick={() => actions.inc()} type="button"> + </button>
+    </>
+  );
+}
 ```
 
 </p>
@@ -2443,7 +2678,6 @@ const audit: Audit = {
 
 ### Reducer<State = any, Action = ReduxAction>
 
-
 Represents a `reducer`, useful when defining your model interface.
 
 <details>
@@ -2567,7 +2801,7 @@ export default MyComponent() {
 
 ---
 
-## Tips and Tricks
+## Tips, Tricks, and FAQs
 
 Below are a few useful tips and tricks when using Easy Peasy.
 
@@ -2641,6 +2875,84 @@ const store = createStore({
 ```
 
 This produces an implementation that is like for like in terms of functionality but far less verbose.
+
+### Usage with class components / Using with react-redux
+
+As Easy Peasy outputs a standard Redux store, so it is entirely possible to use Easy Peasy with the official [`react-redux`](https://github.com/reduxjs/react-redux) package.
+
+This allows you to do a few things:
+
+ - Slowly migrate a legacy application that is built using `react-redux`
+ - Connect your store to Class components via `connect`
+
+<details>
+<summary>First, install the `react-redux` package</summary>
+<p>
+
+```bash
+npm install react-redux
+```
+
+</p>
+</details>
+
+<details>
+<summary>Then wrap your app with the `Provider`</summary>
+<p>
+
+```javascript
+import React from 'react';
+import { render } from 'react-dom';
+import { createStore } from 'easy-peasy';
+import { Provider } from 'react-redux'; // 👈 import the provider
+import model from './model';
+import TodoList from './components/TodoList';
+
+// 👇 then create your store
+const store = createStore(model);
+
+const App = () => (
+  // 👇 then pass it to the Provider
+  <Provider store={store}>
+    <TodoList />
+  </Provider>
+)
+
+render(<App />, document.querySelector('#app'));
+```
+
+</p>
+</details>
+
+<details>
+<summary>Finally, use `connect` against your components</summary>
+<p>
+
+```javascript
+import React, { Component } from 'react';
+import { connect } from 'react-redux'; // 👈 import the connect
+
+function TodoList({ todos, addTodo }) {
+  return (
+    <div>
+      {todos.map(({id, text }) => <Todo key={id} text={text} />)}
+      <AddTodo onSubmit={addTodo} />
+    </div>
+  )
+}
+
+export default connect(
+  // 👇 Map to your required state
+  state => ({ todos: state.todos.items }
+  // 👇 Map your required actions
+  dispatch => ({ addTodo: dispatch.todos.addTodo })
+)(EditTodo)
+```
+
+</p>
+</details>
+
+<p>&nbsp;</p>
 
 ----
 
