@@ -224,7 +224,7 @@ export default function createStoreInternals({
         } else if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
           console.warn(
-            `Easy Peasy: Found a function at path ${path.join(
+            `easy-peasy: Found a function at path ${path.join(
               '.',
             )} in your model. Version 2 required that you wrap your action functions with the "action" helper`,
           );
@@ -267,7 +267,7 @@ export default function createStoreInternals({
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line
           console.warn(
-            `Easy Peasy: you must provide either an "action" or "thunk" to your listeners. Found an invalid handler at "${meta.path.join(
+            `easy-peasy: you must provide either an "action" or "thunk" to your listeners. Found an invalid handler at "${meta.path.join(
               '.',
             )}"`,
           );
