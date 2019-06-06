@@ -100,10 +100,37 @@ export function createStoreDispatchHook(Context) {
 
 export const useStoreDispatch = createStoreDispatchHook(EasyPeasyContext);
 
-/* Aliased hooks. These are deprecated */
-export const useActions = useStoreActions;
-export const useDispatch = useStoreDispatch;
-export const useStore = useStoreState;
+const wrapWithWarning = (prev, next, useImp) => {
+  let warned = false;
+  return function useDeprecated(...args) {
+    if (process.env.NODE_ENV === 'development' && !warned) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `easy-peasy: The "${prev}" hook has been deprecated. Please replace all instances with the "${next}" hook.`,
+      );
+      warned = true;
+    }
+    return useImp(...args);
+  };
+};
+
+export const useActions = wrapWithWarning(
+  'useActions',
+  'useStoreActions',
+  useStoreActions,
+);
+
+export const useDispatch = wrapWithWarning(
+  'useDispatch',
+  'useStoreDispatch',
+  useStoreDispatch,
+);
+
+export const useStore = wrapWithWarning(
+  'useStore',
+  'useStoreState',
+  useStoreState,
+);
 
 export function createTypedHooks() {
   return {
