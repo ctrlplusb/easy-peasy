@@ -103,7 +103,7 @@ export const useStoreDispatch = createStoreDispatchHook(EasyPeasyContext);
 const wrapWithWarning = (prev, next, useImp) => {
   let warned = false;
   return function useDeprecated(...args) {
-    if (process.env.NODE_ENV === 'development' && !warned) {
+    if (process.env.NODE_ENV !== 'production' && !warned) {
       // eslint-disable-next-line no-console
       console.warn(
         `easy-peasy: The "${prev}" hook has been deprecated. Please replace all instances with the "${next}" hook.`,
