@@ -15,7 +15,7 @@ import {
 } from './hooks';
 import createStore from './create-store';
 
-export default function createContainerStore(model, config) {
+export default function createContextStore(model, config) {
   const StoreContext = createContext();
 
   function Provider({ children, initialData }) {
@@ -33,19 +33,7 @@ export default function createContainerStore(model, config) {
   }
 
   function useStore() {
-    const store = useContext(StoreContext);
-    const previousStateRef = useRef(store.getState());
-    const [currentState, setCurrentState] = useState(() => store.getState());
-    useEffect(() => {
-      return store.subscribe(() => {
-        const nextState = store.getState();
-        if (previousStateRef.current !== nextState) {
-          previousStateRef.current = nextState;
-          setCurrentState(nextState);
-        }
-      });
-    }, []);
-    return [currentState, store.dispatch];
+    return useContext(StoreContext);
   }
 
   return {
