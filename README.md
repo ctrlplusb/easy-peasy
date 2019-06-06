@@ -90,14 +90,14 @@ function TodoList() {
 ## Highlights
 
   - React hooks based API
-  - Global, shared, or component level state
   - Simple, intuitive API focusing on speed of development
   - Thunks for data fetching and side effects
   - Selectors for derived data
+  - Global, shared, or component level stores
   - Immutable data store under the hood
-  - Testing helpers baked in
   - Typescript definitions baked in
   - React Native supported
+  - Testing helpers baked in
   - Wraps Redux, all the radness, without the boilerplate
   - Redux Dev Tools support built in
   - Supports Redux middleware and enhancers
@@ -162,13 +162,13 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy provides you with an intuitive and easy to use API that allows rapid development. Batteries are included - you don't need to configure any additional packages to support derived state, API calls, memoisation, or integration with React.
+Easy Peasy provides you with an intuitive and easy to use API allowing you to quickly and easily build the state for your React application. Batteries are included - you don't need to configure any additional packages to support derived state, API calls, memoisation, etc.
 
-Under the hood we are abstracting Redux, taking advantage of the amazing architecture and guarantees it provides which has made it so popular within the React ecosystem. We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing applications.
+Under the hood we are abstracting Redux. Most complaints directed at Redux are typically in reference to the boilerplate associated with it. Easy Peasy provides you with a mechanism to avoid the boilerplate whilst taking advantage of the amazing guarantees that the Redux architecture provides. 
 
-In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This allows the opportunity to interface with existing Redux based libraries.
+We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing libraries. In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This allows the opportunity to interface with existing Redux based libraries.
 
-All that being said, no prior Redux experience is required.
+That all been said, absolutely no Redux experience is required to use Easy Peasy.
 
 <p>&nbsp;</p>
 
@@ -183,7 +183,7 @@ npm install react
 npm install react-dom
 ```
 
-> Note: please ensure you install versions >= 16.8.0 for both `react` and `react-dom`, as this library depends on the new hooks feature
+> Note: please ensure you install versions >= 16.8.0 for both `react` and `react-dom`, as this library depends on the hooks feature of React
 
 Then install Easy Peasy.
 
@@ -217,13 +217,13 @@ https://codesandbox.io/s/woyn8xqk15
 
 ## Tutorial
 
-The below will introduce you to the core concepts of Easy Peasy, where we will interact with the store directly. In a following section we shall illustrate how to integrate [Easy Peasy within a React application](#usage-with-react).
+The below will introduce you to the core concepts of Easy Peasy, where we will create a global store and interact with it directly. In a following section we shall illustrate how to [access the store from your React components](#usage-with-react).
 
 ### Core Concepts
 
 #### Creating the store
 
-Firstly you need to define your model. This represents the structure of your state along with its default values. Your model can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
+Firstly, define your model. This represents the structure of your state along with its default values. Your model can be as deep and complex as you like. Feel free to split your model across many files, importing and composing them as you like.
 
 ```javascript
 const model = {
@@ -233,7 +233,7 @@ const model = {
 };
 ```
 
-Then you provide your model to `createStore`.
+Then provide your model to `createStore`.
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -241,7 +241,9 @@ import { createStore } from 'easy-peasy';
 const store = createStore(model);
 ```
 
-You will now have a [Redux store](https://redux.js.org/api/store) - all the standard APIs of a Redux store is available to you. 👍
+You will now have a [store](#store). 👍
+
+> Note: A store is the same as a Redux store - all the standard Redux store APIs are available to you. You can pass the store into 3rd party libs that require and integrate with Redux stores.
 
 #### Accessing state directly via the store
 
@@ -281,11 +283,11 @@ The action will receive as its first parameter the slice of the state that it wa
 > })
 > ```
 >
-> Personally I find the above harder to read and more prone to error.
+> Personally I find the above harder to read and error prone, however, this is a subjective matter.
 
 #### Dispatching actions directly via the store
 
-Easy Peasy will bind your actions against the stores `dispatch`. They will be bound using paths that match the location of the action on your model.
+Easy Peasy will bind your actions against the `dispatch` of your store. They will be bound using paths that match the location of the action within your model.
 
 ```javascript
 //                                 payload
@@ -431,9 +433,9 @@ You can listen to any action type (`action`/`thunk`), and can execute any action
 
 ### Usage with React
 
-We will now cover how to integrate your store with your React components. We leverage React [hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks, we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try playing with our [examples](#examples).
+We will now cover how to access your store from your React components. We leverage React [hooks](https://reactjs.org/docs/hooks-intro.html) to do so. If you aren't familiar with hooks, we highly recommend that you read the [official documentation](https://reactjs.org/docs/hooks-intro.html) and try out the live [examples](#examples).
 
-> Be sure to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This extension will allow you to view your actions being fired along with the associated updates to state. Easy Peasy is preconfigured to work with it.
+> Be sure to install the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension). This extension allows you to view your actions being fired along with the associated updates to your store's state. Easy Peasy is preconfigured to work with this plugin.
 
 #### Wrap your app with StoreProvider
 
@@ -493,7 +495,7 @@ We recommend that you read the API docs for the [`useStoreState` hook](#usestore
 
 #### Dispatching actions within your Components
 
-In order to fire actions in your components you can use the `useStoreActions` hook.
+To dispatch actions within your components you can use the `useStoreActions` hook.
 
 ```javascript
 import { useState } from 'react';
@@ -515,7 +517,7 @@ For more on how you can use this hook please read the API docs for the [`useStor
 
 #### Final notes
 
-This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend you read through the [API](#API) documentation to gain a more full understanding of the tools and helpers that Easy Peasy exposes to you.
+This is by no means an exhaustive overview of Easy Peasy's API. We _highly_ recommend you read through the [API](#API) documentation to gain a fuller understanding of the tools and helpers that Easy Peasy provides to you.
 
 <p>&nbsp;</p>
 
@@ -523,11 +525,11 @@ This is by no means an exhaustive overview of Easy Peasy. We _highly_ recommend 
 
 ## API
 
-Below is a full breakdown of the API exposed by Easy Peasy. We highly recommend you make yourself with it in order to best make use of the API.
+Below is a full breakdown of the API exposed by Easy Peasy.
 
 ### createStore
 
-Creates a global [store](#store) based on the given model. It also supports an additional [configuration](#storeconfig) parameter allowing customisation of your [store](#store)'s behaviour.
+Creates a global [store](#store) based on the provided model. It supports a [configuration](#storeconfig) parameter to customise your [store's](#store) behaviour.
 
 ```javascript
 createStore({
@@ -591,7 +593,7 @@ ReactDOM.render(
 
 Creates a store powered by context, allowing you to expose state to specific parts of your React application.
 
-Using this approach over the global [createStore](#createstore) approach allows you to create multiple stores, encapsulating the specific state needs for various branches of your application. This introduces a higher degree of portability for your application's features and may be especially useful for larger scale applications, or when employing code splitting techniques.
+Using this approach over the global [createStore](#createstore) approach allows you to create multiple stores. Each store can encapsulate differing state needs for branches/features of your application. This may be especially useful for larger scale applications, or when employing code splitting techniques.
 
 ```javascript
 const Counter = createContextStore({
