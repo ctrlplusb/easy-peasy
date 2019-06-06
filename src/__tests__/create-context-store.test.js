@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { createContextStore, action } from '../index';
@@ -19,8 +21,8 @@ function CountDisplayUseStore() {
 }
 
 function CountDisplay() {
-  const count = Counter.useState(state => state.count);
-  const inc = Counter.useActions(actions => actions.inc);
+  const count = Counter.useStoreState(state => state.count);
+  const inc = Counter.useStoreActions(actions => actions.inc);
   return (
     <>
       <div data-testid="count">{count}</div>
@@ -108,8 +110,8 @@ it('with initial data', () => {
   }));
 
   function CountDisplay() {
-    const count = Counter.useState(state => state.count);
-    const inc = Counter.useActions(actions => actions.inc);
+    const count = Counter.useStoreState(state => state.count);
+    const inc = Counter.useStoreActions(actions => actions.inc);
     return (
       <>
         <div data-testid="count">{count}</div>

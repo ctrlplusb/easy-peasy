@@ -90,14 +90,14 @@ function TodoList() {
 ## Highlights
 
   - React hooks based API
-  - Create global, shared, or local stores
+  - Global, shared, or component level state
   - Simple, intuitive API focusing on speed of development
   - Thunks for data fetching and side effects
   - Selectors for derived data
   - Immutable data store under the hood
   - Testing helpers baked in
-  - Supports Typescript
-  - Supports React Native
+  - Typescript definitions baked in
+  - React Native supported
   - Wraps Redux, all the radness, without the boilerplate
   - Redux Dev Tools support built in
   - Supports Redux middleware and enhancers
@@ -591,7 +591,7 @@ ReactDOM.render(
 
 Creates a store powered by context, allowing you to expose state to specific parts of your React application.
 
-Using this approach over the global [createStore](#createstore) approach allows you to create multiple stores, encapsulating the specific state needs for various branches of your application. This introduces a higher degree of portability for your features an may be especially useful for larger scale applications, or when employing code splitting techniques.
+Using this approach over the global [createStore](#createstore) approach allows you to create multiple stores, encapsulating the specific state needs for various branches of your application. This introduces a higher degree of portability for your application's features and may be especially useful for larger scale applications, or when employing code splitting techniques.
 
 ```javascript
 const Counter = createContextStore({
@@ -606,15 +606,15 @@ const Counter = createContextStore({
 
 The following arguments are accepted:
 
-  - `model` (Object | (any) => Object, required)
+  - `model` (Object | (initialData: any) => Object, required)
 
     The model representing your store.
 
-    Alternatively this can be a function that accepts `initialData`, which is provided when using the store within your components. The function should then return the model. This allows additional runtime configuration/overrides.
+    Alternatively this can be a function that accepts `initialData`. The `initialData` can be provided as a prop to the `Provider`. This allows additional runtime configuration/overrides against your model.
 
   - `config` (Object, not required)
 
-    Provides custom configuration options for your store. Please see the [StoreConfig](#StoreConfig) API documentation for a full list of configuration options.
+    Custom [configuration](#storeconfig) for your store. Please see the [StoreConfig](#storeconfig) API documentation for a full list of configuration options.
 
 **Returns**
 
@@ -638,60 +638,62 @@ When executed you will receive a store container that contains the following pro
 
      Allows you to provide additional data to instantiate your store's model with. This needs to be used in conjunction with the function form of defining your model. See the examples below.
 
- - `useState` (Function, required)
+     ```javascript
+     <Counter.Provider initialData={{ count: 1 }}>
+       <App />
+     </Counter.Provider>
+     ```
+
+ - `useStoreState` (Function, required)
 
    A hook allowing you to access the state of your store.
 
    ```javascript
    function CountDisplay() {
-     const count = Counter.useState(state => state.count);
+     const count = Counter.useStoreState(state => state.count);
      return <div>{count}</div>
    }
    ```
 
    This hook shares all the same properties and features of the global [`useStoreState`](#usestorestate) hook.
 
- - `useActions` (Function, required)
+ - `useStoreActions` (Function, required)
 
    A hook allowing you to access the actions of your store.
 
    ```javascript
    function CountIncButton() {
-     const increment = Counter.useActions(actions => actions.increment);
+     const increment = Counter.useStoreActions(actions => actions.increment);
      return <button onClick={increment}>+</button>
    }
    ```
 
    This hook shares all the same properties and features of the global [`useStoreActions`](#usestoreactions) hook.
 
- - `useStore` (Function, required)
-
-   A hook allowing you to access the state and actions of your store.
-
-   ```javascript
-   function MyCounter() {
-     const [state, actions] = Counter.useStore();
-     return (
-       <div>
-         {state.count}
-         <button onClick={() => actions.inc()} type="button"> + </button>
-       </div>
-     );
-   }
-   ```
-
- - `useDispatch` (Function, required)
+ - `useStoreDispatch` (Function, required)
 
    A hook allowing you to access the dispatch of your store.
 
    ```javascript
    function CountIncButton() {
-     const dispatch = Counter.useDispatch();
+     const dispatch = Counter.useStoreDispatch();
      return <button onClick={() => dispatch({ type: 'INCREMENT' })}>+</button>
    }
    ```
 
    This hook shares all the same properties and features of the global [`useStoreDispatch`](#usestoredispatch) hook.
+
+ - `useStore` (Function, required)
+
+   A hook allowing you to access the store. We recommend that this only be used within exceptional use cases.
+
+   ```javascript
+   function MyCounter() {
+     const store = Counter.useStore();
+     store.getState();
+     return null;
+   }
+   ```
 
 <details>
 <summary>Full example</summary>
@@ -706,7 +708,7 @@ const Counter = createContextStore({
 })
 
 function MyCounter() {
-  const count = Counter.useState(state => state.count);
+  const count = Counter.useStoreState(state => state.count);
   const actions = Counter.useActions(actions => actions.inc);
   return (
     <>
@@ -789,44 +791,6 @@ ReactDOM.render(
   </Counter.Provider>,
   document.querySelector('#app')
 );
-```
-
-</p>
-</details>
-
-<details>
-<summary>Accessing a store within a component</summary>
-<p>
-
-```javascript
-import Counter from './stores/counter';
-
-export default function MyCounter() {
-  const count = Counter.useState(state => state.count);
-  const actions = Counter.useActions(actions => actions.inc);
-  return (
-    <>
-      <div>{count}</div>
-      <button onClick={() => actions.inc()} type="button"> + </button>
-    </>
-  )
-}
-```
-
-_Or_, you could use the shorthand version exposed by `useStore`:
-
-```javascript
-import Counter from './stores/counter';
-
-export default function MyCounter() {
-  const [state, actions] = Counter.useStore();
-  return (
-    <>
-      <div>{state.count}</div>
-      <button onClick={() => actions.inc()} type="button"> + </button>
-    </>
-  )
-}
 ```
 
 </p>

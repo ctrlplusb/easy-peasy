@@ -32,8 +32,8 @@ export default function createContextStore(model, config) {
   return {
     Provider,
     useStore,
-    useState: createStoreStateHook(StoreContext),
-    useActions: createStoreActionsHook(StoreContext),
-    useDispatch: createStoreDispatchHook(StoreContext),
+    useStoreState: createStoreStateHook(StoreContext),
+    useStoreActions: createStoreActionsHook(StoreContext),
+    useStoreDispatch: createStoreDispatchHook(StoreContext),
   };
 }
