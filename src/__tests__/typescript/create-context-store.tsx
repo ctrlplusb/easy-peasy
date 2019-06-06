@@ -29,8 +29,8 @@ const CounterWithInitializer = createContextStore<StoreModel, InitialData>(
 );
 
 function CountDisplay() {
-  const count = Counter.useState(state => state.count);
-  const inc = Counter.useActions(actions => actions.inc);
+  const count = Counter.useStoreState(state => state.count);
+  const inc = Counter.useStoreActions(actions => actions.inc);
   return (
     <>
       <div>{count + 1}</div>
@@ -54,7 +54,7 @@ function CountDisplayUseStore() {
 }
 
 function TestDispatch() {
-  const dispatch = Counter.useDispatch();
+  const dispatch = Counter.useStoreDispatch();
   dispatch({
     type: 'FOO',
     payload: 'bar',
