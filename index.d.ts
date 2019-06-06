@@ -774,7 +774,7 @@ interface StoreModelInitializer<
   (initialData?: InitialData): StoreModel;
 }
 
-export function createContainerStore<
+export function createContextStore<
   StoreModel extends Object = {},
   InitialData = any,
   StoreConfig extends EasyPeasyConfig<any, any> = any
@@ -783,7 +783,7 @@ export function createContainerStore<
   config?: StoreConfig,
 ): {
   Provider: React.SFC<{ initialData?: InitialData }>;
-  useStore: () => [State<StoreModel>, Actions<StoreModel>];
+  useStore: () => Store<StoreModel, StoreConfig>;
   useState: <Result = any>(
     mapState: (state: State<StoreModel>) => Result,
     dependencies?: Array<any>,
@@ -801,7 +801,7 @@ export interface UseLocalStore<
   (initialData?: InitialData): [State<StoreModel>, Actions<StoreModel>];
 }
 
-export function createLocalStore<
+export function createComponentStore<
   StoreModel extends Object = {},
   InitialData = any,
   StoreConfig extends EasyPeasyConfig<any, any> = any

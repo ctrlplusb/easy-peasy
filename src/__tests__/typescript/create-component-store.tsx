@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import * as React from 'react';
-import { createLocalStore, Action, action } from 'easy-peasy';
+import { createComponentStore, Action, action } from 'easy-peasy';
 
 interface StoreModel {
   count: number;
@@ -12,14 +12,14 @@ interface InitialData {
   count: number;
 }
 
-const useCounter = createLocalStore<StoreModel>({
+const useCounter = createComponentStore<StoreModel>({
   count: 0,
   inc: action(state => {
     state.count += 1;
   }),
 });
 
-const useCounterWithInitializer = createLocalStore<StoreModel, InitialData>(
+const useCounterWithInitializer = createComponentStore<StoreModel, InitialData>(
   data => ({
     count: data ? data.count + 1 : 0,
     inc: action(state => {

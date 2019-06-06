@@ -1,7 +1,7 @@
 /* eslint-disable */
 
 import * as React from 'react';
-import { createContainerStore, Action, action } from 'easy-peasy';
+import { createContextStore, Action, action } from 'easy-peasy';
 
 interface StoreModel {
   count: number;
@@ -12,14 +12,14 @@ interface InitialData {
   count: number;
 }
 
-const Counter = createContainerStore<StoreModel>({
+const Counter = createContextStore<StoreModel>({
   count: 0,
   inc: action(state => {
     state.count += 1;
   }),
 });
 
-const CounterWithInitializer = createContainerStore<StoreModel, InitialData>(
+const CounterWithInitializer = createContextStore<StoreModel, InitialData>(
   data => ({
     count: data ? data.count + 1 : 0,
     inc: action(state => {
@@ -42,11 +42,11 @@ function CountDisplay() {
 }
 
 function CountDisplayUseStore() {
-  const [state, actions] = Counter.useStore();
+  const store = Counter.useStore();
   return (
     <>
-      <div>{state.count + 1}</div>
-      <button onClick={actions.inc} type="button">
+      <div>{store.getState().count + 1}</div>
+      <button onClick={store.dispatch.inc} type="button">
         +
       </button>
     </>
