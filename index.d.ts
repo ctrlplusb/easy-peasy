@@ -784,14 +784,14 @@ export function createContextStore<
 ): {
   Provider: React.SFC<{ initialData?: InitialData }>;
   useStore: () => Store<StoreModel, StoreConfig>;
-  useState: <Result = any>(
+  useStoreState: <Result = any>(
     mapState: (state: State<StoreModel>) => Result,
     dependencies?: Array<any>,
   ) => Result;
-  useActions: <Result = any>(
+  useStoreActions: <Result = any>(
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
-  useDispatch: () => Dispatch<StoreModel>;
+  useStoreDispatch: () => Dispatch<StoreModel>;
 };
 
 export interface UseLocalStore<
