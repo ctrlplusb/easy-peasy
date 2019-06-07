@@ -164,7 +164,7 @@ function TodoList() {
 
 Easy Peasy provides you with an intuitive and easy to use API allowing you to quickly and easily build the state for your React application. Batteries are included - you don't need to configure any additional packages to support derived state, API calls, memoisation, etc.
 
-Under the hood we are abstracting Redux. Most complaints directed at Redux are typically in reference to the boilerplate associated with it. Easy Peasy provides you with a mechanism to avoid the boilerplate whilst taking advantage of the amazing guarantees that the Redux architecture provides. 
+Under the hood we are abstracting Redux. Most complaints directed at Redux are typically in reference to the boilerplate associated with it. Easy Peasy provides you with a mechanism to avoid the boilerplate whilst taking advantage of the amazing guarantees that the Redux architecture provides.
 
 We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing libraries. In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This provides the opportunity to integrate existing Redux libraries.
 
@@ -325,7 +325,7 @@ const store = createStore({
 
       // e.g. call an api
       const savedTodo = await todoService.save(payload);
-      
+
       // then dispatch an action with the api result as the payload
       actions.todoSaved(savedTodo);
     }),
@@ -375,7 +375,7 @@ Using the helper will attach a function to your state, that when executed will r
 
 #### Accessing your selectors directly via the store
 
-You can access your selector similar to state, however, selectors are functions.
+You can access your selector similar to state, but remember, selectors are functions.
 
 ```javascript
 store.getState().shoppingBasket.totalPrice(); // fresh hit
@@ -383,7 +383,7 @@ store.getState().shoppingBasket.totalPrice(); // fresh hit
 store.getState().shoppingBasket.totalPrice(); // cached result
 ```
 
-> We intentionally made selectors be functions as it provides a mechanism of lazy resolution, and also opens the doors to providing runtime arguments to your selectors. See the [selector](#selector) API docs for more information.
+> We intentionally made selectors be functions as it allows us to ensure that the work to derive your data is only performed when you actually need it. In addition to this, having selectors as functions allows us to support runtime arguments being provided to them. See the [selector](#selector) API docs for more information and examples of this.
 
 #### Updating multiple parts of your state in response to a thunk/action
 
