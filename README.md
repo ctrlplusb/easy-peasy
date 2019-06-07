@@ -1,5 +1,5 @@
 >
-> This is the v2.4.0 branch. Your early testing and [feedback](https://github.com/ctrlplusb/easy-peasy/pull/181) would be greatly appreacitated. 🙏
+> This is the v2.4.0 branch. Your early testing and [feedback](https://github.com/ctrlplusb/easy-peasy/pull/181) is appreciated. 🙏
 >
 
 <p>&nbsp;</p>
@@ -166,7 +166,7 @@ Easy Peasy provides you with an intuitive and easy to use API allowing you to qu
 
 Under the hood we are abstracting Redux. Most complaints directed at Redux are typically in reference to the boilerplate associated with it. Easy Peasy provides you with a mechanism to avoid the boilerplate whilst taking advantage of the amazing guarantees that the Redux architecture provides. 
 
-We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing libraries. In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This allows the opportunity to interface with existing Redux based libraries.
+We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing libraries. In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This provides the opportunity to integrate existing Redux libraries.
 
 That all been said, absolutely no Redux experience is required to use Easy Peasy.
 
@@ -320,12 +320,14 @@ const store = createStore({
     //          👇 define a thunk action via the helper
     saveTodo: thunk(async (actions, payload) => {
       //                      👆
-      // Notice that the thunk will receive the actions allowing you to dispatch
-      // other actions after you have performed your side effect.
-      const saved = await todoService.save(payload);
-      // Now we dispatch an action to add the saved item to our state
-      //         👇
-      actions.todoSaved(saved);
+      // Notice that the thunk will receive actions instead of state. You can
+      // call the actions to update your state appropriately.
+
+      // e.g. call an api
+      const savedTodo = await todoService.save(payload);
+      
+      // then dispatch an action with the api result as the payload
+      actions.todoSaved(savedTodo);
     }),
 
     todoSaved: action((state, payload) => {
@@ -335,11 +337,9 @@ const store = createStore({
 });
 ```
 
-You cannot modify the state within a `thunk`, however, the `thunk` is provided the `actions` that are local to it. This allows you to delegate state updates via your actions (an experience similar to that of `redux-thunk`).
-
 #### Dispatching a `thunk` action directly via the store
 
-You can dispatch a thunk action in the same manner as a normal action. A `thunk` action is asynchronous and _always_ returns a `Promise`. This allows you chain execution for when the `thunk` has completed.
+You can dispatch a thunk action in the same manner as a normal action. A `thunk` action is _always_ asynchronous and _always_ returns a `Promise`. This allows you chain execution against the succesful resolution of the `thunk`.
 
 ```javascript
 store.dispatch.todos.saveTodo('Install easy-peasy')
@@ -350,7 +350,7 @@ store.dispatch.todos.saveTodo('Install easy-peasy')
 
 #### Creating selectors for derived state
 
-If you wish to derive state you can use the [`selector`](#selector) helper to define selectors.
+If you wish to derive state you can use the [`selector`](#selector) helper.
 
 ```javascript
 import { selector } from 'easy-peasy'; // 👈 import the helper
@@ -369,9 +369,9 @@ const store = createStore({
 }
 ```
 
-The results of selectors are memoized and will only be recalculated when the resolved state that they operate against changes. This provides a nice level of performance optimisation, avoiding unneccessary work when rerendering your React components. We highly recommend you make use of selectors rather than doing frequent state deriving within your components.
+Using the helper will attach a function to your state, that when executed will return the derived state. The results of selectors are memoized and will only be recalculated when the state that they operate against changes. This provides a nice level of performance optimisation, and avoids unneccessary rerendering of your React components.
 
-> You may be familiar with [`reselect`](https://github.com/reduxjs/reselect), which was the inspiration for this helper.
+> This helper is inspired by [`reselect`](https://github.com/reduxjs/reselect), a popular library in the Redux ecosystem.
 
 #### Accessing your selectors directly via the store
 
