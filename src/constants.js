@@ -1,5 +1,6 @@
 export const actionNameSymbol = '🙈actionName🙈';
 export const actionSymbol = '🙈action🙈';
+export const actionStateSymbol = '🙈actionState🙈';
 
 export const listenSymbol = '🙈listen🙈';
 
@@ -17,3 +18,4 @@ export const selectorConfigSymbol = '🙈selectorConfig🙈';
 export const selectorStateSymbol = '🙈selectorState🙈';
 
 export const thunkSymbol = '🙈thunk🙈';
+export const thunkStateSymbol = '🙈thunkState🙈';

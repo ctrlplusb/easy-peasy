@@ -1,6 +1,7 @@
 import { isDraft, finishDraft, createDraft } from 'immer';
 import {
   actionNameSymbol,
+  actionStateSymbol,
   actionSymbol,
   listenSymbol,
   reducerSymbol,
@@ -9,6 +10,7 @@ import {
   selectorSymbol,
   selectStateSymbol,
   selectSymbol,
+  thunkStateSymbol,
   thunkSymbol,
 } from './constants';
 
@@ -29,8 +31,11 @@ export const thunkCompleteName = action =>
 
 export const thunkFailName = action => `${action[actionNameSymbol]}(failed)`;
 
-export const action = fn => {
+export const action = (fn, config) => {
   fn[actionSymbol] = true;
+  fn[actionStateSymbol] = {
+    config,
+  };
   return fn;
 };
 
@@ -39,8 +44,11 @@ export const listen = fn => {
   return fn;
 };
 
-export const thunk = fn => {
+export const thunk = (fn, config) => {
   fn[thunkSymbol] = true;
+  fn[thunkStateSymbol] = {
+    config,
+  };
   return fn;
 };
 

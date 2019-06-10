@@ -91,6 +91,22 @@ export default function createStore(model, options = {}) {
 
   bindStoreInternals(initialState);
 
+  const listenerActionsMiddleware = () => next => action => {
+    const result = next(action);
+    if (
+      action &&
+      references.internals.listenerActionMap[action.type] &&
+      references.internals.listenerActionMap[action.type].length > 0
+    ) {
+      references.internals.listenerActionMap[action.type].forEach(
+        actionCreator => {
+          actionCreator(action.payload);
+        },
+      );
+    }
+    return result;
+  };
+
   const mockActionsMiddleware = () => next => action => {
     if (mockActions) {
       if (
@@ -114,6 +130,7 @@ export default function createStore(model, options = {}) {
         reduxThunk,
         dispatchActionStringListeners,
         ...middleware,
+        listenerActionsMiddleware,
         mockActionsMiddleware,
       ),
       ...enhancers,
@@ -195,12 +212,6 @@ export default function createStore(model, options = {}) {
       ? action
       : undefined;
 
-  const dispatchHandler = (handler, actionName, payload) => {
-    if (handler[thunkSymbol]) {
-      return dispatchThunk(handler, payload);
-    }
-  };
-
   store.triggerListener = (listener, action, payload) => {
     const actionName = resolveActionName(action);
     if (
@@ -217,9 +228,7 @@ export default function createStore(model, options = {}) {
       );
       return thunkHandlers.length > 0
         ? Promise.all(
-            thunkHandlers.map(handler =>
-              dispatchHandler(handler, actionName, payload),
-            ),
+            thunkHandlers.map(handler => dispatchThunk(handler, payload)),
           ).then(() => undefined)
         : Promise.resolve();
     }
