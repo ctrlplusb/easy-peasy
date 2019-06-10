@@ -1,17 +1,26 @@
+import { isDraft, finishDraft, createDraft } from 'immer';
 import {
   actionNameSymbol,
   actionSymbol,
-  selectorSymbol,
-  selectorConfigSymbol,
   listenSymbol,
   reducerSymbol,
   selectDependenciesSymbol,
+  selectorConfigSymbol,
+  selectorSymbol,
   selectStateSymbol,
   selectSymbol,
   thunkSymbol,
 } from './constants';
 
 export const actionName = action => action[actionNameSymbol];
+
+export const debug = state => {
+  if (isDraft(state)) {
+    const final = finishDraft(createDraft(state));
+    return final;
+  }
+  return state;
+};
 
 export const thunkStartName = action => `${action[actionNameSymbol]}(started)`;
 
