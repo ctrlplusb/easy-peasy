@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { createStore, Thunk, thunk } from 'easy-peasy';
+import { createStore, Thunk, thunk, Action } from 'easy-peasy';
 
 interface Injections {
   fetch: () => Promise<void>;
@@ -50,3 +50,84 @@ store.dispatch.audit.log();
 store.dispatch.audit.empty();
 // typings:expect-error
 store.dispatch.audit.empty('foo');
+
+interface ListeningModel {
+  log: Action<ListeningModel, string>;
+}
+
+interface TargetModel {
+  doAction: Action<TargetModel, string>;
+  doThunk: Thunk<TargetModel, string>;
+  doActionInvalid: Action<TargetModel, number>;
+  doThunkInvalid: Thunk<TargetModel, number>;
+}
+
+// @ts-ignore
+const targetModel: TargetModel = {};
+
+const listenAction: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  {
+    listenTo: targetModel.doAction,
+  },
+);
+
+const listenActionInvalidThunk: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  // typings:expect-error
+  {
+    listenTo: targetModel.doActionInvalid,
+  },
+);
+
+const listenThunk: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  {
+    listenTo: targetModel.doThunk,
+  },
+);
+
+const listenThunkInvalidPaylod: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  // typings:expect-error
+  {
+    listenTo: targetModel.doThunkInvalid,
+  },
+);
+
+const listenString: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  {
+    listenTo: 'ADD_TODO',
+  },
+);
+
+const listenInvalid: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  // typings:expect-error
+  {
+    listenTo: 1,
+  },
+);
+
+const listenInvalidFunc: Thunk<AuditModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  // typings:expect-error
+  {
+    listenTo: () => undefined,
+  },
+);
