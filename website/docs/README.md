@@ -12,7 +12,7 @@ Easy Peasy provides you with an intuitive API to quickly and easily manage the s
 ```javascript
 const store = createStore({
   todos: {
-    items: ['Install easy-peasy', 'Define your model', 'Have fun'],
+    items: ['Create store', 'Wrap application', 'Use store'],
     add: action((state, payload) => {
       state.items.push(payload)
     })

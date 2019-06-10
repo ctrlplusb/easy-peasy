@@ -10,24 +10,34 @@
 [![Travis](https://img.shields.io/travis/ctrlplusb/easy-peasy.svg?style=flat-square)](https://travis-ci.org/ctrlplusb/easy-peasy)
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
-```javascript
-import { action, createStore, StoreProvider, useStoreState, useStoreActions } from 'easy-peasy';
+**Step 1 - Create your store**
 
+```javascript
 const store = createStore({
   todos: {
-    items: ['Install easy-peasy', 'Define your model', 'Have fun'],
+    items: ['Create store', 'Wrap application', 'Use store'],
     add: action((state, payload) => {
       state.items.push(payload)
     })
   }
 });
+```
 
-const App = () => (
-  <StoreProvider store={store}>
-    <TodoList />
-  </StoreProvider>
-)
+**Step 2 - Wrap you application**
 
+```javascript
+function App() {
+  return (
+    <StoreProvider store={store}>
+      <TodoList />
+    </StoreProvider>
+  );
+}
+```
+
+**Step 3 - Use the store**
+
+```javascript
 function TodoList() {
   const todos = useStoreState(state => state.todos.items)
   const add = useStoreActions(actions => actions.todos.add)
@@ -57,13 +67,7 @@ function TodoList() {
 
 ## Introduction
 
-Easy Peasy provides you with an intuitive and easy to use API allowing you to quickly and easily build the state for your React application. Batteries are included - you don't need to configure any additional packages to support derived state, API calls, memoisation, etc.
-
-Under the hood we are abstracting Redux. Most complaints directed at Redux are typically in reference to the boilerplate associated with it. Easy Peasy provides you with a mechanism to avoid the boilerplate whilst taking advantage of the amazing guarantees that the Redux architecture provides.
-
-We support the Redux Dev Tools out of the box and output a Redux store allowing interop with existing libraries. In addition to this we even allow extension of the underlying Redux store via middleware and enhancers. This provides the opportunity to integrate existing Redux libraries.
-
-That all been said, absolutely no Redux experience is required to use Easy Peasy.
+Easy Peasy provides you with an intuitive API to quickly and easily manage the state for your React application. Batteries are included - no configuration is required to support derived state, API calls, performance optimisation, developer tools etc.
 
 ## Documentation
 
