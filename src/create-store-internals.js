@@ -2,17 +2,19 @@ import memoizerific from 'memoizerific';
 import produce from 'immer';
 import {
   actionNameSymbol,
+  actionStateSymbol,
   actionSymbol,
-  selectorSymbol,
-  selectorConfigSymbol,
-  selectorStateSymbol,
   listenSymbol,
   metaSymbol,
   reducerSymbol,
   selectDependenciesSymbol,
   selectImpSymbol,
+  selectorConfigSymbol,
+  selectorStateSymbol,
+  selectorSymbol,
   selectStateSymbol,
   selectSymbol,
+  thunkStateSymbol,
   thunkSymbol,
 } from './constants';
 import { isStateObject, get, set } from './lib';
@@ -48,18 +50,30 @@ export default function createStoreInternals({
       : x;
 
   const defaultState = initialState || {};
-  const actionThunks = {};
-  const actionCreators = {};
+  let selectorId = 0;
+
   const actionCreatorDict = {};
-  const customReducers = [];
-  const selectorReducers = [];
-  const listenDefinitions = [];
-  const thunkListenersDict = {};
+  const actionCreators = {};
+
   const actionListenersDict = {};
+
   const actionReducersDict = {};
   const actionReducersForPath = {};
-  let selectorId = 0;
+
+  const actionThunks = {};
+
+  const customReducers = [];
+
+  const listenDefinitions = [];
+
+  const listenerActionDefinitions = [];
+  const listenerActionMap = {};
+  const listenerThunkMap = {};
+
   const selectorsDict = {};
+  const selectorReducers = [];
+
+  const thunkListenersDict = {};
 
   const recursiveExtractDefsFromModel = (current, parentPath) =>
     Object.keys(current).forEach(key => {
@@ -92,6 +106,11 @@ export default function createStoreInternals({
           actionCreator[actionNameSymbol] = name;
           actionCreatorDict[name] = actionCreator;
           set(path, actionCreators, actionCreator);
+
+          const { config } = value[actionStateSymbol];
+          if (config && config.listenTo) {
+            listenerActionDefinitions.push(value);
+          }
         } else if (value[thunkSymbol]) {
           const name = `@thunk.${path.join('.')}`;
           value[actionNameSymbol] = name;
@@ -137,6 +156,11 @@ export default function createStoreInternals({
           actionCreator[actionNameSymbol] = name;
           actionCreatorDict[name] = actionCreator;
           set(path, actionCreators, actionCreator);
+
+          const { config } = value[thunkStateSymbol];
+          if (config && config.listenTo) {
+            listenerActionDefinitions.push(value);
+          }
         } else if (value[selectorSymbol]) {
           selectorId += 1;
           const selectorInstanceId = selectorId;
@@ -247,6 +271,29 @@ export default function createStoreInternals({
     });
 
   recursiveExtractDefsFromModel(model, []);
+
+  listenerActionDefinitions.forEach(listenerAction => {
+    const {
+      config: { listenTo },
+    } = listenerAction[actionStateSymbol] || listenerAction[thunkStateSymbol];
+    let targetName;
+    if (
+      typeof listenTo === 'function' &&
+      listenTo[actionNameSymbol] &&
+      actionCreatorDict[listenTo[actionNameSymbol]]
+    ) {
+      if (listenTo[thunkSymbol]) {
+        targetName = helpers.thunkCompleteName(listenTo);
+      } else {
+        targetName = listenTo[actionNameSymbol];
+      }
+    } else if (typeof listenTo === 'string') {
+      targetName = listenTo;
+    }
+    const listenerReg = listenerActionMap[targetName] || [];
+    listenerReg.push(actionCreatorDict[listenerAction[actionNameSymbol]]);
+    listenerActionMap[targetName] = listenerReg;
+  });
 
   selectorReducers.forEach(selector => {
     selector[selectImpSymbol] = state => wrapFnWithMemoize(selector(state));
@@ -469,6 +516,8 @@ export default function createStoreInternals({
     actionListenersDict,
     defaultState,
     listenDefinitions,
+    listenerActionMap,
+    listenerThunkMap,
     reducer: reducerEnhancer(createReducer()),
     thunkListenersDict,
   };

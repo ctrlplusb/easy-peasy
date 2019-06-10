@@ -267,6 +267,12 @@ export type Thunk<
   result: Result;
 };
 
+type ListenToTarget<TargetPayload> =
+  | Action<any, TargetPayload>
+  | Thunk<any, TargetPayload>
+  | string
+  | void;
+
 /**
  * Declares an thunk action type against your model.
  *
@@ -288,7 +294,8 @@ export function thunk<
   Payload = void,
   Injections = any,
   StoreModel extends Object = {},
-  Result = any
+  Result = any,
+  ListenTo extends ListenToTarget<Payload> = void
 >(
   thunk: (
     actions: Actions<Model>,
@@ -301,6 +308,7 @@ export function thunk<
       meta: Meta;
     },
   ) => Result,
+  config?: { listenTo?: ListenTo },
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
 
 /**
@@ -420,8 +428,15 @@ export type Action<Model extends Object = {}, Payload = void> = {
  *   })
  * });
  */
-export function action<Model extends Object = {}, Payload = any>(
+export function action<
+  Model extends Object = {},
+  Payload = any,
+  ListenTo extends ListenToTarget<Payload> = void
+>(
   action: (state: State<Model>, payload: Payload) => void | State<Model>,
+  config?: {
+    listenTo?: ListenTo;
+  },
 ): Action<Model, Payload>;
 
 type Arguments =
