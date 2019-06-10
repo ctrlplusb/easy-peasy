@@ -23,14 +23,20 @@ const model: Model = {
 const store = createStore(model);
 
 store.dispatch.doAction(true);
+store.actions.doAction(true);
 
 // typings:expect-error
 store.dispatch.doAction(1);
+// typings:expect-error
+store.actions.doAction(1);
 
 store.dispatch.doThunk(1);
+store.actions.doThunk(1);
 
 // typings:expect-error
 store.dispatch.doThunk(true);
+// typings:expect-error
+store.actions.doThunk(true);
 
 store.getMockedActions()[0].type;
 
