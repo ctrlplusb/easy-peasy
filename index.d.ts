@@ -207,6 +207,7 @@ export type Store<
 > = Overwrite<
   ReduxStore<State<StoreModel>>,
   {
+    actions: Actions<StoreModel>;
     dispatch: Dispatch<StoreModel>;
     getMockedActions: () => ActionData[];
     clearMockedActions: () => void;
