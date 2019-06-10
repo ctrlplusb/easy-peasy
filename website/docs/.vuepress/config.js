@@ -1,11 +1,13 @@
 module.exports = {
-  title: 'Easy Peasy',
+  title: 'Easy Peasy 3.x',
   description: 'Easy peasy global state for React',
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Tutorial', link: '/tutorial/' },
       { text: 'API', link: '/api/' },
+      { text: 'Typescript', link: '/typescript/' },
+      { text: 'Testing', link: '/testing/' },
       { text: 'GitHub', link: 'https://github.com/ctrlplusb/easy-peasy' },
     ],
     sidebar: {
@@ -40,6 +42,10 @@ module.exports = {
         'use-store-dispatch',
         'use-store-state',
       ],
+
+      '/typescript/': [''],
+
+      '/testing/': [''],
     },
   },
 };

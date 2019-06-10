@@ -1,4 +1,4 @@
-# Responding to actions
+# Updating multiple state parts via a single action
 
 There are cases where you may want to perform updates on one part of your 
 model in response to an action being fired on another part of it.
