@@ -1,8 +1,8 @@
-<h1 align="center">Easy Peasy state for React</h1>
-<p>&nbsp;</p>
 <p align="center">
   <img src="./assets/happy-peas.png" width="300" />
 </p>
+<p>&nbsp;</p>
+<h1 align="center">Easy Peasy state for React</h1>
 <p>&nbsp;</p>
 
 ```javascript
