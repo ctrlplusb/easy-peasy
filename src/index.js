@@ -15,6 +15,7 @@ import StoreProvider from './provider';
 import {
   action,
   actionName,
+  debug,
   listen,
   reducer,
   select,
@@ -41,6 +42,7 @@ export {
   createComponentStore,
   createStore,
   createTypedHooks,
+  debug,
   listen,
   reducer,
   select,

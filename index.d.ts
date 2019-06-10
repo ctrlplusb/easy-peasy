@@ -44,6 +44,8 @@ type Meta = {
   parent: string[];
 };
 
+export function debug<StateDraft extends any>(state: StateDraft): StateDraft;
+
 export function actionName(action: Action<any, any>): string;
 
 export function thunkStartName(action: Thunk<any, any, any, any, any>): string;
