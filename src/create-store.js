@@ -8,6 +8,7 @@ import { get } from './lib';
 import { metaSymbol, actionSymbol, thunkSymbol } from './constants';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
+import { useStoreActions, useStoreDispatch, useStoreState } from './hooks';
 
 export default function createStore(model, options = {}) {
   const {
@@ -256,6 +257,10 @@ export default function createStore(model, options = {}) {
     }
     return Promise.resolve();
   };
+
+  store.useStoreActions = useStoreActions;
+  store.useStoreDispatch = useStoreDispatch;
+  store.useStoreState = useStoreState;
 
   return store;
 }
