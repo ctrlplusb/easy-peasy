@@ -153,7 +153,7 @@ export default function createStore(model, options = {}) {
     Object.keys(actionCreators).forEach(key => {
       store.dispatch[key] = actionCreators[key];
     });
-    store.actions = actionCreators;
+    store.getActions = () => actionCreators;
   };
 
   bindActionCreators(references.internals.actionCreators);

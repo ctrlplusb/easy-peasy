@@ -102,7 +102,7 @@ test('root action', () => {
     }),
   });
   // act
-  store.actions.doSomething();
+  store.getActions().doSomething();
   // assert
   const actual = store.getState().todos.items;
   expect(actual).toEqual({ 1: { text: 'foo' }, 2: { text: 'bar' } });
@@ -151,7 +151,7 @@ test('allows custom middleware', done => {
   };
   // act
   const store = createStore({}, { middleware: [customMiddleware] });
-  store.actions.logFullState();
+  store.getActions().logFullState();
 });
 
 test('allows custom middleware with mockActions=true', () => {
@@ -284,7 +284,7 @@ test('complex configuration', async () => {
     },
   });
 
-  const result = await store.actions.session.initialise();
+  const result = await store.getActions().session.initialise();
   expect(store.getState().session.isInitialised).toBe(true);
   expect(result).toBe('done');
 });
@@ -326,7 +326,7 @@ test('nested empty model', () => {
   });
 
   // act
-  store.actions.counters.add();
+  store.getActions().counters.add();
 
   // assert
   expect(Object.keys(store.getState().counters).length).toBe(1);

@@ -34,7 +34,7 @@ type IndexSignatureKeysOfType<A extends Object> = {
     ? string extends keyof A[K]
       ? K
       : never
-    : never
+    : never;
 }[keyof A];
 
 type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
@@ -105,7 +105,7 @@ export type Actions<Model extends Object> = {
     ? Param1<Model[P]> extends void
       ? () => void
       : (payload: Param1<Model[P]>) => void
-    : Actions<Model[P]>
+    : Actions<Model[P]>;
 };
 
 type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>;
@@ -209,8 +209,8 @@ export type Store<
 > = Overwrite<
   ReduxStore<State<StoreModel>>,
   {
-    actions: Actions<StoreModel>;
     dispatch: Dispatch<StoreModel>;
+    getActions: () => Actions<StoreModel>;
     getMockedActions: () => ActionData[];
     clearMockedActions: () => void;
     triggerListener: <TriggerAction extends ActionTypes | string>(
@@ -526,20 +526,13 @@ export function selector<
     : Args extends [any, any]
     ? [
         SelectorArgument<Model, StoreModel, Args[0]>,
-        SelectorArgument<Model, StoreModel, Args[1]>
+        SelectorArgument<Model, StoreModel, Args[1]>,
       ]
     : Args extends [any, any, any]
     ? [
         SelectorArgument<Model, StoreModel, Args[0]>,
         SelectorArgument<Model, StoreModel, Args[1]>,
-        SelectorArgument<Model, StoreModel, Args[2]>
-      ]
-    : Args extends [any, any, any, any]
-    ? [
-        SelectorArgument<Model, StoreModel, Args[0]>,
-        SelectorArgument<Model, StoreModel, Args[1]>,
         SelectorArgument<Model, StoreModel, Args[2]>,
-        SelectorArgument<Model, StoreModel, Args[3]>
       ]
     : Args extends [any, any, any, any]
     ? [
@@ -547,7 +540,14 @@ export function selector<
         SelectorArgument<Model, StoreModel, Args[1]>,
         SelectorArgument<Model, StoreModel, Args[2]>,
         SelectorArgument<Model, StoreModel, Args[3]>,
-        SelectorArgument<Model, StoreModel, Args[4]>
+      ]
+    : Args extends [any, any, any, any]
+    ? [
+        SelectorArgument<Model, StoreModel, Args[0]>,
+        SelectorArgument<Model, StoreModel, Args[1]>,
+        SelectorArgument<Model, StoreModel, Args[2]>,
+        SelectorArgument<Model, StoreModel, Args[3]>,
+        SelectorArgument<Model, StoreModel, Args[4]>,
       ]
     : Array<any>,
   selector: (resolvedArgs: Args, runTimeArgs: RunTimeArgs) => Result,
