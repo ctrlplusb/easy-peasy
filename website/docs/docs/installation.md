@@ -1,8 +1,3 @@
----
-prev: false
-next: /tutorial/creating-store
----
-
 # Installation
 
 Firstly, you'll need to make sure that you have React and React DOM installed.

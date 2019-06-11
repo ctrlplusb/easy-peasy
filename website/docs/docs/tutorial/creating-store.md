@@ -10,7 +10,7 @@ const model = {
 };
 ```
 
-Then provide your model to `createStore`.
+Then provide your model to [createStore](/api/create-store).
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -18,8 +18,4 @@ import { createStore } from 'easy-peasy';
 const store = createStore(model);
 ```
 
-You will now have a [store](#store). 👍
-
-> The created store is actually a Redux store - all the standard Redux store
-> APIs are available. You can additionally pass the store into any 3rd party
-> libs that integrate with Redux stores.
+You will now have a [store](/api/store). 👍
