@@ -1,9 +1,14 @@
+---
+pageClass: homepage
+---
+
 <p align="center">
   <img src="./assets/happy-peas.png" width="300" />
 </p>
 <h1 align="center">Easy Peasy state for React</h1>
+<p>&nbsp;</p>
 
-Easy Peasy provides you with an intuitive API to quickly and easily manage the state for your React application. Batteries are included - no configuration is required to support derived state, API calls, performance optimisation, developer tools etc.
+Easy Peasy provides you with an <strong>intuitive API</strong> to quickly and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, performance optimisation, developer tools etc.
 
 <p>&nbsp;</p>
 
@@ -47,6 +52,6 @@ function TodoList() {
 }
 ```
 
-<p>&nbsp;</p>
-
-## [Read the tutorial to get started 👉](/tutorial)
+<div class="hero">
+  <p class="action"><a href="/docs/installation.html" class="action-button">Get Started →</a></p>
+</div>

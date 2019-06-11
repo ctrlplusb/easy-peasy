@@ -1,52 +1,86 @@
 module.exports = {
   title: 'Easy Peasy 3.x',
-  description: 'Easy peasy global state for React',
+  description: 'Easy Peasy state for React',
   themeConfig: {
+    repo: 'ctrlplusb/easy-peasy',
+
+    docsRepo: 'ctrlplusb/easy-peasy',
+    docsDir: 'website',
+    docsBranch: 'next',
+
+    editLinks: true,
+    editLinkText: 'Help us improve this page!',
+
+    lastUpdated: 'Last Updated',
+
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Installation', link: '/installation/' },
-      { text: 'Tutorial', link: '/tutorial/' },
-      { text: 'API', link: '/api/' },
-      { text: 'Typescript', link: '/typescript/' },
-      { text: 'Testing', link: '/testing/' },
-      { text: 'GitHub', link: 'https://github.com/ctrlplusb/easy-peasy' },
+      { text: 'Features', link: '/features/' },
+      { text: 'Docs', link: '/docs/' },
+      { text: 'Releases', link: '/releases/' },
     ],
+
     sidebar: {
-      '/tutorial/': [
-        '',
+      '/docs/': [
         'installation',
-        'creating-store',
-        'integrating-store',
-        'accessing-state',
-        'defining-actions',
-        'dispatching-actions',
-        'defining-thunks',
-        'dispatching-thunks',
-        'defining-selectors',
-        'accessing-selectors',
-        'responding-actions',
-        'final-notes',
+        'examples',
+        {
+          title: 'Tutorial',
+          children: [
+            'tutorial/',
+            'tutorial/creating-store',
+            'tutorial/integrating-store',
+            'tutorial/accessing-state',
+            'tutorial/defining-actions',
+            'tutorial/dispatching-actions',
+            'tutorial/defining-thunks',
+            'tutorial/dispatching-thunks',
+            'tutorial/defining-selectors',
+            'tutorial/accessing-selectors',
+            'tutorial/responding-actions',
+            'tutorial/final-notes',
+          ],
+        },
+        {
+          title: 'API',
+          children: [
+            'api/',
+            'api/action',
+            'api/create-component-store',
+            'api/create-context-store',
+            'api/create-store',
+            'api/reducer',
+            'api/selector',
+            'api/store',
+            'api/store-config',
+            'api/store-provider',
+            'api/thunk',
+            'api/use-store-actions',
+            'api/use-store-dispatch',
+            'api/use-store-state',
+          ],
+        },
+        {
+          title: 'Testing',
+          children: [
+            'testing/',
+            'testing/testing-actions',
+            'testing/testing-thunks',
+          ],
+        },
+        {
+          title: 'Typescript',
+          children: [
+            'typescript/',
+            // 'typescripting-declare-model-interface',
+            'typescript/create-your-model',
+          ],
+        },
+        {
+          title: 'React Native',
+          children: ['react-native/'],
+        },
       ],
-
-      '/api/': [
-        '',
-        'action',
-        'create-component-store',
-        'create-context-store',
-        'create-store',
-        'reducer',
-        'selector',
-        'store-config',
-        'store-provider',
-        'thunk',
-        'use-store-actions',
-        'use-store-dispatch',
-        'use-store-state',
-      ],
-
-      '/typescript/': [''],
-
-      '/testing/': [''],
     },
   },
 };
