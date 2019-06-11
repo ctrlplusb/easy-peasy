@@ -9,18 +9,29 @@ import {
 } from 'easy-peasy';
 
 interface Model {
+  count: number;
   listeners: Listen<Model>;
   doAction: Action<Model, boolean>;
   doThunk: Thunk<Model, number>;
 }
 
 const model: Model = {
+  count: 0,
   listeners: listen(() => {}),
   doAction: action(() => {}),
   doThunk: thunk(() => {}),
 };
 
 const store = createStore(model);
+
+const doAction = store.useStoreActions(actions => actions.doAction);
+doAction(true);
+
+const dispatch = store.useStoreDispatch();
+dispatch({ type: 'FOO' });
+
+const count = store.useStoreState(state => state.count);
+count + 10;
 
 store.dispatch.doAction(true);
 store.getActions().doAction(true);

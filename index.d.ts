@@ -230,6 +230,14 @@ export type Store<
         ? ThunkPayload
         : any,
     ) => Promise<void>;
+    useStoreActions: <Result = any>(
+      mapActions: (actions: Actions<StoreModel>) => Result,
+    ) => Result;
+    useStoreDispatch: () => Dispatch<StoreModel>;
+    useStoreState: <Result = any>(
+      mapState: (state: State<StoreModel>) => Result,
+      dependencies?: Array<any>,
+    ) => Result;
   }
 >;
 
