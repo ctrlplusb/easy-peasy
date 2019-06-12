@@ -34,3 +34,4 @@ state that they operate against changes. This provides a nice performance
 optimisation, helping to avoid unneccessary rerendering of your React components.
 
 > Selectors are inspired by [`reselect`](https://github.com/reduxjs/reselect).
+> a popular library in the Redux ecosystem.
