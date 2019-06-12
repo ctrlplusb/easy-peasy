@@ -1,6 +1,7 @@
 module.exports = {
-  title: 'Easy Peasy 3.x',
+  title: 'Easy Peasy',
   description: 'Easy Peasy state for React',
+  head: [['link', { rel: 'icon', href: '/favicon.png' }]],
   themeConfig: {
     repo: 'ctrlplusb/easy-peasy',
 
@@ -22,8 +23,8 @@ module.exports = {
 
     sidebar: {
       '/docs/': [
-        'installation',
         'examples',
+        'installation',
         {
           title: 'Tutorial',
           children: [

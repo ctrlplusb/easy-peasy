@@ -52,3 +52,14 @@ store.actions.todos.saveTodo('Learn easy peasy')
 This mechanism is useful within your React components. For example you may
 use a thunk to handle a form submission (e.g. login), and then perform a
 redirect after the thunk has completed.
+
+## Debugging Thunks
+
+Thunks represent asynchronous execution that have no effect on state, however, we believed it would be useful for actions to be automatically dispatched that represented the started/completed/failed states of a thunk. This results in the following benefits:
+
+1. Increased debugging experience with greater visibility of asynchronous flow in relation to your standard actions being dispatched
+2. Enables listeners to be attached to specific thunk events (e.g. started, completed, or failed)
+
+Ensure you have the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension installed. This will allow you to see your dispatched thunks as they flow through each of their states (started/completed/failed) along with their payload.
+
+<img src="../../assets/devtools-thunk.png" />

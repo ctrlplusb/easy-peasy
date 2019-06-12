@@ -196,6 +196,7 @@ export default function createStore(model, options = {}) {
     rebindStore(key);
   };
 
+  // @deprecated
   const dispatchActionListener = (actionName, payload) =>
     store.dispatch({
       type: '@@EP/LISTENER',
@@ -214,6 +215,7 @@ export default function createStore(model, options = {}) {
       ? action
       : undefined;
 
+  // @deprecated
   store.triggerListener = (listener, action, payload) => {
     const actionName = resolveActionName(action);
     if (
@@ -237,6 +239,7 @@ export default function createStore(model, options = {}) {
     return Promise.resolve();
   };
 
+  // @deprecated
   store.triggerListeners = (action, payload) => {
     const actionName = resolveActionName(action);
     if (actionName) {
