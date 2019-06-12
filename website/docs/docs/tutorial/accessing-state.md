@@ -3,7 +3,7 @@
 We leverage React [hooks](https://reactjs.org/docs/hooks-intro.html) to communicate with the store. If you aren't familiar with hooks, we highly recommend you read the [official documentation](https://reactjs.org/docs/hooks-intro.html)
 on them.
 
-To access state within your components you can use the [useStoreState](/api/use-store-state) hook, providing it a function to map your state.
+To access state within your components you can use the [useStoreState](/docs/api/use-store-state) hook, providing it a function to map your state.
 
 ```javascript
 import { useStoreState } from 'easy-peasy';
@@ -22,9 +22,9 @@ function TodoList() {
 
 ## Using props to map state
 
-In the case that your [useStoreState](/api/use-store-state) implementation uses a prop to map the required state, you need to declare the prop within the "dependencies" argument of the [useStoreState](/api/use-store-state) hook. This is a similar requirement to some of the official React hooks, and something that you may already be familiar with.
+In the case that your [useStoreState](/docs/api/use-store-state) implementation uses a prop to map the required state, you need to declare the prop within the "dependencies" argument of the [useStoreState](/docs/api/use-store-state) hook. This is a similar requirement to some of the official React hooks, and something that you may already be familiar with.
 
-The [useStoreState](/api/use-store-state) hook will track dependenices and ensure that the state is remapped any time that they change.
+The [useStoreState](/docs/api/use-store-state) hook will track dependenices and ensure that the state is remapped any time that they change.
 
 ```javascript
 import { useStoreState } from 'easy-peasy';
@@ -40,7 +40,7 @@ const Product = ({ id }) => {
 
 ## Pitfalls
 
-Keep your state mappers very simple - don't perform operations against your state within them. This is important as the [useStoreState](/api/use-store-state) hook runs a performance optimisation where it checks to see if the mapped state has changed at all. It uses strict equality checking to check if the next mapped state is equal to the previously mapped state (`prevMappedState === nextMappedState`) - if it isn't then we will rerender your component.
+Keep your state mappers very simple - don't perform operations against your state within them. This is important as the [useStoreState](/docs/api/use-store-state) hook runs a performance optimisation where it checks to see if the mapped state has changed at all. It uses strict equality checking to check if the next mapped state is equal to the previously mapped state (`prevMappedState === nextMappedState`) - if it isn't then we will rerender your component.
 
 Therefore if you perform an operation within your map state that always produces a new value (e.g. a new array/object) your component will rerender for _any_ state change.
 
@@ -59,7 +59,7 @@ function AntiPattern() {
 }
 ```
 
-Note how an array is being returned within the state mapper. A new array will be returned every time the state mapper is executed. This breaks strict equality checking, forcing your component to rerender for _any_ state change on your [store](/api/store).
+Note how an array is being returned within the state mapper. A new array will be returned every time the state mapper is executed. This breaks strict equality checking, forcing your component to rerender for _any_ state change on your [store](/docs/api/store).
 
 We recommend two alternative approaches to avoid this.
 
@@ -73,9 +73,9 @@ function Fixed() {
 }
 ```
 
-**2. Define a [selector](/api/selector) for derived state**
+**2. Define a [selector](/docs/api/selector) for derived state**
 
-For example, perhaps you want to map an array of products to an array containing only their names. 
+For example, perhaps you want to map an array of products to an array containing only their names.
 
 ```javascript
 const store = createStore({
@@ -89,11 +89,11 @@ const store = createStore({
 const productNames = useStoreState(state => state.productNames());
 ```
 
-We cover [selectors](/api/selector) in more detail later in the tutorial.
+We cover [selectors](/docs/api/selector) in more detail later in the tutorial.
 
 ## Accessing state directly via the store
 
-It is possible to access the state directly from the [store](/api/store) instance.
+It is possible to access the state directly from the [store](/docs/api/store) instance.
 
 ```javascript
 store.getState().todos.items;

@@ -1,7 +1,6 @@
 # Defining thunks to perform side effects
 
-If you wish to perform side effects, such as data fetching, you can declare a
-thunk against your model.
+If you wish to perform side effects, such as data fetching, you can declare a [thunk](/docs/api/thunk) against your model.
 
 ```javascript
 import { thunk } from 'easy-peasy';
@@ -25,6 +24,4 @@ const store = createStore({
 });
 ```
 
-As you can see thunks do not receive the state, rather they receive the actions
-that are local to it. You can dispatch the provided actions in order to perform
-updates to your state based on the results of your side effects.
+As you can see [thunks](/docs/api/thunk) do not receive the state, rather they receive the [actions](/docs/api/action) that are local to it. You can dispatch the provided [actions](/docs/api/action) in order to perform updates to your state based on the results of your side effects.

@@ -10,7 +10,7 @@ const model = {
 };
 ```
 
-Then provide your model to [createStore](/api/create-store).
+Then provide your model to [createStore](/docs/api/create-store).
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -18,4 +18,4 @@ import { createStore } from 'easy-peasy';
 const store = createStore(model);
 ```
 
-You will now have a [store](/api/store). 👍
+You will now have a [store](/docs/api/store). 👍

@@ -1,6 +1,6 @@
 # Integrating the store
 
-In order to expose the [store](/api/store) to your React application you need to wrap your application with the [StoreProvider](/api/store-provider) component, providing the store to it as a prop.
+In order to expose the [store](/docs/api/store) to your React application you need to wrap your application with the [StoreProvider](/docs/api/store-provider) component, providing the [store](/docs/api/store) to it as a prop.
 
 ```javascript
 import { StoreProvider, createStore } from 'easy-peasy';
@@ -16,4 +16,4 @@ ReactDOM.render(
 );
 ```
 
-Any components nested within the [StoreProvider](/api/store-provider) will now have the [store](/api/store) exposed to them.
+Any components nested within the [StoreProvider](/docs/api/store-provider) will now have the [store](/docs/api/store) exposed to them.
