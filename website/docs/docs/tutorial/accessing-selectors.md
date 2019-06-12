@@ -6,6 +6,8 @@ Use the [useStoreState](/docs/api/use-store-state) hook to access your [selector
 import { useStoreState } from 'easy-peasy';
 
 function TotalPriceOfProducts() {
+  //                                       Note how we execute the selector
+  //                                                                 👇
   const totalPrice = useStoreState(state => state.products.totalPrice()));
   return <div>Total: {totalPrice}</div>);
 };

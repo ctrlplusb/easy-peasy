@@ -51,4 +51,4 @@ function TodoList() {
 }
 ```
 
-<p class="action"><a href="/docs/installation.html" class="action-button">Get Started →</a></p>
+<p class="action"><a href="/docs/tutorial/" class="action-button">Get Started →</a></p>
