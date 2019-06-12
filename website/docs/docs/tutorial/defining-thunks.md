@@ -4,16 +4,19 @@ If you wish to perform side effects, such as data fetching, you can declare a [t
 
 ```javascript
 import { thunk } from 'easy-peasy';
+//         👆 import the helper
 
 const store = createStore({
   todos: {
     items: [],
 
+    // Define our thunk
+    //         👇
     saveTodo: thunk(async (actions, payload) => {
-      // call an api
+      // In this example we call a service to save the todo
       const savedTodo = await todoService.save(payload);
 
-      // then dispatch an action with result
+      // Then dispatch an action with the result to add it to our state
       actions.todoSaved(savedTodo);
     }),
 

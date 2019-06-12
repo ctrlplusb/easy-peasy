@@ -8,9 +8,11 @@ import { useStoreActions } from 'easy-peasy';
 function FetchTodosButton() {
   const fetchTodos = useStoreActions(actions => actions.todos.fetch);
   return (
-      <button onClick={() => fetchTodos()}>
-        Fetch todos from server
-      </button>
+    // Dispatching of the thunk here
+    //                          👇
+    <button onClick={() => fetchTodos()}>
+      Fetch todos from server
+    </button>
   );
 }
 ```
@@ -41,6 +43,7 @@ For example, if you wanted to inspect the state changes that occurred after your
 
 ```javascript
 store.getActions().todos.saveTodo('Learn easy peasy')
+  // 👇 we chain on the promise returned by dispatching the thunk
   .then(() => {
     console.log(store.getState());
   });

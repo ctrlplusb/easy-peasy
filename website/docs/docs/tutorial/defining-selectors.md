@@ -8,12 +8,15 @@ For example, say that you needed to calculate the total price of the products. T
 
 ```javascript
 import { selector } from 'easy-peasy';
+//         👆 import the helper
 
 const store = createStore({
   shoppingBasket: {
     products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
+    //            👇 define it on your store
     totalPrice: selector(
-      [state => state.products],
+      [state => state.products], //  👈 array of state resolvers
+      // 👇 The deriving function, which receives the resolved state
       (resolvedState) => {
         const [products] = resolvedState;
         return products.reduce((acc, cur) => acc + cur.price, 0);
@@ -39,3 +42,22 @@ selector(
 The array destructuring of the state resolvers along with the implicit return of the anonymous function do make your selectors far more concise, but do try to consider the value of this over readability.
 
 [Selectors](/docs/api/selector) are memoized (cached) and will only be recalculated when the state that they operate against changes. These characteristics make them perfect to avoid the [pitfall we described earlier](/docs/tutorial/accessing-state.html#pitfalls) when using the [useStoreState](/docs/api/use-store-state) hook.
+
+## Resolving global store state
+
+There may be cases where you would like to resolve global state, i.e. state that isn't local to where the [selector](/docs/api/selector) was bound. To do this you can utilise the second argument to your state selectors.
+
+```javascript
+selector(
+  [
+    // In this state resolver we reference the globalState argument
+    //           👇             👇
+    (state, globalState) => globalState.products
+    state => state.favouriteProductId
+  ],
+  (resolvedState) => {
+    const [products, favouriteProductId] = resolvedState;
+    return products[favouriteProductId];
+  }
+)
+```

@@ -16,17 +16,24 @@ module.exports = {
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Features', link: '/features/' },
-      { text: 'Docs', link: '/docs/' },
-      { text: 'Releases', link: '/releases/' },
+      { text: 'Install', link: '/docs/introduction/installation/' },
+      { text: 'Tutorial', link: '/docs/tutorial/' },
+      { text: 'API', link: '/docs/api/' },
     ],
 
     sidebarDepth: 0,
 
     sidebar: {
       '/docs/': [
-        'examples',
-        'installation',
+        {
+          title: 'Introduction',
+          children: [
+            'introduction/overview',
+            'introduction/installation',
+            'introduction/examples',
+            'introduction/prior-art',
+          ],
+        },
         {
           title: 'Tutorial',
           children: [
