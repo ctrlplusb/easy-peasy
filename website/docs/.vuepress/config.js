@@ -21,6 +21,8 @@ module.exports = {
       { text: 'Releases', link: '/releases/' },
     ],
 
+    sidebarDepth: 0,
+
     sidebar: {
       '/docs/': [
         'examples',
@@ -78,8 +80,8 @@ module.exports = {
           ],
         },
         {
-          title: 'React Native',
-          children: ['react-native/'],
+          title: 'Integrations',
+          children: ['integrations/react-native'],
         },
       ],
     },

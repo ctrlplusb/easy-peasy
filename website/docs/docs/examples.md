@@ -2,13 +2,13 @@
 
 ## Todo List
 
-A simple implementation of a todo list that utilises a mock service to illustrate data fetching/persisting via effect actions. A fully stateful app with no class components. Hot dang hooks are awesome.
+A simple todo list that utilises a mock service to illustrate data fetching/persisting via effect actions. This example also makes use of some of the more advanced features, such as selectors and listening actions/thunks.
 
-https://codesandbox.io/s/woyn8xqk15
+[View on CodeSandbox](https://codesandbox.io/s/easy-peasy-30-example-m5c4o)
 
 ## Typescript
 
-This GitHub repository shows off how to utilise Typescript with Easy Peasy. I highly recommend cloning it and running it so that you can experience first hand what a joy it is to have types helping you with global state.
+This example provides a basic illustration of how to use Easy Peasy in a Typescript based project.
 
-https://codesandbox.io/s/easy-peasy-typescript-ycur0
+[View on CodeSandbox](https://codesandbox.io/s/easy-peasy-typescript-ycur0)
 
