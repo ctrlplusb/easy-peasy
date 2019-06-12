@@ -1,4 +1,4 @@
-## Integrating the store
+# Integrating the store
 
 In order to expose the [store](/api/store) to your React application you need to wrap your application with the [StoreProvider](/api/store-provider) component, providing the store to it as a prop.
 
