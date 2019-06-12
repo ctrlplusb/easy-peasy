@@ -80,8 +80,8 @@ module.exports = {
           ],
         },
         {
-          title: 'Integrations',
-          children: ['integrations/react-native'],
+          title: 'Recipes',
+          children: ['recipes/react-native-devtools'],
         },
       ],
     },

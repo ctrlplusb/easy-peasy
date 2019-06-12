@@ -27,7 +27,7 @@ Again, you can dispatch thunks against the store in the same manner as you
 would a normal action.
 
 ```javascript
-store.actions.todos.saveTodo('Learn easy peasy');
+store.getActions().todos.saveTodo('Learn easy peasy');
 ```
 
 ## Thunks are asynchronous
@@ -43,7 +43,7 @@ For example, if you wanted to inspect the state changes that occurred after
 your thunk completed you would have to do the following.
 
 ```javascript
-store.actions.todos.saveTodo('Learn easy peasy')
+store.getActions().todos.saveTodo('Learn easy peasy')
   .then(() => {
     console.log(store.getState());
   });

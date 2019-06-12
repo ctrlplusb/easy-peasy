@@ -1,8 +1,4 @@
-# React Native
-
-Easy Peasy is platform agnostic, however, this section will detail some of the changes that you will need to make in order to effectively use Easy Peasy with React Native.
-
-## Remote Redux dev tools
+# React Native Dev Tools
 
 React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
 
