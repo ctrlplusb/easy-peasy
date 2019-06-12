@@ -1,4 +1,20 @@
 .theme-container.homepage {
+  .page, .theme-default-content {
+    padding: 2rem 2rem 0;
+    max-width: 960px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .title {
+    margin-bottom: 1.8rem;
+  }
+
+  p.action {
+    margin: 3rem 0;
+    text-align: center;
+  }
+
   a.action-button {
     display: inline-block;
     font-size: 1.2rem;
@@ -9,5 +25,11 @@
     transition: background-color 0.1s ease;
     box-sizing: border-box;
     border-bottom: 1px solid #389d70;
+  }
+}
+
+@media (max-width: 760px) {
+  .page, .theme-default-content {
+    padding: 2rem 0.75rem 0 !important;
   }
 }

@@ -37,3 +37,9 @@ store.getActions().todos.addTodo('Learn Easy Peasy');
 store.getState().todos.items;
 // ["Learn Easy Peasy"]
 ```
+
+## Debugging Actions
+
+Ensure you have the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension installed. This will allow you to see your dispatched actions, with their payload and the effect that they had on your state.
+
+<img src="../../assets/devtools-action.png" />
