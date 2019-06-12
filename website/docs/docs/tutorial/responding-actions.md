@@ -1,21 +1,15 @@
-# Updating multiple state parts via a single action
+# Updating multiple state branches via a single action
 
-There are cases where you may want to perform updates on one part of your 
-model in response to an action being fired on another part of it.
+There are cases where you may want to update multiple branches of your state in response to a single [action](/docs/api/action). For example, say you wanted to clear certain parts of your state when a user logged out, or perhaps you would like an audit log that tracks when specific [actions](/docs/api/action) are fired.
 
-For example, say you wanted to clear certain parts of your state when a user
-logs out, or perhaps you would like an audit log to tracks when specific actions
-are fired.
+To support these use cases Easy Peasy allows you to declare an [action](/docs/api/action), or a [thunk](/docs/api/thunk), as being a *listener*. [Actions](/docs/api/action) and [thunks](/docs/api/thunk) both accept an additional configuration argument, which allows you to specify a *target* [action](/docs/api/action), or [thunk](/docs/api/thunk) to listen to. When the *target* has successfully dispatched and completed your *listener* will be dispatched, and it will receive the same payload as was provided to the *target*.
 
-To support these use cases Easy Peasy allows you to declare an action as being
-a "listener". Within the configuration for an action you simply provide
-a target action you would like to listen to. Once this has been configured your
-action will be executed every time the target action has executed successfully.
+In the example below we will set up a *listener* that responds to todo items being added. The *listener* will then update an audit log.
 
 ```javascript
 const todosModel = {
   items: [],
-  // 👇 this is the action we wish to listen to
+  // 👇 this is the target we wish to listen to
   addTodo: action((state, payload) => {
     state.items.push(payload)
   })
@@ -23,7 +17,7 @@ const todosModel = {
 
 const auditModel = {
   logs: [],
-  // 👇 and this is the listening action
+  // 👇 and here we are configuring the listener
   onAddTodo: action(
     (state, payload) => {
       state.logs.push(`Added todo: ${payload.text}`);
@@ -38,13 +32,16 @@ const model = {
 };
 ```
 
-In the example above note that the `onAddTodo` action has been provided a 
-configuration, with the `addTodo` action being set as a target.
+Being able to declare *listeners* allows you to maintain clearer separation of concerns. It would be strange in our example above if the todos model had to dispatch an action against the audit model in order to ensure the logging occurs. It is not the todos model's responsibility to know about auditing. *Listeners* allow us to maintain the correct responsibilities.
 
-Any time the `addTodo` action completes successfully, the `onAddTodo` will be
-fired, receiving the same payload as what `addTodo` received.
+## Debugging listeners
 
-Being able to declare listeners allows you to maintain clearer separation of 
-concerns and promotes a more reactive programming model.
+Listeners are visible within the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension. This makes it very easy to validate they are executing as expected, and to see the effect that they had on state.
 
-Both actions and thunks support the ability to be configured as a listener.
+Below is an example where our *listener* is an [action](/docs/api/action) - i.e. performing state updates.
+
+<img src="../../assets/devtools-listenaction.png" />
+
+And here is an example where our *listener* is a [thunk](/docs/api/thunk) - i.e. performing side effects.
+
+<img src="../../assets/devtools-listenthunk.png" />

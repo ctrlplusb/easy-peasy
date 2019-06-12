@@ -40,6 +40,7 @@ module.exports = {
             'tutorial/dispatching-thunks',
             'tutorial/defining-selectors',
             'tutorial/accessing-selectors',
+            'tutorial/runtime-arg-selectors',
             'tutorial/responding-actions',
             'tutorial/final-notes',
           ],
