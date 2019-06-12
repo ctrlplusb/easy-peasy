@@ -6,7 +6,7 @@ To access your selectors you use the `useStoreState` hook.
 import { useStoreState } from 'easy-peasy';
 
 function TotalPriceOfProducts() {
-  const totalPrice = useStoreState(state => state.products.totalPrice));
+  const totalPrice = useStoreState(state => state.products.totalPrice());
   return <div>Total: {totalPrice()}</div>);
 };
 ```
