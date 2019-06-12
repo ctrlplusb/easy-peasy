@@ -16,7 +16,7 @@ const store = createStore({
     products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
     totalPrice: selector(
       [state => state.products],
-      ([products]) => products.reduce((acc, cur) => acc + cur.price, 0)
+      (products) => products.reduce((acc, cur) => acc + cur.price, 0)
     )
   }
 }
