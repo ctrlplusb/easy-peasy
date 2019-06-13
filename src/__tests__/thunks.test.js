@@ -1,4 +1,5 @@
 import { action, createStore, thunk } from '../index';
+import { reducer } from '../..';
 
 const resolveAfter = (data, ms) =>
   new Promise(resolve => setTimeout(() => resolve(data), ms));
@@ -237,13 +238,40 @@ test('is always promise chainable', done => {
   store.dispatch.doSomething().then(done);
 });
 
-test('dispatch another branch action', async () => {
+test('dispatch an action via redux dispatch', async () => {
   // arrange
   const model = {
     session: {
       user: undefined,
       login: thunk((actions, payload, { dispatch }) => {
-        dispatch.stats.incrementLoginAttempts();
+        dispatch({ type: 'INCREMENT' });
+      }),
+    },
+    counter: reducer((state = 0, action) => {
+      switch (action.type) {
+        case 'INCREMENT':
+          return state + 1;
+        default:
+          return state;
+      }
+    }),
+  };
+  const store = createStore(model);
+
+  // act
+  await store.dispatch.session.login();
+
+  // assert
+  expect(store.getState().counter).toBe(1);
+});
+
+test('dispatch another branch action', async () => {
+  // arrange
+  const model = {
+    session: {
+      user: undefined,
+      login: thunk((actions, payload, { getStoreActions }) => {
+        getStoreActions().stats.incrementLoginAttempts();
       }),
     },
     stats: {

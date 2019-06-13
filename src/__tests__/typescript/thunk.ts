@@ -23,13 +23,21 @@ const model: StoreModel = {
       (
         actions,
         payload,
-        { injections, getState, getStoreState, dispatch, meta },
+        {
+          injections,
+          getState,
+          getStoreActions,
+          getStoreState,
+          dispatch,
+          meta,
+        },
       ) => {
         actions.log(payload);
         getState().logs.length;
         getStoreState().audit.logs.length;
         injections.fetch().then(() => 'done');
-        dispatch.audit.log('foo');
+        dispatch({ type: 'FOO' });
+        getStoreActions().audit.log('foo');
         meta.parent.concat(['foo']);
         meta.path.concat(['foo']);
         return 1;

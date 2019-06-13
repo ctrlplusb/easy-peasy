@@ -1,9 +1,6 @@
 # thunk
 
-Declares a thunk action on your model. A thunk typically encapsulates side
-effects (e.g. calls to an API). It is always executed asynchronously, returning
-a Promise. Thunks cannot modify state directly, however, they can dispatch other
-actions to do so.
+Declares a thunk action on your model. A thunk typically encapsulates side effects (e.g. calls to an API). It is always executed asynchronously, returning a `Promise`. Thunks cannot modify state directly, however, they can dispatch other actions to do so.
 
 ```javascript
 thunk(async (actions, payload) => {
@@ -12,47 +9,41 @@ thunk(async (actions, payload) => {
 })
 ```
 
-When your model is processed by Easy Peasy all of your thunks are bound against
-the store's `actions` property.
-
 ## Arguments
 
-  - `actions` (required)
+  - `actions` (Object)
 
-    The actions that are bound to same section of your model as the thunk. This
-    allows you to dispatch an action to update state should you require.
+    The [actions](/docs/api/action) that are local to the thunk. This allows you to dispatch an [action](/docs/api/action) to update state should you require.
 
-  - `payload` (Any, not required)
+  - `payload` (any, *optional*)
 
-    The payload, if any, that was provided to the thunk when it was dispatch.
+    The payload, if any, that was provided to the thunk when it was dispatched.
 
-  - `helpers` (Object, required)
+  - `helpers` (Object)
 
-    Contains helpers which may be useful in advanced cases. The object contains
-    the following properties:
+    Helpers which may be useful for more advanced thunk implementations. It contains the following properties:
 
-    - `storeActions` (required)
+    - `getState` (Function)
 
-      The store's `actions`. i.e. all of the actions across your entire store.
-      We don't recommend that you use them directly, and invite you to
-      use the [listen](#todo) helper instead.
+      When executed it will provide the state that is local to the thunk.
 
-    - `getState` (Function, required)
+    - `getStoreActions` (Function)
 
-      When executed it will provide the local state against which the thunk was
-      attached to your model.
+      When executed it will get the [actions](/docs/api/action). i.e. all of the [actions](/docs/api/action) across your entire store.
 
-    - `getStoreState` (Function, required)
+      We don't recommend dispatching actions like this, and invite you to consider creating a *listener* [action](/docs/api/action) or [thunk](/docs/api/thunk), which instead promotes a reactive model and generally allows responsiblity to be at the right place.
+
+    - `getStoreState` (Function)
 
       When executed it will provide the entire state of your store.
 
-    - `injections` (Any, not required, default=undefined)
+    - `injections` (Any, default=undefined)
 
       Any dependencies that were provided to the `createStore` configuration
       will be exposed via this argument. See the [`StoreConfig`](#storeconfig)
       documentation on how to provide them to your store.
 
-    - `meta` (Object, required)
+    - `meta` (Object)
 
       This object contains meta information related to the thunk. Specifically it
       contains the following properties:
@@ -160,8 +151,8 @@ const store = createStore({
 ### Dispatching an action on another part of your model
 
 In this example we will dispatch an action that belongs to another part of your
-model. We don't recommned doing this, and instead encourage you to use the
-[listen](#todo) API, which promotes a better seperation of concerns.
+model. We don't recommend doing this, and instead encourage you to use the
+[listen](#todo) API, which promotes a better separation of concerns.
 
 ```javascript
 import { action, createStore, thunk } from 'easy-peasy';

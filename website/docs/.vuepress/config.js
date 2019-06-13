@@ -60,6 +60,7 @@ module.exports = {
             'api/create-component-store',
             'api/create-context-store',
             'api/create-store',
+            'api/debug',
             'api/reducer',
             'api/selector',
             'api/store',

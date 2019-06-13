@@ -1,17 +1,12 @@
 # action
 
-Allows you to declare an action on your model. An action is used to perform
-updates on your store. They specifically have access to the part of your
-state tree against which they were defined.
+Allows you to declare an action on your model. An action is used to perform updates on your [store](/docs/api/store). Actions will have access to the state that is local to them.
 
 ```javascript
 action((state, payload) => {
   state.items.push(payload);
 })
 ```
-
-When your model is processed by Easy Peasy all of your actions are bound against
-the store's `actions` property.
 
 ##  Arguments
 
@@ -34,12 +29,12 @@ the store's `actions` property.
 
     - `listenTo` (Action Reference | Thunk Reference | string, *optional*)
 
-      Setting this makes your action perform as a listener. Any time the 
+      Setting this makes your action perform as a listener. Any time the
       target action, thunk, or string named action is successfully processed
       then this action will be fired.
 
       It will receive the same payload as was supplied to the target action.
-      
+
       ```javascript
       const auditModel = {
         logs: [],
@@ -52,7 +47,7 @@ the store's `actions` property.
       };
       ```
 
-      This helps to promote a reactive model and allows for seperation of 
+      This helps to promote a reactive model and allows for seperation of
       concerns.
 
 ## Examples
@@ -78,20 +73,16 @@ function Add10Button() {
 }
 ```
 
-### Listening to actions
+### Listener action
 
-This example will demonstrate how to create an action that performs as a
-"listener" - i.e. it will be fired when a target action has successfully 
-completed.  When the action is fired, it will receive the same payload that
-was provided to the target action.
+This example will demonstrate how to create an action that acts as a *listener* - i.e. it will be fired when a *target* action or thunk has successfully completed.  When the *listener* is dispatched, it will receive the same payload that was provided to the *target*.
 
-Some example use cases for this includes the need to clear some state when a 
-user logs out of your application, or if you would like to perform some logging
-when certain actions are fired.
+An example use case for this would be the need to clear some state when a user logs out of your application, or if you would like to create an audit trail for when certain actions are fired.
 
 ```javascript
 const todosModel = {
   items: [],
+  //  👇 the target action
   addTodo: action((state, payload) => {
     state.items.push(payload);
   })
@@ -99,43 +90,37 @@ const todosModel = {
 
 const auditModel = {
   logs: [],
+  // 👇 the listener
   onAddTodo: action(
     (state, payload) => {
       state.logs.push(`Added todo: ${payload.text}`);
     },
-    { listenTo: todosModel.addTodo }
+    { listenTo: todosModel.addTodo } // 👈 declare the target to listen to
   )
 };
 ```
 
-In the example above note that the `onAddTodo` action has been provided a 
-configuration, with the `addTodo` action being set as a target.
+In the example above note that the `onAddTodo` action has been provided a configuration, with the `addTodo` action being set as a target.
 
-Any time the `addTodo` action completes successfully, the `onAddTodo` will be
-fired, receiving the same payload as what `addTodo` received.
+Any time the `addTodo` action completes successfully, the `onAddTodo` will be fired, receiving the same payload as what `addTodo` received.
 
 > You can manually dispatch `onAddTodo` as you would any other action, although
 > we would recommend you only use this approach for testing your action.
 
 ### Using console.log within actions
 
-Despite the Redux Dev Tools extension being available there may be cases in 
-which you would like to perform a `console.log` within the body of your actions
-to aid debugging.
+Despite the Redux Dev Tools extension being available there may be cases in which you would like to perform a `console.log` within the body of your actions to aid debugging.
 
-If you try to do so you may not that a Proxy object is printed out instead of
-your expected state. This is due to us using `immer` under the hood, which allows
-us to track mutation updates to the state and then convert them to immutable 
-updates.
+If you try to do so you may not that a `Proxy` object is printed out instead of your expected state. This is due to us using `immer` under the hood, which allows us to track mutation updates to the state and then convert them to immutable updates.
 
-To get around this you can use the following workaround:
+To get around this you can use the [debug](/docs/api/debug) util.
 
 ```javascript
-import { original } from 'immer'
+import { debug } from 'easy-peasy';
 
 const model = {
   myAction: action((state, payload) => {
-    console.log(original(state));
+    console.log(debug(state));
   })
 };
 ```
