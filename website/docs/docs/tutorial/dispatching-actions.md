@@ -8,6 +8,8 @@ import { useStoreActions } from 'easy-peasy';
 function IncrementCountButton() {
   const increment = useStoreActions(actions => actions.counter.increment);
   return (
+    // Dispatching of the action here
+    //                          👇
     <button onClick={() => increment()}>
       Add 1 more
     </button>

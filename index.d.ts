@@ -268,6 +268,7 @@ export type Thunk<
     helpers: {
       dispatch: Dispatch<StoreModel>;
       getState: () => State<Model>;
+      getStoreActions: () => Actions<StoreModel>;
       getStoreState: () => State<StoreModel>;
       injections: Injections;
       meta: Meta;
@@ -314,6 +315,7 @@ export function thunk<
     helpers: {
       dispatch: Dispatch<StoreModel>;
       getState: () => State<Model>;
+      getStoreActions: () => Actions<StoreModel>;
       getStoreState: () => State<StoreModel>;
       injections: Injections;
       meta: Meta;
