@@ -1,19 +1,20 @@
 # selector
 
-Allows you to define a selector against your model. Selectors are used to derive
-state, and are optimised in a manner to ensure that your React components do not
-rerender unnecessarily when you required derived state.
+Allows you to define a selector against your model. Selectors are used to derive state, and are optimised in a manner to ensure that your React components do not re-render unnecessarily when consuming derived state.
 
 ```javascript
 selector(
   [state => state.products],
-  ([products]) => products.length
+  (resolvedState) => {
+    const [products] = resolvedState;
+    return products.length;
+  }
 )
 ```
 
 ## Arguments
 
-  - `stateResolvers` (Array, required)
+  - `stateResolvers` (Array, *required*)
 
     An array of functions responsible for resolving the state that will be used
     to derive against. Each function receives the following arguments:
@@ -30,50 +31,32 @@ selector(
     (state, storeState) => state.foo
     ```
 
-    It is best to keep your state resolveds as simple as possible. Keep the
-    heavy lifting  / deriving to the selector function.
+    It is best to keep your state resolvers as simple as possible. They should only isolate the state that will be used in the deriving process.
 
-  - `selector` (Function, required)
+  - `selector` (Function, *required*)
 
-    The selector function responsible for resolving the derived state. It is
-    provided the following arguments:
+    The selector implementation that consumes the resolved state and produces the derived state. It is provided the following arguments:
 
-    - `resolvedState` (Array, required)
+    - `resolvedState` (Array)
 
-      These are the results of the state resolved by your `stateResolvers`. Each
-      value matches the idx of the respective state resolver.
+      These are the results of the state resolved by your `stateResolvers` array. Each value matches the index of the respective state resolver.
 
-    - `runtimeArguments` (Array, required)
+    - `runtimeArguments` (Array)
 
-      If any runtime arguments were provided to your selector, they will be
-      contained within this array.
+      If any runtime arguments were provided to your selector, they will be contained within this array.
 
-  - `configuration` (Object, not required)
+  - `configuration` (Object, *optional*)
 
-    The configuration for your selector. It currently supports the following
-    properties:
+    The configuration for your selector. It currently supports the following properties:
 
-    - `limit` (number, not required, default=1)
+    - `limit` (number, *optional*, default=1)
 
-      The size of the cache for your selector. By default only the most recent
-      result of your selector will be cached.
+      The size of the cache for your selector. By default only the most recent result of your selector will be cached.
 
-      If your selector gets executed with arguments that do not match the previous arguments that it received provided, then it will be rexecuted and the
-      new result will be cached.
+      This configuration value is only useful for selectors that accept runtime arguments. For example, imagine a `productById` selector. You may make multiple calls to this selector across a render cycle of your React application. It would be wasteful to have a maximum cache size of 1, especially in cases where you expect to query for multiple products at a time. For these cases it is highly recommended to increase the cache limit. For example you could choose to increase the cache limit to 100, in
+      which case the 100 most recent unique argument calls to `productById` would be cached.
 
-      This configuration value is only useful for selectors that accept runtime
-      arguments. For example, imagine a `productById` selector. You may make
-      multiple calls to this selector across a render cycle of your React
-      application. It would be wasteful to have a maximum cache size of 1,
-      especially in cases where you expect to query for multiple products at
-      a time. For these cases it is highly recommended to increase the cache
-      limit. For example you could choose to increase the cache limit to 100, in
-      which case the 100 most recent unique argument calls to `productById` would
-      be cached.
-
-## Examples
-
-### Integrated example
+## Simple Example
 
 ```javascript
 import { selector } from 'easy-peasy';
@@ -81,22 +64,26 @@ import { selector } from 'easy-peasy';
 const store = createStore({
   todos: {
     items: [{ id: 1, text: 'Learn easy peasy' }],
-    first: selector(
+    next: selector(
       [state => state.items],
-      ([items]) => items.length > 0 ? items[0] : undefined
+      (resolvedState) => {
+        const [items] = resolvedState;
+        return items.length > 0 ? items[0] : undefined;
+      }
     )
   }
 });
 
 function NextTodo() {
-  const next = useStoreState(state => state.todos.first());
-  return next
-    ? <Todo todo={next} />
+  //     Note that you have to execute a selector  👇
+  const todo = useStoreState(state => state.todos.next());
+  return todo
+    ? <Todo todo={todo} />
     : null;
 }
 ```
 
-### Multiple state resolvers
+## Multiple state resolvers
 
 In this example we will use multiple bits of state in the deriving selector.
 
@@ -109,16 +96,18 @@ const store = createStore({
     lastName: 'Rose',
     fullName: selector(
       [state => state.firstName, state => state.lastName],
-      ([firstName, lastName]) => `${firstName} ${lastName}`
+      (resolvedState) => {
+        const [firstName, lastName] = resolvedState;
+        return `${firstName} ${lastName}`;
+      }
     )
   }
 });
 ```
 
-### Using global state
+## Using global state
 
-In this example we will resolve some global state to be used within the
-deriving selector.
+In this example we will resolve some global state to be used within the deriving process.
 
 ```javascript
 const store = createStore({
@@ -132,15 +121,19 @@ const store = createStore({
     favouriteTodo: selector(
      [
        state => state.favouriteTodoId,
+       //         👇 note the 2nd arg to our state resolved is the global state
        (state, storeState) => storeState.todos.items
      ],
-     ([todoId, todos]) => todos[todoId]
+     (resolvedState) => {
+       const [todoId, todos] = resolvedState;
+       return todos[todoId];
+     }
     )
   }
 });
 ```
 
-### Providing runtime arguments
+## Providing runtime arguments
 
 In this example we will provide runtime arguments to our selector.
 
@@ -152,13 +145,19 @@ const store = createStore({
     ],
     getById: selector(
       [state => state.items],
-      ([items], [id]) => items.find(todo => todo.id === id)
+      // Runtime args received 👇
+      (stateResolvers, runtimeArgs) => {
+        const [items] = stateResolvers;
+        const [id] = runtimeArgs;
+        return items.find(todo => todo.id === id);
+      }
     )
   }
 });
 
 function Todo({ id }) {
   const todo = useStoreState(
+    // Providing a runtime arg   👇
     state => state.todos.getById(id),
     [id]
   );
@@ -168,7 +167,9 @@ function Todo({ id }) {
 }
 ```
 
-### Customising the cache limit
+In the example above we are passing a prop into our selector, thereby exposing it as a runtime argument to our [selector](/docs/api/selector). It's important to note that as we are depending on an external value, the `id` prop, we had to declare it as a dependency to our [useStoreState](/docs/api/use-store-state) hook. This ensures that the map state will be executed any time that the `id` changes.
+
+## Customising the cache limit
 
 In this example we will customise the cache size for our selector.
 
@@ -180,8 +181,12 @@ const store = createStore({
     ],
     getById: selector(
       [state => state.items],
-      ([items], [id]) => items.find(todo => todo.id === id),
-      { limit: 100 }
+      (stateResolvers, runtimeArgs) => {
+        const [items] = stateResolvers;
+        const [id] = runtimeArgs;
+        return items.find(todo => todo.id === id);
+      },
+      { limit: 10 }  // 👈 set the limit
     )
   },
 });
@@ -192,9 +197,9 @@ store.getState().todos.getById(1); // cached item returned
 store.getState().todos.getById(2); // cached item returned
 ```
 
-### Calling another selector
+## Calling another selector
 
-In this example we will call a different selector from a selector.
+It is possible to reference another selector. To do so you need to resolve the required selector using the state resolvers.
 
 ```javascript
 const store = createStore({
@@ -202,19 +207,30 @@ const store = createStore({
     items: [
       { id: 1, text: 'Win the lottery' }
     ],
+    //  👇 we are going to call this selector from the one below
     getById: selector(
       [state => state.items],
-      ([items], [id]) => items.find(todo => todo.id === id)
+      (stateResolvers, runtimeArgs) => {
+        const [items] = stateResolvers;
+        const [id] = runtimeArgs;
+        return items.find(todo => todo.id === id);
+      }
     ),
   },
   profile: {
     favouriteTodoId: 1,
     favouriteTodo: selector(
-     [
-       state => state.favouriteTodoId,
-       (state, storeState) => storeState.todos.getById
-     ],
-     ([favouriteTodoId, getTodoById]) => getTodoById(favouriteTodoId)
+      [
+        state => state.favouriteTodoId,
+        // we resolve the required selector here  👇
+        (state, storeState) => storeState.todos.getById
+      ],
+      (resolvedState) => {
+        const [favouriteTodoId, getTodoById] = resolvedState;
+        // and now we can call it here
+        //         👇
+        return getTodoById(favouriteTodoId);
+      }
     )
   }
 });

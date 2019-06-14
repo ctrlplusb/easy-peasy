@@ -1,10 +1,8 @@
 # reducer
 
-Declares a section of state to be calculated via a "standard" reducer function -
-as is typical in Redux.
+Declares a section of state to be calculated via a "standard" reducer function - as is typical in Redux.
 
-This API specifically exists to help with integrations against existing Redux
-based libraries, and to help with gradual migration from legacy Redux code.
+This API specifically exists to help with integrations against existing Redux based libraries, and to help with gradual migration from legacy Redux code.
 
 For example [redux-first-history](https://github.com/salvoravida/redux-first-history), requires you to attach a reducer that they provide to your store.
 
@@ -39,7 +37,7 @@ reducer((state = 1, action) => {
 
         Any payload that was provided to the action.
 
-## Integrated Example
+## Example
 
 ```javascript
 import { createStore, reducer, useStoreState, useStoreDispatch } from 'easy-peasy';

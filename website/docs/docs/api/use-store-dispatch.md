@@ -1,6 +1,6 @@
 # useStoreDispatch
 
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's dispatch.
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the [store's](/docs/api/store) dispatch.
 
 ```javascript
 const dispatch = useStoreDispatch();

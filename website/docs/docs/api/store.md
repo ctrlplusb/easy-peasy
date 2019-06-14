@@ -4,7 +4,7 @@ A store is created via the [createStore](/docs/api/create-store) API. A store in
 
   - `clearMockedActions` (Function)
 
-    If the `mockActions` configuration value was passed to the `createStore` then calling this function clears the list of mocked actions that have been tracked by the store. This is useful in the context of testing - especially thunks.
+    If the `mockActions` configuration value was passed to the `createStore` then calling this function clears the list of mocked actions that have been tracked by the store. This is useful in the context of testing - especially thunks and listeners.
 
   - `dispatch` (Function)
 
@@ -20,7 +20,7 @@ A store is created via the [createStore](/docs/api/create-store) API. A store in
 
   - `getMockedActions` (Function)
 
-    If the `mockActions` configuration value was passed to the `createStore` then calling this function will return the actions that have been dispatched (and mocked). This is useful in the context of testing - especially thunks.
+    If the `mockActions` configuration value was passed to the `createStore` then calling this function will return the actions that have been dispatched (and mocked). This is useful in the context of testing - especially thunks and listeners.
 
   - `useStoreActions` (Function)
 

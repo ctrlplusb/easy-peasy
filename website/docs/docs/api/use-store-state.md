@@ -1,6 +1,6 @@
 # useStoreState
 
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the store's state.
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the [store's](/docs/api/store) state.
 
 ```javascript
 const todos = useStoreState(state => state.todos.items);
@@ -39,16 +39,11 @@ const BasketTotal = () => {
 
 ## Pitfalls
 
-Please be careful in the manner that you resolve values from your `mapToState`. To optimise the rendering performance of your components we use referential equality checking (===) to determine if the mapped state has changed. When an update to
-your stores state occurs we will run your mapping function again, and if the new
-value does not equal to the previously mapped value we will rerender your
-component.
+Please be careful in the manner that you resolve values from your `mapToState`. To optimise the rendering performance of your components we use referential equality checking (===) to determine if the mapped state has changed. When an update to your stores state occurs we will run your mapping function again, and if the new value does not equal to the previously mapped value we will re-render your component.
 
-Therefore, if you perform an operation that always returns a new value (for e.g.
-an array) is an anti-pattern as it will break our equality checks, causing our
-components to rerender for _any_ state change.
+Therefore, if you perform an operation that always returns a new value (for e.g. an array) is an anti-pattern as it will break our equality checks, causing our components to re-render for _any_ state change.
 
-Here is an illustrative example.
+Below is an illustrative example.
 
 ```javascript                                                     👇
 const productNames = useStoreState(state => state.products.map(x => x.name))
@@ -66,7 +61,7 @@ const products = useStoreState(state => state.products)
 const productNames = products.map(x => x.name)
 ```
 
-A better approach is to define a [selector](#todo) against your model.
+A better approach is to define a [selector](/docs/api/selector) against your model.
 
 ```javascript
 import { selector, createStore } from 'easy-peasy';
@@ -75,7 +70,10 @@ const createStore = ({
   products: [{ name: 'Boots' }],
   productNames: selector(
     [state => state.products],
-    ([products]) => products.map(x => x.name)
+    (resolvedState) => {
+      const [products] = resolvedState;
+      return products.map(x => x.name);
+    }
   )
 });
 ```
