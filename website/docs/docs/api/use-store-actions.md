@@ -1,7 +1,6 @@
 # useStoreActions
 
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components
-access to the store's actions.
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the [store's](/docs/api/store) [actions](/docs/api/action).
 
 ```javascript
 const addTodo = useStoreActions(actions => actions.todos.add);
@@ -11,11 +10,11 @@ const addTodo = useStoreActions(actions => actions.todos.add);
 
   - `mapActions` (Function, required)
 
-    The function that is used to resolved the action(s) that your component requires. Your `mapActions` can either resolve single or multiple actions. The function will receive the following arguments:
+    The function that is used to resolved the [action](/docs/api/action) that your component requires. It receives the following arguments:
 
     - `actions` (Object, required)
 
-      The `actions` of your store.
+      The [actions](/docs/api/action) of your store.
 
 ## Example
 

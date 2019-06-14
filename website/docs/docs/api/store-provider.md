@@ -1,7 +1,6 @@
 # StoreProvider
 
-Exposes the store to your React application, so that your components will be
-able to consume and interact with the store via the hooks.
+Exposes the [store](/docs/api/store) to your React application, so that your components will be able to consume and interact with the [store](/docs/api/store) via the hooks.
 
 ## Example
 

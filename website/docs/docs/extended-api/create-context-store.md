@@ -106,12 +106,9 @@ When executed you will receive a store container that contains the following pro
    }
    ```
 
-## Examples
+## Example
 
-### Integration Example
-
-This examples shows how to create a context store and integrate it with your
-React application.
+This examples shows how to create a context store and integrate it with your React application.
 
 ```javascript
 const Counter = createContextStore({
@@ -140,10 +137,9 @@ ReactDOM.render(
 );
 ```
 
-### Using multiple stores
+## Using multiple stores
 
-This example demonstrates how you can use multiple context stores within your
-React application.
+This example demonstrates how you can use multiple context stores within your React application.
 
 ```javascript
 const Counter = createContextStore({
@@ -173,7 +169,7 @@ ReactDOM.render(
 );
 ```
 
-### Nesting multiple stores
+## Nesting multiple stores
 
 This example shows how you can nest multiple context stores.
 
@@ -202,7 +198,7 @@ ReactDOM.render(
 );
 ```
 
-### Customising your model at runtime
+## Customising your model at runtime
 
 This example shows how you can use the `initialData` prop of your context store's `Provider` in order to customise your model at runtime.
 

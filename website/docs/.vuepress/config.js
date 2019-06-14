@@ -57,8 +57,6 @@ module.exports = {
           children: [
             'api/',
             'api/action',
-            'api/create-component-store',
-            'api/create-context-store',
             'api/create-store',
             'api/debug',
             'api/reducer',
@@ -73,24 +71,53 @@ module.exports = {
           ],
         },
         {
+          title: 'Extended API',
+          children: [
+            'extended-api/create-component-store',
+            'extended-api/create-context-store',
+          ],
+        },
+        {
+          title: 'Deprecated API',
+          children: [
+            'deprecated-api/',
+            'deprecated-api/create-typed-hooks',
+            'deprecated-api/select',
+            'deprecated-api/store',
+          ],
+        },
+        {
           title: 'Testing',
           children: [
             'testing/',
             'testing/testing-actions',
             'testing/testing-thunks',
+            'testing/testing-components',
           ],
         },
         {
-          title: 'Typescript',
+          title: 'Typescript Tutorial',
           children: [
-            'typescript/',
+            'typescript-tutorial/',
             // 'typescripting-declare-model-interface',
-            'typescript/create-your-model',
+            // 'typescript/create-your-model',
+          ],
+        },
+        {
+          title: 'Typescript API',
+          children: [
+            'typescript-api/',
+            // 'typescripting-declare-model-interface',
+            // 'typescript-api/create-your-model',
           ],
         },
         {
           title: 'Recipes',
-          children: ['recipes/react-native-devtools'],
+          children: [
+            'recipes/react-native-devtools',
+            'recipes/generalising-models',
+            'recipes/usage-with-react-redux',
+          ],
         },
       ],
     },

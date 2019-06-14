@@ -15,9 +15,9 @@ thunk(async (actions, payload) => {
 
     The [actions](/docs/api/action) that are local to the thunk. This allows you to dispatch an [action](/docs/api/action) to update state should you require.
 
-  - `payload` (any, *optional*)
+  - `payload` (any)
 
-    The payload, if any, that was provided to the thunk when it was dispatched.
+    If a payload was provided to the thunk when it was dispatch it will be available via this argument.
 
   - `helpers` (Object)
 
@@ -48,12 +48,12 @@ thunk(async (actions, payload) => {
       This object contains meta information related to the thunk. Specifically it
       contains the following properties:
 
-        - parent (Array, string, required)
+        - parent (Array)
 
           An array representing the path of the parent against which the thunk
           was attached within your model.
 
-        - path (Array, string, required)
+        - path (Array)
 
           An array representing the full path to the thunk based on where it
           was attached within your model.
@@ -74,9 +74,7 @@ thunk(async (actions, payload) => {
       });
       ```
 
-## Examples
-
-### Integrated example
+## Example
 
 This is a fully integrated example show how you can declare and use a thunk.
 
@@ -86,6 +84,7 @@ import { action, createStore, thunk, useStoreActions } from 'easy-peasy';
 const store = createStore({
   session: {
     user: undefined,
+    //  👇 our thunk
     login: thunk(async (actions, payload) => {
       const user = await loginService(payload)
       actions.loginSucceeded(user)
@@ -98,17 +97,47 @@ const store = createStore({
 
 function LoginButton({ username, password }) {
   const login = useStoreActions(actions => actions.session.login);
-  const onLoginClick = useCallback(() => {
-    login({ username, password })
-      .then(() => {
-        window.location = '/dashboard';
-      })
-  }, [username, password]);
-  return <button onClick={onLoginClick}>Login</button>
+  return (
+    //                       👇 dispatch with a payload
+    <button onClick={() => login({ username, password }))}>
+      Login
+    </button>
+  );
 }
 ```
 
-### Using local state
+## Listener thunk
+
+It is possible to define a [thunk](/docs/api/thunk) as being a *listener* via the `listenTo` configuration property. A *listener* [thunk](/docs/api/thunk) will be fired every time that the *target* [action](/docs/api/action)/[thunk](/docs/api/thunk) successfully completes. The *listener* will receive the same payload that was provided to the *target*.
+
+An example use case for this would be the need to clear some state when a user logs out of your application, or if you would like to create an audit trail for when certain [actions](/docs/api/action)/[thunks](/docs/api/thunk) are fired.
+
+```javascript
+const todosModel = {
+  items: [],
+  //  👇 the target action
+  addTodo: action((state, payload) => {
+    state.items.push(payload);
+  })
+};
+
+const auditModel = {
+  logs: [],
+  // 👇 our listener thunk
+  onAddTodo: thunk(
+    async (actions, payload) => {
+      await auditService.post(`Added todo: ${payload.text}`);
+    },
+    { listenTo: todosModel.addTodo } // 👈 declare the target to listen to
+  )
+};
+```
+
+In the example above note that the `onAddTodo` [thunk](/docs/api/thunk) has been provided a configuration, with the `addTodo` [action](/docs/api/action) being set as a target.
+
+Any time the `addTodo` [action](/docs/api/action) completes successfully, the `onAddTodo` will be fired, receiving the same payload as what `addTodo` received.
+
+## Accessing local state
 
 In this example our thunk will use the state that is local to it.
 
@@ -119,8 +148,8 @@ const store = createStore({
   counter: {
     count: 1,
     debug: thunk(async (actions, payload, { getState }) => {
-      console.log(getState().count);
-      // 1
+      console.log(getState());
+      // { count: 1 }
     }),
   }
 });
@@ -148,11 +177,9 @@ const store = createStore({
 });
 ```
 
-### Dispatching an action on another part of your model
+## Dispatching an action on another part of your model
 
-In this example we will dispatch an action that belongs to another part of your
-model. We don't recommend doing this, and instead encourage you to use the
-[listen](#todo) API, which promotes a better separation of concerns.
+In this example we will dispatch an action that belongs to another part of your model.
 
 ```javascript
 import { action, createStore, thunk } from 'easy-peasy';
@@ -172,10 +199,11 @@ const store = createStore({
 });
 ```
 
-### Dependency injection
+We don't recommend doing the above, and instead encourage you to define a listener [action](/docs/api/action) or [thunk](/docs/api/thunk), which promotes a better separation of concerns.
 
-In this example we will consume a helper that was injected via the store
-configuration.
+## Dependency injection
+
+In this example we will use an injected util provided to our store via the store configuration.
 
 ```javascript
 import { createStore, thunk } from 'easy-peasy';
@@ -184,12 +212,16 @@ import api from './api'
 const model = {
   foo: 'bar',
   doSomething: thunk(async (dispatch, payload, { injections }) => {
+    //                                              👆
+    //                 |- Consuming the injections -|
+    //                👇
     const { api } = injections
     await api.foo()
   }),
 };
 
 const store = createStore(model, {
+  // 👇 injections defined here
   injections: {
     api,
   }

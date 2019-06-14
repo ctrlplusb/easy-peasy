@@ -30,9 +30,7 @@ When executed, you will receive a [store](#store) instance back. Please refer to
 
 Once you have a store you provide it to the [StoreProvider](#storeprovider) in order to expose it to your application.
 
-## Examples
-
-### Full Example
+## Example
 
 This example shows a full store implementation.
 
@@ -48,7 +46,9 @@ const model = {
   },
 };
 
-const store = createStore(model, { });
+const store = createStore(model, {
+  name: 'MyAwesomeStore'
+});
 
 ReactDOM.render(
   <StoreProvider store={store}>
