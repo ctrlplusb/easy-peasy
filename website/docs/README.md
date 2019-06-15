@@ -11,6 +11,21 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
 
 <p>&nbsp;</p>
 
+Is mapStateToProps and dispatch confusing you?, you are spending a lot of time trying to implement state
+management in your application?. Hustle no more. State management is something really hard to learn and there are alot of avenues to take but with Easy Peasy your life have been made simple. It's as easy as 1 2 3. 
+
+**Should I choose Easy Peasy for my state management.**
+
+The answer is yes. As compared to setting up state management using react-redux, Its much easier using Easy peasy and here is why;
+
+ * No need to connect every component that needs to know about the app state or having to mapStateToProps 
+ * No need to create all the confusing files reducers, actions, store configurations root reducers etc. 
+ * Less code to implement state management in your application as compared to setting up redux from scratch.
+ * Syntax is very easy to go about.
+
+
+<p>&nbsp;</p>
+
 **Step 1 - Create your store**
 
 ```javascript
