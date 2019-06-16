@@ -2,12 +2,20 @@ module.exports = {
   title: 'Easy Peasy',
   description: 'Easy Peasy state for React',
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
+  plugins: [
+    [
+      '@vuepress/google-analytics',
+      {
+        ga: 'UA-89235861-3',
+      },
+    ],
+  ],
   themeConfig: {
     repo: 'ctrlplusb/easy-peasy',
 
     docsRepo: 'ctrlplusb/easy-peasy',
-    docsDir: 'website',
-    docsBranch: 'next',
+    docsDir: 'website/docs',
+    docsBranch: 'master',
 
     editLinks: true,
     editLinkText: 'Help us improve this page!',
@@ -16,9 +24,9 @@ module.exports = {
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Install', link: '/docs/introduction/installation/' },
       { text: 'Tutorial', link: '/docs/tutorial/' },
       { text: 'API', link: '/docs/api/' },
+      { text: 'Install', link: '/docs/introduction/installation/' },
     ],
 
     sidebarDepth: 0,
@@ -82,6 +90,7 @@ module.exports = {
           children: [
             'deprecated-api/',
             'deprecated-api/create-typed-hooks',
+            'deprecated-api/listen',
             'deprecated-api/select',
             'deprecated-api/store',
           ],
@@ -99,18 +108,21 @@ module.exports = {
           title: 'Typescript Tutorial',
           children: [
             'typescript-tutorial/',
+            'typescript-tutorial/create-your-store',
+            'typescript-tutorial/typed-hooks',
+            'typescript-tutorial/adding-typed-actions',
             // 'typescripting-declare-model-interface',
             // 'typescript/create-your-model',
           ],
         },
-        {
-          title: 'Typescript API',
-          children: [
-            'typescript-api/',
-            // 'typescripting-declare-model-interface',
-            // 'typescript-api/create-your-model',
-          ],
-        },
+        // {
+        //   title: 'Typescript API',
+        //   children: [
+        //     'typescript-api/',
+        //     // 'typescripting-declare-model-interface',
+        //     // 'typescript-api/create-your-model',
+        //   ],
+        // },
         {
           title: 'Recipes',
           children: [

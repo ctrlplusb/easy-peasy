@@ -24,7 +24,7 @@ const store = createStore({
 });
 ```
 
-**Step 2 - Wrap you application**
+**Step 2 - Wrap your application**
 
 ```javascript
 function App() {
