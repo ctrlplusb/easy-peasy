@@ -111,18 +111,9 @@ module.exports = {
             'typescript-tutorial/create-your-store',
             'typescript-tutorial/typed-hooks',
             'typescript-tutorial/adding-typed-actions',
-            // 'typescripting-declare-model-interface',
-            // 'typescript/create-your-model',
+            'typescript-tutorial/adding-typed-thunks',
           ],
         },
-        // {
-        //   title: 'Typescript API',
-        //   children: [
-        //     'typescript-api/',
-        //     // 'typescripting-declare-model-interface',
-        //     // 'typescript-api/create-your-model',
-        //   ],
-        // },
         {
           title: 'Recipes',
           children: [

@@ -55,6 +55,8 @@ function AddTodo() {
   //                                  map the addTodo action 👇
   const addTodo = useStoreActions(actions => actions.todos.addTodo);
 
+  // The below are the standard React hooks we are using to manage the form
+  // state and the button onClick callback
   const [text, setText] = useState('');
   const onButtonClick = useCallback(() => {
     addTodo(text); // 👈 dispatch our action with the text describing the todo
@@ -69,3 +71,5 @@ function AddTodo() {
   );
 }
 ```
+
+***TODO: Screenshot of typing information on action dispatch***
