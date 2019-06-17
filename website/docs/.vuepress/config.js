@@ -112,6 +112,9 @@ module.exports = {
             'typescript-tutorial/typed-hooks',
             'typescript-tutorial/adding-typed-actions',
             'typescript-tutorial/adding-typed-thunks',
+            'typescript-tutorial/using-typed-injections',
+            'typescript-tutorial/typing-thunk-against-the-store',
+            'typescript-tutorial/adding-typed-listeners',
           ],
         },
         {

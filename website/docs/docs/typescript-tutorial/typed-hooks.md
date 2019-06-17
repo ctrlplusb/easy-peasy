@@ -1,14 +1,20 @@
 # Using typed hooks
 
-For convenience we bind the hooks to your create [store](/docs/api/store) instances. This is especially useful in the context of Typescript because all the typing information of your model will be automatically baked into these hooks. We therefore recommend that you export these hooks of your store so that you can easily import and use them within your components.
+For convenience we bind the Easy Peasy's hooks against a [store](/docs/api/store) instance. 
+
+If you were to use the hooks imported directly from the Easy Peasy library, e.g. `import { useStoreActions } from 'easy-peasy';`, you would have to provide the model interface that represents your store every time you used them.
+
+By binding the hooks against a [store](/docs/api/store) instance we provide a convenient mechanism for you to avoid have to do this. 
+
+We recommend that you extract these typed hooks off your [store](/docs/api/store) instance, and export them so that you can easily use them in your components.
 
 ```typescript
 // my-store.ts
 
 import { createStore } from 'easy-peasy';
-import model from './model';
+import storeModel from './model';
 
-const store = createStore(model);
+const store = createStore(storeModel);
 
 // 👇export the typed hooks
 export const useStoreActions = store.useStoreActions;
@@ -18,7 +24,7 @@ export const useStoreState = store.useStoreState;
 export default store;
 ```
 
-You could then import them into your components, and receive the benefit of all the model typing being available.
+We can now import the typed hooks into a component.
 
 ```typescript
 import { useStoreState } from './my-store'; // 👈 import the typed hook
