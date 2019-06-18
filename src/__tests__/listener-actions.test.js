@@ -165,3 +165,60 @@ it('listening to an string, firing a thunk', done => {
   // act
   store.dispatch({ type: 'MATH_ADD', payload: 10 });
 });
+
+it('action listening to multiple actions', async () => {
+  // arrange
+  const actionTarget = action(() => {});
+  const thunkTarget = thunk(() => {});
+  const model = {
+    logs: [],
+    actionTarget,
+    thunkTarget,
+    onActions: action(
+      (state, payload) => {
+        state.logs.push(payload);
+      },
+      { listenTo: [actionTarget, thunkTarget] },
+    ),
+  };
+  const store = createStore(model);
+
+  // act
+  store.getActions().actionTarget('action payload');
+  await store.getActions().thunkTarget('thunk payload');
+
+  // assert
+  expect(store.getState().logs).toEqual(['action payload', 'thunk payload']);
+});
+
+it('thunk listening to multiple actions', async () => {
+  // arrange
+  const thunkSpy = jest.fn();
+  const actionTarget = action(() => {});
+  const thunkTarget = thunk(() => {});
+  const model = {
+    logs: [],
+    actionTarget,
+    thunkTarget,
+    onActions: thunk(thunkSpy, { listenTo: [actionTarget, thunkTarget] }),
+  };
+  const store = createStore(model);
+
+  // act
+  store.getActions().actionTarget('action payload');
+  await store.getActions().thunkTarget('thunk payload');
+
+  // assert
+  await new Promise(resolve => setTimeout(resolve, 100));
+  expect(thunkSpy).toHaveBeenCalledTimes(2);
+  expect(thunkSpy).toHaveBeenCalledWith(
+    expect.anything(),
+    'action payload',
+    expect.anything(),
+  );
+  expect(thunkSpy).toHaveBeenCalledWith(
+    expect.anything(),
+    'thunk payload',
+    expect.anything(),
+  );
+});

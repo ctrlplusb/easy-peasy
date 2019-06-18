@@ -116,3 +116,22 @@ const listeningInvalidFunc: Action<ListeningModel, string> = action(
     listenTo: () => undefined,
   },
 );
+
+const multiListeningAction: Action<ListeningModel, string> = action(
+  (state, payload) => {
+    state.logs.push(payload);
+  },
+  {
+    listenTo: [targetModel.doAction, targetModel.doThunk],
+  },
+);
+
+const multiListeningActionInvalid: Action<ListeningModel, string> = action(
+  (state, payload) => {
+    state.logs.push(payload);
+  },
+  // typings:expect-error
+  {
+    listenTo: [targetModel.doAction, targetModel.doThunkInvalid],
+  },
+);

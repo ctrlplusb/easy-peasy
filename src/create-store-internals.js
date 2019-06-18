@@ -279,22 +279,31 @@ export default function createStoreInternals({
       config: { listenTo },
     } = listenerAction[actionStateSymbol] || listenerAction[thunkStateSymbol];
     let targetName;
-    if (
-      typeof listenTo === 'function' &&
-      listenTo[actionNameSymbol] &&
-      actionCreatorDict[listenTo[actionNameSymbol]]
-    ) {
-      if (listenTo[thunkSymbol]) {
-        targetName = helpers.thunkCompleteName(listenTo);
-      } else {
-        targetName = listenTo[actionNameSymbol];
+
+    const processListenTo = target => {
+      if (
+        typeof target === 'function' &&
+        target[actionNameSymbol] &&
+        actionCreatorDict[target[actionNameSymbol]]
+      ) {
+        if (target[thunkSymbol]) {
+          targetName = helpers.thunkCompleteName(target);
+        } else {
+          targetName = target[actionNameSymbol];
+        }
+      } else if (typeof target === 'string') {
+        targetName = target;
       }
-    } else if (typeof listenTo === 'string') {
-      targetName = listenTo;
+      const listenerReg = listenerActionMap[targetName] || [];
+      listenerReg.push(actionCreatorDict[listenerAction[actionNameSymbol]]);
+      listenerActionMap[targetName] = listenerReg;
+    };
+
+    if (Array.isArray(listenTo)) {
+      listenTo.forEach(processListenTo);
+    } else {
+      processListenTo(listenTo);
     }
-    const listenerReg = listenerActionMap[targetName] || [];
-    listenerReg.push(actionCreatorDict[listenerAction[actionNameSymbol]]);
-    listenerActionMap[targetName] = listenerReg;
   });
 
   selectorReducers.forEach(selector => {

@@ -7,7 +7,7 @@ interface Todo {
   text: string;
 }
 
-type CountSelector = Selector<TodosModel, number, [Array<Todo>], void>;
+type CountSelector = Selector<TodosModel, number, [Array<Todo>]>;
 
 interface TodosModel {
   items: Array<Todo>;
@@ -21,7 +21,7 @@ interface StatusModel {
     StatusModel,
     number,
     [SelectorRef<CountSelector>],
-    void,
+    [],
     StoreModel
   >;
 }

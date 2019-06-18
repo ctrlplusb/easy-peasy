@@ -279,11 +279,15 @@ export type Thunk<
   result: Result;
 };
 
-type ListenToTarget<TargetPayload> =
+type Target<TargetPayload> =
   | Action<any, TargetPayload>
   | Thunk<any, TargetPayload>
   | string
   | void;
+
+type ListenToTarget<TargetPayload> =
+  | Target<TargetPayload>
+  | Array<Target<TargetPayload>>;
 
 /**
  * Declares an thunk action type against your model.
@@ -459,7 +463,7 @@ type Arguments =
   | [any, any, any, any]
   | [any, any, any, any, any];
 
-type OptionalArguments = void | Arguments;
+type OptionalArguments = [] | Arguments;
 
 /**
  * A selector type.
@@ -478,11 +482,11 @@ type OptionalArguments = void | Arguments;
 export type Selector<
   Model extends Object = {},
   Result = any,
-  Args extends Arguments = any,
-  RunTimeArgs extends OptionalArguments = any,
+  ResolvedState extends Arguments = any,
+  RuntimeArgs extends OptionalArguments = any,
   StoreModel extends Object = {}
 > = {
-  (resolvedArgs: Args, runTimeArgs: RunTimeArgs): Result;
+  (resolvedArgs: ResolvedState, runTimeArgs: RuntimeArgs): Result;
   type: 'selector';
   result: Result;
 };

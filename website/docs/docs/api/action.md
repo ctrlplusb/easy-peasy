@@ -27,11 +27,11 @@ action((state, payload) => {
     Additional configuration for the [action](/docs/api/action). It current supports the following
     properties:
 
-    - `listenTo` ([action](/docs/api/action) reference | [thunk](/docs/api/thunk) reference | string, *optional*)
+    - `listenTo` ([action](/docs/api/action) reference | [thunk](/docs/api/thunk) reference | string | Array, *optional*)
 
-      Setting this makes your [action](/docs/api/action) *listen* to provided *target* [action](/docs/api/action), [thunk](/docs/api/thunk), or string named action. Any time the *target* is successfully processed then this [action](/docs/api/action) will be fired.
+      Setting this makes your [action](/docs/api/action) *listen* to provided *target(s)* [action(s)](/docs/api/action), [thunk(s)](/docs/api/thunk), or string named action(s). Any time the *target(s)* is successfully processed then this [action](/docs/api/action) will be fired.
 
-      The *listener* will receive the same payload as was supplied to the *target*.
+      The *listener* will receive the same payload as was supplied to the *target(s)*.
 
       ```javascript
       const auditModel = {
@@ -99,6 +99,40 @@ const auditModel = {
 In the example above note that the `onAddTodo` [action](/docs/api/action) has been provided a configuration, with the `addTodo` [action](/docs/api/action) being set as a target.
 
 Any time the `addTodo` [action](/docs/api/action) completes successfully, the `onAddTodo` will be fired, receiving the same payload as what `addTodo` received.
+
+## Listening to multiple actions
+
+It is possible for a *listening* action to listen to multiple *targets*. Simply provide an array of *targets* against the `listenTo` configuration.
+
+```javascript
+const fooModel = {
+  items: [],
+  //  👇 the first target action
+  firstAction: action((state, payload) => {
+    state.items.push(payload);
+  }),
+  // 👇 the second target action
+  secondAction action((state, payload) => {
+    state.items.push(payload);
+  }),
+};
+
+const auditModel = {
+  logs: [],
+  onAddTodo: action(
+    (state, payload) => {
+      state.logs.push(payload);
+    },
+    { 
+      // 👇 declare the targets within an array
+      listenTo: [
+        fooModel.firstAction, 
+        fooModel.secondAction
+      ] 
+    } 
+  )
+};
+```
 
 ## Using console.log within actions
 

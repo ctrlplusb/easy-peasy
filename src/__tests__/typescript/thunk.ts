@@ -139,3 +139,22 @@ const listenInvalidFunc: Thunk<AuditModel, string> = thunk(
     listenTo: () => undefined,
   },
 );
+
+const multiListenAction: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  {
+    listenTo: [targetModel.doAction, targetModel.doThunk],
+  },
+);
+
+const multiListenActionInvalidThunk: Thunk<ListeningModel, string> = thunk(
+  (actions, payload) => {
+    actions.log(payload);
+  },
+  // typings:expect-error
+  {
+    listenTo: [targetModel.doAction, targetModel.doThunkInvalid],
+  },
+);
