@@ -1,3 +1,29 @@
+.screenshot {
+  background-color: #E8F5E9;
+  background-image: url(/camera.svg);
+  background-size: 32px;
+  background-repeat: no-repeat;
+  background-position: 10px 10px;
+  background-origin: top right;
+  padding: 2.5rem 0 calc(2.5rem - 1.2rem);
+
+  > img {
+    display: block;
+    margin: 0 auto;
+    position: relative;
+    width: 80%;
+  }
+
+  .caption {
+    display: block;
+    text-align: center;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #000;
+    margin: 0.3rem 0 0;
+  }
+}
+
 .theme-container.homepage {
   .page, .theme-default-content {
     padding: 2rem 2rem 0;
@@ -31,5 +57,10 @@
 @media (max-width: 760px) {
   .page, .theme-default-content {
     padding: 2rem 0.75rem 0 !important;
+  }
+
+  .screenshot {
+    margin: 0 auto;
+    width: 100%;
   }
 }

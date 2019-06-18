@@ -61,6 +61,20 @@ module.exports = {
           ],
         },
         {
+          title: 'Typescript Tutorial',
+          children: [
+            'typescript-tutorial/',
+            'typescript-tutorial/create-your-store',
+            'typescript-tutorial/typed-hooks',
+            'typescript-tutorial/adding-typed-actions',
+            'typescript-tutorial/adding-typed-thunks',
+            'typescript-tutorial/using-typed-injections',
+            'typescript-tutorial/typing-thunk-against-the-store',
+            'typescript-tutorial/adding-typed-listeners',
+            'typescript-tutorial/adding-typed-selectors',
+          ],
+        },
+        {
           title: 'API',
           children: [
             'api/',
@@ -102,19 +116,6 @@ module.exports = {
             'testing/testing-actions',
             'testing/testing-thunks',
             'testing/testing-components',
-          ],
-        },
-        {
-          title: 'Typescript Tutorial',
-          children: [
-            'typescript-tutorial/',
-            'typescript-tutorial/create-your-store',
-            'typescript-tutorial/typed-hooks',
-            'typescript-tutorial/adding-typed-actions',
-            'typescript-tutorial/adding-typed-thunks',
-            'typescript-tutorial/using-typed-injections',
-            'typescript-tutorial/typing-thunk-against-the-store',
-            'typescript-tutorial/adding-typed-listeners',
           ],
         },
         {
