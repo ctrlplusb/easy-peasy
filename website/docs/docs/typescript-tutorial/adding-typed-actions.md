@@ -3,7 +3,10 @@
 Easy Peasy exports an `Action` type, allowing you declare an [action](/docs/api/action) against your model interface. The signature for this type is:
 
 ```typescript
-Action<Model extends Object = {}, Payload = void>
+type Action<
+  Model extends Object = {}, 
+  Payload = void
+>
 ```
 
 ## Type parameters

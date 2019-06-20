@@ -2,6 +2,8 @@
 
 We will now extend our [thunk](/docs/api/thunk) so that it is able to get the state/actions for the entire [store](/docs/api/store), after which we will update our [thunk](/docs/api/thunk) implementation so that it will create an audit log entry every time a todo is saved.
 
+## Extending our audit model with an action
+
 Firstly, let's ensure that our audit model has an [action](/docs/api/action) on it which allows us to create a new log entry.
 
 ```typescript
@@ -18,6 +20,8 @@ const audit: AuditModel = {
 };
 ```
 
+## Calling audit model from our todo model thunk
+
 Now let's update our [thunk](/docs/api/thunk) configuration so that it is aware of the typings that represent our entire [store](/docs/api/store).
 
 ```typescript
@@ -31,7 +35,7 @@ export interface TodosModel {
   saveTodo: Thunk<
     TodosModel, 
     string, 
-    StoreInjections,
+    Injections,
     StoreModel // 👈 provide the store model interface
   >; 
 }
@@ -49,15 +53,29 @@ const todosModel: TodosModel = {
     const { todosService } = injections;
     await todosService.save(payload);
     actions.addTodo(payload);
-    getStoreActions().audit.addLog(payload); // 👈 accessing global actions
+    // 👇 accessing global actions
+    getStoreActions().audit.addLog(`Added todo: ${payload}`); 
   })
 };
 ```
 
-As you can see above we were able to get full type information against the `getStoreActions` helper, allowing us to add a log entry. It is important to note that the `getStoreState` helper would work equally as well.
+As you can see above we were able to get full type information against the `getStoreActions` helper, allowing us to add a log entry. 
+
+<div class="screenshot">
+  <img src="../../assets/typescript-tutorial/typed-thunk-globals.png" />
+  <span class="caption">Typing info available on getStoreActions</span>
+</div>
+
+## Accessing global state from thunk
+
+It is important to note that the `getStoreState` helper would work equally as well.
 
 ```typescript
 thunk(async (actions, payload, { getStoreState }) => {
   console.log(getStoreState().audit.logs);
 })
 ```
+
+## Demo Application
+
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-thunk-global-qo7ep)

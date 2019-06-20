@@ -1,6 +1,6 @@
 # Adding typed thunks
 
-Easy Peasy exports a `Thunk` type, allowing you to declare a [thunk](/docs/api/thunk) against your model interface. The full typing definition for the `Thunk` type is:
+Easy Peasy exports a `Thunk` type, allowing you to declare a [thunk](/docs/api/thunk) against your model interface. The signature for this type is:
 
 ```typescript
 type Thunk<
@@ -12,13 +12,15 @@ type Thunk<
 >
 ```
 
-As you can see it accepts 5 type parameters, all of them optional. This may seem like a lot of type parameters, but in most cases you will likely only need to provide 2 of them. We have tried to order the type parameters from the most to the least frequently used, based on our experience with [thunks](/docs/api/thunk). 
+## Type parameters
+
+As you can see it accepts five type parameters, all of them optional. This may seem like a lot, but in most cases you will likely only need to provide two. We have tried to order the type parameters from the most to the least frequently used. 
 
 The type parameters can be described as follows.
 
 - `Model`
 
-  The model against which the [thunk](/docs/api/thunk) is being bound. This allows us to ensure the the `actions` argument that is provided to our [thunks](/docs/api/thunk) are correctly typed.
+  The model against which the [thunk](/docs/api/thunk) is being bound. This allows us to ensure the the `actions` argument that is provided to our [thunk](/docs/api/thunk) implementations are correctly typed.
 
 - `Payload`
 
@@ -26,21 +28,25 @@ The type parameters can be described as follows.
 
 - `Injections`
 
-  When [creating your store](/docs/api/create-store) your store allows the specification of `injections` via the [store configuration](/docs/api/store-config). One use case of the `injections` is to provide a mechanism by which to dependency injected services used to make HTTP calls into your [thunks](/docs/api/thunk). These `injections` are then exposed via the 3rd argument to your [thunks](/docs/api/thunk).
+  When [creating your store](/docs/api/create-store) you can specify `injections` via the [store configuration](/docs/api/store-config). The typical use case for the `injections` is to provide a mechanism by which to dependency injected services used to make HTTP calls. These `injections` are exposed to your your [thunks](/docs/api/thunk) via the `helpers` argument that they receive.
 
-  Should you be using injections then providing the typing information via this type parameter will ensure that your [thunks](/docs/api/thunk) are using correctly typed versions of them.
+  Should you be using injections then it is useful to provide the typing information that describes them to this type parameter.
 
 - `StoreModel`
 
-  The 3rd argument to your [thunks](/docs/api/thunk) allows you to get the entire store state (via `getStoreState`), and the entire store actions (via `getStoreActions`). For these to be correctly typed we need to ensure that we provide our store's interface here. You may be concerned with cyclical dependency imports but fear not - Typescript is totally fine with this.
+  The `helpers` argument to your [thunks](/docs/api/thunk) exposes APIs which allow you to get the entire store state (via `getStoreState`), or all the actions for your store (via `getStoreActions`). 
+  
+  For these to be correctly typed we need to ensure that we provide the model interface for our store to this type parameter.
 
 - `Result`
 
   If you return data from your [thunk](/docs/api/thunk), then you should provide the expected type here.
 
-  FYI - thunks alway return a `Promise`. By default it would just be a type of `Promise<void>`. This allows you to define `Promise<Result>`.
+  A [thunk](/docs/api/thunk) always returns a `Promise`. By default it is of type `Promise<void>`, however, if you provide this type parameter it becomes `Promise<Result>`.
 
-Let's define a thunk that will allow us to save a todo by posting to an HTTP endpoint.
+## Declaring a Thunk
+
+Let's define a [thunk](/docs/api/thunk) which we will use to save a todo.
 
 ```typescript
 import { Thunk } from 'easy-peasy';
@@ -54,7 +60,9 @@ export interface TodosModel {
 
 As you can see our `Thunk` is operating against the `TodosModel` and it expects a payload of `string`.
 
-We can now implement this action against our model.
+## Implementing a Thunk
+
+We can now implement this [thunk](/docs/api/thunk) against our model.
 
 ```typescript
 import { thunk } from 'easy-peasy';
@@ -73,15 +81,20 @@ const todosModel: TodosModel = {
 
 You will have noted that Typescript was providing us with the typing information and assertions whilst we implemented our [thunk](/docs/api/thunk).
 
-***TODO: Screenshot of typing information on thunk implementation***
+<div class="screenshot">
+  <img src="../../assets/typescript-tutorial/typed-thunk-imp.png" />
+  <span class="caption">Typing info available during thunk implementation</span>
+</div>
+
+## Using a thunk
 
 We can now consume the [thunk](/docs/api/thunk) within our component, making sure we use the typed version of `useStoreActions` that we exported from our store. We will refactor our component from earlier.
 
 ```typescript
-import { useStoreActions } from './my-store'; // 👈 import typed hook
+import { useStoreActions } from './store'; // 👈 import typed hook
 
 function AddTodo() {
-  //                                  map the saveTodo thunk 👇
+  //                                    map the saveTodo thunk 👇
   const saveTodo = useStoreActions(actions => actions.todos.saveTodo);
 
   const [text, setText] = useState('');
@@ -99,4 +112,11 @@ function AddTodo() {
 }
 ```
 
-***TODO: Screenshot of typing information on thunk dispatch***
+<div class="screenshot">
+  <img src="../../assets/typescript-tutorial/typed-thunk-dispatch.png" />
+  <span class="caption">Typing info available during thunk dispatch</span>
+</div>
+
+## Demo Application
+
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-thunks-lwi6o)
