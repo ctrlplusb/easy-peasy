@@ -1,8 +1,10 @@
-import { isDraft, finishDraft, createDraft } from 'immer';
+import { isDraft, finishDraft, createDraft } from 'immer-peasy';
 import {
   actionNameSymbol,
   actionStateSymbol,
   actionSymbol,
+  computedSymbol,
+  computedConfigSymbol,
   listenSymbol,
   reducerSymbol,
   selectDependenciesSymbol,
@@ -35,6 +37,16 @@ export const action = (fn, config) => {
   fn[actionSymbol] = true;
   fn[actionStateSymbol] = {
     config,
+  };
+  return fn;
+};
+
+const defaultStateResolvers = [state => state];
+
+export const computed = (fn, stateResolvers = defaultStateResolvers) => {
+  fn[computedSymbol] = true;
+  fn[computedConfigSymbol] = {
+    stateResolvers,
   };
   return fn;
 };

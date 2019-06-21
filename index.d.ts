@@ -67,6 +67,7 @@ type FilterActionTypes<T extends object> = Omit<
     | Select<any, any>
     | Selector<any, any, any, any, any>
     | Listen<any, any, any>
+    | Computed<any, any, any, any>
   >
 >;
 
@@ -114,7 +115,9 @@ type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>;
 type StateModelValues<
   Model extends Object,
   P extends keyof Model
-> = Model[P] extends Select<any, infer R>
+> = Model[P] extends Computed<any, infer R, any, any>
+  ? R
+  : Model[P] extends Select<any, infer R>
   ? R
   : Model[P] extends Selector<any, infer R, any, any, any>
   ? SelectorRef<Model[P]>
@@ -567,6 +570,111 @@ export function selector<
   selector: (resolvedArgs: Args, runTimeArgs: RunTimeArgs) => Result,
   memoizeLimit?: number,
 ): Selector<Model, Result, Args, RunTimeArgs, StoreModel>;
+
+type StateArgs0<Model, StoreModel, Arg0> = [
+  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+];
+
+type StateResolvers0<Model, StoreModel, Arg0> = [
+  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+];
+
+type StateResolvers1<Model, StoreModel, Arg0, Arg1> = [
+  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
+];
+
+type StateResolvers2<Model, StoreModel, Arg0, Arg1, Arg2> = [
+  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg2,
+];
+
+type StateResolvers3<Model, StoreModel, Arg0, Arg1, Arg2, Arg3> = [
+  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg2,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg3,
+];
+
+type StateResolvers4<Model, StoreModel, Arg0, Arg1, Arg2, Arg3, Arg4> = [
+  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg2,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg3,
+  (state: State<Model>, storeState: State<StoreModel>) => Arg4,
+];
+
+/**
+ * A computed type.
+ *
+ * Useful when declaring your model.
+ *
+ * @example
+ *
+ * import { Computed } from 'easy-peasy';
+ *
+ * interface Model {
+ *   products: Array<Product>;
+ *   totalPrice: Computed<Model, number>;
+ * }
+ */
+export type Computed<
+  Model extends Object = {},
+  Result = any,
+  Args extends Arguments | void = void,
+  StoreModel extends Object = {}
+> = {
+  (...args: Args extends void ? [State<Model>] : Args): Result;
+  type: 'computed';
+  result: Result;
+};
+
+export function computed<
+  Model extends Object = {},
+  Result = any,
+  Args extends Arguments | void = void,
+  StoreModel extends Object = {}
+>(
+  computationFunc: Args extends Arguments
+    ? Args extends [infer Arg0]
+      ? (arg0: Arg0) => Result
+      : Args extends [infer Arg0, infer Arg1]
+      ? (arg0: Arg0, arg1: Arg1) => Result
+      : Args extends [infer Arg0, infer Arg1, infer Arg2]
+      ? (arg0: Arg0, arg1: Arg1, arg2: Arg2) => Result
+      : Args extends [infer Arg0, infer Arg1, infer Arg2, infer Arg3]
+      ? (arg0: Arg0, arg1: Arg1, arg2: Arg2, arg3: Arg3) => Result
+      : Args extends [
+          infer Arg0,
+          infer Arg1,
+          infer Arg2,
+          infer Arg3,
+          infer Arg4,
+        ]
+      ? (arg0: Arg0, arg1: Arg1, arg2: Arg2, arg3: Arg3, arg4: Arg4) => Result
+      : (state: State<Model>) => Result
+    : (state: State<Model>) => Result,
+  stateResolvers?: Args extends Arguments
+    ? Args extends [infer Arg0]
+      ? StateResolvers0<Model, StoreModel, Arg0>
+      : Args extends [infer Arg0, infer Arg1]
+      ? StateResolvers1<Model, StoreModel, Arg0, Arg1>
+      : Args extends [infer Arg0, infer Arg1, infer Arg2]
+      ? StateResolvers2<Model, StoreModel, Arg0, Arg1, Arg2>
+      : Args extends [infer Arg0, infer Arg1, infer Arg2, infer Arg3]
+      ? StateResolvers3<Model, StoreModel, Arg0, Arg1, Arg2, Arg3>
+      : Args extends [
+          infer Arg0,
+          infer Arg1,
+          infer Arg2,
+          infer Arg3,
+          infer Arg4,
+        ]
+      ? StateResolvers4<Model, StoreModel, Arg0, Arg1, Arg2, Arg3, Arg4>
+      : any
+    : void,
+): Computed<Model, Result, Args, StoreModel>;
 
 /**
  * A select type.

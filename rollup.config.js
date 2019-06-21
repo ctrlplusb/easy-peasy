@@ -3,7 +3,7 @@
 const { uglify } = require('rollup-plugin-uglify');
 const babel = require('rollup-plugin-babel');
 const changeCase = require('change-case');
-const produce = require('immer').default;
+const produce = require('immer-peasy').default;
 const replace = require('rollup-plugin-replace');
 const fileSize = require('rollup-plugin-filesize');
 const resolve = require('rollup-plugin-node-resolve');
@@ -15,7 +15,7 @@ process.env.BABEL_ENV = 'production';
 
 const baseConfig = {
   external: [
-    'immer',
+    'immer-peasy',
     'memoizerific',
     'react',
     'redux',
@@ -61,7 +61,7 @@ const commonUMD = config =>
     draft.output.globals = {
       memoizerific: 'memoizerific',
       'redux-thunk': 'ReduxThunk',
-      immer: 'immer',
+      'immer-peasy': 'produce',
       react: 'React',
       redux: 'Redux',
     };
