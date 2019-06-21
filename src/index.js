@@ -1,4 +1,4 @@
-import { setAutoFreeze } from 'immer';
+import { setAutoFreeze } from 'immer-peasy';
 import {
   createTypedHooks,
   useActions,
@@ -15,6 +15,7 @@ import StoreProvider from './provider';
 import {
   action,
   actionName,
+  computed,
   debug,
   listen,
   reducer,
@@ -38,6 +39,7 @@ setAutoFreeze(false);
 export {
   action,
   actionName,
+  computed,
   createContextStore,
   createComponentStore,
   createStore,

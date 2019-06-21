@@ -3455,10 +3455,10 @@ iltorb@^2.0.5:
     prebuild-install "^5.2.1"
     which-pm-runs "^1.0.0"
 
-immer@^3.1.3:
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-3.1.3.tgz#59bc742b2aab6e2c676445edb653e588a23c70fc"
-  integrity sha512-HG5SXTXTTVy9lGNwS075cNhQoV375jHsIJO3UtMjuUWJOuwlMr0u42FlsKTJcppt5AzsFAsmj9r4kHvsSHh3hQ==
+immer-peasy@^4.0.0-beta.0:
+  version "4.0.0-beta.0"
+  resolved "https://registry.yarnpkg.com/immer-peasy/-/immer-peasy-4.0.0-beta.0.tgz#d1ba5297bcf4cb6b42089653f61c80252ba51c4a"
+  integrity sha512-DazOrbz+fToZ3DC1kf3PI7YVa47fElgA4nc7G5JHYkGwfWEzk0b0Hiix+oQjMoRnLOuKZm6P3C+9uPtzIeMjJw==
 
 import-fresh@^2.0.0:
   version "2.0.0"

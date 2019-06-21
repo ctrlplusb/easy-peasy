@@ -1,9 +1,11 @@
 import memoizerific from 'memoizerific';
-import produce from 'immer';
+import produce from 'immer-peasy';
 import {
   actionNameSymbol,
   actionStateSymbol,
   actionSymbol,
+  computedSymbol,
+  computedConfigSymbol,
   listenSymbol,
   metaSymbol,
   reducerSymbol,
@@ -44,6 +46,8 @@ export default function createStoreInternals({
   reducerEnhancer,
   references,
 }) {
+  let isInReducer = false;
+
   const wrapFnWithMemoize = x =>
     !disableInternalSelectFnMemoize && typeof x === 'function'
       ? memoizerific(maxSelectFnMemoize)(x)
@@ -51,6 +55,8 @@ export default function createStoreInternals({
 
   const defaultState = initialState || {};
   let selectorId = 0;
+
+  const computedProperties = {};
 
   const actionCreatorDict = {};
   const actionCreators = {};
@@ -163,6 +169,42 @@ export default function createStoreInternals({
           if (config && config.listenTo) {
             listenerActionDefinitions.push(value);
           }
+        } else if (value[computedSymbol]) {
+          let target = get(parentPath, defaultState);
+          if (!target) {
+            target = {};
+            set(parentPath, defaultState, target);
+          }
+          const config = value[computedConfigSymbol];
+          const { stateResolvers } = config;
+          const memoisedResultFn = memoizerific(1)(value);
+          let cache;
+          const createComputedProperty = o => {
+            Object.defineProperty(o, key, {
+              configurable: true,
+              get: () => {
+                if (isInReducer) {
+                  return cache;
+                }
+                const storeState = references.getState();
+                const state = get(parentPath, storeState);
+                const inputs = stateResolvers.map(resolver =>
+                  resolver(state, storeState),
+                );
+                cache = memoisedResultFn(...inputs);
+                return cache;
+              },
+              set: () => {
+                throw new Error(
+                  `Easy Peasy: You attempted to set "${path.join(
+                    '.',
+                  )}", which is a computed property set a computed property`,
+                );
+              },
+            });
+          };
+          createComputedProperty(target);
+          set(path, computedProperties, createComputedProperty);
         } else if (value[selectorSymbol]) {
           selectorId += 1;
           const selectorInstanceId = selectorId;
@@ -415,16 +457,30 @@ export default function createStoreInternals({
   const createReducer = () => {
     const runActionReducerAtPath = (state, action, actionReducer, path) => {
       const current = get(path, state);
-      if (path.length === 0) {
-        return produce(state, _draft => actionReducer(_draft, action.payload));
+      const updatedState =
+        path.length === 0
+          ? produce(state, _draft => actionReducer(_draft, action.payload))
+          : produce(state, draft => {
+              set(
+                actionReducer[metaSymbol].parent,
+                draft,
+                produce(current, _draft =>
+                  actionReducer(_draft, action.payload),
+                ),
+              );
+            });
+
+      if (updatedState !== state) {
+        const computedPropertyCreators = get(path, computedProperties);
+        if (computedPropertyCreators) {
+          const updatedCurrent = get(path, updatedState);
+          Object.keys(computedPropertyCreators).forEach(key => {
+            computedPropertyCreators[key](updatedCurrent);
+          });
+        }
       }
-      return produce(state, draft => {
-        set(
-          actionReducer[metaSymbol].parent,
-          draft,
-          produce(current, _draft => actionReducer(_draft, action.payload)),
-        );
-      });
+
+      return updatedState;
     };
 
     const reducerForActions = (state, action) => {
@@ -503,6 +559,7 @@ export default function createStoreInternals({
     };
 
     const rootReducer = (state, action) => {
+      isInReducer = true;
       const stateAfterActions = reducerForActions(state, action);
       const stateAfterListeners = reducerForListeners(
         stateAfterActions,
@@ -516,7 +573,9 @@ export default function createStoreInternals({
         state !== stateAfterCustomReducers || isInitial
           ? selectsReducer(stateAfterCustomReducers)
           : stateAfterCustomReducers;
-      return selectorsReducer(stateAfterSelect);
+      const result = selectorsReducer(stateAfterSelect);
+      isInReducer = false;
+      return result;
     };
 
     return rootReducer;

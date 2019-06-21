@@ -3,6 +3,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from '@testing-library/react';
+import { mockConsole } from './utils';
 
 import {
   action,
@@ -33,8 +34,15 @@ class ErrorBoundary extends React.Component {
 }
 
 describe('mapState errors', () => {
+  let restoreConsole;
+
   beforeEach(() => {
     jest.useFakeTimers();
+    restoreConsole = mockConsole();
+  });
+
+  afterEach(() => {
+    restoreConsole();
   });
 
   describe('zombie children', () => {
