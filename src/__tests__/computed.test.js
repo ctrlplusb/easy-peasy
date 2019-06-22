@@ -170,6 +170,21 @@ test('computed properties can access global state', () => {
   ]);
 });
 
+test('computed properties are available in actions', () => {
+  // arrange
+  const store = createStore({
+    todos: ['test computed'],
+    todosCount: computed(state => state.todos.length),
+    testAction: action((state, payload) => {
+      // assert
+      expect(state.todosCount).toBe(1);
+    }),
+  });
+
+  // act
+  store.getActions().testAction();
+});
+
 test('computed properties work in a React component', () => {
   // arrange
   let renderCount = 0;

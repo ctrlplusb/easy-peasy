@@ -123,6 +123,11 @@ export default function createStore(model, options = {}) {
     return next(action);
   };
 
+  const currentStateMiddleware = () => next => action => {
+    references.currentState = references.getState();
+    return next(action);
+  };
+
   const store = reduxCreateStore(
     references.internals.reducer,
     references.internals.defaultState,
@@ -132,6 +137,7 @@ export default function createStore(model, options = {}) {
         dispatchActionStringListeners,
         ...middleware,
         listenerActionsMiddleware,
+        currentStateMiddleware,
         mockActionsMiddleware,
       ),
       ...enhancers,

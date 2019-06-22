@@ -183,10 +183,9 @@ export default function createStoreInternals({
             Object.defineProperty(o, key, {
               configurable: true,
               get: () => {
-                if (isInReducer) {
-                  return cache;
-                }
-                const storeState = references.getState();
+                const storeState = isInReducer
+                  ? references.currentState
+                  : references.getState();
                 const state = get(parentPath, storeState);
                 const inputs = stateResolvers.map(resolver =>
                   resolver(state, storeState),
