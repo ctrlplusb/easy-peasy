@@ -53,7 +53,7 @@ function TodoList({ todos, addTodo }) {
 
 export default connect(
   // 👇 Map to your required state
-  state => ({ todos: state.todos.items }
+  state => ({ todos: state.todos.items }),
   // 👇 Map your required actions
   dispatch => ({ addTodo: dispatch.todos.addTodo })
 )(EditTodo)
