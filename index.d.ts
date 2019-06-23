@@ -571,39 +571,60 @@ export function selector<
   memoizeLimit?: number,
 ): Selector<Model, Result, Args, RunTimeArgs, StoreModel>;
 
-type StateArgs0<Model, StoreModel, Arg0> = [
-  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+type StateResolver<
+  Model extends {},
+  StoreModel extends {},
+  Result extends any
+> = (state: State<Model>, storeState: State<StoreModel>) => Result;
+
+type StateResolvers1<Model, StoreModel, Arg1> = [
+  StateResolver<Model, StoreModel, Arg1>,
 ];
 
-type StateResolvers0<Model, StoreModel, Arg0> = [
-  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
+type StateResolvers2<Model, StoreModel, Arg1, Arg2> = [
+  StateResolver<Model, StoreModel, Arg1>,
+  StateResolver<Model, StoreModel, Arg2>,
 ];
 
-type StateResolvers1<Model, StoreModel, Arg0, Arg1> = [
-  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
+type StateResolvers3<Model, StoreModel, Arg1, Arg2, Arg3> = [
+  StateResolver<Model, StoreModel, Arg1>,
+  StateResolver<Model, StoreModel, Arg2>,
+  StateResolver<Model, StoreModel, Arg3>,
 ];
 
-type StateResolvers2<Model, StoreModel, Arg0, Arg1, Arg2> = [
-  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg2,
+type StateResolvers4<Model, StoreModel, Arg1, Arg2, Arg3, Arg4> = [
+  StateResolver<Model, StoreModel, Arg1>,
+  StateResolver<Model, StoreModel, Arg2>,
+  StateResolver<Model, StoreModel, Arg3>,
+  StateResolver<Model, StoreModel, Arg4>,
 ];
 
-type StateResolvers3<Model, StoreModel, Arg0, Arg1, Arg2, Arg3> = [
-  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg2,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg3,
+type StateResolvers5<Model, StoreModel, Arg1, Arg2, Arg3, Arg4, Arg5> = [
+  StateResolver<Model, StoreModel, Arg1>,
+  StateResolver<Model, StoreModel, Arg2>,
+  StateResolver<Model, StoreModel, Arg3>,
+  StateResolver<Model, StoreModel, Arg4>,
+  StateResolver<Model, StoreModel, Arg5>,
 ];
 
-type StateResolvers4<Model, StoreModel, Arg0, Arg1, Arg2, Arg3, Arg4> = [
-  (state: State<Model>, storeState: State<StoreModel>) => Arg0,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg1,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg2,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg3,
-  (state: State<Model>, storeState: State<StoreModel>) => Arg4,
+export type ResolvedState1<Arg1> = [Arg1];
+export type ResolvedState2<Arg1, Arg2> = [Arg1, Arg2];
+export type ResolvedState3<Arg1, Arg2, Arg3> = [Arg1, Arg2, Arg3];
+export type ResolvedState4<Arg1, Arg2, Arg3, Arg4> = [Arg1, Arg2, Arg3, Arg4];
+export type ResolvedState5<Arg1, Arg2, Arg3, Arg4, Arg5> = [
+  Arg1,
+  Arg2,
+  Arg3,
+  Arg4,
+  Arg5,
 ];
+
+type ResolvedStates =
+  | ResolvedState1<any>
+  | ResolvedState2<any, any>
+  | ResolvedState3<any, any, any>
+  | ResolvedState4<any, any, any, any>
+  | ResolvedState5<any, any, any, any, any>;
 
 /**
  * A computed type.
@@ -622,10 +643,14 @@ type StateResolvers4<Model, StoreModel, Arg0, Arg1, Arg2, Arg3, Arg4> = [
 export type Computed<
   Model extends Object = {},
   Result = any,
-  Args extends Arguments | void = void,
+  ResolvedState extends ResolvedStates | void = void,
   StoreModel extends Object = {}
 > = {
-  (...args: Args extends void ? [State<Model>] : Args): Result;
+  (
+    ...args: ResolvedState extends ResolvedStates
+      ? ResolvedState
+      : [State<Model>]
+  ): Result;
   type: 'computed';
   result: Result;
 };
@@ -633,48 +658,39 @@ export type Computed<
 export function computed<
   Model extends Object = {},
   Result = any,
-  Args extends Arguments | void = void,
+  ResolvedState extends ResolvedStates | void = void,
   StoreModel extends Object = {}
 >(
-  computationFunc: Args extends Arguments
-    ? Args extends [infer Arg0]
-      ? (arg0: Arg0) => Result
-      : Args extends [infer Arg0, infer Arg1]
-      ? (arg0: Arg0, arg1: Arg1) => Result
-      : Args extends [infer Arg0, infer Arg1, infer Arg2]
-      ? (arg0: Arg0, arg1: Arg1, arg2: Arg2) => Result
-      : Args extends [infer Arg0, infer Arg1, infer Arg2, infer Arg3]
-      ? (arg0: Arg0, arg1: Arg1, arg2: Arg2, arg3: Arg3) => Result
-      : Args extends [
-          infer Arg0,
+  computationFunc: (
+    ...args: ResolvedState extends ResolvedStates
+      ? ResolvedState
+      : [State<Model>]
+  ) => Result,
+  stateResolvers?: ResolvedState extends ResolvedStates
+    ? ResolvedState extends ResolvedState1<infer Arg1>
+      ? StateResolvers1<Model, StoreModel, Arg1>
+      : ResolvedState extends ResolvedState2<infer Arg1, infer Arg2>
+      ? StateResolvers2<Model, StoreModel, Arg1, Arg2>
+      : ResolvedState extends ResolvedState3<infer Arg1, infer Arg2, infer Arg3>
+      ? StateResolvers3<Model, StoreModel, Arg1, Arg2, Arg3>
+      : ResolvedState extends ResolvedState4<
+          infer Arg1,
+          infer Arg2,
+          infer Arg3,
+          infer Arg4
+        >
+      ? StateResolvers4<Model, StoreModel, Arg1, Arg2, Arg3, Arg4>
+      : ResolvedState extends ResolvedState5<
           infer Arg1,
           infer Arg2,
           infer Arg3,
           infer Arg4,
-        ]
-      ? (arg0: Arg0, arg1: Arg1, arg2: Arg2, arg3: Arg3, arg4: Arg4) => Result
-      : (state: State<Model>) => Result
-    : (state: State<Model>) => Result,
-  stateResolvers?: Args extends Arguments
-    ? Args extends [infer Arg0]
-      ? StateResolvers0<Model, StoreModel, Arg0>
-      : Args extends [infer Arg0, infer Arg1]
-      ? StateResolvers1<Model, StoreModel, Arg0, Arg1>
-      : Args extends [infer Arg0, infer Arg1, infer Arg2]
-      ? StateResolvers2<Model, StoreModel, Arg0, Arg1, Arg2>
-      : Args extends [infer Arg0, infer Arg1, infer Arg2, infer Arg3]
-      ? StateResolvers3<Model, StoreModel, Arg0, Arg1, Arg2, Arg3>
-      : Args extends [
-          infer Arg0,
-          infer Arg1,
-          infer Arg2,
-          infer Arg3,
-          infer Arg4,
-        ]
-      ? StateResolvers4<Model, StoreModel, Arg0, Arg1, Arg2, Arg3, Arg4>
-      : any
+          infer Arg5
+        >
+      ? StateResolvers5<Model, StoreModel, Arg1, Arg2, Arg3, Arg4, Arg5>
+      : StateResolver<Model, StoreModel, any>[]
     : void,
-): Computed<Model, Result, Args, StoreModel>;
+): Computed<Model, Result, ResolvedState, StoreModel>;
 
 /**
  * A select type.

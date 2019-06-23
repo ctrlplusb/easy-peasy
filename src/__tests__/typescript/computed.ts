@@ -1,4 +1,4 @@
-import { Computed, computed } from 'easy-peasy';
+import { Computed, computed, ResolvedState1, ResolvedState2 } from 'easy-peasy';
 
 interface Product {
   id: number;
@@ -9,12 +9,17 @@ interface Product {
 interface ProductsModel {
   products: Product[];
   totalPrice: Computed<ProductsModel, number>;
-  totalPriceVerbose: Computed<ProductsModel, number, [Product[]]>;
+  totalPriceVerbose: Computed<ProductsModel, number, ResolvedState1<Product[]>>;
 }
 
 interface BasketModel {
   productIds: number[];
-  products: Computed<BasketModel, Product[], [number[], Product[]], StoreModel>;
+  products: Computed<
+    BasketModel,
+    Product[],
+    ResolvedState2<number[], Product[]>,
+    StoreModel
+  >;
 }
 
 interface StoreModel {
