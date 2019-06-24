@@ -72,6 +72,8 @@ module.exports = {
             'typescript-tutorial/typing-thunk-against-the-store',
             'typescript-tutorial/adding-typed-listeners',
             'typescript-tutorial/adding-typed-computed',
+            'typescript-tutorial/typing-computed-with-store-state',
+            'typescript-tutorial/final-notes',
           ],
         },
         {
