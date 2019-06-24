@@ -48,7 +48,7 @@ Let's illustrate this pitfall via the following example.
 ```javascript
 function AntiPattern() {
   const stuff = useStoreState(state => {
-    return [state.thing1, state.thing2];
+    return  { thing1: state.thing1, thing2: state.thing2 };
   });
   return (
     <div>
@@ -58,11 +58,9 @@ function AntiPattern() {
 }
 ```
 
-Note how an array is being returned within the state mapper. A new array will be returned every time the state mapper is executed. This breaks strict equality checking, forcing your component to re-render for _any_ state change on your [store](/docs/api/store).
+Note how a new object is being returned within the state mapper. This will occur every time the state mapper is executed, and  breaks strict equality checking, forcing your component to re-render for _any_ state change on your [store](/docs/api/store).
 
-We recommend two alternative approaches to avoid this.
-
-**1. Resolve slices of state individually**
+For this case we recommend that you map the required states individually.
 
 ```javascript
 function Fixed() {
@@ -72,20 +70,63 @@ function Fixed() {
 }
 ```
 
-**2. Define a [selector](/docs/api/selector) for derived state**
+Another case may be that you wish to derive some state, for example, perhaps you would like the names of products only.
 
-For example, perhaps you want to map an array of products to an array containing only their names.
+```javascript
+function AntiPatternTwo() {
+  const productNames = useStoreState(state => {
+    return state.products.items.map(product => product.name);
+  });
+  return (
+    <ul>
+      {productNames.map(name => <li>{name}</li>)}
+    </ul>
+  );
+}
+```
+
+In this case you are returning a new array instance every time the state mapper executes, again breaking the strict equality checking. For this case we recommend one of two options.
+
+**1. Use React's [useMemo](https://reactjs.org/docs/hooks-reference.html#usememo) hook**
+
+Using the [useMemo](https://reactjs.org/docs/hooks-reference.html#usememo) we can ensure our product names mapping only re-runs if the actual product items have changed.
+
+```javascript
+import { useMemo } from 'react';
+
+function FixedOptionOne() {
+  const products = useStoreState(state => state.products.items);
+  const productNames = useMemo(
+    () => products.map(product => product.name),
+    [products] // 👈 tell React to rerun useMemo every time products changes
+  );
+  return (
+    <ul>
+      {productNames.map(name => <li>{name}</li>)}
+    </ul>
+  );
+}
+```
+
+**2. Define a [computed](/docs/api/computed) property**
+
+The alternative solution would be to define a [computed](/docs/api/computed) property to represent the product names. This can be a handy solution especially if you expect product names to be used within multiple locations of your application - this would then avoid you having duplicated logic spread through your application
 
 ```javascript
 const store = createStore({
-  products: [],
-  productNames: selector(
-    [state => state.products],
-    ([products]) => products.map(product => product.name)
-  )
+  products: {
+    items: [],
+    // 👇 defining a computed property
+    productNames: computed(state => state.items.map(product => product.name))
+  }
 });
 
-const productNames = useStoreState(state => state.productNames());
+function FixedOptionTwo() {
+  const productNames = useStoreState(state => state.products.productNames);
+  return (
+    <ul>
+      {productNames.map(name => <li>{name}</li>)}
+    </ul>
+  );
+}
 ```
-
-We cover [selectors](/docs/api/selector) in more detail later in the tutorial.
