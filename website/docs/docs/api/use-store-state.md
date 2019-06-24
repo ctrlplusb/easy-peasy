@@ -41,7 +41,7 @@ const BasketTotal = () => {
 
 Keep your state mappers very simple - don't perform operations against your state within them. This is important as the [useStoreState](/docs/api/use-store-state) hook runs a performance optimisation where it checks to see if the mapped state has changed at all. It uses strict equality checking to check if the next mapped state is equal to the previously mapped state (i.e. `prevMappedState === nextMappedState`). If the newly mapped state doesn't match the previously mapped state your component will re-render.
 
-Therefore if you perform an operation within your map state that always produces a new value (e.g. a new array/object) your component will re-render for _any_ state change.
+Therefore if you perform an operation within your map state that always produces a new reference value (i.e. a new array or object) your component will re-render for _any_ state change on your store.
 
 Let's illustrate this pitfall via the following example.
 
@@ -58,7 +58,7 @@ function AntiPattern() {
 }
 ```
 
-Note how a new object is being returned within the state mapper. This will occur every time the state mapper is executed, and  breaks strict equality checking, forcing your component to re-render for _any_ state change on your [store](/docs/api/store).
+Note how a new object is being returned within the state mapper. This will occur every time the state mapper is executed, and breaks strict equality checking, forcing your component to re-render for _any_ state change on your [store](/docs/api/store).
 
 For this case we recommend that you map the required states individually.
 
@@ -75,6 +75,8 @@ Another case may be that you wish to derive some state, for example, perhaps you
 ```javascript
 function AntiPatternTwo() {
   const productNames = useStoreState(state => {
+    // Array.map produces a new array instance
+    //                           👇
     return state.products.items.map(product => product.name);
   });
   return (
