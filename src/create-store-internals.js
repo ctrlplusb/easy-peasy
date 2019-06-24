@@ -56,7 +56,7 @@ export default function createStoreInternals({
   const defaultState = initialState || {};
   let selectorId = 0;
 
-  const computedProperties = {};
+  const computedProperties = [];
 
   const actionCreatorDict = {};
   const actionCreators = {};
@@ -203,7 +203,7 @@ export default function createStoreInternals({
             });
           };
           createComputedProperty(target);
-          set(path, computedProperties, createComputedProperty);
+          computedProperties.push({ key, parentPath, createComputedProperty });
         } else if (value[selectorSymbol]) {
           selectorId += 1;
           const selectorInstanceId = selectorId;
@@ -559,17 +559,11 @@ export default function createStoreInternals({
           : stateAfterCustomReducers;
       const result = selectorsReducer(stateAfterSelect);
       isInReducer = false;
-      const recursiveRebindComputedProperties = (currentPath, obj) => {
-        const updatedCurrent = get(currentPath, result);
-        Object.keys(obj).forEach(key => {
-          if (typeof obj[key] === 'function') {
-            obj[key](updatedCurrent);
-          } else {
-            recursiveRebindComputedProperties([...currentPath, key], obj[key]);
-          }
+      if (result !== state) {
+        computedProperties.forEach(({ parentPath, createComputedProperty }) => {
+          createComputedProperty(get(parentPath, result));
         });
-      };
-      recursiveRebindComputedProperties([], computedProperties);
+      }
       return result;
     };
 
