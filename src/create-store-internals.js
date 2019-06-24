@@ -474,7 +474,9 @@ export default function createStoreInternals({
         if (computedPropertyCreators) {
           const updatedCurrent = get(path, updatedState);
           Object.keys(computedPropertyCreators).forEach(key => {
-            computedPropertyCreators[key](updatedCurrent);
+            if (typeof computedPropertyCreators[key] === 'function') {
+              computedPropertyCreators[key](updatedCurrent);
+            }
           });
         }
       }
