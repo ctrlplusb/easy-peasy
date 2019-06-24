@@ -6,6 +6,7 @@ import {
   createStore,
   computed,
   action,
+  thunk,
   useStoreState,
   StoreProvider,
 } from '../index';
@@ -337,4 +338,63 @@ test('computed properties accessing others in React component', () => {
   // assert
   expect(getByTestId('products').textContent).toBe('boots, shirt');
   expect(renderCount).toBe(2);
+});
+
+test('nested computed properties', () => {
+  const model = {
+    items: {
+      1: 'foo',
+    },
+
+    nested: {
+      numbers: [1, 2, 3],
+      filteredNumbers: computed(state => {
+        return state.numbers.filter(number => number > 1);
+      }),
+    },
+
+    // selectors
+    list: computed(items => Object.values(items), [state => state.items]),
+
+    // actions
+    fetched: action((state, payload) => {
+      state.nested.numbers = payload;
+      state.items['1'] = 'bar';
+    }),
+  };
+
+  const store = createStore(model);
+
+  // act
+  store.getActions().fetched([4, 5, 6]);
+
+  // assert
+  expect(store.getState().nested.filteredNumbers).toEqual([4, 5, 6]);
+  expect(store.getState().list).toEqual(['bar']);
+});
+
+test('updating nested state', () => {
+  const model = {
+    items: {
+      1: { id: 1, text: 'foo' },
+    },
+
+    nested: {
+      numbers: [1, 2, 3],
+      reset: action(state => {
+        state.numbers = [];
+      }),
+    },
+
+    list: computed(items => Object.values(items), [state => state.items]),
+  };
+
+  const store = createStore(model);
+
+  // act
+  store.getActions().nested.reset();
+
+  // assert
+  expect(store.getState().nested.numbers).toEqual([]);
+  expect(store.getState().list).toEqual([{ id: 1, text: 'foo' }]);
 });

@@ -456,40 +456,15 @@ export default function createStoreInternals({
   const createReducer = () => {
     const runActionReducerAtPath = (state, action, actionReducer, path) => {
       const current = get(path, state);
-      const updatedState =
-        path.length === 0
-          ? produce(state, _draft => actionReducer(_draft, action.payload))
-          : produce(state, draft => {
-              set(
-                actionReducer[metaSymbol].parent,
-                draft,
-                produce(current, _draft =>
-                  actionReducer(_draft, action.payload),
-                ),
-              );
-            });
-
-      if (updatedState !== state) {
-        const computedPropertyCreators = get(path, computedProperties);
-        if (computedPropertyCreators) {
-          const recursiveRebindComputedProperties = (currentPath, obj) => {
-            const updatedCurrent = get(currentPath, updatedState);
-            Object.keys(obj).forEach(key => {
-              if (typeof obj[key] === 'function') {
-                obj[key](updatedCurrent);
-              } else {
-                recursiveRebindComputedProperties(
-                  [...currentPath, key],
-                  obj[key],
-                );
-              }
-            });
-          };
-          recursiveRebindComputedProperties(path, computedPropertyCreators);
-        }
-      }
-
-      return updatedState;
+      return path.length === 0
+        ? produce(state, _draft => actionReducer(_draft, action.payload))
+        : produce(state, draft => {
+            set(
+              actionReducer[metaSymbol].parent,
+              draft,
+              produce(current, _draft => actionReducer(_draft, action.payload)),
+            );
+          });
     };
 
     const reducerForActions = (state, action) => {
@@ -584,6 +559,17 @@ export default function createStoreInternals({
           : stateAfterCustomReducers;
       const result = selectorsReducer(stateAfterSelect);
       isInReducer = false;
+      const recursiveRebindComputedProperties = (currentPath, obj) => {
+        const updatedCurrent = get(currentPath, result);
+        Object.keys(obj).forEach(key => {
+          if (typeof obj[key] === 'function') {
+            obj[key](updatedCurrent);
+          } else {
+            recursiveRebindComputedProperties([...currentPath, key], obj[key]);
+          }
+        });
+      };
+      recursiveRebindComputedProperties([], computedProperties);
       return result;
     };
 
