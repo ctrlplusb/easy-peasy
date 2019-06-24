@@ -2,20 +2,11 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import {
-  Action,
-  Actions,
-  createStore,
-  createTypedHooks,
-  Select,
-  State,
-  StoreProvider,
-} from 'easy-peasy';
+import { Action, createStore, State, StoreProvider } from 'easy-peasy';
 import { connect } from 'react-redux';
 
 interface StoreModel {
   items: Array<string>;
-  firstItem: Select<StoreModel, string | void>;
   addTodo: Action<StoreModel, string>;
 }
 
@@ -24,15 +15,11 @@ const model: StoreModel = {};
 
 const store = createStore(model);
 
-const { useStoreActions, useStoreState, useStoreDispatch } = createTypedHooks<
-  StoreModel
->();
-
 function MyComponent() {
-  const items = useStoreState(state => state.items);
-  const addTodo = useStoreActions(actions => actions.addTodo);
+  const items = store.useStoreState(state => state.items);
+  const addTodo = store.useStoreActions(actions => actions.addTodo);
   addTodo('Install easy peasy');
-  const dispatch = useStoreDispatch();
+  const dispatch = store.useStoreDispatch();
   dispatch({
     type: 'ADD_FOO',
     payload: 'bar',

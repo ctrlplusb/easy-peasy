@@ -4,8 +4,6 @@ import {
   createStore as reduxCreateStore,
 } from 'redux';
 import reduxThunk from 'redux-thunk';
-import { get } from './lib';
-import { metaSymbol, actionSymbol, thunkSymbol } from './constants';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
 import { useStoreActions, useStoreDispatch, useStoreState } from './hooks';
@@ -14,7 +12,6 @@ export default function createStore(model, options = {}) {
   const {
     compose,
     devTools = true,
-    disableInternalSelectFnMemoize = false,
     enhancers = [],
     initialState = {},
     injections,
@@ -37,38 +34,6 @@ export default function createStore(model, options = {}) {
 
   let mockedActions = [];
 
-  const dispatchThunk = (thunk, payload) =>
-    thunk(
-      get(thunk[metaSymbol].parent, references.internals.actionCreators),
-      payload,
-      {
-        dispatch: references.dispatch,
-        getState: () => get(thunk[metaSymbol].parent, references.getState()),
-        getStoreState: references.getState,
-        injections,
-        meta: thunk[metaSymbol],
-      },
-    );
-
-  const dispatchThunkListeners = (name, payload) => {
-    const listensForAction = references.internals.thunkListenersDict[name];
-    return listensForAction && listensForAction.length > 0
-      ? Promise.all(
-          listensForAction.map(listenForAction =>
-            dispatchThunk(listenForAction, payload),
-          ),
-        )
-      : Promise.resolve();
-  };
-
-  const dispatchActionStringListeners = () => next => action => {
-    const result = next(action);
-    if (references.internals.thunkListenersDict[action.type]) {
-      dispatchThunkListeners(action.type, action.payload);
-    }
-    return result;
-  };
-
   const composeEnhancers =
     compose ||
     (devTools &&
@@ -81,7 +46,6 @@ export default function createStore(model, options = {}) {
 
   const bindStoreInternals = state => {
     references.internals = createStoreInternals({
-      disableInternalSelectFnMemoize,
       initialState: state,
       injections,
       model: modelDefinition,
@@ -134,7 +98,6 @@ export default function createStore(model, options = {}) {
     composeEnhancers(
       applyMiddleware(
         reduxThunk,
-        dispatchActionStringListeners,
         ...middleware,
         listenerActionsMiddleware,
         currentStateMiddleware,
@@ -200,71 +163,6 @@ export default function createStore(model, options = {}) {
     }
     delete modelDefinition[key];
     rebindStore(key);
-  };
-
-  // @deprecated
-  const dispatchActionListener = (actionName, payload) =>
-    store.dispatch({
-      type: '@@EP/LISTENER',
-      payload,
-      actionName,
-    });
-
-  const resolveActionName = action =>
-    typeof action === 'function'
-      ? action[actionSymbol]
-        ? helpers.actionName(action)
-        : action[thunkSymbol]
-        ? helpers.thunkCompleteName(action)
-        : undefined
-      : typeof action === 'string'
-      ? action
-      : undefined;
-
-  // @deprecated
-  store.triggerListener = (listener, action, payload) => {
-    const actionName = resolveActionName(action);
-    if (
-      listener.listeners[actionName] &&
-      listener.listeners[actionName].length > 0
-    ) {
-      if (
-        listener.listeners[actionName].some(handler => handler[actionSymbol])
-      ) {
-        dispatchActionListener(actionName, payload);
-      }
-      const thunkHandlers = listener.listeners[actionName].filter(
-        handler => handler[thunkSymbol],
-      );
-      return thunkHandlers.length > 0
-        ? Promise.all(
-            thunkHandlers.map(handler => dispatchThunk(handler, payload)),
-          ).then(() => undefined)
-        : Promise.resolve();
-    }
-    return Promise.resolve();
-  };
-
-  // @deprecated
-  store.triggerListeners = (action, payload) => {
-    const actionName = resolveActionName(action);
-    if (actionName) {
-      const actionListenerHandlers =
-        references.internals.actionListenersDict[actionName];
-      if (actionListenerHandlers && actionListenerHandlers.length > 0) {
-        dispatchActionListener(actionName, payload);
-      }
-      const thunkListenerHandlers =
-        references.internals.thunkListenersDict[actionName];
-      return thunkListenerHandlers && thunkListenerHandlers.length > 0
-        ? Promise.all(
-            thunkListenerHandlers.map(handler =>
-              dispatchThunk(handler, payload),
-            ),
-          ).then(() => undefined)
-        : Promise.resolve();
-    }
-    return Promise.resolve();
   };
 
   store.useStoreActions = useStoreActions;

@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { Actions, Thunk, Action, Select, Listen, Reducer } from 'easy-peasy';
+import { Actions, Thunk, Action, Reducer } from 'easy-peasy';
 
 type Model = {
   stateArray: Array<string>;
@@ -14,8 +14,6 @@ type Model = {
   stateUnion: string | null;
   actionImp: Action<Model, number>;
   thunkImp: Thunk<Model, string>;
-  selectImp: Select<Model, number>;
-  listenImp: Listen<Model>;
   reducerImp: Reducer<number>;
   nested: {
     actionImp: Action<Model, number>;
@@ -51,15 +49,6 @@ assert.stateUndefined;
 assert.stateUnion;
 // typings:expect-error
 assert.reducerImp;
-// typings:expect-error
-assert.selectImp;
-
-/**
- * Listener Types
- */
-
-// typings:expect-error
-assert.listenImp;
 // typings:expect-error
 assert.reducerImp;
 
