@@ -2,7 +2,9 @@ import { action, computed, createStore } from '../index';
 
 test('issue217', () => {
   const model = {
-    items: {},
+    items: {
+      1: 'foo',
+    },
 
     nested: {
       numbers: [1, 2, 3],
@@ -16,18 +18,17 @@ test('issue217', () => {
 
     // actions
     fetched: action((state, payload) => {
-      state.items = payload.reduce((acc, todo) => {
-        acc[todo.id] = todo;
-        return acc;
-      }, {});
+      state.nested.numbers = payload;
+      state.items['1'] = 'bar';
     }),
   };
 
   const store = createStore(model);
 
   // act
-  store.getActions().fetched([{ id: 1, text: 'foo' }]);
+  store.getActions().fetched([4, 5, 6]);
 
   // assert
-  expect(store.getState().nested.filteredNumbers).toEqual([2, 3]);
+  expect(store.getState().nested.filteredNumbers).toEqual([4, 5, 6]);
+  expect(store.getState().list).toEqual(['bar']);
 });

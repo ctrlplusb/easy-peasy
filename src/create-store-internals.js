@@ -472,12 +472,20 @@ export default function createStoreInternals({
       if (updatedState !== state) {
         const computedPropertyCreators = get(path, computedProperties);
         if (computedPropertyCreators) {
-          const updatedCurrent = get(path, updatedState);
-          Object.keys(computedPropertyCreators).forEach(key => {
-            if (typeof computedPropertyCreators[key] === 'function') {
-              computedPropertyCreators[key](updatedCurrent);
-            }
-          });
+          const recursiveRebindComputedProperties = (currentPath, obj) => {
+            const updatedCurrent = get(currentPath, updatedState);
+            Object.keys(obj).forEach(key => {
+              if (typeof obj[key] === 'function') {
+                obj[key](updatedCurrent);
+              } else {
+                recursiveRebindComputedProperties(
+                  [...currentPath, key],
+                  obj[key],
+                );
+              }
+            });
+          };
+          recursiveRebindComputedProperties(path, computedPropertyCreators);
         }
       }
 
