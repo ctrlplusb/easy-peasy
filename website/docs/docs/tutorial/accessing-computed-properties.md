@@ -11,9 +11,9 @@ function TotalPriceOfProducts() {
 };
 ```
 
-## Accessing selectors directly via the store
+## Accessing computed properties directly via the store
 
-You can additionally access your [computed](/docs/api/computed) property from the [store's](/docs/api/store) `getState` API.
+You can additionally access your [computed](/docs/api/computed) property via the [store's](/docs/api/store) `getState` API.
 
 ```javascript
 store.getState().shoppingBasket.totalPrice;

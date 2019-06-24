@@ -52,18 +52,20 @@ function TodoList() {
 
 ## Highlights
 
-  - React hooks based API
-  - Simple, intuitive API focusing on speed of development
+  - Zero configuration
+  - No boilerplate
+  - Intuitive API
+  - React hooks to use store within components
   - Thunks for data fetching and side effects
-  - Selectors for derived data
+  - Computed properties - i.e. derived data
   - Global, shared, or component level stores
   - Immutable data store under the hood
-  - Typescript definitions baked in
+  - Includes robust Typescript definitions
   - React Native supported
-  - Testing helpers baked in
+  - Includes APIs to aid testing
   - Wraps Redux, all the radness, without the boilerplate
-  - Redux Dev Tools support built in
-  - Supports Redux middleware and enhancers
+  - Redux Dev Tools support preconfigured
+  - Supports customisation of the underlying Redux store
 
 ## Introduction
 
