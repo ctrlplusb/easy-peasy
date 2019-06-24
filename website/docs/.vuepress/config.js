@@ -84,6 +84,7 @@ module.exports = {
             'api/computed',
             'api/create-store',
             'api/debug',
+            'api/memo',
             'api/reducer',
             'api/store',
             'api/store-config',

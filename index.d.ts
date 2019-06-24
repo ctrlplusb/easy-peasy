@@ -965,3 +965,5 @@ export function createComponentStore<
   model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
   config?: StoreConfig,
 ): UseLocalStore<StoreModel, InitialData>;
+
+export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
