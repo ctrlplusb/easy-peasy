@@ -33,15 +33,3 @@ const model = {
 ```
 
 Being able to declare *listeners* allows you to maintain clearer separation of concerns. It would be strange in our example above if the todos model had to dispatch an action against the audit model in order to ensure the logging occurs. It is not the todos model's responsibility to know about auditing. *Listeners* allow us to maintain the correct responsibilities.
-
-## Debugging listeners
-
-Listeners are visible within the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension. This makes it very easy to validate they are executing as expected, and to see the effect that they had on state.
-
-Below is an example where our *listener* is an [action](/docs/api/action) - i.e. performing state updates.
-
-<img src="../../assets/devtools-listenaction.png" />
-
-And here is an example where our *listener* is a [thunk](/docs/api/thunk) - i.e. performing side effects.
-
-<img src="../../assets/devtools-listenthunk.png" />

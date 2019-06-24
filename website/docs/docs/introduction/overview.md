@@ -4,14 +4,15 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
 
 ## Features
 
-  - Zero config
+  - Zero configuration
+  - No boilerplate
   - Intuitive API
-  - React hooks to communicate with store
+  - React hooks to use store within components
   - Thunks for data fetching and side effects
-  - Selectors for derived data
+  - Computed properties - i.e. derived data
   - Global, shared, or component level stores
   - Immutable data store under the hood
-  - Includes Typescript definitions
+  - Includes robust Typescript definitions
   - React Native supported
   - Includes APIs to aid testing
   - Wraps Redux, all the radness, without the boilerplate
