@@ -3,7 +3,7 @@
 Allows you to declare an [action](/docs/api/action) on your model. An [action](/docs/api/action) is used to perform updates on your [store](/docs/api/store).
 
 ```javascript
-action((state, payload) => {
+addTodo: action((state, payload) => {
   state.items.push(payload);
 })
 ```
@@ -48,6 +48,23 @@ action((state, payload) => {
       ```
 
       This helps to promote a reactive model and allows for separation of concerns.
+
+## Actions are synchronous
+
+[Actions](/docs/api/action) are executed synchronously, therefore, you can immediately query your [store](/docs/api/store) to see the updated state.
+
+```javascript
+store.getActions().todos.addTodo('Learn Easy Peasy');
+
+store.getState().todos.items;
+// ["Learn Easy Peasy"]
+```
+
+## Debugging Actions
+
+Ensure you have the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension installed. This will allow you to see your dispatched actions, with their payload and the effect that they had on your state.
+
+<img src="../../assets/devtools-action.png" />
 
 ## Example
 
@@ -123,16 +140,24 @@ const auditModel = {
     (state, payload) => {
       state.logs.push(payload);
     },
-    { 
+    {
       // 👇 declare the targets within an array
       listenTo: [
-        fooModel.firstAction, 
+        fooModel.firstAction,
         fooModel.secondAction
-      ] 
-    } 
+      ]
+    }
   )
 };
 ```
+
+## Debugging listeners
+
+Listeners are visible within the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension. This makes it very easy to validate they are executing as expected, and to see the effect that they had on state.
+
+Below is an example of an [action](/docs/api/action) *listener* being fired in response to an action.
+
+<img src="../../assets/devtools-listenaction.png" />
 
 ## Using console.log within actions
 

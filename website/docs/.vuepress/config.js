@@ -24,9 +24,10 @@ module.exports = {
 
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Install', link: '/docs/introduction/installation/' },
       { text: 'Tutorial', link: '/docs/tutorial/' },
       { text: 'API', link: '/docs/api/' },
-      { text: 'Install', link: '/docs/introduction/installation/' },
+      { text: 'Typescript', link: '/docs/typescript-tutorial/' },
     ],
 
     sidebarDepth: 0,
@@ -53,9 +54,8 @@ module.exports = {
             'tutorial/dispatching-actions',
             'tutorial/defining-thunks',
             'tutorial/dispatching-thunks',
-            'tutorial/defining-selectors',
-            'tutorial/accessing-selectors',
-            'tutorial/runtime-arg-selectors',
+            'tutorial/defining-computed-properties',
+            'tutorial/accessing-computed-properties',
             'tutorial/responding-actions',
             'tutorial/final-notes',
           ],
@@ -71,7 +71,7 @@ module.exports = {
             'typescript-tutorial/using-typed-injections',
             'typescript-tutorial/typing-thunk-against-the-store',
             'typescript-tutorial/adding-typed-listeners',
-            'typescript-tutorial/adding-typed-selectors',
+            'typescript-tutorial/adding-typed-computed',
           ],
         },
         {
@@ -79,10 +79,10 @@ module.exports = {
           children: [
             'api/',
             'api/action',
+            'api/computed',
             'api/create-store',
             'api/debug',
             'api/reducer',
-            'api/selector',
             'api/store',
             'api/store-config',
             'api/store-provider',
@@ -106,6 +106,7 @@ module.exports = {
             'deprecated-api/create-typed-hooks',
             'deprecated-api/listen',
             'deprecated-api/select',
+            'deprecated-api/selector',
             'deprecated-api/store',
           ],
         },

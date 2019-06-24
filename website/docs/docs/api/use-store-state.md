@@ -39,47 +39,53 @@ const BasketTotal = () => {
 
 ## Pitfalls
 
-Please be careful in the manner that you resolve values from your `mapToState`. To optimise the rendering performance of your components we use referential equality checking (===) to determine if the mapped state has changed. When an update to your stores state occurs we will run your mapping function again, and if the new value does not equal to the previously mapped value we will re-render your component.
+Keep your state mappers very simple - don't perform operations against your state within them. This is important as the [useStoreState](/docs/api/use-store-state) hook runs a performance optimisation where it checks to see if the mapped state has changed at all. It uses strict equality checking to check if the next mapped state is equal to the previously mapped state (i.e. `prevMappedState === nextMappedState`). If the newly mapped state doesn't match the previously mapped state your component will re-render.
 
-Therefore, if you perform an operation that always returns a new value (for e.g. an array) is an anti-pattern as it will break our equality checks, causing our components to re-render for _any_ state change.
+Therefore if you perform an operation within your map state that always produces a new value (e.g. a new array/object) your component will re-render for _any_ state change.
 
-Below is an illustrative example.
-
-```javascript                                                     👇
-const productNames = useStoreState(state => state.products.map(x => x.name))
-```
-
-Using `.map` produces a new array instance every time it is called. So
-`prevProductNames !== nextProductNames`.
-
-You have two options to solve the above.
-
-Firstly, you could just return the products and then do the `.map` outside of your `mapState`:
+Let's illustrate this pitfall via the following example.
 
 ```javascript
-const products = useStoreState(state => state.products)
-const productNames = products.map(x => x.name)
+function AntiPattern() {
+  const stuff = useStoreState(state => {
+    return [state.thing1, state.thing2];
+  });
+  return (
+    <div>
+      I will re-render any time any state update happens across the store!
+    </div>
+  );
+}
 ```
 
-A better approach is to define a [selector](/docs/api/selector) against your model.
+Note how an array is being returned within the state mapper. A new array will be returned every time the state mapper is executed. This breaks strict equality checking, forcing your component to re-render for _any_ state change on your [store](/docs/api/store).
+
+We recommend two alternative approaches to avoid this.
+
+**1. Resolve slices of state individually**
 
 ```javascript
-import { selector, createStore } from 'easy-peasy';
+function Fixed() {
+  const thing1 = useStoreState(state => state.thing1);
+  const thing2 = useStoreState(state => state.thing2);
+  return <div>I am optimised</div>;
+}
+```
 
-const createStore = ({
-  products: [{ name: 'Boots' }],
+**2. Define a [selector](/docs/api/selector) for derived state**
+
+For example, perhaps you want to map an array of products to an array containing only their names.
+
+```javascript
+const store = createStore({
+  products: [],
   productNames: selector(
     [state => state.products],
-    (resolvedState) => {
-      const [products] = resolvedState;
-      return products.map(x => x.name);
-    }
+    ([products]) => products.map(product => product.name)
   )
 });
-```
 
-And then use it like so:
-
-```javascript
 const productNames = useStoreState(state => state.productNames());
 ```
+
+We cover [selectors](/docs/api/selector) in more detail later in the tutorial.
