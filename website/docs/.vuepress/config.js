@@ -103,17 +103,6 @@ module.exports = {
           ],
         },
         {
-          title: 'Deprecated API',
-          children: [
-            'deprecated-api/',
-            'deprecated-api/create-typed-hooks',
-            'deprecated-api/listen',
-            'deprecated-api/select',
-            'deprecated-api/selector',
-            'deprecated-api/store',
-          ],
-        },
-        {
           title: 'Testing',
           children: [
             'testing/',

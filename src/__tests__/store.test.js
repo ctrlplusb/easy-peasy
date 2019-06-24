@@ -1,4 +1,4 @@
-import { action, createStore, listen, select, thunk } from '../index';
+import { action, createStore, thunk } from '../index';
 
 test('empty object in state', () => {
   // arrange
@@ -174,14 +174,6 @@ test('allows custom middleware with mockActions=true', () => {
       saved: action((state, { success }) => {
         state.error = !success;
       }),
-      listeners: listen(on => {
-        on(
-          'API_RESPONSE',
-          thunk(async (actions, payload) => {
-            await actions.saved(payload);
-          }),
-        );
-      }),
     },
     { middleware: [customMiddleware], mockActions: true },
   );
@@ -193,7 +185,6 @@ test('allows custom middleware with mockActions=true', () => {
   expect(store.getMockedActions()).toEqual([
     { type: 'API_REQUEST' },
     { type: 'API_RESPONSE', payload: { success: true } },
-    { type: '@action.saved', payload: { success: true } },
     { customMiddleware: 'operateOnAPI' },
   ]);
 });
@@ -269,7 +260,6 @@ test('complex configuration', async () => {
 
   const store = createStore({
     error: {
-      hasError: select(state => !!state.message),
       message: undefined,
     },
     session: {
