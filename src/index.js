@@ -1,13 +1,5 @@
 import { setAutoFreeze } from 'immer-peasy';
-import {
-  createTypedHooks,
-  useActions,
-  useDispatch,
-  useStore,
-  useStoreActions,
-  useStoreDispatch,
-  useStoreState,
-} from './hooks';
+import { useStoreActions, useStoreDispatch, useStoreState } from './hooks';
 import createStore from './create-store';
 import createContextStore from './create-context-store';
 import createComponentStore from './create-component-store';
@@ -17,11 +9,8 @@ import {
   actionName,
   computed,
   debug,
-  listen,
   memo,
   reducer,
-  select,
-  selector,
   thunk,
   thunkCompleteName,
   thunkFailName,
@@ -41,21 +30,14 @@ export {
   createContextStore,
   createComponentStore,
   createStore,
-  createTypedHooks,
   debug,
-  listen,
   memo,
   reducer,
-  select,
-  selector,
   StoreProvider,
   thunk,
   thunkCompleteName,
   thunkFailName,
   thunkStartName,
-  useActions,
-  useDispatch,
-  useStore,
   useStoreActions,
   useStoreDispatch,
   useStoreState,

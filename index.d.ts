@@ -66,28 +66,13 @@ type FilterActionTypes<T extends object> = Omit<
     | Date
     | RegExp
     | Reducer<any, any>
-    | Select<any, any>
-    | Selector<any, any, any, any, any>
-    | Listen<any, any, any>
     | Computed<any, any, any, any>
   >
 >;
 
 type FilterStateTypes<T extends object> = Overwrite<
-  Omit<
-    T,
-    KeysOfType<
-      T,
-      Action<any, any> | Listen<any, any, any> | Thunk<any, any, any, any, any>
-    >
-  >,
-  Pick<
-    T,
-    KeysOfType<
-      T,
-      Select<any, any> | Reducer<any, any> | Selector<any, any, any, any, any>
-    >
-  >
+  Omit<T, KeysOfType<T, Action<any, any> | Thunk<any, any, any, any, any>>>,
+  Pick<T, KeysOfType<T, Reducer<any, any>>>
 >;
 
 /**
@@ -122,10 +107,6 @@ type StateModelValues<
   P extends keyof Model
 > = Model[P] extends Computed<any, infer R, any, any>
   ? R
-  : Model[P] extends Select<any, infer R>
-  ? R
-  : Model[P] extends Selector<any, infer R, any, any, any>
-  ? SelectorRef<Model[P]>
   : Model[P] extends Reducer<infer R, any>
   ? R
   : Model[P] extends object
@@ -221,23 +202,6 @@ export type Store<
     getActions: () => Actions<StoreModel>;
     getMockedActions: () => ActionData[];
     clearMockedActions: () => void;
-    triggerListener: <TriggerAction extends ActionTypes | string>(
-      listener: Listen<any>,
-      action: TriggerAction,
-      payload: TriggerAction extends Action<any, infer ActionPayload>
-        ? ActionPayload
-        : TriggerAction extends Thunk<any, infer ThunkPayload>
-        ? ThunkPayload
-        : any,
-    ) => Promise<void>;
-    triggerListeners: <TriggerAction extends ActionTypes | string>(
-      action: TriggerAction,
-      payload: TriggerAction extends Action<any, infer ActionPayload>
-        ? ActionPayload
-        : TriggerAction extends Thunk<any, infer ThunkPayload>
-        ? ThunkPayload
-        : any,
-    ) => Promise<void>;
     useStoreActions: <Result = any>(
       mapActions: (actions: Actions<StoreModel>) => Result,
     ) => Result;
@@ -337,86 +301,6 @@ export function thunk<
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
 
 /**
- * Action listeners type.
- *
- * Useful when declaring your model.
- *
- * @example
- *
- * import { Listeners } from 'easy-peasy';
- *
- * interface Model {
- *   userListeners: Listeners<Model>;
- * }
- *
- * listen(on => {
- *   on()
- * })
- */
-export type Listen<
-  Model extends Object = {},
-  Injections = any,
-  StoreModel extends Object = {}
-> = {
-  type: 'listen';
-};
-
-/**
- * Declares action listeners against your model.
- *
- * https://github.com/ctrlplusb/easy-peasy#listenersattach
- *
- * @example
- *
- * import { listen } from 'easy-peasy';
- *
- * const store = createStore({
- *   users: userModel,
- *   audit: {
- *     logs: [],
- *     add: (state, payload) => {
- *       state.logs.push(payload)
- *     },
- *     userListeners: listen((on) => {
- *       on(userModel.login, (actions) => {
- *          actions.add('User logged in');
- *       });
- *     })
- *   }
- * });
- */
-export function listen<
-  Model extends Object = {},
-  Injections = any,
-  StoreModel extends Object = {}
->(
-  attach: (
-    on: <ListenAction extends ActionTypes | string>(
-      action: ListenAction,
-      handler:
-        | Thunk<
-            Model,
-            ListenAction extends string
-              ? any
-              : ListenAction extends Thunk<any, any, any, any, any>
-              ? ListenAction['payload']
-              : Param1<ListenAction>,
-            Injections,
-            StoreModel
-          >
-        | Action<
-            Model,
-            ListenAction extends string
-              ? any
-              : ListenAction extends Thunk<any, any, any, any, any>
-              ? ListenAction['payload']
-              : Param1<ListenAction>
-          >,
-    ) => void,
-  ) => void,
-): Listen<Model, Injections, StoreModel>;
-
-/**
  * An action type.
  *
  * Useful when declaring your model.
@@ -463,118 +347,6 @@ export function action<
     listenTo?: ListenTo;
   },
 ): Action<Model, Payload>;
-
-type Arguments =
-  | [any]
-  | [any, any]
-  | [any, any, any]
-  | [any, any, any, any]
-  | [any, any, any, any, any];
-
-type OptionalArguments = [] | Arguments;
-
-/**
- * A selector type.
- *
- * Useful when declaring your model.
- *
- * @example
- *
- * import { Selector } from 'easy-peasy';
- *
- * interface Model {
- *   products: Array<Product>;
- *   totalPrice: Selector<Model, number>;
- * }
- */
-export type Selector<
-  Model extends Object = {},
-  Result = any,
-  ResolvedState extends Arguments = any,
-  RuntimeArgs extends OptionalArguments = any,
-  StoreModel extends Object = {}
-> = {
-  (resolvedArgs: ResolvedState, runTimeArgs: RuntimeArgs): Result;
-  type: 'selector';
-  result: Result;
-};
-
-type SelectorArgument<
-  Model extends Object = {},
-  StoreModel extends Object = {},
-  Result = any
-> = (state: State<Model>, storeState: State<StoreModel>) => Result;
-
-export type SelectorRef<
-  TargetSelector extends Selector<any, any, any, any, any>
-> = TargetSelector extends Selector<
-  any,
-  infer Result,
-  any,
-  infer RunTimeArgs,
-  any
->
-  ? RunTimeArgs extends Arguments
-    ? (...args: RunTimeArgs) => Result
-    : () => Result
-  : () => any;
-
-/**
- * Allows you to declare a selector against your model.
- *
- * https://github.com/ctrlplusb/easy-peasy#selector
- *
- * @example
- *
- * import { selector } from 'easy-peasy';
- *
- * const store = createStore({
- *   products: [],
- *   totalPrice: selector(
- *     [state => state.products],
- *     products => products.reduce((acc, cur) => acc + cur.price, 0),
- *   )
- * });
- */
-export function selector<
-  Model extends Object = {},
-  Result = any,
-  Args extends Arguments = any,
-  RunTimeArgs extends OptionalArguments = any,
-  StoreModel extends Object = {}
->(
-  argumentSelectors: Args extends [any]
-    ? [SelectorArgument<Model, StoreModel, Args[0]>]
-    : Args extends [any, any]
-    ? [
-        SelectorArgument<Model, StoreModel, Args[0]>,
-        SelectorArgument<Model, StoreModel, Args[1]>,
-      ]
-    : Args extends [any, any, any]
-    ? [
-        SelectorArgument<Model, StoreModel, Args[0]>,
-        SelectorArgument<Model, StoreModel, Args[1]>,
-        SelectorArgument<Model, StoreModel, Args[2]>,
-      ]
-    : Args extends [any, any, any, any]
-    ? [
-        SelectorArgument<Model, StoreModel, Args[0]>,
-        SelectorArgument<Model, StoreModel, Args[1]>,
-        SelectorArgument<Model, StoreModel, Args[2]>,
-        SelectorArgument<Model, StoreModel, Args[3]>,
-      ]
-    : Args extends [any, any, any, any]
-    ? [
-        SelectorArgument<Model, StoreModel, Args[0]>,
-        SelectorArgument<Model, StoreModel, Args[1]>,
-        SelectorArgument<Model, StoreModel, Args[2]>,
-        SelectorArgument<Model, StoreModel, Args[3]>,
-        SelectorArgument<Model, StoreModel, Args[4]>,
-      ]
-    : Array<any>,
-  selector: (resolvedArgs: Args, runTimeArgs: RunTimeArgs) => Result,
-  memoizeLimit?: number,
-): Selector<Model, Result, Args, RunTimeArgs, StoreModel>;
 
 type StateResolver<
   Model extends {},
@@ -698,47 +470,6 @@ export function computed<
 ): Computed<Model, Result, ResolvedState, StoreModel>;
 
 /**
- * A select type.
- *
- * Useful when declaring your model.
- *
- * @example
- *
- * import { Select } from 'easy-peasy';
- *
- * interface Model {
- *   products: Array<Product>;
- *   totalPrice: Select<Model, number>;
- * }
- */
-export type Select<Model extends Object = {}, Result = any> = {
-  (state: State<Model>): Result;
-  type: 'select';
-  result: Result;
-};
-
-/**
- * Allows you to declare derived state against your model.
- *
- * https://github.com/ctrlplusb/easy-peasy#selectselector
- *
- * @example
- *
- * import { select } from 'easy-peasy';
- *
- * const store = createStore({
- *   products: [],
- *   totalPrice: select(state =>
- *     state.products.reduce((acc, cur) => acc + cur.price, 0)
- *   )
- * });
- */
-export function select<Model extends Object = {}, Result = any>(
-  select: (state: State<Model>) => Result,
-  dependencies?: Array<Select<any, any>>,
-): Select<Model, Result>;
-
-/**
  * A reducer type.
  *
  * Useful when declaring your model.
@@ -825,14 +556,6 @@ export function useStoreState<StoreState extends State<any> = {}, Result = any>(
 ): Result;
 
 /**
- * @deprecated Use useStoreState instead
- */
-export function useStore<StoreState extends State<any> = {}, Result = any>(
-  mapState: (state: StoreState) => Result,
-  dependencies?: Array<any>,
-): Result;
-
-/**
  * A React Hook allowing you to use actions within your component.
  *
  * https://github.com/ctrlplusb/easy-peasy#useactionsmapactions
@@ -847,13 +570,6 @@ export function useStore<StoreState extends State<any> = {}, Result = any>(
  * }
  */
 export function useStoreActions<StoreModel extends Object = {}, Result = any>(
-  mapActions: (actions: Actions<StoreModel>) => Result,
-): Result;
-
-/**
- * @deprecated Use useStoreActions instead
- */
-export function useActions<StoreModel extends Object = {}, Result = any>(
   mapActions: (actions: Actions<StoreModel>) => Result,
 ): Result;
 
@@ -874,40 +590,6 @@ export function useActions<StoreModel extends Object = {}, Result = any>(
 export function useStoreDispatch<StoreModel extends Object = {}>(): Dispatch<
   StoreModel
 >;
-
-/**
- * @deprecated Use useStoreDispatch instead
- */
-export function useDispatch<StoreModel extends Object = {}>(): Dispatch<
-  StoreModel
->;
-
-/**
- * A utility function used to create pre-typed hooks.
- *
- * @example
- * const { useStoreActions, useStoreState, useStoreDispatch } = createTypedHooks<StoreModel>();
- *
- * useStoreActions(actions => actions.todo.add); // fully typed
- */
-export function createTypedHooks<StoreModel extends Object = {}>(): {
-  useStoreActions: <Result = any>(
-    mapActions: (actions: Actions<StoreModel>) => Result,
-  ) => Result;
-  useStoreDispatch: () => Dispatch<StoreModel>;
-  useStoreState: <Result = any>(
-    mapState: (state: State<StoreModel>) => Result,
-    dependencies?: Array<any>,
-  ) => Result;
-  useActions: <Result = any>(
-    mapActions: (actions: Actions<StoreModel>) => Result,
-  ) => Result;
-  useDispatch: () => Dispatch<StoreModel>;
-  useStore: <Result = any>(
-    mapState: (state: State<StoreModel>) => Result,
-    dependencies?: Array<any>,
-  ) => Result;
-};
 
 /**
  * Exposes the store to your app (and hooks).

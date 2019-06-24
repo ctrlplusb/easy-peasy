@@ -4,11 +4,8 @@ import {
   Actions,
   Thunk,
   Action,
-  Select,
-  Listen,
   Reducer,
   State,
-  createTypedHooks,
   useStoreActions,
   useStoreDispatch,
   useStoreState,
@@ -26,8 +23,6 @@ interface Model {
   stateUnion: string | null;
   actionImp: Action<Model, number>;
   thunkImp: Thunk<Model, string>;
-  selectImp: Select<Model, number>;
-  listenImp: Listen<Model>;
   reducerImp: Reducer<number>;
   nested: {
     actionImp: Action<Model, number>;
@@ -43,15 +38,4 @@ useStoreResult + 1;
 let useActionResult = useStoreActions(
   (actions: Actions<Model>) => actions.actionImp,
 );
-useActionResult(1);
-
-const typedHooks = createTypedHooks<Model>();
-
-useStoreResult = typedHooks.useStoreState(state => state.stateNumber);
-useStoreResult + 1;
-useActionResult = typedHooks.useStoreActions(actions => actions.actionImp);
-useActionResult(1);
-useStoreResult = typedHooks.useStore(state => state.stateNumber);
-useStoreResult + 1;
-useActionResult = typedHooks.useActions(actions => actions.actionImp);
 useActionResult(1);
