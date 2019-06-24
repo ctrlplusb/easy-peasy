@@ -6,13 +6,7 @@ import {
   actionSymbol,
   computedSymbol,
   computedConfigSymbol,
-  listenSymbol,
   reducerSymbol,
-  selectDependenciesSymbol,
-  selectorConfigSymbol,
-  selectorSymbol,
-  selectStateSymbol,
-  selectSymbol,
   thunkStateSymbol,
   thunkSymbol,
 } from './constants';
@@ -52,32 +46,11 @@ export const computed = (fn, stateResolvers = defaultStateResolvers) => {
   return fn;
 };
 
-export const listen = fn => {
-  fn[listenSymbol] = true;
-  return fn;
-};
-
 export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
 
 export const thunk = (fn, config) => {
   fn[thunkSymbol] = true;
   fn[thunkStateSymbol] = {
-    config,
-  };
-  return fn;
-};
-
-export const select = (fn, dependencies) => {
-  fn[selectSymbol] = true;
-  fn[selectDependenciesSymbol] = dependencies;
-  fn[selectStateSymbol] = {};
-  return fn;
-};
-
-export const selector = (args, fn, config) => {
-  fn[selectorSymbol] = true;
-  fn[selectorConfigSymbol] = {
-    args,
     config,
   };
   return fn;
