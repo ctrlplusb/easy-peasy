@@ -1,4 +1,5 @@
 import { isDraft, finishDraft, createDraft } from 'immer-peasy';
+import memoizerific from 'memoizerific';
 import {
   actionNameSymbol,
   actionStateSymbol,
@@ -55,6 +56,8 @@ export const listen = fn => {
   fn[listenSymbol] = true;
   return fn;
 };
+
+export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
 
 export const thunk = (fn, config) => {
   fn[thunkSymbol] = true;
