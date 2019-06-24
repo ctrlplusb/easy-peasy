@@ -182,3 +182,21 @@ function FirstXTodos({ num }) {
   return <div>...</div>;
 }
 ```
+
+### Memoising your runtime arg functions
+
+Easy Peasy exports a [memo](/docs/api/memo) which allows you to easily memoise your [computed](/docs/api/computed) property runtime arg functions. Lets refactor the example from above to do so.
+
+```javascript
+import { memo } from 'easy-peasy';
+//        👆
+
+const todosModel = {
+  items: [],
+  firstXTodos: computed(state => 
+    // 👇
+    memo(num => state.items.slice(0, num), 10)
+    //                the cache size limit 👆
+  )
+}
+```
