@@ -15,9 +15,8 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
   - Includes robust Typescript definitions
   - React Native supported
   - Includes APIs to aid testing
-  - Wraps Redux, all the radness, without the boilerplate
   - Redux Dev Tools support preconfigured
-  - Supports customisation of the underlying Redux store
+  - Supports Redux middleware
 
 ## Architecture
 
