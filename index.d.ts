@@ -30,8 +30,10 @@ import { string } from 'prop-types';
  * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
  */
 type IndexSignatureKeysOfType<A extends Object> = {
-  [K in keyof A]: A[K] extends { [key: string]: any }
+  [K in keyof A]: A[K] extends ({ [key: string]: any } | { [key: number]: any })
     ? string extends keyof A[K]
+      ? K
+      : number extends keyof A[K]
       ? K
       : never
     : never;

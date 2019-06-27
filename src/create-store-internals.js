@@ -182,6 +182,7 @@ export default function createStoreInternals({
           const createComputedProperty = o => {
             Object.defineProperty(o, key, {
               configurable: true,
+              enumerable: true,
               get: () => {
                 const storeState = isInReducer
                   ? references.currentState

@@ -6,7 +6,6 @@ import {
   createStore,
   computed,
   action,
-  thunk,
   useStoreState,
   StoreProvider,
 } from '../index';
@@ -65,6 +64,37 @@ test('defining and accessing a computed property', () => {
 
   // act
   expect(store.getState().fullName).toBe('Mary Poppins');
+});
+
+test('computed properties immediately available in an action', () => {
+  // arrange
+  const store = createStore({
+    firstName: 'Mary',
+    lastName: 'Poppins',
+    fullName: computed(state => `${state.firstName} ${state.lastName}`),
+    anAction: action(state => {
+      // assert
+      expect(state.fullName).toBe('Mary Poppins');
+    }),
+  });
+
+  // act
+  store.getActions().anAction();
+});
+
+test('can spread computed', () => {
+  // arange
+  const store = createStore({
+    firstName: 'Mary',
+    lastName: 'Poppins',
+    fullName: computed(state => `${state.firstName} ${state.lastName}`),
+  });
+
+  // act
+  const myState = { ...store.getState() };
+
+  // assert
+  expect(myState.fullName).toBe('Mary Poppins');
 });
 
 test('computed properties are memoized', () => {
@@ -382,7 +412,7 @@ test('updating nested state', () => {
     nested: {
       numbers: [1, 2, 3],
       reset: action(state => {
-        state.numbers = [];
+        state.numbers = [5];
       }),
     },
 
@@ -395,6 +425,6 @@ test('updating nested state', () => {
   store.getActions().nested.reset();
 
   // assert
-  expect(store.getState().nested.numbers).toEqual([]);
+  expect(store.getState().nested.numbers).toEqual([5]);
   expect(store.getState().list).toEqual([{ id: 1, text: 'foo' }]);
 });

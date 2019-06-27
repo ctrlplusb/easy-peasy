@@ -4,6 +4,7 @@ import { State, Thunk, Action, Select, Listen, Reducer } from 'easy-peasy';
 
 type Model = {
   stateMap: { [key: string]: Array<string> };
+  numberStateMap: { [key: number]: boolean };
   optionalStateMap?: { [key: string]: Array<string> };
   stateArray: Array<string>;
   stateBoolean: boolean;
@@ -41,6 +42,9 @@ type Model = {
 const assert: State<Model> = {
   stateMap: {
     foo: ['bar'],
+  },
+  numberStateMap: {
+    1: true,
   },
   optionalStateMap: {
     foo: ['bar'],
@@ -80,6 +84,7 @@ const assert: State<Model> = {
  */
 
 assert.stateArray;
+assert.numberStateMap;
 assert.stateBoolean;
 assert.stateDate;
 assert.stateNull;
