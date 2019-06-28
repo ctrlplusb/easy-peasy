@@ -98,8 +98,9 @@ type FilterStateTypes<T extends object> = Overwrite<
  * type OnlyActions = Actions<Model>;
  */
 export type Actions<Model extends Object> = {
-  [P in keyof FilterActionTypes<
-    Pick<Model, KeysOfType<Model, object>>
+  [P in keyof Overwrite<
+    FilterActionTypes<Pick<Model, KeysOfType<Model, object>>>,
+    Pick<Model, KeysOfType<Model, ActionTypes>>
   >]: Model[P] extends Thunk<any, any, any, any, infer R>
     ? Param1<Model[P]> extends void
       ? () => R extends Promise<any> ? R : Promise<R>
@@ -108,7 +109,9 @@ export type Actions<Model extends Object> = {
     ? Param1<Model[P]> extends void
       ? () => void
       : (payload: Param1<Model[P]>) => void
-    : Actions<Model[P]>;
+    : Model[P] extends object
+    ? Actions<Model[P]>
+    : unknown;
 };
 
 type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>;
@@ -136,11 +139,11 @@ type RecursiveState<
   RequiredModel extends Object,
   OptionalModel extends Object
 > = Overwrite<
-  { [P in keyof OtherModel]: OtherModel[P] },
   Overwrite<
     { [P in keyof RequiredModel]: StateModelValues<RequiredModel, P> },
     { [P in keyof OptionalModel]?: StateModelValues<OptionalModel, P> }
-  >
+  >,
+  { [P in keyof OtherModel]: OtherModel[P] }
 >;
 
 type FilterIndexSignatures<
