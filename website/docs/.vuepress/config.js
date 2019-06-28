@@ -41,6 +41,16 @@ module.exports = {
             'introduction/installation',
             'introduction/examples',
             'introduction/prior-art',
+            'introduction/quick-start',
+          ],
+        },
+        {
+          title: 'New Tutorial',
+          children: [
+            'new-tutorial/',
+            'new-tutorial/create-your-store',
+            'new-tutorial/connecting-your-store',
+            'new-tutorial/consuming-state',
           ],
         },
         {
