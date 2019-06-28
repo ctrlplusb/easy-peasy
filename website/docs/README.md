@@ -78,4 +78,7 @@ function TodoList() {
   - Redux Dev Tools support preconfigured
   - Supports Redux middleware
 
-<p class="action"><a href="/docs/tutorial/" class="action-button">Get Started →</a></p>
+<p class="action">
+  <a href="/docs/introduction/quick-start" class="action-button">Quick Start</a>
+  <a href="/docs/tutorial/" class="action-button">Full Tutorial</a>
+</p>
