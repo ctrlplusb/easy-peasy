@@ -29,11 +29,8 @@ import {
 } from './helpers';
 
 /**
- * immer is an implementation detail, so we are not going to use its auto freeze
- * behaviour, which throws errors if trying to mutate state. It's also risky
- * for production builds as has a perf overhead.
- *
- * @see https://github.com/mweststrate/immer#auto-freezing
+ * The auto freeze feature of immer doesn't seem to work in our testing. We have
+ * explicitly disabled it to avoid perf issues.
  */
 setAutoFreeze(false);
 
