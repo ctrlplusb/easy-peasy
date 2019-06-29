@@ -13,7 +13,7 @@ const store = createStore({
     products: [{ name: 'Shoes', price: 123 }, { name: 'Hat', price: 75 }],
     //            👇 define the computed property
     totalPrice: computed(state =>
-      products.reduce((acc, cur) => acc + cur.price, 0)
+      state.products.reduce((acc, cur) => acc + cur.price, 0)
     )
   }
 }
