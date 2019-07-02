@@ -54,6 +54,14 @@ module.exports = {
           ],
         },
         {
+          title: 'New Tutorial',
+          children: [
+            'new-tutorial/',
+            'new-tutorial/create-your-store',
+            'new-tutorial/connect-app-to-store',
+          ],
+        },
+        {
           title: 'Tutorial',
           children: [
             'tutorial/',
