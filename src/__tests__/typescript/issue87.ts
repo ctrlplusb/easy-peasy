@@ -3,7 +3,8 @@
 import { action, Action, createStore } from 'easy-peasy';
 
 interface IAnimal {
-  name?: string;
+  name: string;
+  age?: number;
 }
 
 interface IModel {
