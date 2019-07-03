@@ -20,35 +20,14 @@ import {
   StoreEnhancer,
   Middleware,
 } from 'redux';
-import { string } from 'prop-types';
 
-/**
- * This allows you to narrow keys of an object type that are index signature
- * based.
- *
- * Based on answer from here:
- * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
- */
-type IndexSignatureKeysOfType<A extends Object> = {
-  [K in keyof A]: A[K] extends ({ [key: string]: any } | { [key: number]: any })
-    ? string extends keyof A[K]
-      ? K
-      : number extends keyof A[K]
-      ? K
-      : never
-    : never;
-}[keyof A];
+// #region Helpers
 
-type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
-
-type Meta = {
-  path: string[];
-  parent: string[];
-};
+export function actionName(action: Action<any, any>): string;
 
 export function debug<StateDraft extends any>(state: StateDraft): StateDraft;
 
-export function actionName(action: Action<any, any>): string;
+export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 export function thunkStartName(action: Thunk<any, any, any, any, any>): string;
 
@@ -57,6 +36,12 @@ export function thunkCompleteName(
 ): string;
 
 export function thunkFailName(action: Thunk<any, any, any, any, any>): string;
+
+// #endregion
+
+// #region Actions
+
+type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
 type FilterActionTypes<T extends object> = Omit<
   T,
@@ -68,11 +53,6 @@ type FilterActionTypes<T extends object> = Omit<
     | Reducer<any, any>
     | Computed<any, any, any, any>
   >
->;
-
-type FilterStateTypes<T extends object> = Overwrite<
-  Omit<T, KeysOfType<T, Action<any, any> | Thunk<any, any, any, any, any>>>,
-  Pick<T, KeysOfType<T, Reducer<any, any>>>
 >;
 
 /**
@@ -98,6 +78,32 @@ export type Actions<Model extends Object> = {
     ? Actions<Model[P]>
     : unknown;
 };
+
+// #endregion
+
+// #region State
+
+/**
+ * This allows you to narrow keys of an object type that are index signature
+ * based.
+ *
+ * Based on answer from here:
+ * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
+ */
+type IndexSignatureKeysOfType<A extends Object> = {
+  [K in keyof A]: A[K] extends ({ [key: string]: any } | { [key: number]: any })
+    ? string extends keyof A[K]
+      ? K
+      : number extends keyof A[K]
+      ? K
+      : never
+    : never;
+}[keyof A];
+
+type FilterStateTypes<T extends object> = Overwrite<
+  Omit<T, KeysOfType<T, Action<any, any> | Thunk<any, any, any, any, any>>>,
+  Pick<T, KeysOfType<T, Reducer<any, any>>>
+>;
 
 type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>;
 type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>;
@@ -150,6 +156,36 @@ export type State<Model extends Object> = FilterIndexSignatures<
   FilterStateTypes<OptionalOnly<Model>>
 >;
 
+// #endregion
+
+// #region Store + Config + Creation
+
+/**
+ * Creates an easy-peasy powered Redux store.
+ *
+ * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
+ *
+ * @example
+ *
+ * import { createStore } from 'easy-peasy';
+ *
+ * interface StoreModel {
+ *   todos: {
+ *     items: Array<string>;
+ *   }
+ * }
+ *
+ * const store = createStore<StoreModel>({
+ *   todos: {
+ *     items: [],
+ *   }
+ * })
+ */
+export function createStore<
+  StoreModel extends Object = {},
+  StoreConfig extends EasyPeasyConfig<any, any> = any
+>(model: StoreModel, config?: StoreConfig): Store<StoreModel, StoreConfig>;
+
 /**
  * Configuration interface for the createStore
  */
@@ -168,19 +204,7 @@ export interface EasyPeasyConfig<
   reducerEnhancer?: (reducer: Reducer<any, any>) => Reducer<any, any>;
 }
 
-/**
- * Enhances the Redux Dispatch with actions
- *
- * @example
- *
- * type DispatchWithActions = Dispatch<StoreModel>;
- */
-export type Dispatch<
-  StoreModel,
-  Action extends ReduxAction = ReduxAction<any>
-> = Actions<StoreModel> & ReduxDispatch<Action>;
-
-export interface ActionData {
+export interface MockedAction {
   type: string;
   [key: string]: any;
 }
@@ -200,7 +224,7 @@ export type Store<
   {
     dispatch: Dispatch<StoreModel>;
     getActions: () => Actions<StoreModel>;
-    getMockedActions: () => ActionData[];
+    getMockedActions: () => MockedAction[];
     clearMockedActions: () => void;
     useStoreActions: <Result = any>(
       mapActions: (actions: Actions<StoreModel>) => Result,
@@ -212,6 +236,45 @@ export type Store<
     ) => Result;
   }
 >;
+
+// #endregion
+
+// #region Dispatch
+
+/**
+ * Enhances the Redux Dispatch with actions
+ *
+ * @example
+ *
+ * type DispatchWithActions = Dispatch<StoreModel>;
+ */
+export type Dispatch<
+  StoreModel,
+  Action extends ReduxAction = ReduxAction<any>
+> = Actions<StoreModel> & ReduxDispatch<Action>;
+
+// #endregion
+
+// #region Types for Thunk / Action listenTo configs
+
+type Target<TargetPayload> =
+  | Action<any, TargetPayload>
+  | Thunk<any, TargetPayload>
+  | string
+  | void;
+
+type ListenToTarget<TargetPayload> =
+  | Target<TargetPayload>
+  | Array<Target<TargetPayload>>;
+
+// #endregion
+
+// #region Thunk
+
+type Meta = {
+  path: string[];
+  parent: string[];
+};
 
 /**
  * A thunk type.
@@ -251,16 +314,6 @@ export type Thunk<
   result: Result;
 };
 
-type Target<TargetPayload> =
-  | Action<any, TargetPayload>
-  | Thunk<any, TargetPayload>
-  | string
-  | void;
-
-type ListenToTarget<TargetPayload> =
-  | Target<TargetPayload>
-  | Array<Target<TargetPayload>>;
-
 /**
  * Declares an thunk action type against your model.
  *
@@ -299,6 +352,10 @@ export function thunk<
   ) => Result,
   config?: { listenTo?: ListenTo },
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
+
+// #endregion
+
+// #region Action
 
 /**
  * An action type.
@@ -347,6 +404,10 @@ export function action<
     listenTo?: ListenTo;
   },
 ): Action<Model, Payload>;
+
+// #endregion
+
+// #region Computed
 
 type StateResolver<
   Model extends {},
@@ -469,6 +530,10 @@ export function computed<
     : void,
 ): Computed<Model, Result, ResolvedState, StoreModel>;
 
+// #endregion
+
+// #region Reducer
+
 /**
  * A reducer type.
  *
@@ -510,31 +575,9 @@ export function reducer<State extends Object = {}>(
   state: ReduxReducer<State>,
 ): Reducer<State>;
 
-/**
- * Creates an easy-peasy powered Redux store.
- *
- * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
- *
- * @example
- *
- * import { createStore } from 'easy-peasy';
- *
- * interface StoreModel {
- *   todos: {
- *     items: Array<string>;
- *   }
- * }
- *
- * const store = createStore<StoreModel>({
- *   todos: {
- *     items: [],
- *   }
- * })
- */
-export function createStore<
-  StoreModel extends Object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = any
->(model: StoreModel, config?: StoreConfig): Store<StoreModel, StoreConfig>;
+// #endregion
+
+// #region Hooks
 
 /**
  * A React Hook allowing you to use state within your component.
@@ -591,6 +634,10 @@ export function useStoreDispatch<StoreModel extends Object = {}>(): Dispatch<
   StoreModel
 >;
 
+// #endregion
+
+// #region StoreProvider
+
 /**
  * Exposes the store to your app (and hooks).
  *
@@ -609,6 +656,10 @@ export function useStoreDispatch<StoreModel extends Object = {}>(): Dispatch<
 export class StoreProvider<StoreModel = any> extends Component<{
   store: Store<StoreModel>;
 }> {}
+
+// #endregion
+
+// #region Context + Local Stores
 
 interface StoreModelInitializer<
   StoreModel extends Object = {},
@@ -653,4 +704,4 @@ export function createComponentStore<
   config?: StoreConfig,
 ): UseLocalStore<StoreModel, InitialData>;
 
-export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
+// #endregion
