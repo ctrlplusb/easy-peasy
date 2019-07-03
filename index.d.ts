@@ -61,7 +61,7 @@ export function thunkFailName(action: Thunk<any, any, any, any, any>): string;
 
 // #region Actions
 
-type ActionMapper<ActionsModel extends object, Depth extends number> = {
+type ActionMapper<ActionsModel extends object, Depth extends string> = {
   [P in keyof ActionsModel]: ActionsModel[P] extends Thunk<
     any,
     any,
@@ -77,23 +77,23 @@ type ActionMapper<ActionsModel extends object, Depth extends number> = {
     : ActionsModel[P] extends object
     ? RecursiveActions<
         ActionsModel[P],
-        Depth extends 1
-          ? 2
-          : Depth extends 2
-          ? 3
-          : Depth extends 3
-          ? 4
-          : Depth extends 4
-          ? 5
-          : 6
+        Depth extends '1'
+          ? '2'
+          : Depth extends '2'
+          ? '3'
+          : Depth extends '3'
+          ? '4'
+          : Depth extends '4'
+          ? '5'
+          : '6'
       >
     : unknown;
 };
 
 type RecursiveActions<
   Model extends Object,
-  Depth extends number
-> = Depth extends 6
+  Depth extends string
+> = Depth extends '6'
   ? Model
   : ActionMapper<
       O.Filter<
@@ -114,13 +114,13 @@ type RecursiveActions<
  *
  * type OnlyActions = Actions<Model>;
  */
-export type Actions<Model extends Object> = RecursiveActions<Model, 1>;
+export type Actions<Model extends Object> = RecursiveActions<Model, '1'>;
 
 // #endregion
 
 // #region State
 
-type StateMapper<StateModel extends object, Depth extends number> = {
+type StateMapper<StateModel extends object, Depth extends string> = {
   [P in keyof StateModel]: StateModel[P] extends Computed<any, any, any, any>
     ? StateModel[P]['result']
     : StateModel[P] extends Reducer<any, any>
@@ -130,25 +130,31 @@ type StateMapper<StateModel extends object, Depth extends number> = {
       ? StateModel[P]
       : RecursiveState<
           StateModel[P],
-          Depth extends 1
-            ? 2
-            : Depth extends 2
-            ? 3
-            : Depth extends 3
-            ? 4
-            : Depth extends 4
-            ? 5
-            : 6
+          Depth extends '1'
+            ? '2'
+            : Depth extends '2'
+            ? '3'
+            : Depth extends '3'
+            ? '4'
+            : Depth extends '4'
+            ? '5'
+            : '6'
         >
     : StateModel[P];
 };
 
 type RecursiveState<
   Model extends object,
-  Depth extends number
-> = Depth extends 6
+  Depth extends string
+> = Depth extends '6'
   ? Model
-  : StateMapper<O.Filter<Model, ActionTypes, 'default'>, Depth>;
+  : O.Merge<
+      StateMapper<
+        O.Omit<O.Filter<Model, ActionTypes>, IndexSignatureKeysOfType<Model>>,
+        Depth
+      >,
+      O.Pick<Model, IndexSignatureKeysOfType<Model>>
+    >;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -157,7 +163,7 @@ type RecursiveState<
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends object> = RecursiveState<Model, 1>;
+export type State<Model extends object> = RecursiveState<Model, '1'>;
 
 // #endregion
 
