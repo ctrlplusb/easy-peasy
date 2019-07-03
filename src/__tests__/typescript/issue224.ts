@@ -11,23 +11,23 @@ import {
 } from 'easy-peasy';
 
 interface ObjectWithId {
-  id: number;
+  id: string;
 }
 
 interface Nested {
-  save: Thunk<Nested>;
+  save: Thunk<Nested, number>;
 }
 
 interface DataModel<DataItem extends ObjectWithId> {
-  data: Record<string, DataItem>;
-  sortBy: keyof DataItem | 'none';
+  data: { [key: number]: DataItem };
+  sortBy: 'none' | string;
   name: string;
-  ids: Computed<DataModel<DataItem>, string[]>;
+  ids: Computed<DataModel<DataItem>, number[]>;
   fetched: Action<DataModel<DataItem>, DataItem[]>;
   fetch: Thunk<DataModel<DataItem>, string>;
   getItemById: Computed<
     DataModel<DataItem>,
-    (id: number) => DataItem | undefined
+    (id: string) => DataItem | undefined
   >;
   nested: Nested;
 }
@@ -35,52 +35,46 @@ interface DataModel<DataItem extends ObjectWithId> {
 const dataModel = <Item extends ObjectWithId>(
   name: string,
   endpoint: () => Promise<Item[]>,
-  // @ts-ignore
 ): DataModel<Item> => {
-  /*
-  return {
+  const result: DataModel<Item> = {
     data: {},
+    sortBy: 'none',
     name,
-    ids: computed(state => Object.keys(state.data)),
+    ids: computed(state => Object.keys(state.data).map(id => parseInt(id))),
     fetched: action((state, items) => {
+      state.name;
       items.forEach((item, idx) => {
         state.data[idx] = item;
       });
-      84656;
     }),
     fetch: thunk(async (actions, payload) => {
       const data = await endpoint();
       actions.fetched(data);
-      // Nested actions do not work on generics :(
-      // typings:expect-error
-      actions.nested.save();
+      actions.nested.save(1);
     }),
-    getItemById: computed(state => (id: number) =>
+    getItemById: computed(state => (id: string) =>
       Object.values(state.data).find(item => item.id === id),
     ),
-    sortBy: 'id',
     nested: {
-      save: thunk(() => {}),
+      save: thunk((actions, payload) => {
+        actions.save(payload + 1);
+      }),
     },
   };
-  */
+  return result;
 };
 
 interface Person extends ObjectWithId {
-  id: number;
+  id: string;
   name: string;
 }
 
 const personModel = dataModel<Person>('person', () =>
-  Promise.resolve([{ id: 1, name: 'bob' }]),
+  Promise.resolve([{ id: '1', name: 'bob' }]),
 );
 
 const store = createStore(personModel);
 
-store.getState().sortBy;
-
 store.getActions().fetched([]);
 store.getActions().data;
-// typings:expect-error
-store.getActions().sortBy;
-store.getActions().nested.save();
+store.getActions().nested.save(1);
