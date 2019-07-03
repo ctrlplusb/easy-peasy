@@ -19,8 +19,9 @@ interface Nested {
 }
 
 interface DataModel<DataItem extends ObjectWithId> {
-  data: { [key: number]: DataItem };
+  data: Record<string, DataItem>;
   sortBy: keyof DataItem | 'none';
+  name: string;
   ids: Computed<DataModel<DataItem>, string[]>;
   fetched: Action<DataModel<DataItem>, DataItem[]>;
   fetch: Thunk<DataModel<DataItem>, string>;
@@ -32,10 +33,14 @@ interface DataModel<DataItem extends ObjectWithId> {
 }
 
 const dataModel = <Item extends ObjectWithId>(
+  name: string,
   endpoint: () => Promise<Item[]>,
+  // @ts-ignore
 ): DataModel<Item> => {
-  const result: DataModel<Item> = {
+  /*
+  return {
     data: {},
+    name,
     ids: computed(state => Object.keys(state.data)),
     fetched: action((state, items) => {
       items.forEach((item, idx) => {
@@ -58,7 +63,7 @@ const dataModel = <Item extends ObjectWithId>(
       save: thunk(() => {}),
     },
   };
-  return result;
+  */
 };
 
 interface Person extends ObjectWithId {
@@ -66,7 +71,7 @@ interface Person extends ObjectWithId {
   name: string;
 }
 
-const personModel = dataModel<Person>(() =>
+const personModel = dataModel<Person>('person', () =>
   Promise.resolve([{ id: 1, name: 'bob' }]),
 );
 

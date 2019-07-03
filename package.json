@@ -51,6 +51,7 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0",
+    "ts-toolbelt": "^2.1.5",
     "type-zoo": "^3.3.0",
     "typelevel-ts": "^0.3.5"
   },
