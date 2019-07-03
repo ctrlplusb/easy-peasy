@@ -46,7 +46,7 @@ function CountDisplayUseStore() {
   return (
     <>
       <div>{store.getState().count + 1}</div>
-      <button onClick={store.dispatch.inc} type="button">
+      <button onClick={store.getActions().inc} type="button">
         +
       </button>
     </>

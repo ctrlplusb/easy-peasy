@@ -31,7 +31,7 @@ test('dispatches an action to represent the start and end of an thunk', async ()
   const store = createStore(model, { middleware: [trackActions] });
   const payload = 'hello';
   // act
-  const actualResult = await store.dispatch.foo.doSomething(payload);
+  const actualResult = await store.getActions().foo.doSomething(payload);
   // assert
   expect(trackActions.actions).toEqual([
     { type: '@thunk.foo.doSomething(started)', payload },
@@ -62,7 +62,7 @@ describe('errors', () => {
 
     try {
       // act
-      await store.dispatch.foo.doSomething(payload);
+      await store.getActions().foo.doSomething(payload);
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
@@ -101,7 +101,7 @@ describe('errors', () => {
 
     try {
       // act
-      await store.dispatch.foo.doSomething(payload);
+      await store.getActions().foo.doSomething(payload);
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
@@ -139,7 +139,7 @@ describe('errors', () => {
 
     try {
       // act
-      await store.dispatch.foo.doSomething(payload);
+      await store.getActions().foo.doSomething(payload);
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
@@ -171,7 +171,7 @@ describe('errors', () => {
 
     try {
       // act
-      await store.dispatch.foo.doSomething(payload);
+      await store.getActions().foo.doSomething(payload);
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
@@ -215,7 +215,7 @@ test('async', async () => {
   // act
   const store = createStore(model);
   // act
-  const result = await store.dispatch.session.login({
+  const result = await store.getActions().session.login({
     username: 'bob',
     password: 'foo',
   });
@@ -235,7 +235,10 @@ test('is always promise chainable', done => {
   const model = { doSomething: thunk(() => undefined) };
   const store = createStore(model);
   // act
-  store.dispatch.doSomething().then(done);
+  store
+    .getActions()
+    .doSomething()
+    .then(done);
 });
 
 test('dispatch an action via redux dispatch', async () => {
@@ -259,7 +262,7 @@ test('dispatch an action via redux dispatch', async () => {
   const store = createStore(model);
 
   // act
-  await store.dispatch.session.login();
+  await store.getActions().session.login();
 
   // assert
   expect(store.getState().counter).toBe(1);
@@ -284,7 +287,7 @@ test('dispatch another branch action', async () => {
   // act
   const store = createStore(model);
   // act
-  await store.dispatch.session.login();
+  await store.getActions().session.login();
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -309,7 +312,7 @@ test('getState is exposed', async () => {
   });
 
   // act
-  await store.dispatch.counter.doSomething();
+  await store.getActions().counter.doSomething();
 });
 
 test('getStoreState is exposed', async () => {
@@ -325,7 +328,7 @@ test('getStoreState is exposed', async () => {
   });
 
   // act
-  await store.dispatch.counter.doSomething();
+  await store.getActions().counter.doSomething();
 });
 
 test('meta values are exposed', async () => {
@@ -340,7 +343,7 @@ test('meta values are exposed', async () => {
   });
 
   // act
-  await store.dispatch.foo.doSomething();
+  await store.getActions().foo.doSomething();
 
   // assert
   expect(actualMeta).toEqual({
@@ -367,7 +370,7 @@ test('injections are exposed', async () => {
   );
 
   // act
-  await store.dispatch.foo.doSomething();
+  await store.getActions().foo.doSomething();
 
   // assert
   expect(actualInjections).toEqual(injections);

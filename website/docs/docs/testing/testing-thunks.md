@@ -48,7 +48,7 @@ test('fetchById', async () => {
   })
 
   // act
-  await store.dispatch.fetchById(todo.id)
+  await store.getActions().fetchById(todo.id)
 
   // assert
   expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`)

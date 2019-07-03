@@ -23,7 +23,7 @@ it('should return state with changes applied', () => {
   });
 
   // act
-  store.dispatch.add('bar');
+  store.getActions().add('bar');
 
   // assert
   expect(store.getState()).toEqual({ logs: ['foo', 'bar'] });

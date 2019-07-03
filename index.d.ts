@@ -1,14 +1,6 @@
 /* eslint-disable */
 
 import { Component } from 'react';
-import {
-  Diff,
-  KeysOfType,
-  Omit,
-  OptionalKeys,
-  Overwrite,
-  RequiredKeys,
-} from 'typelevel-ts';
 import { Param0, Param1 } from 'type-zoo';
 import {
   compose,
@@ -21,6 +13,13 @@ import {
   Middleware,
 } from 'redux';
 import { O } from 'ts-toolbelt';
+
+/**
+ * Picks only the keys of a certain type
+ */
+type KeysOfType<A extends object, B> = {
+  [K in keyof A]-?: A[K] extends B ? K : never;
+}[keyof A];
 
 type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
@@ -226,19 +225,18 @@ export interface MockedAction {
  * type EnhancedReduxStore = Store<StoreModel>;
  */
 export type Store<
-  StoreModel,
+  StoreModel extends object,
   StoreConfig extends EasyPeasyConfig<any, any> = any
-> = Overwrite<
+> = O.Merge<
   ReduxStore<State<StoreModel>>,
   {
-    dispatch: Dispatch<StoreModel>;
     getActions: () => Actions<StoreModel>;
     getMockedActions: () => MockedAction[];
     clearMockedActions: () => void;
     useStoreActions: <Result = any>(
       mapActions: (actions: Actions<StoreModel>) => Result,
     ) => Result;
-    useStoreDispatch: () => Dispatch<StoreModel>;
+    useStoreDispatch: () => Dispatch;
     useStoreState: <Result = any>(
       mapState: (state: State<StoreModel>) => Result,
       dependencies?: Array<any>,
@@ -251,16 +249,9 @@ export type Store<
 // #region Dispatch
 
 /**
- * Enhances the Redux Dispatch with actions
- *
- * @example
- *
- * type DispatchWithActions = Dispatch<StoreModel>;
+ * The Redux store Dispatch
  */
-export type Dispatch<
-  StoreModel,
-  Action extends ReduxAction = ReduxAction<any>
-> = Actions<StoreModel> & ReduxDispatch<Action>;
+export type Dispatch = ReduxDispatch;
 
 // #endregion
 
@@ -300,10 +291,10 @@ type Meta = {
  * }
  */
 export type Thunk<
-  Model extends Object = {},
+  Model extends object = {},
   Payload = void,
   Injections = any,
-  StoreModel extends Object = {},
+  StoreModel extends object = {},
   Result = any
 > = {
   actionCreator: Payload extends void
@@ -331,10 +322,10 @@ export type Thunk<
  * });
  */
 export function thunk<
-  Model extends Object = {},
+  Model extends object = {},
   Payload = void,
   Injections = any,
-  StoreModel extends Object = {},
+  StoreModel extends object = {},
   Result = any,
   ListenTo extends ListenToTarget<Payload> = void
 >(
@@ -342,7 +333,7 @@ export function thunk<
     actions: Actions<Model>,
     payload: Payload,
     helpers: {
-      dispatch: Dispatch<StoreModel>;
+      dispatch: Dispatch;
       getState: () => State<Model>;
       getStoreActions: () => Actions<StoreModel>;
       getStoreState: () => State<StoreModel>;
@@ -371,7 +362,7 @@ export function thunk<
  *   addTodo: Action<Model, Todo>;
  * }
  */
-export type Action<Model extends Object = {}, Payload = void> = {
+export type Action<Model extends object = {}, Payload = void> = {
   type: 'action';
   payload: Payload;
   result: void | State<Model>;
@@ -394,7 +385,7 @@ export type Action<Model extends Object = {}, Payload = void> = {
  * });
  */
 export function action<
-  Model extends Object = {},
+  Model extends object = {},
   Payload = any,
   ListenTo extends ListenToTarget<Payload> = void
 >(
@@ -478,20 +469,20 @@ type ResolvedStates =
  * }
  */
 export type Computed<
-  Model extends Object = {},
+  Model extends object = {},
   Result = any,
   ResolvedState extends ResolvedStates | void = void,
-  StoreModel extends Object = {}
+  StoreModel extends object = {}
 > = {
   type: 'computed';
   result: Result;
 };
 
 export function computed<
-  Model extends Object = {},
+  Model extends object = {},
   Result = any,
   ResolvedState extends ResolvedStates | void = void,
-  StoreModel extends Object = {}
+  StoreModel extends object = {}
 >(
   computationFunc: (
     ...args: ResolvedState extends ResolvedStates
@@ -564,7 +555,7 @@ export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
  *   })
  * });
  */
-export function reducer<State extends Object = {}>(
+export function reducer<State = any>(
   state: ReduxReducer<State>,
 ): Reducer<State>;
 
@@ -624,9 +615,7 @@ export function useStoreActions<
  *   return <AddTodoForm save={(todo) => dispatch({ type: 'ADD_TODO', payload: todo })} />;
  * }
  */
-export function useStoreDispatch<StoreModel extends Object = {}>(): Dispatch<
-  StoreModel
->;
+export function useStoreDispatch(): Dispatch;
 
 // #endregion
 
@@ -647,7 +636,7 @@ export function useStoreDispatch<StoreModel extends Object = {}>(): Dispatch<
  *   </StoreProvider>
  * );
  */
-export class StoreProvider<StoreModel = any> extends Component<{
+export class StoreProvider<StoreModel extends object = any> extends Component<{
   store: Store<StoreModel>;
 }> {}
 
@@ -656,14 +645,14 @@ export class StoreProvider<StoreModel = any> extends Component<{
 // #region Context + Local Stores
 
 interface StoreModelInitializer<
-  StoreModel extends Object = {},
+  StoreModel extends object = {},
   InitialData = any
 > {
   (initialData?: InitialData): StoreModel;
 }
 
 export function createContextStore<
-  StoreModel extends Object = {},
+  StoreModel extends object = {},
   InitialData = any,
   StoreConfig extends EasyPeasyConfig<any, any> = any
 >(
@@ -679,18 +668,18 @@ export function createContextStore<
   useStoreActions: <Result = any>(
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
-  useStoreDispatch: () => Dispatch<StoreModel>;
+  useStoreDispatch: () => Dispatch;
 };
 
 export interface UseLocalStore<
-  StoreModel extends Object = {},
+  StoreModel extends object = {},
   InitialData = any
 > {
   (initialData?: InitialData): [State<StoreModel>, Actions<StoreModel>];
 }
 
 export function createComponentStore<
-  StoreModel extends Object = {},
+  StoreModel extends object = {},
   InitialData = any,
   StoreConfig extends EasyPeasyConfig<any, any> = any
 >(

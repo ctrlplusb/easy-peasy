@@ -93,7 +93,6 @@ export default function createStoreInternals({
           // Thunk Action
           const action = payload => {
             return value(get(parentPath, actionCreators), payload, {
-              // @deprecated
               dispatch: references.dispatch,
               getState: () => get(parentPath, references.getState()),
               getStoreActions: () => actionCreators,
