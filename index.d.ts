@@ -20,6 +20,26 @@ import {
   StoreEnhancer,
   Middleware,
 } from 'redux';
+import { O } from 'ts-toolbelt';
+
+type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
+
+/**
+ * This allows you to narrow keys of an object type that are index signature
+ * based.
+ *
+ * Based on answer from here:
+ * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
+ */
+type IndexSignatureKeysOfType<A extends Object> = {
+  [K in keyof A]: A[K] extends ({ [key: string]: any } | { [key: number]: any })
+    ? string extends keyof A[K]
+      ? K
+      : number extends keyof A[K]
+      ? K
+      : never
+    : never;
+}[keyof A];
 
 // #region Helpers
 
@@ -41,19 +61,51 @@ export function thunkFailName(action: Thunk<any, any, any, any, any>): string;
 
 // #region Actions
 
-type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
-
-type FilterActionTypes<T extends object> = Omit<
-  T,
-  KeysOfType<
-    T,
-    | Array<any>
-    | Date
-    | RegExp
-    | Reducer<any, any>
-    | Computed<any, any, any, any>
+type ActionMapper<ActionsModel extends object, Depth extends number> = {
+  [P in keyof ActionsModel]: ActionsModel[P] extends Thunk<
+    any,
+    any,
+    any,
+    any,
+    any
   >
->;
+    ? ActionsModel[P]['actionCreator']
+    : ActionsModel[P] extends Action<any, any>
+    ? ActionsModel[P]['payload'] extends void
+      ? () => void
+      : (payload: ActionsModel[P]['payload']) => void
+    : ActionsModel[P] extends object
+    ? RecursiveActions<
+        ActionsModel[P],
+        Depth extends 1
+          ? 2
+          : Depth extends 2
+          ? 3
+          : Depth extends 3
+          ? 4
+          : Depth extends 4
+          ? 5
+          : 6
+      >
+    : unknown;
+};
+
+type RecursiveActions<
+  Model extends Object,
+  Depth extends number
+> = Depth extends 6
+  ? Model
+  : ActionMapper<
+      O.Filter<
+        O.Select<Model, object>,
+        | Array<any>
+        | RegExp
+        | Date
+        | Reducer<any, any>
+        | Computed<any, any, any, any>
+      >,
+      Depth
+    >;
 
 /**
  * Filters a model into a type that represents the actions (and effects) only
@@ -62,86 +114,41 @@ type FilterActionTypes<T extends object> = Omit<
  *
  * type OnlyActions = Actions<Model>;
  */
-export type Actions<Model extends Object> = {
-  [P in keyof Overwrite<
-    FilterActionTypes<Pick<Model, KeysOfType<Model, object>>>,
-    Pick<Model, KeysOfType<Model, ActionTypes>>
-  >]: Model[P] extends Thunk<any, any, any, any, infer R>
-    ? Param1<Model[P]> extends void
-      ? () => R extends Promise<any> ? R : Promise<R>
-      : (payload: Param1<Model[P]>) => R extends Promise<any> ? R : Promise<R>
-    : Model[P] extends Action<any, any>
-    ? Param1<Model[P]> extends void
-      ? () => void
-      : (payload: Param1<Model[P]>) => void
-    : Model[P] extends object
-    ? Actions<Model[P]>
-    : unknown;
-};
+export type Actions<Model extends Object> = RecursiveActions<Model, 1>;
 
 // #endregion
 
 // #region State
 
-/**
- * This allows you to narrow keys of an object type that are index signature
- * based.
- *
- * Based on answer from here:
- * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
- */
-type IndexSignatureKeysOfType<A extends Object> = {
-  [K in keyof A]: A[K] extends ({ [key: string]: any } | { [key: number]: any })
-    ? string extends keyof A[K]
-      ? K
-      : number extends keyof A[K]
-      ? K
-      : never
-    : never;
-}[keyof A];
-
-type FilterStateTypes<T extends object> = Overwrite<
-  Omit<T, KeysOfType<T, Action<any, any> | Thunk<any, any, any, any, any>>>,
-  Pick<T, KeysOfType<T, Reducer<any, any>>>
->;
-
-type RequiredOnly<Model extends Object> = Pick<Model, RequiredKeys<Model>>;
-type OptionalOnly<Model extends Object> = Pick<Model, OptionalKeys<Model>>;
-
-type StateModelValues<
-  Model extends Object,
-  P extends keyof Model
-> = Model[P] extends Computed<any, infer R, any, any>
-  ? R
-  : Model[P] extends Reducer<infer R, any>
-  ? R
-  : Model[P] extends object
-  ? Model[P] extends Array<any> | RegExp | Date | Function
-    ? Model[P]
-    : State<Model[P]>
-  : Model[P];
+type StateMapper<StateModel extends object, Depth extends number> = {
+  [P in keyof StateModel]: StateModel[P] extends Computed<any, any, any, any>
+    ? StateModel[P]['result']
+    : StateModel[P] extends Reducer<any, any>
+    ? StateModel[P]['result']
+    : StateModel[P] extends object
+    ? StateModel[P] extends Array<any> | RegExp
+      ? StateModel[P]
+      : RecursiveState<
+          StateModel[P],
+          Depth extends 1
+            ? 2
+            : Depth extends 2
+            ? 3
+            : Depth extends 3
+            ? 4
+            : Depth extends 4
+            ? 5
+            : 6
+        >
+    : StateModel[P];
+};
 
 type RecursiveState<
-  OtherModel extends Object,
-  RequiredModel extends Object,
-  OptionalModel extends Object
-> = Overwrite<
-  Overwrite<
-    { [P in keyof RequiredModel]: StateModelValues<RequiredModel, P> },
-    { [P in keyof OptionalModel]?: StateModelValues<OptionalModel, P> }
-  >,
-  { [P in keyof OtherModel]: OtherModel[P] }
->;
-
-type FilterIndexSignatures<
-  StateModel extends Object,
-  RequiredStateModel extends Object,
-  OptionalStateModel extends Object
-> = RecursiveState<
-  StateModel,
-  Omit<RequiredStateModel, keyof StateModel>,
-  Omit<OptionalStateModel, keyof StateModel>
->;
+  Model extends object,
+  Depth extends number
+> = Depth extends 6
+  ? Model
+  : StateMapper<O.Filter<Model, ActionTypes, 'default'>, Depth>;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -150,11 +157,7 @@ type FilterIndexSignatures<
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends Object> = FilterIndexSignatures<
-  Pick<Model, IndexSignatureKeysOfType<Model>>,
-  FilterStateTypes<RequiredOnly<Model>>,
-  FilterStateTypes<OptionalOnly<Model>>
->;
+export type State<Model extends object> = RecursiveState<Model, 1>;
 
 // #endregion
 
@@ -297,18 +300,9 @@ export type Thunk<
   StoreModel extends Object = {},
   Result = any
 > = {
-  (
-    actions: Actions<Model>,
-    payload: Payload,
-    helpers: {
-      dispatch: Dispatch<StoreModel>;
-      getState: () => State<Model>;
-      getStoreActions: () => Actions<StoreModel>;
-      getStoreState: () => State<StoreModel>;
-      injections: Injections;
-      meta: Meta;
-    },
-  ): Result;
+  actionCreator: Payload extends void
+    ? () => Promise<Result>
+    : (payload: Payload) => Promise<Result>;
   type: 'thunk';
   payload: Payload;
   result: Result;
@@ -372,7 +366,6 @@ export function thunk<
  * }
  */
 export type Action<Model extends Object = {}, Payload = void> = {
-  (state: State<Model>, payload: Payload): void | State<Model>;
   type: 'action';
   payload: Payload;
   result: void | State<Model>;
@@ -484,11 +477,6 @@ export type Computed<
   ResolvedState extends ResolvedStates | void = void,
   StoreModel extends Object = {}
 > = {
-  (
-    ...args: ResolvedState extends ResolvedStates
-      ? ResolvedState
-      : [State<Model>]
-  ): Result;
   type: 'computed';
   result: Result;
 };
@@ -548,7 +536,6 @@ export function computed<
  * }
  */
 export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
-  (state: State, action: Action): State;
   type: 'reducer';
   result: State;
 };
@@ -612,9 +599,10 @@ export function useStoreState<StoreState extends State<any> = {}, Result = any>(
  *   return <AddTodoForm save={addTodo} />;
  * }
  */
-export function useStoreActions<StoreModel extends Object = {}, Result = any>(
-  mapActions: (actions: Actions<StoreModel>) => Result,
-): Result;
+export function useStoreActions<
+  StoreActions extends Actions<any> = {},
+  Result = any
+>(mapActions: (actions: StoreActions) => Result): Result;
 
 /**
  * A React Hook allowing you to use the store's dispatch within your component.
