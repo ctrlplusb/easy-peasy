@@ -40,7 +40,7 @@ test('basic features', () => {
     },
   });
   // act
-  store.dispatch.session.login({
+  store.getActions().session.login({
     name: 'bob',
   });
   // assert
@@ -79,7 +79,7 @@ test('nested action', () => {
     },
   });
   // act
-  store.dispatch.session.settings.setFavouriteColor('blue');
+  store.getActions().session.settings.setFavouriteColor('blue');
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -125,7 +125,7 @@ test('state with no actions', () => {
   // act
   const store = createStore(model);
   // act
-  store.dispatch.session.login({
+  store.getActions().session.login({
     name: 'bob',
   });
   // assert

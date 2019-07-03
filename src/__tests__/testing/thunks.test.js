@@ -66,7 +66,7 @@ describe('without mocking actions', () => {
     });
 
     // act
-    await store.dispatch.fetchById(todo.id);
+    await store.getActions().fetchById(todo.id);
 
     // assert
     expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`);
@@ -89,7 +89,7 @@ describe('without mocking actions', () => {
 
     // act
     try {
-      await store.dispatch.throwing('A payload');
+      await store.getActions().throwing('A payload');
     } catch (err) {
       // assert
       expect(err.message).toEqual('poop');
@@ -131,7 +131,7 @@ describe('with mocking actions', () => {
     });
 
     // act
-    await store.dispatch.fetchById(todo.id);
+    await store.getActions().fetchById(todo.id);
 
     // assert
     expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`);
@@ -163,7 +163,7 @@ describe('with mocking actions', () => {
 
     // act
     try {
-      await store.dispatch.throwing('A payload');
+      await store.getActions().throwing('A payload');
     } catch (err) {
       // assert
       expect(err.message).toEqual('poop');
@@ -201,7 +201,7 @@ describe('with mocking actions', () => {
     );
 
     // act
-    await store.dispatch.add();
+    await store.getActions().add();
 
     // assert
     expect(store.getMockedActions()).toEqual([

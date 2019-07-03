@@ -20,7 +20,7 @@ it('state gets updated', () => {
   const store = createStore(todosModel);
 
   // act
-  store.dispatch.add(todo);
+  store.getActions().add(todo);
 
   // assert
   expect(store.getState().items).toEqual({ [todo.id]: todo });

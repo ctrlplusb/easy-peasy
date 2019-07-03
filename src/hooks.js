@@ -85,7 +85,7 @@ export const useStoreState = createStoreStateHook(EasyPeasyContext);
 export function createStoreActionsHook(Context) {
   return function useStoreActions(mapActions) {
     const store = useContext(Context);
-    return mapActions(store.dispatch);
+    return mapActions(store.getActions());
   };
 }
 

@@ -10,5 +10,5 @@ test('deprecated action API does nothing', () => {
   });
 
   // assert
-  expect(store.dispatch.increment).toBeUndefined();
+  expect(store.getActions().increment).toBeUndefined();
 });

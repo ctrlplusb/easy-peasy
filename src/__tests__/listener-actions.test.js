@@ -23,7 +23,7 @@ it('listening to an action, firing an action', () => {
   });
 
   // act
-  store.dispatch.math.add(10);
+  store.getActions().math.add(10);
 
   // assert
   expect(store.getState().audit.logs).toEqual(['Added 10']);
@@ -57,7 +57,7 @@ it('listening to an action, firing a thunk', done => {
   });
 
   // act
-  store.dispatch.math.add(10);
+  store.getActions().math.add(10);
 });
 
 it('listening to a thunk, firing an action', async () => {
@@ -83,7 +83,7 @@ it('listening to a thunk, firing an action', async () => {
   });
 
   // act
-  await store.dispatch.math.add(10);
+  await store.getActions().math.add(10);
 
   // assert
   expect(store.getState().audit.logs).toEqual(['Added 10']);
@@ -117,7 +117,7 @@ it('listening to a thunk, firing a thunk', async done => {
   });
 
   // act
-  await store.dispatch.math.add(10);
+  await store.getActions().math.add(10);
 });
 
 it('listening to a string, firing an action', async () => {
