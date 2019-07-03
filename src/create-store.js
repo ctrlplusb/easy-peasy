@@ -111,22 +111,10 @@ export default function createStore(model, options = {}) {
   store.clearMockedActions = () => {
     mockedActions = [];
   };
+  store.getActions = () => references.internals.actionCreators;
 
   references.dispatch = store.dispatch;
   references.getState = store.getState;
-
-  // attach the action creators to dispatch
-  const bindActionCreators = actionCreators => {
-    Object.keys(store.dispatch).forEach(actionsKey => {
-      delete store.dispatch[actionsKey];
-    });
-    Object.keys(actionCreators).forEach(key => {
-      store.dispatch[key] = actionCreators[key];
-    });
-    store.getActions = () => actionCreators;
-  };
-
-  bindActionCreators(references.internals.actionCreators);
 
   const rebindStore = removeKey => {
     const currentState = store.getState();
@@ -135,8 +123,7 @@ export default function createStore(model, options = {}) {
     }
     bindStoreInternals(store.getState());
     store.replaceReducer(references.internals.reducer);
-    store.dispatch.replaceState(references.internals.defaultState);
-    bindActionCreators(references.internals.actionCreators);
+    store.getActions().replaceState(references.internals.defaultState);
   };
 
   store.addModel = (key, modelForKey) => {

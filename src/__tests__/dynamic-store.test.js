@@ -23,7 +23,7 @@ test('addModel', () => {
   expect(store.getState().router.path).toBe('/');
 
   // act
-  store.dispatch.router.push('/foo');
+  store.getActions().router.push('/foo');
 
   // assert
   expect(store.getState().router.path).toBe('/foo');
@@ -98,7 +98,7 @@ test('removeModel', () => {
   store.removeModel('router');
 
   // assert
-  expect(store.dispatch.router).toBeUndefined();
+  expect(store.getActions().router).toBeUndefined();
   expect(store.getState()).toEqual({
     counter: {
       count: 0,
@@ -132,7 +132,7 @@ test('adding and removing model maintains existing state - issue#184', () => {
     },
   });
 
-  store.dispatch.counter.inc(1);
+  store.getActions().counter.inc(1);
 
   // act
   store.addModel('router', 'router', {

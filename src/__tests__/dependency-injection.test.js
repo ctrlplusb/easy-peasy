@@ -17,7 +17,7 @@ test('exposes dependencies to effect actions', async () => {
   );
 
   // act
-  await store.dispatch.doSomething();
+  await store.getActions().doSomething();
 
   // assert
   expect(injection).toHaveBeenCalledTimes(1);

@@ -49,15 +49,15 @@ const model: StoreModel = {
 
 const store = createStore(model);
 
-store.dispatch.audit.log('foo').then(result => result + 1);
+store.getActions().audit.log('foo').then(result => result + 1);
 // typings:expect-error
-store.dispatch.audit.log(1);
+store.getActions().audit.log(1);
 // typings:expect-error
-store.dispatch.audit.log();
+store.getActions().audit.log();
 
-store.dispatch.audit.empty();
+store.getActions().audit.empty();
 // typings:expect-error
-store.dispatch.audit.empty('foo');
+store.getActions().audit.empty('foo');
 
 interface ListeningModel {
   log: Action<ListeningModel, string>;
