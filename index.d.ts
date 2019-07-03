@@ -1,7 +1,6 @@
 /* eslint-disable */
 
 import { Component } from 'react';
-import { Param0, Param1 } from 'type-zoo';
 import {
   compose,
   AnyAction,
