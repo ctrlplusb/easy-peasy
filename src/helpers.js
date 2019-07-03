@@ -21,6 +21,8 @@ export const debug = state => {
   return state;
 };
 
+export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
+
 export const thunkStartName = action => `${action[actionNameSymbol]}(started)`;
 
 export const thunkCompleteName = action =>
@@ -45,8 +47,6 @@ export const computed = (fn, stateResolvers = defaultStateResolvers) => {
   };
   return fn;
 };
-
-export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
 
 export const thunk = (fn, config) => {
   fn[thunkSymbol] = true;
