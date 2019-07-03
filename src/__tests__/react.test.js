@@ -107,7 +107,7 @@ test('store subscribe is only called once', () => {
 
   // act
   act(() => {
-    store.dispatch.inc();
+    store.getActions().inc();
   });
 
   // assert
@@ -142,7 +142,7 @@ test('store is unsubscribed on unmount', () => {
   expect(unsubscribeSpy).toBeCalledTimes(0);
 
   // act
-  store.dispatch.inc();
+  store.getActions().inc();
 
   // assert
   expect(unsubscribeSpy).toBeCalledTimes(0);
@@ -227,7 +227,7 @@ describe('direct form', () => {
     expect(renderSpy).toHaveBeenCalledTimes(1);
 
     // act
-    store.dispatch.updateSomethingElse('foo');
+    store.getActions().updateSomethingElse('foo');
 
     // assert
     expect(countButton.firstChild.textContent).toBe('1');
@@ -313,7 +313,7 @@ describe('object form', () => {
 
     // act
     act(() => {
-      store.dispatch.updateSomethingElse('foo');
+      store.getActions().updateSomethingElse('foo');
     });
 
     // assert

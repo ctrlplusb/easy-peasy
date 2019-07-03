@@ -27,6 +27,6 @@ export default function createComponentStore(model, config) {
         }
       });
     }, [store]);
-    return [currentState, store.dispatch];
+    return [currentState, store.getActions()];
   };
 }
