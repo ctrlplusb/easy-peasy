@@ -1,11 +1,14 @@
 /* eslint-disable */
 
-import { State, Thunk, Action, Reducer } from 'easy-peasy';
+import { State, Computed, Thunk, Action, Reducer } from 'easy-peasy';
+import { O } from 'ts-toolbelt';
 
 type Model = {
   stateMap: { [key: string]: Array<string> };
   numberStateMap: { [key: number]: boolean };
   optionalStateMap?: { [key: string]: Array<string> };
+  optionValueFieldsMap: { [key: string]: { name: string; age?: number } };
+  optionalVal?: string;
   stateArray: Array<string>;
   stateBoolean: boolean;
   stateDate: Date;
@@ -18,8 +21,13 @@ type Model = {
   actionImp: Action<Model, number>;
   thunkImp: Thunk<Model, string>;
   reducerImp: Reducer<number>;
+  computedImp: Computed<Model, number>;
   nested: {
     stateMap: { [key: string]: Array<string> };
+    numberStateMap: { [key: number]: boolean };
+    optionalStateMap?: { [key: string]: Array<string> };
+    optionValueFieldsMap: { [key: string]: { name: string; age?: number } };
+    optionalVal?: string;
     stateArray: Array<string>;
     stateBoolean: boolean;
     stateDate: Date;
@@ -29,9 +37,10 @@ type Model = {
     stateString: string;
     stateUndefined: undefined;
     stateUnion: string | null;
-    reducerImp: Reducer<number>;
     actionImp: Action<Model, number>;
     thunkImp: Thunk<Model, string>;
+    reducerImp: Reducer<number>;
+    computedImp: Computed<Model, number>;
   };
 };
 
@@ -45,6 +54,11 @@ const assert: State<Model> = {
   optionalStateMap: {
     foo: ['bar'],
   },
+  optionValueFieldsMap: {
+    foo: {
+      name: 'bob',
+    },
+  },
   stateArray: [],
   stateBoolean: true,
   stateDate: new Date(),
@@ -55,9 +69,21 @@ const assert: State<Model> = {
   stateUndefined: undefined,
   stateUnion: 'bar',
   reducerImp: 1,
+  computedImp: 1,
   nested: {
     stateMap: {
       foo: ['bar'],
+    },
+    numberStateMap: {
+      1: true,
+    },
+    optionalStateMap: {
+      foo: ['bar'],
+    },
+    optionValueFieldsMap: {
+      foo: {
+        name: 'bob',
+      },
     },
     stateArray: [],
     stateBoolean: true,
@@ -69,6 +95,7 @@ const assert: State<Model> = {
     stateUndefined: undefined,
     stateUnion: 'bar',
     reducerImp: 1,
+    computedImp: 1,
   },
 };
 
