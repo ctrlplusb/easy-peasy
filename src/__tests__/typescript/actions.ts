@@ -1,6 +1,13 @@
 /* eslint-disable */
 
-import { Actions, Thunk, Action, Reducer, Computed } from 'easy-peasy';
+import {
+  createStore,
+  Actions,
+  Thunk,
+  Action,
+  Reducer,
+  Computed,
+} from 'easy-peasy';
 
 type Model = {
   stateArray: Array<string>;
@@ -13,9 +20,11 @@ type Model = {
   stateUndefined: undefined;
   stateUnion: string | null;
   actionImp: Action<Model, number>;
-  thunkImp: Thunk<Model, string>;
+  thunkImp: Thunk<Model, string | undefined | null>;
   reducerImp: Reducer<number>;
   computedImp: Computed<Model, number>;
+  // push: Action<Model>;
+  // pop: Action<Model>;
   nested: {
     stateArray: Array<string>;
     stateBoolean: boolean;
@@ -34,6 +43,14 @@ type Model = {
 };
 
 type ModelActions = Actions<Model>;
+
+// @ts-ignore
+const store = createStore<Model>({});
+
+store.getActions().push();
+store.getActions().pop();
+store.getActions().actionImp(1);
+store.getActions().thunkImp(null);
 
 const assert = {} as ModelActions;
 
