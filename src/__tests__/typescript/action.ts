@@ -30,24 +30,32 @@ const store = createStore(model);
 
 interface ListeningModel {
   logs: string[];
+  doAction: Action<ListeningModel, string>;
+  doThunk: Thunk<ListeningModel, string>;
+  doActionInvalid: Action<ListeningModel, number>;
+  doThunkInvalid: Thunk<ListeningModel, number>;
 }
 
-interface TargetModel {
-  doAction: Action<TargetModel, string>;
-  doThunk: Thunk<TargetModel, string>;
-  doActionInvalid: Action<TargetModel, number>;
-  doThunkInvalid: Thunk<TargetModel, number>;
+interface OtherModel {
+  otherAction: Action<OtherModel, string>;
+  otherThunk: Thunk<OtherModel, string>;
 }
 
-// @ts-ignore
-const targetModel: TargetModel = {};
+interface StoreListenerModel {
+  listening: ListeningModel;
+  other: OtherModel;
+}
 
-const listeningAction: Action<ListeningModel, string> = action(
+const listeningAction: Action<
+  ListeningModel,
+  string,
+  StoreListenerModel
+> = action(
   (state, payload) => {
     state.logs.push(payload);
   },
   {
-    listenTo: targetModel.doAction,
+    listenTo: actions => actions.doAction,
   },
 );
 
@@ -57,7 +65,7 @@ const listeningActionInvalidPayload: Action<ListeningModel, string> = action(
   },
   // typings:expect-error
   {
-    listenTo: targetModel.doActionInvalid,
+    listenTo: actions => actions.doActionInvalid,
   },
 );
 
@@ -66,7 +74,7 @@ const listeningThunk: Action<ListeningModel, string> = action(
     state.logs.push(payload);
   },
   {
-    listenTo: targetModel.doThunk,
+    listenTo: actions => actions.doThunk,
   },
 );
 
@@ -76,7 +84,7 @@ const listeningThunkInvalidPayload: Action<ListeningModel, string> = action(
   },
   // typings:expect-error
   {
-    listenTo: targetModel.doThunkInvalid,
+    listenTo: actions => actions.doThunkInvalid,
   },
 );
 
@@ -85,7 +93,7 @@ const listeningString: Action<ListeningModel, string> = action(
     state.logs.push(payload);
   },
   {
-    listenTo: 'ADD_TODO',
+    listenTo: () => 'ADD_TODO',
   },
 );
 
@@ -95,7 +103,7 @@ const listeningInvalid: Action<ListeningModel, string> = action(
   },
   // typings:expect-error
   {
-    listenTo: 1,
+    listenTo: () => 1,
   },
 );
 
@@ -114,7 +122,7 @@ const multiListeningAction: Action<ListeningModel, string> = action(
     state.logs.push(payload);
   },
   {
-    listenTo: [targetModel.doAction, targetModel.doThunk],
+    listenTo: actions => [actions.doAction, actions.doThunk],
   },
 );
 
@@ -124,6 +132,24 @@ const multiListeningActionInvalid: Action<ListeningModel, string> = action(
   },
   // typings:expect-error
   {
-    listenTo: [targetModel.doAction, targetModel.doThunkInvalid],
+    listenTo: actions => [actions.doAction, actions.doThunkInvalid],
+  },
+);
+
+const multiListeningActionString: Action<ListeningModel, string> = action(
+  (state, payload) => {
+    state.logs.push(payload);
+  },
+  {
+    listenTo: () => ['foo', 'bar'],
+  },
+);
+
+const listeningActionString: Action<ListeningModel, string> = action(
+  (state, payload) => {
+    state.logs.push(payload);
+  },
+  {
+    listenTo: () => 'foo',
   },
 );

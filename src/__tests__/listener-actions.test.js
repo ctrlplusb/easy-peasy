@@ -14,7 +14,7 @@ it('listening to an action, firing an action', () => {
       (state, payload) => {
         state.logs.push(`Added ${payload}`);
       },
-      { listenTo: math.add },
+      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -48,7 +48,7 @@ it('listening to an action, firing a thunk', done => {
       (actions, payload) => {
         actions.add(`Added ${payload}`);
       },
-      { listenTo: math.add },
+      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -74,7 +74,7 @@ it('listening to a thunk, firing an action', async () => {
       (state, payload) => {
         state.logs.push(`Added ${payload}`);
       },
-      { listenTo: math.add },
+      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -108,7 +108,7 @@ it('listening to a thunk, firing a thunk', async done => {
       (actions, payload) => {
         actions.add(`Added ${payload}`);
       },
-      { listenTo: math.add },
+      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -128,7 +128,7 @@ it('listening to a string, firing an action', async () => {
       (state, payload) => {
         state.logs.push(`Added ${payload}`);
       },
-      { listenTo: 'MATH_ADD' },
+      { listenTo: () => 'MATH_ADD' },
     ),
   };
   const store = createStore({
@@ -155,7 +155,7 @@ it('listening to an string, firing a thunk', done => {
       (actions, payload) => {
         actions.add(`Added ${payload}`);
       },
-      { listenTo: 'MATH_ADD' },
+      { listenTo: () => 'MATH_ADD' },
     ),
   };
   const store = createStore({
@@ -168,17 +168,15 @@ it('listening to an string, firing a thunk', done => {
 
 it('action listening to multiple actions', async () => {
   // arrange
-  const actionTarget = action(() => {});
-  const thunkTarget = thunk(() => {});
   const model = {
     logs: [],
-    actionTarget,
-    thunkTarget,
+    actionTarget: action(() => {}),
+    thunkTarget: thunk(() => {}),
     onActions: action(
       (state, payload) => {
         state.logs.push(payload);
       },
-      { listenTo: [actionTarget, thunkTarget] },
+      { listenTo: actions => [actions.actionTarget, actions.thunkTarget] },
     ),
   };
   const store = createStore(model);
@@ -194,13 +192,13 @@ it('action listening to multiple actions', async () => {
 it('thunk listening to multiple actions', async () => {
   // arrange
   const thunkSpy = jest.fn();
-  const actionTarget = action(() => {});
-  const thunkTarget = thunk(() => {});
   const model = {
     logs: [],
-    actionTarget,
-    thunkTarget,
-    onActions: thunk(thunkSpy, { listenTo: [actionTarget, thunkTarget] }),
+    actionTarget: action(() => {}),
+    thunkTarget: thunk(() => {}),
+    onActions: thunk(thunkSpy, {
+      listenTo: actions => [actions.actionTarget, actions.thunkTarget],
+    }),
   };
   const store = createStore(model);
 

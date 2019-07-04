@@ -79,6 +79,7 @@ export default function createStoreInternals({
             return result;
           };
           actionCreator[actionNameSymbol] = name;
+          actionCreator[actionSymbol] = true;
           actionCreatorDict[name] = actionCreator;
           set(path, actionCreators, actionCreator);
 
@@ -89,6 +90,7 @@ export default function createStoreInternals({
         } else if (value[thunkSymbol]) {
           const name = `@thunk.${path.join('.')}`;
           value[actionNameSymbol] = name;
+          value[metaSymbol] = meta;
 
           // Thunk Action
           const action = payload => {
@@ -130,6 +132,7 @@ export default function createStoreInternals({
               });
 
           actionCreator[actionNameSymbol] = name;
+          actionCreator[thunkSymbol] = true;
           actionCreatorDict[name] = actionCreator;
           set(path, actionCreators, actionCreator);
 
@@ -199,9 +202,17 @@ export default function createStoreInternals({
     const {
       config: { listenTo },
     } = listenerAction[actionStateSymbol] || listenerAction[thunkStateSymbol];
-    let targetName;
+
+    if (typeof listenTo !== 'function') {
+      return;
+    }
+
+    const { parent } = listenerAction[metaSymbol];
+
+    const targets = listenTo(get(parent, actionCreators), actionCreators);
 
     const processListenTo = target => {
+      let targetName;
       if (
         typeof target === 'function' &&
         target[actionNameSymbol] &&
@@ -220,10 +231,10 @@ export default function createStoreInternals({
       listenerActionMap[targetName] = listenerReg;
     };
 
-    if (Array.isArray(listenTo)) {
-      listenTo.forEach(processListenTo);
+    if (Array.isArray(targets)) {
+      targets.forEach(processListenTo);
     } else {
-      processListenTo(listenTo);
+      processListenTo(targets);
     }
   });
 
