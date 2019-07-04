@@ -235,89 +235,11 @@ describe('direct form', () => {
   });
 });
 
-describe('object form', () => {
-  test('component updates with state change', () => {
-    // arrange
-    const store = createStore({
-      count: 1,
-      inc: action(state => {
-        state.count += 1;
-      }),
-    });
-    const renderSpy = jest.fn();
-    function Counter() {
-      const { count } = useStoreState(state => ({
-        count: state.count,
-      }));
-      const inc = useStoreActions(actions => actions.inc);
-      renderSpy();
-      return (
-        <button data-testid="count" type="button" onClick={inc}>
-          {count}
-        </button>
-      );
-    }
+test('issue230', () => {
+  // arrange
+  const renderSpy = jest.fn();
 
-    const app = (
-      <StoreProvider store={store}>
-        <Counter />
-      </StoreProvider>
-    );
+  // act
 
-    // act
-    const { getByTestId } = render(app);
-
-    // assert
-    const countButton = getByTestId('count');
-    expect(countButton.firstChild.textContent).toBe('1');
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-
-    // act
-    fireEvent.click(countButton);
-
-    // assert
-    expect(countButton.firstChild.textContent).toBe('2');
-    expect(renderSpy).toHaveBeenCalledTimes(2);
-  });
-
-  test('component only updates with state change', () => {
-    // arrange
-    const store = createStore({
-      count: 1,
-      somethingElse: null,
-      updateSomethingElse: action((state, payload) => {
-        state.somethingElse = payload;
-      }),
-    });
-    const renderSpy = jest.fn();
-    function Counter() {
-      const { count } = useStoreState(state => ({
-        count: state.count,
-      }));
-      renderSpy();
-      return <span data-testid="count">{count}</span>;
-    }
-    const app = (
-      <StoreProvider store={store}>
-        <Counter />
-      </StoreProvider>
-    );
-
-    // act
-    const { getByTestId } = render(app);
-
-    // assert
-    const countButton = getByTestId('count');
-    expect(countButton.firstChild.textContent).toBe('1');
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-
-    // act
-    act(() => {
-      store.getActions().updateSomethingElse('foo');
-    });
-
-    // assert
-    expect(countButton.firstChild.textContent).toBe('1');
-    expect(renderSpy).toHaveBeenCalledTimes(1);
-  });
+  // assert
 });

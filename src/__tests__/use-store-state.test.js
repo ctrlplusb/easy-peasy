@@ -4,7 +4,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from '@testing-library/react';
 import { mockConsole } from './utils';
-
 import {
   action,
   createStore,
@@ -33,218 +32,205 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-describe('mapState errors', () => {
-  let restoreConsole;
+let restoreConsole;
 
-  beforeEach(() => {
-    jest.useFakeTimers();
-    restoreConsole = mockConsole();
+beforeEach(() => {
+  jest.useFakeTimers();
+  restoreConsole = mockConsole();
+});
+
+afterEach(() => {
+  restoreConsole();
+});
+
+test('zombie children case is handled', () => {
+  // arrange
+  const store = createStore({
+    items: {
+      a: { name: 'A' },
+      b: { name: 'B' },
+      c: { name: 'C' },
+    },
+    deleteItem: action((state, payload) => {
+      delete state.items[payload];
+    }),
   });
 
-  afterEach(() => {
-    restoreConsole();
+  const ListItem = ({ id }) => {
+    const name = useStoreState(s => s.items[id].name, [id]);
+    return name;
+  };
+
+  function App() {
+    const itemIds = useStoreState(s => Object.keys(s.items));
+    const deleteItem = useStoreActions(a => a.deleteItem);
+    const items = itemIds.map(id => <ListItem key={id} id={id} />);
+    return (
+      <>
+        <div data-testid="items">{items}</div>
+        <button
+          data-testid="delete"
+          type="button"
+          onClick={() => deleteItem('b')}
+        >
+          Delete B
+        </button>
+      </>
+    );
+  }
+
+  const app = (
+    <StoreProvider store={store}>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StoreProvider>
+  );
+
+  // act
+  const { getByTestId } = render(app);
+
+  // assert
+  expect(getByTestId('items').innerHTML).toBe('ABC');
+
+  // act
+  fireEvent.click(getByTestId('delete'));
+
+  // assert
+  expect(getByTestId('items').innerHTML).toBe('AC');
+});
+
+test('throws an error if state mapping fails', () => {
+  // arrange
+  const store = createStore({
+    todo: { text: 'foo' },
+    remove: action(state => {
+      delete state.todo;
+    }),
   });
 
-  describe('zombie children', () => {
-    test('renders successfully within window of opportunity', () => {
-      // arrange
-      const store = createStore({
-        items: {
-          a: { name: 'A' },
-          b: { name: 'B' },
-          c: { name: 'C' },
-        },
-        deleteItem: action((state, payload) => {
-          delete state.items[payload];
-        }),
-      });
+  function Todo() {
+    const text = useStoreState(state => state.todo.text);
+    return <div>{text}</div>;
+  }
 
-      const ListItem = ({ id }) => {
-        const name = useStoreState(s => s.items[id].name, [id]);
-        return name;
-      };
+  function App() {
+    const remove = useStoreActions(actions => actions.remove);
+    return (
+      <>
+        <Todo />
+        <button data-testid="remove" onClick={remove} type="button">
+          Remove
+        </button>
+      </>
+    );
+  }
 
-      function App() {
-        const itemIds = useStoreState(s => Object.keys(s.items));
-        const deleteItem = useStoreActions(a => a.deleteItem);
-        const items = itemIds.map(id => <ListItem key={id} id={id} />);
-        return (
-          <>
-            <div data-testid="items">{items}</div>
-            <button
-              data-testid="delete"
-              type="button"
-              onClick={() => deleteItem('b')}
-            >
-              Delete B
-            </button>
-          </>
-        );
+  const { getByTestId } = render(
+    <StoreProvider store={store}>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StoreProvider>,
+  );
+
+  // act
+  act(() => {
+    // multiple store updates should be idempotent
+    fireEvent.click(getByTestId('remove'));
+    fireEvent.click(getByTestId('remove'));
+  });
+
+  // assert
+  expect(getByTestId('error').textContent).toMatch(
+    "Cannot read property 'text' of undefined",
+  );
+});
+
+test('throws an error for an invalid subscription only update', () => {
+  // arrange
+  const store = createStore({
+    todo: { text: 'foo' },
+    remove: action(state => {
+      delete state.todo;
+    }),
+  });
+
+  function App() {
+    const text = useStoreState(state => state.todo.text);
+    return <div>{text}</div>;
+  }
+
+  const { getByTestId } = render(
+    <StoreProvider store={store}>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StoreProvider>,
+  );
+
+  // act
+  act(() => {
+    store.getActions().remove();
+  });
+
+  // assert
+  expect(getByTestId('error').textContent).toMatch(
+    "Cannot read property 'text' of undefined",
+  );
+});
+
+test('does not throw if state is removed', () => {
+  // arrange
+  const store = createStore({
+    todos: {
+      1: { text: 'write some tests' },
+      2: { text: 'ensure hooks work' },
+    },
+    activeTodo: 1,
+    completedActive: action(state => {
+      if (state.activeTodo) {
+        delete state.todos[state.activeTodo];
+        const outstanding = Object.keys(state.todos);
+        state.activeTodo = outstanding.length > 0 ? outstanding[0] : null;
       }
-
-      const app = (
-        <StoreProvider store={store}>
-          <ErrorBoundary>
-            <App />
-          </ErrorBoundary>
-        </StoreProvider>
-      );
-
-      // act
-      const { getByTestId } = render(app);
-
-      // assert
-      expect(getByTestId('items').innerHTML).toBe('ABC');
-
-      // act
-      act(() => {
-        fireEvent.click(getByTestId('delete'));
-      });
-
-      // assert
-      expect(getByTestId('items').innerHTML).toBe('AC');
-
-      // act
-      act(() => {
-        jest.runAllTimers();
-      });
-
-      // assert
-      expect(getByTestId('items').innerHTML).toBe('AC');
-      expect(setTimeout).toHaveBeenCalledTimes(2);
-      expect(setTimeout).toHaveBeenNthCalledWith(2, expect.any(Function), 200);
-    });
+    }),
   });
 
-  describe('state getting removed', () => {
-    let app;
-    let store;
-    let App;
+  function Todo({ id }) {
+    const text = useStoreState(state => state.todos[id].text);
+    return <div data-testid="todo">{text}</div>;
+  }
 
-    beforeEach(() => {
-      store = createStore({
-        todos: {
-          1: { text: 'write some tests' },
-          2: { text: 'ensure hooks work' },
-        },
-        removeTodo: action((state, payload) => {
-          delete state.todos[payload];
-        }),
-      });
+  function App() {
+    const activeTodo = useStoreState(state => state.activeTodo);
+    const completedActive = useStoreActions(actions => actions.completedActive);
+    return (
+      <>
+        <Todo id={activeTodo} />
+        <button data-testid="remove" onClick={completedActive} type="button">
+          Remove
+        </button>
+      </>
+    );
+  }
 
-      function Todo({ id }) {
-        const text = useStoreState(s => s.todos[id].text, [id]);
-        return <div data-testid="todo">{text}</div>;
-      }
+  const app = (
+    <StoreProvider store={store}>
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+    </StoreProvider>
+  );
 
-      App = ({ activeTodo = 1, displayTodo = true }) => {
-        const removeTodo = useStoreActions(a => a.removeTodo);
-        return (
-          <>
-            {displayTodo ? (
-              <Todo id={activeTodo} />
-            ) : (
-              <div data-testid="no-todo">No todo</div>
-            )}
-            <button
-              data-testid="remove"
-              onClick={() => removeTodo(activeTodo)}
-              type="button"
-            >
-              Remove todo
-            </button>
-          </>
-        );
-      };
+  const { getByTestId, rerender } = render(app);
 
-      app = (
-        <StoreProvider store={store}>
-          <ErrorBoundary>
-            <App />
-          </ErrorBoundary>
-        </StoreProvider>
-      );
-    });
+  // act
+  fireEvent.click(getByTestId('remove'));
 
-    test('throws an error if the window of opportunity is exceeded', () => {
-      // arrange
-      const { getByTestId } = render(app);
+  // act
+  rerender(app);
 
-      // act
-      act(() => {
-        // multiple store updates should be idempotent
-        fireEvent.click(getByTestId('remove'));
-        fireEvent.click(getByTestId('remove'));
-      });
-
-      // assert
-      expect(getByTestId('todo').textContent).toEqual('write some tests');
-
-      // act
-      act(() => {
-        jest.runAllTimers();
-      });
-
-      // assert
-      expect(getByTestId('error').textContent).toEqual(
-        "Cannot read property 'text' of undefined",
-      );
-    });
-
-    test('does not throw if the component unmounts', () => {
-      // arrange
-      const { getByTestId, rerender } = render(app);
-
-      // act
-      act(() => {
-        fireEvent.click(getByTestId('remove'));
-      });
-
-      // assert
-      expect(getByTestId('todo').textContent).toEqual('write some tests');
-
-      // act
-      rerender(
-        <StoreProvider store={store}>
-          <ErrorBoundary>
-            <App displayTodo={false} />
-          </ErrorBoundary>
-        </StoreProvider>,
-      );
-      act(() => {
-        jest.runAllTimers();
-      });
-
-      // assert
-      expect(getByTestId('no-todo').textContent).toEqual('No todo');
-    });
-
-    test('does not throw if the component gets new props that map to valid state', () => {
-      // arrange
-      const { getByTestId, rerender } = render(app);
-
-      // act
-      act(() => {
-        fireEvent.click(getByTestId('remove'));
-      });
-
-      // assert
-      expect(getByTestId('todo').textContent).toEqual('write some tests');
-
-      // act
-      rerender(
-        <StoreProvider store={store}>
-          <ErrorBoundary>
-            <App activeTodo={2} />
-          </ErrorBoundary>
-        </StoreProvider>,
-      );
-      act(() => {
-        jest.runAllTimers();
-      });
-
-      // assert
-      expect(getByTestId('todo').textContent).toEqual('ensure hooks work');
-    });
-  });
+  // assert
+  expect(getByTestId('todo').textContent).toEqual('ensure hooks work');
 });
