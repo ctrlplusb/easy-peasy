@@ -1,8 +1,8 @@
 # Quick Start
 
-The tutorial for the impatient. ⏰🚀
+> i.e. The TLDR tutorial 🚀
 
-This will give you a quick fire overview of Easy Peasy. When you have the time, or if you are interested in a bit more detail, we would recommend reading the [full tutorial](/docs/tutorial) and [API docs](/docs/api).
+This quick fire overview will provide you with a brief introduction to 90% of Easy Peasy's API.
 
 ## Installation
 
@@ -10,9 +10,9 @@ This will give you a quick fire overview of Easy Peasy. When you have the time, 
 npm install easy-peasy
 ```
 
-## Define your model
+## Use a model to define your store
 
-Your state is represented via an object-based model. Feel free to split your model into separate files.
+Your [store](/docs/api/store) definition is represented via an object-based model.
 
 ```javascript
 const productsModel = : {
@@ -31,7 +31,9 @@ const storeModel = {
 };
 ```
 
-## Create your store
+Feel free to split your model into separate files, importing them and composing them as you please.
+
+## Create the store
 
 Provide your model to [createStore](/docs/api/create-store) in order to get a [store](/docs/api/store) instance.
 
@@ -40,6 +42,8 @@ import { createStore } from 'easy-peasy';
 
 const store = createStore(storeModel);
 ```
+
+> FYI, the output store is a Redux store, fully compatible with any library that expects to receive one (e.g. react-redux)
 
 ## Wrap your application
 
@@ -56,7 +60,7 @@ ReactDOM.render(
 );
 ```
 
-## Consume state in a component
+## Consume state
 
 The [useStoreState](/docs/api/use-store-state) hook allows you to consume state.
 
@@ -69,35 +73,42 @@ function ProductsInBasket() {
 }
 ```
 
-## Extend model with actions to update state
+## Adding actions to your model
 
 Define an [action](/docs/api/action) against your model to support updates.
 
 ```javascript
 import { action } from 'easy-peasy';
+//         👆
 
 const basketModel = {
   productIds: [1],
-  addProduct: action((state, product) => {
-    state.productIds.push(product.id);
+  //            👇
+  addProduct: action((state, payload) => {
+    state.productIds.push(payload);
   })
 };
 ```
 
-The [action](/docs/api/action) will receive the local modal state against which it is bound. You can mutate the state with the update, which we convert to an immutable update via [immer](https://github.com/immerjs/immer), or you can return new immutable version of your state like a standard reducer pattern.
+The [action](/docs/api/action) will receive the state which is local to it. 
 
-## Dispatch your actions from components
+You can mutate the state with the update, which we convert to an immutable update via [immer](https://github.com/immerjs/immer), or you can return new immutable version of your state like a standard reducer pattern.
 
-The [useStoreActions](/docs/api/use-store-actions) hook allows you to use an [action](/docs/api/action) within a component.
+## Dispatching your actions
+
+The [useStoreActions](/docs/api/use-store-actions) hook allows you to access an [action](/docs/api/action) within a component.
 
 ```javascript
 import { useStoreActions } from 'easy-peasy';
+//          👆
 
 function Product({ product }) {
+  //                                👇
   const addProductToBasket = useStoreActions(actions => actions.basket.addProduct);
   return (
     <div>
       <h2>{product.name}</h2>
+      {/*                            👇                   */}
       <button onClick={() => addProductToBasket(product.id)}>
         Add to basket
       </button>
@@ -106,9 +117,9 @@ function Product({ product }) {
 }
 ```
 
-## Extend model with thunks to perform side effects
+## Add thunks to perform side effects
 
-Define a [thunk](/docs/api/thunk) in order to perform a side effect, such as make an API request.
+Define a [thunk](/docs/api/thunk) in order to perform a side effect, such as making a request to an API.
 
 ```javascript
 import { thunk } from 'easy-peasy';
@@ -129,29 +140,30 @@ const productsModel = {
 }
 ```
 
-## Dispatch your thunks from a component
+## Dispatch your thunks
 
-The [useStoreActions](/docs/api/use-store-actions) hook allows you to use an [thunk](/docs/api/action) within a component.
+The [useStoreActions](/docs/api/use-store-actions) hook allows you to access a [thunk](/docs/api/action) within a component.
 
 ```javascript
 import { useStoreActions } from 'easy-peasy';
+//           👆
 
 function EditProduct({ product }) {
-  //        👇 mapped thunk
+  //                        👇
   const updateProduct = useStoreActions(actions => actions.products.updateProduct);
   return (
     <ProductForm 
       product={product} 
-      //                            👇 dispatching thunk
+      //                            👇
       onSave={updatedValues => updateProduct(updatedValues)}
     />  
   );
 }
 ```
 
-## Derived data
+## Computed properties
 
-You can derive state via [computed](/docs/api/computed) properties.
+You can create derived state via [computed](/docs/api/computed).
 
 ```javascript
 import { computed } from 'easy-peasy';
@@ -166,22 +178,24 @@ const productsModel = {
 }
 ```
 
-## Consuming computed properties within component
+## Consuming computed properties
 
 [Computed](/docs/api/computed) properties are accessed via the [useStoreState](/docs/api/use-store-state) hook, just like any other state.
 
 ```javascript
 import { useStoreState } from 'easy-peasy';
+//            👆
 
 function ProductCount() {
+  //               👇
   const count = useState(state => state.products.count);
   return <div>{count} products</div>;
 }
 ```
 
-## Listening to actions from other models
+## Listening to actions
 
-[Actions](/docs/api/action) or [thunks](/docs/api/thunk) can be configured to listen to any other [action](/docs/api/action)/[thunk](/docs/api/thunk), firing in response to them completing.
+[Actions](/docs/api/action) or [thunks](/docs/api/thunk) can be configured to listen to any other [action](/docs/api/action)/[thunk](/docs/api/thunk).
 
 ```javascript
 import { action } from 'easy-peasy';
@@ -192,12 +206,19 @@ const auditModel = {
     (state, payload) => {
       state.logs(`Added product ${payload} to basket`);
     },
-    // 👇 config:
+    //  👇 listen configuration
     { listenTo: actions => actions.basket.addProduct }
+    //               the action to listen to 👆
   )
 }
 ```
 
-## All done
+They will receive the same payload as was provided to the action/thunk being listened to.
 
-That concludes the quick start overview of Easy Peasy. The above APIs would likely represent the 95% use case of Easy Peasy, but do look at the [full tutorial](/docs/tutorial) and the [API docs](/docs/api) to gain a deeper insight into Easy Peasy and the tools it provides to you.
+## Closing notes
+
+That concludes the quick start overview of Easy Peasy. 
+
+From here we would recommend either looking at the [live examples](/docs/introduction/examples), the [full tutorial](/docs/tutorial) or the [API docs](/docs/api).
+
+Have fun. 👋

@@ -17,7 +17,7 @@ pageClass: homepage
 <p align="center">
   <img src="./assets/happy-peas.png" width="300" />
 </p>
-<h1 class="title" align="center">Easy Peasy state for React</h1>
+<h1 class="title" align="center">Vegetarian friendly state for React</h1>
 
 Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickly</strong> and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, performance optimisation, developer tools etc.
 
