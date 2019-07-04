@@ -1,7 +1,7 @@
 {
   "name": "easy-peasy",
   "version": "3.0.0-alpha.2",
-  "description": "Easy peasy state for React",
+  "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
   "module": "dist/easy-peasy.esm.js",
