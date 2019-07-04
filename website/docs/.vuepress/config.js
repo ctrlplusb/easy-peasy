@@ -1,6 +1,6 @@
 module.exports = {
   title: 'Easy Peasy',
-  description: 'Easy Peasy state for React',
+  description: 'Vegetarian friendly state for React',
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
   plugins: [
     [
