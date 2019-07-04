@@ -1,10 +1,11 @@
 /* eslint-disable */
 
 import { State, Computed, Thunk, Action, Reducer } from 'easy-peasy';
-import { O } from 'ts-toolbelt';
+import { any } from 'prop-types';
 
 type Model = {
   stateMap: { [key: string]: Array<string> };
+  stateAny: any;
   numberStateMap: { [key: number]: boolean };
   optionalStateMap?: { [key: string]: Array<string> };
   optionValueFieldsMap: { [key: string]: { name: string; age?: number } };
@@ -45,6 +46,7 @@ type Model = {
 };
 
 const assert: State<Model> = {
+  stateAny: any,
   stateMap: {
     foo: ['bar'],
   },
