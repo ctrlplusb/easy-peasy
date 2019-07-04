@@ -67,7 +67,11 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
     any,
     any
   >
-    ? ActionsModel[P]['actionCreator']
+    ? ActionsModel[P]['payload'] extends void
+      ? () => Promise<ActionsModel[P]['result']>
+      : (
+          payload: ActionsModel[P]['payload'],
+        ) => Promise<ActionsModel[P]['result']>
     : ActionsModel[P] extends Action<any, any>
     ? ActionsModel[P]['payload'] extends void
       ? () => void
@@ -296,9 +300,6 @@ export type Thunk<
   StoreModel extends object = {},
   Result = any
 > = {
-  actionCreator: Payload extends void
-    ? () => Promise<Result>
-    : (payload: Payload) => Promise<Result>;
   type: 'thunk';
   payload: Payload;
   result: Result;
