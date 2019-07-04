@@ -20,8 +20,6 @@ type KeysOfType<A extends object, B> = {
   [K in keyof A]-?: A[K] extends B ? K : never;
 }[keyof A];
 
-type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
-
 /**
  * This allows you to narrow keys of an object type that are index signature
  * based.
@@ -39,9 +37,19 @@ type IndexSignatureKeysOfType<A extends Object> = {
     : never;
 }[keyof A];
 
+type ActionTypes = Action<any, any, any> | Thunk<any, any, any, any, any>;
+
+type ActionCreator<Result> = () => Result;
+
+type ActionCreatorWithPayload<Payload, Result> = (payload: Payload) => Result;
+
+type ActionCreators<Payload = any, Result = any> =
+  | ActionCreator<Result>
+  | ActionCreatorWithPayload<Payload, Result>;
+
 // #region Helpers
 
-export function actionName(action: Action<any, any>): string;
+export function actionName(action: Action<any, any, any>): string;
 
 export function debug<StateDraft extends any>(state: StateDraft): StateDraft;
 
@@ -68,14 +76,15 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
     any
   >
     ? ActionsModel[P]['payload'] extends void
-      ? () => Promise<ActionsModel[P]['result']>
-      : (
-          payload: ActionsModel[P]['payload'],
-        ) => Promise<ActionsModel[P]['result']>
-    : ActionsModel[P] extends Action<any, any>
+      ? ActionCreator<Promise<ActionsModel[P]['result']>>
+      : ActionCreatorWithPayload<
+          ActionsModel[P]['payload'],
+          Promise<ActionsModel[P]['result']>
+        >
+    : ActionsModel[P] extends Action<any, any, any>
     ? ActionsModel[P]['payload'] extends void
-      ? () => void
-      : (payload: ActionsModel[P]['payload']) => void
+      ? ActionCreator<void>
+      : ActionCreatorWithPayload<ActionsModel[P]['payload'], void>
     : ActionsModel[P] extends object
     ? RecursiveActions<
         ActionsModel[P],
@@ -260,15 +269,22 @@ export type Dispatch = ReduxDispatch;
 
 // #region Types for Thunk / Action listenTo configs
 
-type Target<TargetPayload> =
-  | Action<any, TargetPayload>
-  | Thunk<any, TargetPayload>
-  | string
-  | void;
+type Target<TargetPayload> = ActionCreators<TargetPayload> | string;
 
-type ListenToTarget<TargetPayload> =
-  | Target<TargetPayload>
-  | Array<Target<TargetPayload>>;
+type ListenToTargetResolver<
+  TargetPayload extends any,
+  Model extends object,
+  StoreModel extends object
+> = (
+  actions: Actions<Model>,
+  storeActions: Actions<StoreModel>,
+) => Target<TargetPayload> | Array<Target<TargetPayload>>;
+
+type ListenToTarget<
+  TargetPayload extends any,
+  Model extends object,
+  StoreModel extends object
+> = ListenToTargetResolver<TargetPayload, Model, StoreModel>;
 
 // #endregion
 
@@ -326,8 +342,7 @@ export function thunk<
   Payload = void,
   Injections = any,
   StoreModel extends object = {},
-  Result = any,
-  ListenTo extends ListenToTarget<Payload> = void
+  Result = any
 >(
   thunk: (
     actions: Actions<Model>,
@@ -341,7 +356,7 @@ export function thunk<
       meta: Meta;
     },
   ) => Result,
-  config?: { listenTo?: ListenTo },
+  config?: { listenTo?: ListenToTarget<Payload, Model, StoreModel> },
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
 
 // #endregion
@@ -362,7 +377,11 @@ export function thunk<
  *   addTodo: Action<Model, Todo>;
  * }
  */
-export type Action<Model extends object = {}, Payload = void> = {
+export type Action<
+  Model extends object = {},
+  Payload = void,
+  StoreModel extends object = {}
+> = {
   type: 'action';
   payload: Payload;
   result: void | State<Model>;
@@ -387,13 +406,13 @@ export type Action<Model extends object = {}, Payload = void> = {
 export function action<
   Model extends object = {},
   Payload = any,
-  ListenTo extends ListenToTarget<Payload> = void
+  StoreModel extends object = {}
 >(
   action: (state: State<Model>, payload: Payload) => void | State<Model>,
   config?: {
-    listenTo?: ListenTo;
+    listenTo?: ListenToTarget<Payload, Model, StoreModel>;
   },
-): Action<Model, Payload>;
+): Action<Model, Payload, StoreModel>;
 
 // #endregion
 
