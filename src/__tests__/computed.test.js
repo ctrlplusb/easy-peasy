@@ -220,7 +220,7 @@ test('computed properties work in a React component', () => {
   // arrange
   let renderCount = 0;
   function Product({ id }) {
-    const product = useStoreState(state => state.products.itemMap[id], [id]);
+    const product = useStoreState(state => state.products.itemMap[id]);
     renderCount += 1;
     return <div data-testid="name">{product.name}</div>;
   }
