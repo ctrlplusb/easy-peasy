@@ -1,3 +1,7 @@
+---
+sidebar: auto
+---
+
 # Quick Start
 
 > i.e. The TLDR tutorial 🚀
@@ -90,7 +94,7 @@ const basketModel = {
 };
 ```
 
-The [action](/docs/api/action) will receive the state which is local to it. 
+The [action](/docs/api/action) will receive the state which is local to it.
 
 You can mutate the state with the update, which we convert to an immutable update via [immer](https://github.com/immerjs/immer), or you can return new immutable version of your state like a standard reducer pattern.
 
@@ -152,11 +156,11 @@ function EditProduct({ product }) {
   //                        👇
   const updateProduct = useStoreActions(actions => actions.products.updateProduct);
   return (
-    <ProductForm 
-      product={product} 
+    <ProductForm
+      product={product}
       //                            👇
       onSave={updatedValues => updateProduct(updatedValues)}
-    />  
+    />
   );
 }
 ```
@@ -217,7 +221,7 @@ They will receive the same payload as was provided to the action/thunk being lis
 
 ## Closing notes
 
-That concludes the quick start overview of Easy Peasy. 
+That concludes the quick start overview of Easy Peasy.
 
 From here we would recommend either looking at the [live examples](/docs/introduction/examples), the [full tutorial](/docs/tutorial) or the [API docs](/docs/api).
 
