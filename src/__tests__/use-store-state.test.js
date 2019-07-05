@@ -10,6 +10,7 @@ import {
   useStoreState,
   StoreProvider,
   useStoreActions,
+  computed,
 } from '../index';
 
 class ErrorBoundary extends React.Component {
@@ -233,4 +234,50 @@ test('does not throw if state is removed', () => {
 
   // assert
   expect(getByTestId('todo').textContent).toEqual('ensure hooks work');
+});
+
+test('multiple hooks receive state update in same render cycle', () => {
+  // arrange
+  const store = createStore({
+    items: [],
+    count: computed(state => state.items.length),
+    fetch: action(state => {
+      state.items = ['foo'];
+    }),
+  });
+
+  const renderSpy = jest.fn();
+
+  function App() {
+    const items = useStoreState(state => state.items);
+    const count = useStoreState(state => state.count);
+    renderSpy();
+    return (
+      <>
+        <div data-testid="items">{items.join('')}</div>
+        <div data-testid="count">{count}</div>
+      </>
+    );
+  }
+
+  const { getByTestId } = render(
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>,
+  );
+
+  // assert
+  expect(renderSpy).toHaveBeenCalledTimes(1);
+  expect(getByTestId('items').textContent).toBe('');
+  expect(getByTestId('count').textContent).toBe('0');
+
+  // act
+  act(() => {
+    store.getActions().fetch();
+  });
+
+  // assert
+  expect(renderSpy).toHaveBeenCalledTimes(2);
+  expect(getByTestId('items').textContent).toBe('foo');
+  expect(getByTestId('count').textContent).toBe('1');
 });
