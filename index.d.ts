@@ -49,19 +49,19 @@ type ActionCreators<Payload = any, Result = any> =
 
 // #region Helpers
 
-export function actionName(action: Action<any, any, any>): string;
+export function actionName(action: ActionCreators<any, any>): string;
 
 export function debug<StateDraft extends any>(state: StateDraft): StateDraft;
 
 export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
-export function thunkStartName(action: Thunk<any, any, any, any, any>): string;
+export function thunkStartName(action: ActionCreators<any, any>): string;
 
 export function thunkCompleteName(
-  action: Thunk<any, any, any, any, any>,
+  action: ActionCreators<any, any>,
 ): string;
 
-export function thunkFailName(action: Thunk<any, any, any, any, any>): string;
+export function thunkFailName(action: ActionCreators<any, any>): string;
 
 // #endregion
 
