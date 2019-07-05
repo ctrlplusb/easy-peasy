@@ -58,6 +58,15 @@ export default function createStoreInternals({
         parent: parentPath,
         path,
       };
+      const handleValueAsState = () => {
+        const initialParentRef = get(parentPath, initialState);
+        if (initialParentRef && key in initialParentRef) {
+          set(path, defaultState, initialParentRef[key]);
+        } else {
+          set(path, defaultState, value);
+        }
+      };
+
       if (typeof value === 'function') {
         if (value[actionSymbol]) {
           const name = `@action.${path.join('.')}`;
@@ -178,6 +187,8 @@ export default function createStoreInternals({
           computedProperties.push({ key, parentPath, createComputedProperty });
         } else if (value[reducerSymbol]) {
           customReducers.push({ path, reducer: value });
+        } else {
+          handleValueAsState();
         }
       } else if (isStateObject(value) && Object.keys(value).length > 0) {
         const existing = get(path, defaultState);
@@ -186,13 +197,7 @@ export default function createStoreInternals({
         }
         recursiveExtractDefsFromModel(value, path);
       } else {
-        // State
-        const initialParentRef = get(parentPath, initialState);
-        if (initialParentRef && key in initialParentRef) {
-          set(path, defaultState, initialParentRef[key]);
-        } else {
-          set(path, defaultState, value);
-        }
+        handleValueAsState();
       }
     });
 
