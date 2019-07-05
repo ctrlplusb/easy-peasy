@@ -24,7 +24,7 @@ module.exports = {
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Install', link: '/docs/introduction/installation/' },
+      { text: 'Quick Start', link: '/docs/quick-start/' },
       { text: 'Tutorial', link: '/docs/tutorial/' },
       { text: 'API', link: '/docs/api/' },
       { text: 'Typescript', link: '/docs/typescript-tutorial/' },
@@ -41,41 +41,18 @@ module.exports = {
             'introduction/installation',
             'introduction/examples',
             'introduction/prior-art',
-            'introduction/quick-start',
-          ],
-        },
-        {
-          title: 'New Tutorial',
-          children: [
-            'new-tutorial/',
-            'new-tutorial/create-your-store',
-            'new-tutorial/connecting-your-store',
-            'new-tutorial/consuming-state',
-          ],
-        },
-        {
-          title: 'New Tutorial',
-          children: [
-            'new-tutorial/',
-            'new-tutorial/create-your-store',
-            'new-tutorial/connect-app-to-store',
           ],
         },
         {
           title: 'Tutorial',
           children: [
             'tutorial/',
-            'tutorial/creating-store',
-            'tutorial/integrating-store',
-            'tutorial/accessing-state',
-            'tutorial/defining-actions',
-            'tutorial/dispatching-actions',
-            'tutorial/defining-thunks',
-            'tutorial/dispatching-thunks',
-            'tutorial/defining-computed-properties',
-            'tutorial/accessing-computed-properties',
-            'tutorial/responding-actions',
-            'tutorial/final-notes',
+            'tutorial/create-your-store',
+            'tutorial/connecting-your-store',
+            'tutorial/consuming-state',
+            'tutorial/using-actions-to-update-state',
+            'tutorial/using-thunks-to-perform-side-effects',
+            'tutorial/using-computed-properties',
           ],
         },
         {
