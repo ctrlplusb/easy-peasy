@@ -39,7 +39,7 @@
     }
   },
   "resolutions": {
-    "@types/react": "16.8.22"
+    "@types/react": "16.8.23"
   },
   "peerDependencies": {
     "prop-types": "^15.6.2",
@@ -54,19 +54,19 @@
     "ts-toolbelt": "^2.1.5"
   },
   "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.0",
+    "@babel/plugin-proposal-class-properties": "^7.5.0",
     "@babel/plugin-proposal-json-strings": "^7.0.0",
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "@babel/plugin-syntax-import-meta": "^7.0.0",
     "@babel/polyfill": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
+    "@babel/preset-env": "^7.5.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.3.3",
     "@babel/register": "^7.4.4",
     "@testing-library/react": "^8.0.4",
-    "@types/react": "^16.8.22",
+    "@types/react": "^16.8.23",
     "@types/react-dom": "^16.8.4",
     "@types/react-redux": "^7.1.1",
     "app-root-dir": "^1.0.2",
@@ -93,7 +93,7 @@
     "react-dom": "^16.8.3",
     "react-redux": "^7.1.0",
     "rimraf": "^2.6.2",
-    "rollup": "^1.16.4",
+    "rollup": "^1.16.6",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.0.1",
     "rollup-plugin-filesize": "^6.1.1",
