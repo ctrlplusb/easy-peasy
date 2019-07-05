@@ -58,7 +58,7 @@ test('zombie children case is handled', () => {
   });
 
   const ListItem = ({ id }) => {
-    const name = useStoreState(s => s.items[id].name, [id]);
+    const name = useStoreState(s => s.items[id].name);
     return name;
   };
 

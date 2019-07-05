@@ -41,7 +41,7 @@ test('exposes dispatch', () => {
   );
 });
 
-test('maps state when prop dependency changes', async () => {
+test('maps state when props change', async () => {
   // arrange
   const store = createStore({
     values: {
@@ -50,7 +50,7 @@ test('maps state when prop dependency changes', async () => {
     },
   });
   function Values({ id }) {
-    const value = useStoreState(state => state.values[id], [id]);
+    const value = useStoreState(state => state.values[id]);
     return <span data-testid="value">{value}</span>;
   }
   const app = (
