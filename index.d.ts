@@ -598,7 +598,6 @@ export function reducer<State = any>(
  */
 export function useStoreState<StoreState extends State<any> = {}, Result = any>(
   mapState: (state: StoreState) => Result,
-  dependencies?: Array<any>,
 ): Result;
 
 /**
