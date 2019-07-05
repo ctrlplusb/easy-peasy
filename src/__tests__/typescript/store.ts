@@ -24,20 +24,20 @@ const count = store.useStoreState(state => state.count);
 count + 10;
 
 store.getActions().doAction(true);
-store.getActions().doAction(true);
+store.dispatch.doAction(true);
 
 // typings:expect-error
 store.getActions().doAction(1);
 // typings:expect-error
-store.getActions().doAction(1);
+store.dispatch.doAction(1);
 
 store.getActions().doThunk(1);
-store.getActions().doThunk(1);
+store.dispatch.doThunk(1);
 
 // typings:expect-error
 store.getActions().doThunk(true);
 // typings:expect-error
-store.getActions().doThunk(true);
+store.dispatch.doThunk(true);
 
 store.getMockedActions()[0].type;
 
