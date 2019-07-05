@@ -57,9 +57,7 @@ export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 export function thunkStartName(action: ActionCreators<any, any>): string;
 
-export function thunkCompleteName(
-  action: ActionCreators<any, any>,
-): string;
+export function thunkCompleteName(action: ActionCreators<any, any>): string;
 
 export function thunkFailName(action: ActionCreators<any, any>): string;
 
@@ -137,7 +135,7 @@ type StateMapper<StateModel extends object, Depth extends string> = {
     : StateModel[P] extends Reducer<any, any>
     ? StateModel[P]['result']
     : StateModel[P] extends object
-    ? StateModel[P] extends Array<any> | RegExp
+    ? StateModel[P] extends Array<any> | RegExp | Date | Function
       ? StateModel[P]
       : RecursiveState<
           StateModel[P],
