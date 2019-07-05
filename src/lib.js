@@ -1,5 +1,8 @@
 export const isStateObject = x =>
-  x !== null && typeof x === 'object' && !Array.isArray(x);
+  x !== null &&
+  typeof x === 'object' &&
+  !Array.isArray(x) &&
+  x.constructor == Object;
 
 export const get = (path, target) =>
   path.reduce(
