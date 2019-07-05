@@ -240,15 +240,16 @@ export type Store<
   StoreModel extends object,
   StoreConfig extends EasyPeasyConfig<any, any> = any
 > = O.Merge<
-  ReduxStore<State<StoreModel>>,
+  O.Omit<ReduxStore<State<StoreModel>>, 'dispatch'>,
   {
+    dispatch: Dispatch<StoreModel>;
     getActions: () => Actions<StoreModel>;
     getMockedActions: () => MockedAction[];
     clearMockedActions: () => void;
     useStoreActions: <Result = any>(
       mapActions: (actions: Actions<StoreModel>) => Result,
     ) => Result;
-    useStoreDispatch: () => Dispatch;
+    useStoreDispatch: () => Dispatch<StoreModel>;
     useStoreState: <Result = any>(
       mapState: (state: State<StoreModel>) => Result,
       dependencies?: Array<any>,
@@ -261,9 +262,16 @@ export type Store<
 // #region Dispatch
 
 /**
- * The Redux store Dispatch
+ * Enhanced version of the Redux Dispatch with action creators bound to it
+ *
+ * @example
+ *
+ * type DispatchWithActions = Dispatch<StoreModel>;
  */
-export type Dispatch = ReduxDispatch;
+export type Dispatch<
+  StoreModel,
+  Action extends ReduxAction = ReduxAction<any>
+> = Actions<StoreModel> & ReduxDispatch<Action>;
 
 // #endregion
 
@@ -348,7 +356,7 @@ export function thunk<
     actions: Actions<Model>,
     payload: Payload,
     helpers: {
-      dispatch: Dispatch;
+      dispatch: Dispatch<StoreModel>;
       getState: () => State<Model>;
       getStoreActions: () => Actions<StoreModel>;
       getStoreState: () => State<StoreModel>;
@@ -633,7 +641,9 @@ export function useStoreActions<
  *   return <AddTodoForm save={(todo) => dispatch({ type: 'ADD_TODO', payload: todo })} />;
  * }
  */
-export function useStoreDispatch(): Dispatch;
+export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
+  StoreModel
+>;
 
 // #endregion
 
@@ -686,7 +696,7 @@ export function createContextStore<
   useStoreActions: <Result = any>(
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
-  useStoreDispatch: () => Dispatch;
+  useStoreDispatch: () => Dispatch<StoreModel>;
 };
 
 export interface UseLocalStore<
