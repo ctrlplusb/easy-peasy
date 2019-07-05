@@ -11,68 +11,86 @@ thunk(async (actions, payload) => {
 
 ## Arguments
 
-  - `actions` (Object)
+  - `handler` (Function, *required*)
 
-    The [actions](/docs/api/action) that are local to the thunk. This allows you to dispatch an [action](/docs/api/action) to update state should you require.
+    The handler for your [thunk](/docs/api/thunk). It will receive the following arguments:
 
-  - `payload` (any)
+    - `actions` (Object)
 
-    If a payload was provided to the thunk when it was dispatch it will be available via this argument.
+      The [actions](/docs/api/action) that are local to the thunk. This allows you to dispatch an [action](/docs/api/action) to update state should you require.
 
-  - `helpers` (Object)
+    - `payload` (any)
 
-    Helpers which may be useful for more advanced thunk implementations. It contains the following properties:
+      If a payload was provided to the thunk when it was dispatch it will be available via this argument.
 
-    - `getState` (Function)
+    - `helpers` (Object)
 
-      When executed it will provide the state that is local to the thunk.
+      Helpers which may be useful for more advanced thunk implementations. It contains the following properties:
 
-    - `getStoreActions` (Function)
+      - `dispatch` (Function)
 
-      When executed it will get the [actions](/docs/api/action). i.e. all of the [actions](/docs/api/action) across your entire store.
+        The Redux dispatch function, allowing you to dispatch "custom" actions.
 
-      We don't recommend dispatching actions like this, and invite you to consider creating a *listener* [action](/docs/api/action) or [thunk](/docs/api/thunk), which instead promotes a reactive model and generally allows responsiblity to be at the right place.
+      - `getState` (Function)
 
-    - `getStoreState` (Function)
+        When executed it will provide the state that is local to the thunk.
 
-      When executed it will provide the entire state of your store.
+      - `getStoreActions` (Function)
 
-    - `injections` (Any, default=undefined)
+        When executed it will get the [actions](/docs/api/action). i.e. all of the [actions](/docs/api/action) across your entire store.
 
-      Any dependencies that were provided to the `createStore` configuration
-      will be exposed via this argument. See the [`StoreConfig`](#storeconfig)
-      documentation on how to provide them to your store.
+        We don't recommend dispatching actions like this, and invite you to consider creating a *listener* [action](/docs/api/action) or [thunk](/docs/api/thunk), which instead promotes a reactive model and generally allows responsiblity to be at the right place.
 
-    - `meta` (Object)
+      - `getStoreState` (Function)
 
-      This object contains meta information related to the thunk. Specifically it
-      contains the following properties:
+        When executed it will provide the entire state of your store.
 
-        - parent (Array)
+      - `injections` (Any, default=undefined)
 
-          An array representing the path of the parent against which the thunk
-          was attached within your model.
+        Any dependencies that were provided to the `createStore` configuration
+        will be exposed via this argument. See the [`StoreConfig`](#storeconfig)
+        documentation on how to provide them to your store.
 
-        - path (Array)
+      - `meta` (Object)
 
-          An array representing the full path to the thunk based on where it
-          was attached within your model.
+        This object contains meta information related to the thunk. Specifically it
+        contains the following properties:
 
-      For example:
+          - parent (Array)
 
-      ```javascript
-      const store = createStore({
-        products: {
-          fetchById: thunk((actions, payload, { meta }) => {
-            console.log(meta);
-            // {
-            //   parent: ['products'],
-            //   path: ['products', 'fetchById']
-            // }
-          })
-        }
-      });
-      ```
+            An array representing the path of the parent against which the thunk
+            was attached within your model.
+
+          - path (Array)
+
+            An array representing the full path to the thunk based on where it
+            was attached within your model.
+
+        For example:
+
+        ```javascript
+        const store = createStore({
+          products: {
+            fetchById: thunk((actions, payload, { meta }) => {
+              console.log(meta);
+              // {
+              //   parent: ['products'],
+              //   path: ['products', 'fetchById']
+              // }
+            })
+          }
+        });
+        ```
+  - `options` (Object, *optional*)
+
+    Additional configuration for the [thunk](/docs/api/thunk). It current supports the following
+    properties:
+
+    - `listenTo` (Function, *optional*)
+
+      Setting this allows your [thunk](/docs/api/thunk) to act as a *listener*, automatically firing in response to the *target* actions that are resolved by your `listenTo` callback function.
+
+      Please see the [listenTo](/docs/api/listen-to) documentation for full details on this configuration value.
 
 ## Thunks are asynchronous
 
@@ -137,45 +155,6 @@ function LoginButton({ username, password }) {
 }
 ```
 
-## Listener thunk
-
-It is possible to define a [thunk](/docs/api/thunk) as being a *listener* via the `listenTo` configuration property. A *listener* [thunk](/docs/api/thunk) will be fired every time that the *target* [action](/docs/api/action)/[thunk](/docs/api/thunk) successfully completes. The *listener* will receive the same payload that was provided to the *target*.
-
-An example use case for this would be the need to clear some state when a user logs out of your application, or if you would like to create an audit trail for when certain [actions](/docs/api/action)/[thunks](/docs/api/thunk) are fired.
-
-```javascript
-const todosModel = {
-  items: [],
-  //  👇 the target action
-  addTodo: action((state, payload) => {
-    state.items.push(payload);
-  })
-};
-
-const auditModel = {
-  logs: [],
-  // 👇 our listener thunk
-  onAddTodo: thunk(
-    async (actions, payload) => {
-      await auditService.post(`Added todo: ${payload.text}`);
-    },
-    { listenTo: todosModel.addTodo } // 👈 declare the target to listen to
-  )
-};
-```
-
-In the example above note that the `onAddTodo` [thunk](/docs/api/thunk) has been provided a configuration, with the `addTodo` [action](/docs/api/action) being set as a target.
-
-Any time the `addTodo` [action](/docs/api/action) completes successfully, the `onAddTodo` will be fired, receiving the same payload as what `addTodo` received.
-
-## Debugging listeners
-
-Listeners are visible within the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension. This makes it very easy to validate they are executing as expected, and to see the effect that they had on state.
-
-Below is an example of a [thunk](/docs/api/thunk) *listener* firing in response to another action.
-
-<img src="../../assets/devtools-listenthunk.png" />
-
 ## Accessing local state
 
 In this example our thunk will use the state that is local to it.
@@ -194,7 +173,7 @@ const store = createStore({
 });
 ```
 
-## Accessing global state
+## Accessing full store state
 
 In this example our thunk will use the full state of our store.
 
@@ -230,9 +209,9 @@ const store = createStore({
       audit.logs.push(payload);
     })
   },
-  todos: {                                  👇
-    saveTodo: thunk((actions, payload, { dispatch }) => {
-      actions.audit.add('Added a todo');
+  todos: {                                     👇
+    saveTodo: thunk((actions, payload, { getStoreActions }) => {
+      getStoreActions().audit.add('Added a todo');
     })
   }
 });
