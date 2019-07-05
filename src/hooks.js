@@ -20,20 +20,21 @@ const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function createStoreStateHook(Context) {
-  return function useStoreState(mapState, dependencies = []) {
+  return function useStoreState(mapState) {
     const store = useContext(Context);
-    const mappedState = useRef();
+    const mapStateRef = useRef(mapState);
+    const stateRef = useRef();
     const subscriptionMapStateError = useRef();
 
     const [, forceRender] = useReducer(s => s + 1, 0);
 
-    useMemo(() => {
-      mappedState.current = mapState(store.getState());
-    }, dependencies);
-
-    if (subscriptionMapStateError.current || mappedState.current == null) {
+    if (
+      stateRef.current == null ||
+      mapStateRef.current !== mapState ||
+      subscriptionMapStateError.current
+    ) {
       try {
-        mappedState.current = mapState(store.getState());
+        stateRef.current = mapState(store.getState());
       } catch (err) {
         let errorMessage = `An error occurred trying to map state in a useStoreState hook: ${err.message}.`;
         if (subscriptionMapStateError.current) {
@@ -44,17 +45,18 @@ export function createStoreStateHook(Context) {
     }
 
     useIsomorphicLayoutEffect(() => {
+      mapStateRef.current = mapState;
       subscriptionMapStateError.current = undefined;
     });
 
     useIsomorphicLayoutEffect(() => {
       const checkMapState = () => {
         try {
-          const newState = mapState(store.getState());
-          if (newState === mappedState.current) {
+          const newState = mapStateRef.current(store.getState());
+          if (newState === stateRef.current) {
             return;
           }
-          mappedState.current = newState;
+          stateRef.current = newState;
         } catch (err) {
           // see https://github.com/reduxjs/react-redux/issues/1179
           // There is a possibility mapState will fail due to stale state or
@@ -69,7 +71,7 @@ export function createStoreStateHook(Context) {
       return unsubscribe;
     }, []);
 
-    return mappedState.current;
+    return stateRef.current;
   };
 }
 
