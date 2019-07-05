@@ -28,6 +28,14 @@ const model: Model = {
 
 const store = createStore(model);
 
+store.dispatch.todos.add('foo');
+// typings:expect-error
+store.dispatch.todos.add(1);
+// typings:expect-error
+store.dispatch.todos.add();
+
+store.dispatch.todos.clear();
+
 interface ListeningModel {
   logs: string[];
   doAction: Action<ListeningModel, string>;
