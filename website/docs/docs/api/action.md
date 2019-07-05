@@ -27,27 +27,11 @@ addTodo: action((state, payload) => {
     Additional configuration for the [action](/docs/api/action). It current supports the following
     properties:
 
-    - `listenTo` ([action](/docs/api/action) reference | [thunk](/docs/api/thunk) reference | string | Array, *optional*)
+    - `listenTo` (Function, *optional*)
 
-      Setting this makes your [action](/docs/api/action) *listen* to provided *target(s)* [action(s)](/docs/api/action), [thunk(s)](/docs/api/thunk), or string named action(s). Any time the *target(s)* is successfully processed then this [action](/docs/api/action) will be fired.
+      Setting this allows your [action](/docs/api/action) to act as a *listener*, automatically firing in response to the *target* actions that are resolved by your `listenTo` callback function.
 
-      The *listener* will receive the same payload as was supplied to the *target(s)*.
-
-      ```javascript
-      const auditModel = {
-        logs: [],
-        onTodoAdded: action(
-          (state, payload) => {
-            state.logs.push(`Added todo: ${payload.text}`);
-          },
-          { listenTo: todosModel.addTodo }
-        )
-      };
-
-      store.getActions().todos.addTodo({ text: 'Learn Easy Peasy' });
-      ```
-
-      This helps to promote a reactive model and allows for separation of concerns.
+      Please see the [listenTo](/docs/api/listen-to) documentation for full details on this configuration value.
 
 ## Actions are synchronous
 
@@ -85,79 +69,6 @@ function Add10Button() {
   return <button onClick={() => add(10)}>Add 10</button>;
 }
 ```
-
-## Listener actions
-
-It is possible to define an [action](/docs/api/action) as being a *listener* via the `listenTo` configuration property. A *listener* [action](/docs/api/action) will be fired every time that the *target* [action](/docs/api/action)/[thunk](/docs/api/thunk) successfully completes. The *listener* will receive the same payload that was provided to the *target*.
-
-An example use case for this would be the need to clear some state when a user logs out of your application, or if you would like to create an audit trail for when certain [actions](/docs/api/action)/[thunks](/docs/api/thunk) are fired.
-
-```javascript
-const todosModel = {
-  items: [],
-  //  👇 the target action
-  addTodo: action((state, payload) => {
-    state.items.push(payload);
-  })
-};
-
-const auditModel = {
-  logs: [],
-  // 👇 the listener
-  onAddTodo: action(
-    (state, payload) => {
-      state.logs.push(`Added todo: ${payload.text}`);
-    },
-    { listenTo: todosModel.addTodo } // 👈 declare the target to listen to
-  )
-};
-```
-
-In the example above note that the `onAddTodo` [action](/docs/api/action) has been provided a configuration, with the `addTodo` [action](/docs/api/action) being set as a target.
-
-Any time the `addTodo` [action](/docs/api/action) completes successfully, the `onAddTodo` will be fired, receiving the same payload as what `addTodo` received.
-
-## Listening to multiple actions
-
-It is possible for a *listening* action to listen to multiple *targets*. Simply provide an array of *targets* against the `listenTo` configuration.
-
-```javascript
-const fooModel = {
-  items: [],
-  //  👇 the first target action
-  firstAction: action((state, payload) => {
-    state.items.push(payload);
-  }),
-  // 👇 the second target action
-  secondAction action((state, payload) => {
-    state.items.push(payload);
-  }),
-};
-
-const auditModel = {
-  logs: [],
-  onAddTodo: action(
-    (state, payload) => {
-      state.logs.push(payload);
-    },
-    {
-      // 👇 declare the targets within an array
-      listenTo: [
-        fooModel.firstAction,
-        fooModel.secondAction
-      ]
-    }
-  )
-};
-```
-
-## Debugging listeners
-
-Listeners are visible within the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension. This makes it very easy to validate they are executing as expected, and to see the effect that they had on state.
-
-Below is an example of an [action](/docs/api/action) *listener* being fired in response to an action.
-
-<img src="../../assets/devtools-listenaction.png" />
 
 ## Using console.log within actions
 
