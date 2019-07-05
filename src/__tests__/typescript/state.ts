@@ -1,9 +1,26 @@
 /* eslint-disable */
 
-import { State, Computed, Thunk, Action, Reducer } from 'easy-peasy';
-import { any } from 'prop-types';
+import {
+  State,
+  Computed,
+  Thunk,
+  Action,
+  Reducer,
+  createStore,
+} from 'easy-peasy';
+
+class Person {
+  private name: string;
+  private surname: string;
+  constructor(name: string, surname: string) {
+    this.name = name;
+    this.surname = surname;
+  }
+  fullName = () => `${this.name} ${this.surname}`;
+}
 
 type Model = {
+  statePerson: Person;
   stateMap: { [key: string]: Array<string> };
   stateAny: any;
   numberStateMap: { [key: number]: boolean };
@@ -46,7 +63,8 @@ type Model = {
 };
 
 const assert: State<Model> = {
-  stateAny: any,
+  statePerson: new Person('bob', 'boberson'),
+  stateAny: 'what',
   stateMap: {
     foo: ['bar'],
   },

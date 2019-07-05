@@ -10,9 +10,8 @@ describe('isObject', () => {
     expect(isStateObject(foo)).toBe(false);
   });
 
-  // We won't fix this as you shouldn't be adding regexes to your state
   test('regex', () => {
-    expect(isStateObject(/foo/)).toBe(true);
+    expect(isStateObject(/foo/)).toBe(false);
   });
 
   test('null', () => {
@@ -43,7 +42,7 @@ describe('isObject', () => {
   test('class instance', () => {
     class Foo {}
     const foo = new Foo();
-    expect(isStateObject(foo)).toBe(true);
+    expect(isStateObject(foo)).toBe(false);
   });
 
   test('array', () => {

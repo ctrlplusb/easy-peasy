@@ -321,3 +321,26 @@ test('nested empty model', () => {
   // assert
   expect(Object.keys(store.getState().counters).length).toBe(1);
 });
+
+test('supports non literal objects as state - i.e. classes etc', () => {
+  // arrange
+  class Person {
+    constructor(name, surname) {
+      this.name = name;
+      this.surname = surname;
+    }
+
+    fullName = () => `${this.name} ${this.surname}`;
+  }
+
+  // act
+  const store = createStore({
+    person: new Person('bob', 'boberson'),
+    changePerson: action((state, person) => {
+      state.person = person;
+    }),
+  });
+
+  // assert
+  expect(store.getState().person).toBeInstanceOf(Person);
+});
