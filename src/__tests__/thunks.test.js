@@ -13,7 +13,7 @@ const trackActionsMiddleware = () => {
   return middleware;
 };
 
-test('dispatches an action to represent the start and end of an thunk', async () => {
+test('dispatches actions to represent a succeeded thunk', async () => {
   // arrange
   const model = {
     foo: {
@@ -36,96 +36,16 @@ test('dispatches an action to represent the start and end of an thunk', async ()
   expect(trackActions.actions).toEqual([
     { type: '@thunk.foo.doSomething(started)', payload },
     { type: '@action.foo.increment', payload: undefined },
-    { type: '@thunk.foo.doSomething(completed)', payload },
+    { type: '@thunk.foo.doSomething(succeeded)', payload },
+    { type: '@thunk.foo.doSomething', payload },
   ]);
   expect(actualResult).toBe('did something');
 });
 
 describe('errors', () => {
-  test('dispatches an action to indicate failure', async () => {
+  test('dispatches actions to represent a failed thunk', async () => {
     // arrange
     const err = new Error('error');
-    const model = {
-      foo: {
-        doSomething: thunk(async () => {
-          throw err;
-        }),
-      },
-    };
-    const trackActions = trackActionsMiddleware();
-    const store = createStore(model, { middleware: [trackActions] });
-    const payload = 'a payload';
-    const expectedError = {
-      message: err.message,
-      stack: err.stack,
-    };
-
-    try {
-      // act
-      await store.getActions().foo.doSomething(payload);
-    } catch (e) {
-      // assert
-      expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
-        {
-          type: '@thunk.foo.doSomething(failed)',
-          payload,
-          error: expectedError,
-        },
-      ]);
-
-      expect(e).toBe(err);
-    }
-  });
-
-  test('errors are thrown up through thunks', async () => {
-    // arrange
-    const err = new Error('error');
-    const model = {
-      foo: {
-        error: thunk(async () => {
-          throw err;
-        }),
-        doSomething: thunk(async actions => {
-          await actions.error();
-        }),
-      },
-    };
-    const trackActions = trackActionsMiddleware();
-    const store = createStore(model, { middleware: [trackActions] });
-    const payload = 'a payload';
-    const expectedError = {
-      message: err.message,
-      stack: err.stack,
-    };
-
-    try {
-      // act
-      await store.getActions().foo.doSomething(payload);
-    } catch (e) {
-      // assert
-      expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
-        { type: '@thunk.foo.error(started)', payload: undefined },
-        {
-          type: '@thunk.foo.error(failed)',
-          payload: undefined,
-          error: expectedError,
-        },
-        {
-          type: '@thunk.foo.doSomething(failed)',
-          payload,
-          error: expectedError,
-        },
-      ]);
-
-      expect(e).toBe(err);
-    }
-  });
-
-  test('supports string errors', async () => {
-    // arrange
-    const err = 'error';
     const model = {
       foo: {
         doSomething: thunk(async () => {
@@ -149,19 +69,27 @@ describe('errors', () => {
           payload,
           error: err,
         },
+        {
+          type: '@thunk.foo.doSomething',
+          payload,
+          error: err,
+        },
       ]);
 
       expect(e).toBe(err);
     }
   });
 
-  test('non string or Error error types produce an undefined payload', async () => {
+  test('errors are thrown up through thunks', async () => {
     // arrange
-    const err = {};
+    const err = new Error('error');
     const model = {
       foo: {
-        doSomething: thunk(async () => {
+        error: thunk(async () => {
           throw err;
+        }),
+        doSomething: thunk(async actions => {
+          await actions.error();
         }),
       },
     };
@@ -176,10 +104,26 @@ describe('errors', () => {
       // assert
       expect(trackActions.actions).toEqual([
         { type: '@thunk.foo.doSomething(started)', payload },
+        { type: '@thunk.foo.error(started)', payload: undefined },
+        {
+          type: '@thunk.foo.error(failed)',
+          payload: undefined,
+          error: err,
+        },
+        {
+          type: '@thunk.foo.error',
+          payload: undefined,
+          error: err,
+        },
         {
           type: '@thunk.foo.doSomething(failed)',
           payload,
-          error: undefined,
+          error: err,
+        },
+        {
+          type: '@thunk.foo.doSomething',
+          payload,
+          error: err,
         },
       ]);
 

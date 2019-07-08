@@ -1,18 +1,18 @@
 import memoizerific from 'memoizerific';
 import { createDraft, finishDraft, nothing, isDraft } from 'immer-peasy';
 import {
-  actionNameSymbol,
   actionStateSymbol,
   actionSymbol,
   computedSymbol,
   computedConfigSymbol,
+  listenerActionSymbol,
+  listenerThunkSymbol,
   metaSymbol,
   reducerSymbol,
   thunkStateSymbol,
   thunkSymbol,
 } from './constants';
 import { isStateObject, get, set } from './lib';
-import * as helpers from './helpers';
 
 function simpleProduce(state, fn) {
   const draft = createDraft(state);
@@ -26,20 +26,9 @@ function simpleProduce(state, fn) {
   return finishDraft(draft);
 }
 
-const tick = () => new Promise(resolve => setTimeout(resolve));
-
-const errorToPayload = err => {
-  if (err instanceof Error) {
-    return {
-      message: err.message,
-      stack: err.stack,
-    };
-  }
-  if (typeof err === 'string') {
-    return err;
-  }
-  return undefined;
-};
+function tick() {
+  return new Promise(resolve => setTimeout(resolve));
+}
 
 export default function createStoreInternals({
   initialState,
@@ -80,37 +69,37 @@ export default function createStoreInternals({
       };
 
       if (typeof value === 'function') {
-        if (value[actionSymbol]) {
-          const name = `@action.${path.join('.')}`;
-          value[actionNameSymbol] = name;
+        if (value[actionSymbol] || value[listenerActionSymbol]) {
+          const type = `@action.${path.join('.')}`;
+          value.type = type;
           value[metaSymbol] = meta;
 
           // Action Reducer
           const actionReducer = value;
-          actionReducer[actionNameSymbol] = name;
-          actionReducersDict[name] = actionReducer;
+          actionReducer.type = type;
+          actionReducersDict[type] = actionReducer;
           actionReducersForPath[parentPath] = actionReducer;
 
           // Action Creator
           const actionCreator = payload => {
             const result = references.dispatch({
-              type: actionReducer[actionNameSymbol],
+              type: actionReducer.type,
               payload,
             });
             return result;
           };
-          actionCreator[actionNameSymbol] = name;
+          actionCreator.type = type;
           actionCreator[actionSymbol] = true;
-          actionCreatorDict[name] = actionCreator;
+          actionCreatorDict[type] = actionCreator;
           set(path, actionCreators, actionCreator);
 
-          const { config } = value[actionStateSymbol];
-          if (config && config.listenTo) {
+          if (value[listenerActionSymbol]) {
             listenerActionDefinitions.push(value);
           }
-        } else if (value[thunkSymbol]) {
-          const name = `@thunk.${path.join('.')}`;
-          value[actionNameSymbol] = name;
+        } else if (value[thunkSymbol] || value[listenerThunkSymbol]) {
+          const type = `@thunk.${path.join('.')}`;
+          value.actionName = key;
+          value.type = type;
           value[metaSymbol] = meta;
 
           // Thunk Action
@@ -126,39 +115,55 @@ export default function createStoreInternals({
           };
           set(path, actionThunks, action);
 
+          const startedType = `${type}(started)`;
+          const succeededType = `${type}(succeeded)`;
+          const failedType = `${type}(failed)`;
+
           // Thunk Action Creator
           const actionCreator = payload =>
             tick()
               .then(() =>
                 references.dispatch({
-                  type: `${name}(started)`,
+                  type: startedType,
                   payload,
                 }),
               )
               .then(() => references.dispatch(() => action(payload)))
               .then(result => {
                 references.dispatch({
-                  type: `${name}(completed)`,
+                  type: succeededType,
+                  payload,
+                });
+                references.dispatch({
+                  type,
                   payload,
                 });
                 return result;
               })
               .catch(err => {
                 references.dispatch({
-                  type: `${name}(failed)`,
+                  type: failedType,
                   payload,
-                  error: errorToPayload(err),
+                  error: err,
+                });
+                references.dispatch({
+                  type,
+                  payload,
+                  error: err,
                 });
                 throw err;
               });
 
-          actionCreator[actionNameSymbol] = name;
+          actionCreator.actionName = key;
+          actionCreator.type = type;
+          actionCreator.startedType = startedType;
+          actionCreator.completedType = succeededType;
+          actionCreator.failedType = failedType;
           actionCreator[thunkSymbol] = true;
-          actionCreatorDict[name] = actionCreator;
+          actionCreatorDict[type] = actionCreator;
           set(path, actionCreators, actionCreator);
 
-          const { config } = value[thunkStateSymbol];
-          if (config && config.listenTo) {
+          if (value[listenerThunkSymbol]) {
             listenerActionDefinitions.push(value);
           }
         } else if (value[computedSymbol]) {
@@ -216,35 +221,35 @@ export default function createStoreInternals({
   recursiveExtractDefsFromModel(model, []);
 
   listenerActionDefinitions.forEach(listenerAction => {
-    const {
-      config: { listenTo },
-    } = listenerAction[actionStateSymbol] || listenerAction[thunkStateSymbol];
+    const { targetResolver } =
+      listenerAction[actionStateSymbol] || listenerAction[thunkStateSymbol];
 
-    if (typeof listenTo !== 'function') {
+    if (typeof targetResolver !== 'function') {
       return;
     }
 
     const { parent } = listenerAction[metaSymbol];
 
-    const targets = listenTo(get(parent, actionCreators), actionCreators);
+    const targets = targetResolver(get(parent, actionCreators), actionCreators);
 
     const processListenTo = target => {
       let targetName;
+
       if (
         typeof target === 'function' &&
-        target[actionNameSymbol] &&
-        actionCreatorDict[target[actionNameSymbol]]
+        target.type &&
+        actionCreatorDict[target.type]
       ) {
         if (target[thunkSymbol]) {
-          targetName = helpers.thunkCompleteName(target);
+          targetName = target.completedType;
         } else {
-          targetName = target[actionNameSymbol];
+          targetName = target.type;
         }
       } else if (typeof target === 'string') {
         targetName = target;
       }
       const listenerReg = listenerActionMap[targetName] || [];
-      listenerReg.push(actionCreatorDict[listenerAction[actionNameSymbol]]);
+      listenerReg.push(actionCreatorDict[listenerAction.type]);
       listenerActionMap[targetName] = listenerReg;
     };
 
@@ -313,6 +318,7 @@ export default function createStoreInternals({
   };
 
   return {
+    actionCreatorDict,
     actionCreators,
     defaultState,
     listenerActionMap,

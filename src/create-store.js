@@ -23,10 +23,6 @@ export default function createStore(model, options = {}) {
 
   const modelDefinition = {
     ...model,
-    logFullState: helpers.thunk((actions, payload, { getState }) => {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(getState(), null, 2));
-    }),
     replaceState: helpers.action((state, payload) => payload),
   };
 
@@ -63,9 +59,13 @@ export default function createStore(model, options = {}) {
       references.internals.listenerActionMap[action.type] &&
       references.internals.listenerActionMap[action.type].length > 0
     ) {
+      const sourceAction = references.internals.actionCreatorDict[action.type];
       references.internals.listenerActionMap[action.type].forEach(
         actionCreator => {
-          actionCreator(action.payload);
+          actionCreator({
+            type: sourceAction ? sourceAction.type : action.type,
+            payload: action.payload,
+          });
         },
       );
     }
@@ -116,7 +116,7 @@ export default function createStore(model, options = {}) {
   references.dispatch = store.dispatch;
   references.getState = store.getState;
 
-  // attachs the action creators to the stores dispatch
+  // attaches the action creators to the stores dispatch
   const bindActionCreators = () => {
     Object.keys(store.dispatch).forEach(actionsKey => {
       delete store.dispatch[actionsKey];

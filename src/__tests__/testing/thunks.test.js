@@ -14,15 +14,7 @@
  * We will show both strategies below.
  */
 
-import {
-  action,
-  actionName,
-  createStore,
-  thunk,
-  thunkStartName,
-  thunkCompleteName,
-  thunkFailName,
-} from '../../index';
+import { action, createStore, thunk } from '../../index';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 1));
 
@@ -136,9 +128,10 @@ describe('with mocking actions', () => {
     // assert
     expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`);
     expect(store.getMockedActions()).toEqual([
-      { type: thunkStartName(todosModel.fetchById), payload: todo.id },
-      { type: actionName(todosModel.add), payload: todo },
-      { type: thunkCompleteName(todosModel.fetchById), payload: todo.id },
+      { type: '@thunk.fetchById(started)', payload: todo.id },
+      { type: '@action.add', payload: todo },
+      { type: '@thunk.fetchById(succeeded)', payload: todo.id },
+      { type: '@thunk.fetchById', payload: todo.id },
     ]);
     expect(store.getState()).toEqual({ items: {} }); // No actual actions were run
 
@@ -152,9 +145,10 @@ describe('with mocking actions', () => {
 
   it('an error occurs', async () => {
     // arrange
+    const err = new Error('poop');
     const model = {
       throwing: thunk(() => {
-        throw new Error('poop');
+        throw err;
       }),
     };
     const store = createStore(model, {
@@ -171,14 +165,16 @@ describe('with mocking actions', () => {
 
     // assert
     expect(store.getMockedActions()).toMatchObject([
-      { type: thunkStartName(model.throwing), payload: 'A payload' },
+      { type: '@thunk.throwing(started)', payload: 'A payload' },
       {
-        type: thunkFailName(model.throwing),
+        type: '@thunk.throwing(failed)',
         payload: 'A payload',
-        error: {
-          message: 'poop',
-          stack: /Error: poop/g,
-        },
+        error: err,
+      },
+      {
+        type: '@thunk.throwing',
+        payload: 'A payload',
+        error: err,
       },
     ]);
   });
@@ -207,7 +203,8 @@ describe('with mocking actions', () => {
     expect(store.getMockedActions()).toEqual([
       { type: '@thunk.add(started)', payload: undefined },
       { type: 'CUSTOM_ACTION', payload: 'the payload' },
-      { type: '@thunk.add(completed)', payload: undefined },
+      { type: '@thunk.add(succeeded)', payload: undefined },
+      { type: '@thunk.add', payload: undefined },
     ]);
   });
 });
