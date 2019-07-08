@@ -4,7 +4,7 @@
     "jsx": "preserve",
     "strict": true,
     "baseUrl": "../../..",
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "paths": {
       "easy-peasy": ["index.d.ts"]
     }
