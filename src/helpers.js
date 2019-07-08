@@ -1,4 +1,4 @@
-import { isDraft, finishDraft, createDraft } from 'immer-peasy';
+import { isDraft, createDraft, finishDraft } from 'immer-peasy';
 import memoizerific from 'memoizerific';
 import {
   actionNameSymbol,
@@ -15,8 +15,7 @@ export const actionName = action => action[actionNameSymbol];
 
 export const debug = state => {
   if (isDraft(state)) {
-    const final = finishDraft(createDraft(state));
-    return final;
+    return finishDraft(createDraft(state));
   }
   return state;
 };

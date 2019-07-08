@@ -1,5 +1,5 @@
 import memoizerific from 'memoizerific';
-import produce from 'immer-peasy';
+import { createDraft, finishDraft, nothing, isDraft } from 'immer-peasy';
 import {
   actionNameSymbol,
   actionStateSymbol,
@@ -13,6 +13,18 @@ import {
 } from './constants';
 import { isStateObject, get, set } from './lib';
 import * as helpers from './helpers';
+
+function simpleProduce(state, fn) {
+  const draft = createDraft(state);
+  const result = fn(draft);
+  if (result === nothing) {
+    return undefined;
+  }
+  if (result !== undefined) {
+    return isDraft(result) ? finishDraft(result) : result;
+  }
+  return finishDraft(draft);
+}
 
 const tick = () => new Promise(resolve => setTimeout(resolve));
 
@@ -245,16 +257,21 @@ export default function createStoreInternals({
 
   const createReducer = () => {
     const runActionReducerAtPath = (state, action, actionReducer, path) => {
+      if (path.length === 0) {
+        return simpleProduce(state, draft =>
+          actionReducer(draft, action.payload),
+        );
+      }
       const current = get(path, state);
-      return path.length === 0
-        ? produce(state, _draft => actionReducer(_draft, action.payload))
-        : produce(state, draft => {
-            set(
-              actionReducer[metaSymbol].parent,
-              draft,
-              produce(current, _draft => actionReducer(_draft, action.payload)),
-            );
-          });
+      return simpleProduce(state, draft => {
+        set(
+          actionReducer[metaSymbol].parent,
+          draft,
+          simpleProduce(current, _draft =>
+            actionReducer(_draft, action.payload),
+          ),
+        );
+      });
     };
 
     const reducerForActions = (state, action) => {
@@ -271,7 +288,7 @@ export default function createStoreInternals({
     };
 
     const reducerForCustomReducers = (state, action) => {
-      return produce(state, draft => {
+      return simpleProduce(state, draft => {
         customReducers.forEach(({ path: p, reducer: red }) => {
           const current = get(p, draft);
           set(p, draft, red(current, action));
