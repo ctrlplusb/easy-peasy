@@ -11,10 +11,15 @@ it('listening to an action, firing an action', () => {
   const audit = {
     logs: [],
     onMathAdd: actionOn(
+      (_, storeActions) => storeActions.math.add,
       (state, target) => {
+        expect(target.type).toBe('@action.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBeUndefined();
+        expect(target.error).toBeUndefined();
+        expect(target.resolvedTargets).toEqual([target.type]);
         state.logs.push(`Added ${target.payload}`);
       },
-      (_, storeActions) => storeActions.math.add,
     ),
   };
   const store = createStore({
@@ -45,10 +50,15 @@ it('listening to an action, firing a thunk', done => {
       done();
     }),
     onMathAdd: thunkOn(
+      (_, storeActions) => storeActions.math.add,
       (actions, target) => {
+        expect(target.type).toBe('@action.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBeUndefined();
+        expect(target.error).toBeUndefined();
+        expect(target.resolvedTargets).toEqual([target.type]);
         actions.add(`Added ${target.payload}`);
       },
-      (_, storeActions) => storeActions.math.add,
     ),
   };
   const store = createStore({
@@ -60,21 +70,27 @@ it('listening to an action, firing a thunk', done => {
   store.getActions().math.add(10);
 });
 
-it('listening to a thunk, firing an action', async () => {
+it('listening to a successful thunk, firing an action', async () => {
   // arrange
   const math = {
     sum: 0,
-    add: thunk(() => {
-      // do nothing
+    add: thunk(async () => {
+      const result = await Promise.resolve('foo');
+      return result;
     }),
   };
   const audit = {
     logs: [],
     onMathAdd: actionOn(
+      (_, storeActions) => storeActions.math.add,
       (state, target) => {
+        expect(target.type).toBe('@thunk.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBe('foo');
+        expect(target.error).toBeUndefined();
+        expect(target.type).toBe('@thunk.math.add');
         state.logs.push(`Added ${target.payload}`);
       },
-      (_, storeActions) => storeActions.math.add,
     ),
   };
   const store = createStore({
@@ -84,6 +100,45 @@ it('listening to a thunk, firing an action', async () => {
 
   // act
   await store.getActions().math.add(10);
+
+  // assert
+  expect(store.getState().audit.logs).toEqual(['Added 10']);
+});
+
+it('listening to a failed thunk', async () => {
+  // arrange
+  const err = new Error('💩');
+  const math = {
+    sum: 0,
+    add: thunk(() => {
+      throw err;
+    }),
+  };
+  const audit = {
+    logs: [],
+    onMathAdd: actionOn(
+      (_, storeActions) => storeActions.math.add,
+      (state, target) => {
+        expect(target.type).toBe('@thunk.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBeUndefined();
+        expect(target.error).toBe(err);
+        expect(target.type).toBe('@thunk.math.add');
+        state.logs.push(`Added ${target.payload}`);
+      },
+    ),
+  };
+  const store = createStore({
+    math,
+    audit,
+  });
+
+  // act
+  try {
+    await store.getActions().math.add(10);
+  } catch (error) {
+    expect(error).toBe(err);
+  }
 
   // assert
   expect(store.getState().audit.logs).toEqual(['Added 10']);
@@ -105,10 +160,10 @@ it('listening to a thunk, firing a thunk', async done => {
       done();
     }),
     onMathAdd: thunkOn(
+      (_, storeActions) => storeActions.math.add,
       (actions, target) => {
         actions.add(`Added ${target.payload}`);
       },
-      (_, storeActions) => storeActions.math.add,
     ),
   };
   const store = createStore({
@@ -125,10 +180,10 @@ it('listening to a string, firing an action', async () => {
   const audit = {
     logs: [],
     onMathAdd: actionOn(
+      () => 'MATH_ADD',
       (state, target) => {
         state.logs.push(`Added ${target.payload}`);
       },
-      () => 'MATH_ADD',
     ),
   };
   const store = createStore({
@@ -152,10 +207,10 @@ it('listening to an string, firing a thunk', done => {
       done();
     }),
     onMathAdd: thunkOn(
+      () => 'MATH_ADD',
       (actions, target) => {
         actions.add(`Added ${target.payload}`);
       },
-      () => 'MATH_ADD',
     ),
   };
   const store = createStore({
@@ -173,10 +228,14 @@ it('action listening to multiple actions', async () => {
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
     onActions: actionOn(
+      actions => [actions.actionTarget, actions.thunkTarget],
       (state, target) => {
+        expect(target.resolvedTargets).toEqual([
+          '@action.actionTarget',
+          '@thunk.thunkTarget',
+        ]);
         state.logs.push(target.payload);
       },
-      actions => [actions.actionTarget, actions.thunkTarget],
     ),
   };
   const store = createStore(model);
@@ -196,10 +255,10 @@ it('thunk listening to multiple actions', async () => {
     logs: [],
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
-    onActions: thunkOn(thunkSpy, actions => [
-      actions.actionTarget,
-      actions.thunkTarget,
-    ]),
+    onActions: thunkOn(
+      actions => [actions.actionTarget, actions.thunkTarget],
+      thunkSpy,
+    ),
   };
   const store = createStore(model);
 
@@ -214,6 +273,9 @@ it('thunk listening to multiple actions', async () => {
     {
       type: store.getActions().actionTarget.type,
       payload: 'action payload',
+      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget'],
+      result: undefined,
+      error: undefined,
     },
     expect.anything(),
   );
@@ -227,8 +289,11 @@ it('thunk listening to multiple actions', async () => {
   expect(thunkSpy).toHaveBeenLastCalledWith(
     expect.anything(),
     {
-      type: store.getActions().thunkTarget.completedType,
+      type: store.getActions().thunkTarget.type,
       payload: 'thunk payload',
+      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget'],
+      result: undefined,
+      error: undefined,
     },
     expect.anything(),
   );

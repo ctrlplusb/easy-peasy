@@ -1,6 +1,7 @@
 import memoizerific from 'memoizerific';
 import { createDraft, finishDraft, nothing, isDraft } from 'immer-peasy';
 import {
+  actionInternalMetaSymbol,
   actionStateSymbol,
   actionSymbol,
   computedSymbol,
@@ -71,6 +72,7 @@ export default function createStoreInternals({
       if (typeof value === 'function') {
         if (value[actionSymbol] || value[listenerActionSymbol]) {
           const type = `@action.${path.join('.')}`;
+          value.actionName = key;
           value.type = type;
           value[metaSymbol] = meta;
 
@@ -82,15 +84,21 @@ export default function createStoreInternals({
 
           // Action Creator
           const actionCreator = payload => {
-            const result = references.dispatch({
+            const actionDefinition = {
               type: actionReducer.type,
               payload,
-            });
+            };
+            if (value[listenerActionSymbol] && actionCreator.resolvedTargets) {
+              payload.resolvedTargets = [...actionCreator.resolvedTargets];
+            }
+            const result = references.dispatch(actionDefinition);
             return result;
           };
+          actionCreator.actionName = key;
           actionCreator.type = type;
           actionCreator[actionSymbol] = true;
           actionCreatorDict[type] = actionCreator;
+          value.actionCreator = actionCreator;
           set(path, actionCreators, actionCreator);
 
           if (value[listenerActionSymbol]) {
@@ -103,46 +111,52 @@ export default function createStoreInternals({
           value[metaSymbol] = meta;
 
           // Thunk Action
-          const action = payload => {
-            return value(get(parentPath, actionCreators), payload, {
+          const thunkHandler = payload => {
+            const helpers = {
               dispatch: references.dispatch,
               getState: () => get(parentPath, references.getState()),
               getStoreActions: () => actionCreators,
               getStoreState: references.getState,
               injections,
               meta,
-            });
+            };
+            if (value[listenerThunkSymbol] && thunkHandler.resolvedTargets) {
+              payload.resolvedTargets = [...thunkHandler.resolvedTargets];
+            }
+            return value(get(parentPath, actionCreators), payload, helpers);
           };
-          set(path, actionThunks, action);
+          set(path, actionThunks, thunkHandler);
 
-          const startedType = `${type}(started)`;
-          const succeededType = `${type}(succeeded)`;
-          const failedType = `${type}(failed)`;
+          const startType = `${type}(start)`;
+          const successType = `${type}(success)`;
+          const failType = `${type}(fail)`;
 
           // Thunk Action Creator
           const actionCreator = payload =>
             tick()
               .then(() =>
                 references.dispatch({
-                  type: startedType,
+                  type: startType,
                   payload,
                 }),
               )
-              .then(() => references.dispatch(() => action(payload)))
+              .then(() => references.dispatch(() => thunkHandler(payload)))
               .then(result => {
                 references.dispatch({
-                  type: succeededType,
+                  type: successType,
                   payload,
+                  result,
                 });
                 references.dispatch({
                   type,
                   payload,
+                  result,
                 });
                 return result;
               })
               .catch(err => {
                 references.dispatch({
-                  type: failedType,
+                  type: failType,
                   payload,
                   error: err,
                 });
@@ -156,12 +170,14 @@ export default function createStoreInternals({
 
           actionCreator.actionName = key;
           actionCreator.type = type;
-          actionCreator.startedType = startedType;
-          actionCreator.completedType = succeededType;
-          actionCreator.failedType = failedType;
+          actionCreator.startType = startType;
+          actionCreator.successType = successType;
+          actionCreator.failType = failType;
           actionCreator[thunkSymbol] = true;
           actionCreatorDict[type] = actionCreator;
           set(path, actionCreators, actionCreator);
+
+          value.thunkHandler = thunkHandler;
 
           if (value[listenerThunkSymbol]) {
             listenerActionDefinitions.push(value);
@@ -220,44 +236,45 @@ export default function createStoreInternals({
 
   recursiveExtractDefsFromModel(model, []);
 
-  listenerActionDefinitions.forEach(actionOn => {
+  listenerActionDefinitions.forEach(listenerActionOrThunk => {
     const { targetResolver } =
-      actionOn[actionStateSymbol] || actionOn[thunkStateSymbol];
+      listenerActionOrThunk[actionStateSymbol] ||
+      listenerActionOrThunk[thunkStateSymbol];
 
     if (typeof targetResolver !== 'function') {
       return;
     }
 
-    const { parent } = actionOn[metaSymbol];
+    const { parent } = listenerActionOrThunk[metaSymbol];
 
     const targets = targetResolver(get(parent, actionCreators), actionCreators);
-
-    const processListenTo = target => {
-      let targetName;
-
+    const resolvedTargets = (Array.isArray(targets)
+      ? targets
+      : [targets]
+    ).reduce((acc, target) => {
       if (
         typeof target === 'function' &&
         target.type &&
         actionCreatorDict[target.type]
       ) {
-        if (target[thunkSymbol]) {
-          targetName = target.completedType;
-        } else {
-          targetName = target.type;
-        }
+        acc.push(target.type);
       } else if (typeof target === 'string') {
-        targetName = target;
+        acc.push(target);
       }
-      const listenerReg = listenerActionMap[targetName] || [];
-      listenerReg.push(actionCreatorDict[actionOn.type]);
-      listenerActionMap[targetName] = listenerReg;
-    };
+      return acc;
+    }, []);
 
-    if (Array.isArray(targets)) {
-      targets.forEach(processListenTo);
-    } else {
-      processListenTo(targets);
+    if (listenerActionOrThunk.thunkHandler) {
+      listenerActionOrThunk.thunkHandler.resolvedTargets = resolvedTargets;
+    } else if (listenerActionOrThunk.actionCreator) {
+      listenerActionOrThunk.actionCreator.resolvedTargets = resolvedTargets;
     }
+
+    resolvedTargets.forEach(targetType => {
+      const listenerReg = listenerActionMap[targetType] || [];
+      listenerReg.push(actionCreatorDict[listenerActionOrThunk.type]);
+      listenerActionMap[targetType] = listenerReg;
+    });
   });
 
   const createReducer = () => {

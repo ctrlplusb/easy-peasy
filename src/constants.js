@@ -1,3 +1,4 @@
+export const actionInternalMetaSymbol = Symbol('🙈actionInternalMeta🙈');
 export const actionNameSymbol = '🙈actionName🙈';
 export const actionSymbol = '🙈action🙈';
 

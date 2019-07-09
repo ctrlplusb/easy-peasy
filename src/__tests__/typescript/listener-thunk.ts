@@ -9,96 +9,97 @@ interface Model {
 }
 
 const listenAction: ThunkOn<Model, string> = thunkOn(
-  (actions, target, { targets }) => {
-    const [foo] = targets;
+  actions => actions.doAction,
+  (actions, target) => {
+    const [foo] = target.resolvedTargets;
     foo + 'bar';
     target.type + 'foo';
-    target.name + 'foo';
     if (target.error != null) {
       target.error.stack;
     }
     actions.log(target.payload);
   },
-  actions => actions.doAction,
 );
 
 const listenActionInvalidThunk: ThunkOn<Model, string> = thunkOn(
+  // typings:expect-error
+  actions => actions.doActionInvalid,
   (actions, target) => {
     actions.log(target.payload);
   },
-  // typings:expect-error
-  actions => actions.doActionInvalid,
 );
 
 const listenThunk: ThunkOn<Model, string> = thunkOn(
+  actions => actions.doThunk,
   (actions, target) => {
     actions.log(target.payload);
   },
-  actions => actions.doThunk,
 );
 
 const listenThunkInvalidPaylod: ThunkOn<Model, string> = thunkOn(
+  // typings:expect-error
+  actions => actions.doThunkInvalid,
   (actions, target) => {
     actions.log(target.payload);
   },
-  // typings:expect-error
-  actions => actions.doThunkInvalid,
 );
 
 const listenString: ThunkOn<Model, string> = thunkOn(
+  () => 'ADD_TODO',
   (actions, target) => {
     actions.log(target.payload);
   },
-  () => 'ADD_TODO',
 );
 
 const listenInvalid: ThunkOn<Model, string> = thunkOn(
+  // typings:expect-error
+  () => 1,
+  // typings:expect-error
   (actions, target) => {
     actions.log(target.payload);
   },
-  // typings:expect-error
-  () => 1,
 );
 
 const listenInvalidFunc: ThunkOn<Model, string> = thunkOn(
+  // typings:expect-error
+  () => undefined,
+  // typings:expect-error
   (actions, target) => {
     actions.log(target.payload);
   },
-  // typings:expect-error
-  () => undefined,
 );
 
 const multiListenAction: ThunkOn<Model, string> = thunkOn(
-  (actions, target) => {
-    actions.log(target.payload);
-  },
   actions => [
     actions.doAction.type,
     actions.doThunk.type,
-    actions.doThunk.startedType,
-    actions.doThunk.succeededType,
-    actions.doThunk.failedType,
+    actions.doThunk.startType,
+    actions.doThunk.successType,
+    actions.doThunk.failType,
   ],
+  (actions, target) => {
+    actions.log(target.payload);
+  },
 );
 
 const multiListenActionInvalidThunk: ThunkOn<Model, string> = thunkOn(
+  // typings:expect-error
+  actions => [actions.doAction, actions.doThunkInvalid],
   (actions, target) => {
     actions.log(target.payload);
   },
-  // typings:expect-error
-  actions => [actions.doAction, actions.doThunkInvalid],
 );
 
 const multiListeningActionString: ThunkOn<Model, string> = thunkOn(
+  () => ['foo', 'bar'],
   (actions, target) => {
     actions.log(target.payload);
   },
-  () => ['foo', 'bar'],
 );
 
 const listeningActionString: ThunkOn<Model, string> = thunkOn(
+  () => 'foo',
   (actions, target) => {
     actions.log(target.payload);
   },
-  () => 'foo',
 );

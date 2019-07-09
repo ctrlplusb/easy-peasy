@@ -65,6 +65,8 @@ export default function createStore(model, options = {}) {
           actionCreator({
             type: sourceAction ? sourceAction.type : action.type,
             payload: action.payload,
+            error: action.error,
+            result: action.result,
           });
         },
       );

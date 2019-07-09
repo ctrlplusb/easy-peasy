@@ -128,9 +128,9 @@ describe('with mocking actions', () => {
     // assert
     expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`);
     expect(store.getMockedActions()).toEqual([
-      { type: '@thunk.fetchById(started)', payload: todo.id },
+      { type: '@thunk.fetchById(start)', payload: todo.id },
       { type: '@action.add', payload: todo },
-      { type: '@thunk.fetchById(succeeded)', payload: todo.id },
+      { type: '@thunk.fetchById(success)', payload: todo.id },
       { type: '@thunk.fetchById', payload: todo.id },
     ]);
     expect(store.getState()).toEqual({ items: {} }); // No actual actions were run
@@ -165,9 +165,9 @@ describe('with mocking actions', () => {
 
     // assert
     expect(store.getMockedActions()).toMatchObject([
-      { type: '@thunk.throwing(started)', payload: 'A payload' },
+      { type: '@thunk.throwing(start)', payload: 'A payload' },
       {
-        type: '@thunk.throwing(failed)',
+        type: '@thunk.throwing(fail)',
         payload: 'A payload',
         error: err,
       },
@@ -201,9 +201,9 @@ describe('with mocking actions', () => {
 
     // assert
     expect(store.getMockedActions()).toEqual([
-      { type: '@thunk.add(started)', payload: undefined },
+      { type: '@thunk.add(start)', payload: undefined },
       { type: 'CUSTOM_ACTION', payload: 'the payload' },
-      { type: '@thunk.add(succeeded)', payload: undefined },
+      { type: '@thunk.add(success)', payload: undefined },
       { type: '@thunk.add', payload: undefined },
     ]);
   });

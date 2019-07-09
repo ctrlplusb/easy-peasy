@@ -54,18 +54,18 @@ interface ActionCreatorWithPayload<Payload> {
 interface ThunkActionCreator<Result> {
   (): Result;
   type: string;
-  startedType: string;
-  succeededType: string;
-  failedType: string;
+  startType: string;
+  successType: string;
+  failType: string;
   z__creator: 'thunkNoPayload';
 }
 
 interface ThunkActionCreatorWithPayload<Payload, Result> {
   (payload: Payload): Result;
   type: string;
-  startedType: string;
-  succeededType: string;
-  failedType: string;
+  startType: string;
+  successType: string;
+  failType: string;
   z__creator: 'thunkWithPayload';
 }
 
@@ -307,11 +307,11 @@ type TargetResolver<
 ) => Target<TargetPayload> | Array<Target<TargetPayload>>;
 
 interface ListenerTarget<Payload> {
-  name: string;
   type: string;
   payload: Payload;
   result?: any;
   error?: Error;
+  resolvedTargets: Array<string>;
 }
 
 // #endregion
@@ -407,11 +407,18 @@ export function thunkOn<
   Payload = void,
   Injections = any,
   StoreModel extends object = {},
-  Result = any
+  Result = any,
+  Target extends ListenerTarget<Payload> = ListenerTarget<Payload>,
+  Resolver extends TargetResolver<Payload, Model, StoreModel> = TargetResolver<
+    Payload,
+    Model,
+    StoreModel
+  >
 >(
+  targetResolver: Resolver,
   handler: (
     actions: Actions<Model>,
-    target: ListenerTarget<Payload>,
+    target: Target,
     helpers: {
       dispatch: Dispatch<StoreModel>;
       getState: () => State<Model>;
@@ -419,10 +426,8 @@ export function thunkOn<
       getStoreState: () => State<StoreModel>;
       injections: Injections;
       meta: Meta;
-      targets: Array<string>;
     },
   ) => Result,
-  targetResolver: TargetResolver<Payload, Model, StoreModel>,
 ): ThunkOn<Model, Payload, Injections, StoreModel, Result>;
 
 // #endregion
@@ -486,16 +491,16 @@ export interface ActionOn<
 export function actionOn<
   Model extends object = {},
   Payload = any,
-  StoreModel extends object = {}
+  StoreModel extends object = {},
+  Target extends ListenerTarget<Payload> = ListenerTarget<Payload>,
+  Resolver extends TargetResolver<Payload, Model, StoreModel> = TargetResolver<
+    Payload,
+    Model,
+    StoreModel
+  >
 >(
-  handler: (
-    state: State<Model>,
-    target: ListenerTarget<Payload>,
-    helpers: {
-      targets: Array<string>;
-    },
-  ) => void | State<Model>,
-  targetResolver: TargetResolver<Payload, Model, StoreModel>,
+  targetResolver: Resolver,
+  handler: (state: State<Model>, target: Target) => void | State<Model>,
 ): ActionOn<Model, Payload, StoreModel>;
 
 // #endregion

@@ -19,93 +19,94 @@ interface StoreModel {
 }
 
 const listeningAction: ActionOn<ListeningModel, string, StoreModel> = actionOn(
-  (state, target, { targets }) => {
-    const [foo] = targets;
+  actions => actions.doAction,
+  (state, target) => {
+    const [foo] = target.resolvedTargets;
     foo + 'bar';
     target.type + 'foo';
-    target.name + 'foo';
     if (target.error != null) {
       target.error.stack;
     }
     state.logs.push(target.payload);
   },
-  actions => actions.doAction,
 );
 
 const listeningActionInvalidPayload: ActionOn<
   ListeningModel,
   string
 > = actionOn(
+  // typings:expect-error
+  actions => actions.doActionInvalid,
   (state, target) => {
     state.logs.push(target.payload);
   },
-  // typings:expect-error
-  actions => actions.doActionInvalid,
 );
 
 const listeningThunk: ActionOn<ListeningModel, string> = actionOn(
+  actions => actions.doThunk,
   (state, target) => {
     state.logs.push(target.payload);
   },
-  actions => actions.doThunk,
 );
 
 const listeningThunkInvalidPayload: ActionOn<ListeningModel, string> = actionOn(
+  // typings:expect-error
+  actions => actions.doThunkInvalid,
   (state, target) => {
     state.logs.push(target.payload);
   },
-  // typings:expect-error
-  actions => actions.doThunkInvalid,
 );
 
 const listeningString: ActionOn<ListeningModel, string> = actionOn(
+  () => 'ADD_TODO',
   (state, target) => {
     state.logs.push(target.payload);
   },
-  () => 'ADD_TODO',
 );
 
 const listeningInvalid: ActionOn<ListeningModel, string> = actionOn(
+  // typings:expect-error
+  () => 1,
+  // typings:expect-error
   (state, target) => {
     state.logs.push(target.payload);
   },
-  // typings:expect-error
-  () => 1,
 );
 
 const listeningInvalidFunc: ActionOn<ListeningModel, string> = actionOn(
+  // typings:expect-error
+  () => undefined,
+  // typings:expect-error
   (state, target) => {
     state.logs.push(target.payload);
   },
-  // typings:expect-error
-  () => undefined,
 );
 
 const multiListeningAction: ActionOn<ListeningModel, string> = actionOn(
+  actions => [actions.doAction, actions.doThunk],
   (state, target) => {
     state.logs.push(target.payload);
   },
-  actions => [actions.doAction, actions.doThunk],
 );
 
 const multiListeningActionInvalid: ActionOn<ListeningModel, string> = actionOn(
+  // typings:expect-error
+  actions => [actions.doAction, actions.doThunkInvalid],
   (state, target) => {
     state.logs.push(target.payload);
   },
-  // typings:expect-error
-  actions => [actions.doAction, actions.doThunkInvalid],
 );
 
 const multiListeningActionString: ActionOn<ListeningModel, string> = actionOn(
+  () => ['foo', 'bar'],
   (state, target) => {
     state.logs.push(target.payload);
   },
-  () => ['foo', 'bar'],
 );
 
 const listeningActionString: ActionOn<ListeningModel, string> = actionOn(
+  () => 'foo',
   (state, target) => {
     state.logs.push(target.payload);
   },
-  () => 'foo',
 );

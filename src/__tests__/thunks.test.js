@@ -34,10 +34,14 @@ test('dispatches actions to represent a succeeded thunk', async () => {
   const actualResult = await store.getActions().foo.doSomething(payload);
   // assert
   expect(trackActions.actions).toEqual([
-    { type: '@thunk.foo.doSomething(started)', payload },
+    { type: '@thunk.foo.doSomething(start)', payload },
     { type: '@action.foo.increment', payload: undefined },
-    { type: '@thunk.foo.doSomething(succeeded)', payload },
-    { type: '@thunk.foo.doSomething', payload },
+    {
+      type: '@thunk.foo.doSomething(success)',
+      payload,
+      result: 'did something',
+    },
+    { type: '@thunk.foo.doSomething', payload, result: 'did something' },
   ]);
   expect(actualResult).toBe('did something');
 });
@@ -63,9 +67,9 @@ describe('errors', () => {
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
+        { type: '@thunk.foo.doSomething(start)', payload },
         {
-          type: '@thunk.foo.doSomething(failed)',
+          type: '@thunk.foo.doSomething(fail)',
           payload,
           error: err,
         },
@@ -103,10 +107,10 @@ describe('errors', () => {
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
-        { type: '@thunk.foo.error(started)', payload: undefined },
+        { type: '@thunk.foo.doSomething(start)', payload },
+        { type: '@thunk.foo.error(start)', payload: undefined },
         {
-          type: '@thunk.foo.error(failed)',
+          type: '@thunk.foo.error(fail)',
           payload: undefined,
           error: err,
         },
@@ -116,7 +120,7 @@ describe('errors', () => {
           error: err,
         },
         {
-          type: '@thunk.foo.doSomething(failed)',
+          type: '@thunk.foo.doSomething(fail)',
           payload,
           error: err,
         },
