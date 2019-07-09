@@ -20,6 +20,8 @@ interface Nested {
 
 interface DataModel<DataItem extends ObjectWithId> {
   data: { [key: number]: DataItem };
+  // 🚨 THIS BREAKS TYPESCRIPT 😭 🚨
+  // sortBy: 'none' | keyof DataItem;
   sortBy: 'none' | string;
   name: string;
   ids: Computed<DataModel<DataItem>, number[]>;
