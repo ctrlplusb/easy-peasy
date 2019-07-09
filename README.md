@@ -72,7 +72,7 @@ function TodoList() {
   - Computed properties - i.e. derived data
   - Global, shared, or component level stores
   - Immutable data store under the hood
-  - Includes robust Typescript definitions
+  - Includes robust TypeScript definitions
   - React Native supported
   - Includes APIs to aid testing
   - Wraps Redux, all the radness, without the boilerplate

@@ -71,7 +71,7 @@ function TodoList() {
   - Thunks for data fetching and side effects
   - Computed properties - i.e. derived data
   - Immutable data store under the hood
-  - Includes robust Typescript definitions
+  - Includes robust TypeScript definitions
   - Global, shared, or component level stores
   - React Native supported
   - Includes APIs to aid testing
