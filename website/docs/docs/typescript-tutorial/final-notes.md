@@ -1,3 +1,3 @@
 # Final Notes
 
-This concludes the Typescript tutorial, you can view the fully implemented application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-computed-entire-state-niw08). We tried to cover as wide a surface area as possible in terms of defining the types that represent your store. If anything is unclear or missing from this tutorial we kindly request that you open an issue within the repository to indicate this.
+This concludes the TypeScript tutorial, you can view the fully implemented application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-computed-entire-state-niw08). We tried to cover as wide a surface area as possible in terms of defining the types that represent your store. If anything is unclear or missing from this tutorial we kindly request that you open an issue within the repository to indicate this.

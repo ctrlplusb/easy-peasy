@@ -731,6 +731,25 @@ export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
   StoreModel
 >;
 
+/**
+ * A utility function used to create pre-typed hooks.
+ *
+ * @example
+ * const { useStoreActions, useStoreState, useStoreDispatch } = createTypedHooks<StoreModel>();
+ *
+ * useStoreActions(actions => actions.todo.add); // fully typed
+ */
+export function createTypedHooks<StoreModel extends Object = {}>(): {
+  useStoreActions: <Result = any>(
+    mapActions: (actions: Actions<StoreModel>) => Result,
+  ) => Result;
+  useStoreDispatch: () => Dispatch<StoreModel>;
+  useStoreState: <Result = any>(
+    mapState: (state: State<StoreModel>) => Result,
+    dependencies?: Array<any>,
+  ) => Result;
+};
+
 // #endregion
 
 // #region StoreProvider

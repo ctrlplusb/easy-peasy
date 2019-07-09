@@ -79,7 +79,7 @@ const todosModel: TodosModel = {
 };
 ```
 
-You will have noted that Typescript was providing us with the typing information and assertions whilst we implemented our [thunk](/docs/api/thunk).
+You will have noted that TypeScript was providing us with the typing information and assertions whilst we implemented our [thunk](/docs/api/thunk).
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-thunk-imp.png" />
