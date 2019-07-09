@@ -37,7 +37,7 @@ type IndexSignatureKeysOfType<A extends Object> = {
     : never;
 }[keyof A];
 
-type ActionTypes = Action<any, any, any> | Thunk<any, any, any, any, any>;
+type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
 type ActionCreator<Result> = () => Result;
 
@@ -49,17 +49,9 @@ type ActionCreators<Payload = any, Result = any> =
 
 // #region Helpers
 
-export function actionName(action: ActionCreators<any, any>): string;
-
 export function debug<StateDraft extends any>(state: StateDraft): StateDraft;
 
 export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
-
-export function thunkStartName(action: ActionCreators<any, any>): string;
-
-export function thunkCompleteName(action: ActionCreators<any, any>): string;
-
-export function thunkFailName(action: ActionCreators<any, any>): string;
 
 // #endregion
 
@@ -79,7 +71,7 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
           ActionsModel[P]['payload'],
           Promise<ActionsModel[P]['result']>
         >
-    : ActionsModel[P] extends Action<any, any, any>
+    : ActionsModel[P] extends Action<any, any>
     ? ActionsModel[P]['payload'] extends void
       ? ActionCreator<void>
       : ActionCreatorWithPayload<ActionsModel[P]['payload'], void>
@@ -273,11 +265,11 @@ export type Dispatch<
 
 // #endregion
 
-// #region Types for Thunk / Action listenTo configs
+// #region Types for listenerAction/listenerThunk resolveTargets
 
 type Target<TargetPayload> = ActionCreators<TargetPayload> | string;
 
-type ListenToTargetResolver<
+type TargetResolver<
   TargetPayload extends any,
   Model extends object,
   StoreModel extends object
@@ -285,12 +277,6 @@ type ListenToTargetResolver<
   actions: Actions<Model>,
   storeActions: Actions<StoreModel>,
 ) => Target<TargetPayload> | Array<Target<TargetPayload>>;
-
-type ListenToTarget<
-  TargetPayload extends any,
-  Model extends object,
-  StoreModel extends object
-> = ListenToTargetResolver<TargetPayload, Model, StoreModel>;
 
 // #endregion
 
@@ -362,8 +348,45 @@ export function thunk<
       meta: Meta;
     },
   ) => Result,
-  config?: { listenTo?: ListenToTarget<Payload, Model, StoreModel> },
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
+
+// #endregion
+
+// #region Listener Thunk
+
+export interface ListenerThunk<
+  Model extends object = {},
+  Payload = void,
+  Injections = any,
+  StoreModel extends object = {},
+  Result = any
+> {
+  type: 'listenerThunk';
+  payload: Payload;
+  result: Result;
+}
+
+export function listenerThunk<
+  Model extends object = {},
+  Payload = void,
+  Injections = any,
+  StoreModel extends object = {},
+  Result = any
+>(
+  handler: (
+    actions: Actions<Model>,
+    target: ListenerTarget<Payload>,
+    helpers: {
+      dispatch: Dispatch<StoreModel>;
+      getState: () => State<Model>;
+      getStoreActions: () => Actions<StoreModel>;
+      getStoreState: () => State<StoreModel>;
+      injections: Injections;
+      meta: Meta;
+    },
+  ) => Result,
+  targetResolver: TargetResolver<Payload, Model, StoreModel>,
+): ListenerThunk<Model, Payload, Injections, StoreModel, Result>;
 
 // #endregion
 
@@ -383,11 +406,7 @@ export function thunk<
  *   addTodo: Action<Model, Todo>;
  * }
  */
-export type Action<
-  Model extends object = {},
-  Payload = void,
-  StoreModel extends object = {}
-> = {
+export type Action<Model extends object = {}, Payload = void> = {
   type: 'action';
   payload: Payload;
   result: void | State<Model>;
@@ -409,16 +428,42 @@ export type Action<
  *   })
  * });
  */
-export function action<
+export function action<Model extends object = {}, Payload = any>(
+  action: (state: State<Model>, payload: Payload) => void | State<Model>,
+): Action<Model, Payload>;
+
+// #endregion
+
+// #region Listener Action
+
+interface ListenerTarget<Payload> {
+  name: string;
+  type: string;
+  payload: Payload;
+  error?: Error;
+}
+
+export interface ListenerAction<
+  Model extends object = {},
+  Payload = void,
+  StoreModel extends object = {}
+> {
+  type: 'listenerAction';
+  payload: Payload;
+  result: void | State<Model>;
+}
+
+export function listenerAction<
   Model extends object = {},
   Payload = any,
   StoreModel extends object = {}
 >(
-  action: (state: State<Model>, payload: Payload) => void | State<Model>,
-  config?: {
-    listenTo?: ListenToTarget<Payload, Model, StoreModel>;
-  },
-): Action<Model, Payload, StoreModel>;
+  handler: (
+    state: State<Model>,
+    target: ListenerTarget<Payload>,
+  ) => void | State<Model>,
+  targetResolver: TargetResolver<Payload, Model, StoreModel>,
+): ListenerAction<Model, Payload, StoreModel>;
 
 // #endregion
 
