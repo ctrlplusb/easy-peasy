@@ -95,7 +95,7 @@ const todosModel: TodosModel = {
 };
 ```
 
-Again, as we declared the `Computed` property against our model, Typescript would have been making sure that we implemented our [computed](/docs/api/computere) property per spec.
+Again, as we declared the `Computed` property against our model, TypeScript would have been making sure that we implemented our [computed](/docs/api/computere) property per spec.
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-computed-imp.png" />

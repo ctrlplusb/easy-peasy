@@ -12,7 +12,7 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
   - Computed properties - i.e. derived data
   - Global, shared, or component level stores
   - Immutable data store under the hood
-  - Includes robust Typescript definitions
+  - Includes robust TypeScript definitions
   - React Native supported
   - Includes APIs to aid testing
   - Redux Dev Tools support preconfigured

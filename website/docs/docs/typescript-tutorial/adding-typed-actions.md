@@ -51,7 +51,7 @@ const todos: TodosModel = {
 };
 ```
 
-You will have noted that Typescript was providing us with the typing information and assertions whilst we implemented our [action](/docs/api/action).
+You will have noted that TypeScript was providing us with the typing information and assertions whilst we implemented our [action](/docs/api/action).
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-action-imp.png" />

@@ -6,9 +6,9 @@ A simple todo list that utilises a mock service to illustrate data fetching/pers
 
 [View on CodeSandbox](https://codesandbox.io/s/easy-peasy-30-example-m5c4o)
 
-## Typescript
+## TypeScript
 
-This example provides a basic illustration of how to use Easy Peasy in a Typescript based project.
+This example provides a basic illustration of how to use Easy Peasy in a TypeScript based project.
 
 [View on CodeSandbox](https://codesandbox.io/s/easy-peasy-typescript-ycur0)
 
