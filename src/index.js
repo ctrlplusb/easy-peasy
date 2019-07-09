@@ -6,15 +6,13 @@ import createComponentStore from './create-component-store';
 import StoreProvider from './provider';
 import {
   action,
-  actionName,
   computed,
   debug,
   memo,
   reducer,
   thunk,
-  thunkCompleteName,
-  thunkFailName,
-  thunkStartName,
+  actionOn,
+  thunkOn,
 } from './helpers';
 
 /**
@@ -25,19 +23,17 @@ setAutoFreeze(false);
 
 export {
   action,
-  actionName,
   computed,
   createContextStore,
   createComponentStore,
   createStore,
   debug,
+  actionOn,
+  thunkOn,
   memo,
   reducer,
   StoreProvider,
   thunk,
-  thunkCompleteName,
-  thunkFailName,
-  thunkStartName,
   useStoreActions,
   useStoreDispatch,
   useStoreState,

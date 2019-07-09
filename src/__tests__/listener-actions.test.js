@@ -1,4 +1,4 @@
-import { action, createStore, thunk } from '../index';
+import { action, createStore, thunk, actionOn, thunkOn } from '../index';
 
 it('listening to an action, firing an action', () => {
   // arrange
@@ -10,11 +10,16 @@ it('listening to an action, firing an action', () => {
   };
   const audit = {
     logs: [],
-    onMathAdd: action(
-      (state, payload) => {
-        state.logs.push(`Added ${payload}`);
+    onMathAdd: actionOn(
+      (_, storeActions) => storeActions.math.add,
+      (state, target) => {
+        expect(target.type).toBe('@action.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBeUndefined();
+        expect(target.error).toBeUndefined();
+        expect(target.resolvedTargets).toEqual([target.type]);
+        state.logs.push(`Added ${target.payload}`);
       },
-      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -44,11 +49,16 @@ it('listening to an action, firing a thunk', done => {
       expect(payload).toBe('Added 10');
       done();
     }),
-    onMathAdd: thunk(
-      (actions, payload) => {
-        actions.add(`Added ${payload}`);
+    onMathAdd: thunkOn(
+      (_, storeActions) => storeActions.math.add,
+      (actions, target) => {
+        expect(target.type).toBe('@action.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBeUndefined();
+        expect(target.error).toBeUndefined();
+        expect(target.resolvedTargets).toEqual([target.type]);
+        actions.add(`Added ${target.payload}`);
       },
-      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -60,21 +70,27 @@ it('listening to an action, firing a thunk', done => {
   store.getActions().math.add(10);
 });
 
-it('listening to a thunk, firing an action', async () => {
+it('listening to a successful thunk, firing an action', async () => {
   // arrange
   const math = {
     sum: 0,
-    add: thunk(() => {
-      // do nothing
+    add: thunk(async () => {
+      const result = await Promise.resolve('foo');
+      return result;
     }),
   };
   const audit = {
     logs: [],
-    onMathAdd: action(
-      (state, payload) => {
-        state.logs.push(`Added ${payload}`);
+    onMathAdd: actionOn(
+      (_, storeActions) => storeActions.math.add,
+      (state, target) => {
+        expect(target.type).toBe('@thunk.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBe('foo');
+        expect(target.error).toBeUndefined();
+        expect(target.type).toBe('@thunk.math.add');
+        state.logs.push(`Added ${target.payload}`);
       },
-      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -84,6 +100,45 @@ it('listening to a thunk, firing an action', async () => {
 
   // act
   await store.getActions().math.add(10);
+
+  // assert
+  expect(store.getState().audit.logs).toEqual(['Added 10']);
+});
+
+it('listening to a failed thunk', async () => {
+  // arrange
+  const err = new Error('💩');
+  const math = {
+    sum: 0,
+    add: thunk(() => {
+      throw err;
+    }),
+  };
+  const audit = {
+    logs: [],
+    onMathAdd: actionOn(
+      (_, storeActions) => storeActions.math.add,
+      (state, target) => {
+        expect(target.type).toBe('@thunk.math.add');
+        expect(target.payload).toBe(10);
+        expect(target.result).toBeUndefined();
+        expect(target.error).toBe(err);
+        expect(target.type).toBe('@thunk.math.add');
+        state.logs.push(`Added ${target.payload}`);
+      },
+    ),
+  };
+  const store = createStore({
+    math,
+    audit,
+  });
+
+  // act
+  try {
+    await store.getActions().math.add(10);
+  } catch (error) {
+    expect(error).toBe(err);
+  }
 
   // assert
   expect(store.getState().audit.logs).toEqual(['Added 10']);
@@ -104,11 +159,11 @@ it('listening to a thunk, firing a thunk', async done => {
       expect(payload).toEqual('Added 10');
       done();
     }),
-    onMathAdd: thunk(
-      (actions, payload) => {
-        actions.add(`Added ${payload}`);
+    onMathAdd: thunkOn(
+      (_, storeActions) => storeActions.math.add,
+      (actions, target) => {
+        actions.add(`Added ${target.payload}`);
       },
-      { listenTo: (_, storeActions) => storeActions.math.add },
     ),
   };
   const store = createStore({
@@ -124,11 +179,11 @@ it('listening to a string, firing an action', async () => {
   // arrange
   const audit = {
     logs: [],
-    onMathAdd: action(
-      (state, payload) => {
-        state.logs.push(`Added ${payload}`);
+    onMathAdd: actionOn(
+      () => 'MATH_ADD',
+      (state, target) => {
+        state.logs.push(`Added ${target.payload}`);
       },
-      { listenTo: () => 'MATH_ADD' },
     ),
   };
   const store = createStore({
@@ -151,11 +206,11 @@ it('listening to an string, firing a thunk', done => {
       expect(payload).toBe('Added 10');
       done();
     }),
-    onMathAdd: thunk(
-      (actions, payload) => {
-        actions.add(`Added ${payload}`);
+    onMathAdd: thunkOn(
+      () => 'MATH_ADD',
+      (actions, target) => {
+        actions.add(`Added ${target.payload}`);
       },
-      { listenTo: () => 'MATH_ADD' },
     ),
   };
   const store = createStore({
@@ -172,11 +227,15 @@ it('action listening to multiple actions', async () => {
     logs: [],
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
-    onActions: action(
-      (state, payload) => {
-        state.logs.push(payload);
+    onActions: actionOn(
+      actions => [actions.actionTarget, actions.thunkTarget],
+      (state, target) => {
+        expect(target.resolvedTargets).toEqual([
+          '@action.actionTarget',
+          '@thunk.thunkTarget',
+        ]);
+        state.logs.push(target.payload);
       },
-      { listenTo: actions => [actions.actionTarget, actions.thunkTarget] },
     ),
   };
   const store = createStore(model);
@@ -196,27 +255,46 @@ it('thunk listening to multiple actions', async () => {
     logs: [],
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
-    onActions: thunk(thunkSpy, {
-      listenTo: actions => [actions.actionTarget, actions.thunkTarget],
-    }),
+    onActions: thunkOn(
+      actions => [actions.actionTarget, actions.thunkTarget],
+      thunkSpy,
+    ),
   };
   const store = createStore(model);
 
   // act
   store.getActions().actionTarget('action payload');
-  await store.getActions().thunkTarget('thunk payload');
 
   // assert
-  await new Promise(resolve => setTimeout(resolve, 100));
-  expect(thunkSpy).toHaveBeenCalledTimes(2);
+  await new Promise(resolve => setTimeout(resolve, 10));
+  expect(thunkSpy).toHaveBeenCalledTimes(1);
   expect(thunkSpy).toHaveBeenCalledWith(
     expect.anything(),
-    'action payload',
+    {
+      type: store.getActions().actionTarget.type,
+      payload: 'action payload',
+      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget'],
+      result: undefined,
+      error: undefined,
+    },
     expect.anything(),
   );
-  expect(thunkSpy).toHaveBeenCalledWith(
+
+  // act
+  await store.getActions().thunkTarget('thunk payload');
+  await new Promise(resolve => setTimeout(resolve, 10));
+
+  // assert
+  expect(thunkSpy).toHaveBeenCalledTimes(2);
+  expect(thunkSpy).toHaveBeenLastCalledWith(
     expect.anything(),
-    'thunk payload',
+    {
+      type: store.getActions().thunkTarget.type,
+      payload: 'thunk payload',
+      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget'],
+      result: undefined,
+      error: undefined,
+    },
     expect.anything(),
   );
 });

@@ -13,7 +13,7 @@ const trackActionsMiddleware = () => {
   return middleware;
 };
 
-test('dispatches an action to represent the start and end of an thunk', async () => {
+test('dispatches actions to represent a succeeded thunk', async () => {
   // arrange
   const model = {
     foo: {
@@ -34,15 +34,20 @@ test('dispatches an action to represent the start and end of an thunk', async ()
   const actualResult = await store.getActions().foo.doSomething(payload);
   // assert
   expect(trackActions.actions).toEqual([
-    { type: '@thunk.foo.doSomething(started)', payload },
+    { type: '@thunk.foo.doSomething(start)', payload },
     { type: '@action.foo.increment', payload: undefined },
-    { type: '@thunk.foo.doSomething(completed)', payload },
+    {
+      type: '@thunk.foo.doSomething(success)',
+      payload,
+      result: 'did something',
+    },
+    { type: '@thunk.foo.doSomething', payload, result: 'did something' },
   ]);
   expect(actualResult).toBe('did something');
 });
 
 describe('errors', () => {
-  test('dispatches an action to indicate failure', async () => {
+  test('dispatches actions to represent a failed thunk', async () => {
     // arrange
     const err = new Error('error');
     const model = {
@@ -55,10 +60,6 @@ describe('errors', () => {
     const trackActions = trackActionsMiddleware();
     const store = createStore(model, { middleware: [trackActions] });
     const payload = 'a payload';
-    const expectedError = {
-      message: err.message,
-      stack: err.stack,
-    };
 
     try {
       // act
@@ -66,11 +67,16 @@ describe('errors', () => {
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
+        { type: '@thunk.foo.doSomething(start)', payload },
         {
-          type: '@thunk.foo.doSomething(failed)',
+          type: '@thunk.foo.doSomething(fail)',
           payload,
-          error: expectedError,
+          error: err,
+        },
+        {
+          type: '@thunk.foo.doSomething',
+          payload,
+          error: err,
         },
       ]);
 
@@ -94,10 +100,6 @@ describe('errors', () => {
     const trackActions = trackActionsMiddleware();
     const store = createStore(model, { middleware: [trackActions] });
     const payload = 'a payload';
-    const expectedError = {
-      message: err.message,
-      stack: err.stack,
-    };
 
     try {
       // act
@@ -105,81 +107,27 @@ describe('errors', () => {
     } catch (e) {
       // assert
       expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
-        { type: '@thunk.foo.error(started)', payload: undefined },
+        { type: '@thunk.foo.doSomething(start)', payload },
+        { type: '@thunk.foo.error(start)', payload: undefined },
         {
-          type: '@thunk.foo.error(failed)',
+          type: '@thunk.foo.error(fail)',
           payload: undefined,
-          error: expectedError,
+          error: err,
         },
         {
-          type: '@thunk.foo.doSomething(failed)',
-          payload,
-          error: expectedError,
+          type: '@thunk.foo.error',
+          payload: undefined,
+          error: err,
         },
-      ]);
-
-      expect(e).toBe(err);
-    }
-  });
-
-  test('supports string errors', async () => {
-    // arrange
-    const err = 'error';
-    const model = {
-      foo: {
-        doSomething: thunk(async () => {
-          throw err;
-        }),
-      },
-    };
-    const trackActions = trackActionsMiddleware();
-    const store = createStore(model, { middleware: [trackActions] });
-    const payload = 'a payload';
-
-    try {
-      // act
-      await store.getActions().foo.doSomething(payload);
-    } catch (e) {
-      // assert
-      expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
         {
-          type: '@thunk.foo.doSomething(failed)',
+          type: '@thunk.foo.doSomething(fail)',
           payload,
           error: err,
         },
-      ]);
-
-      expect(e).toBe(err);
-    }
-  });
-
-  test('non string or Error error types produce an undefined payload', async () => {
-    // arrange
-    const err = {};
-    const model = {
-      foo: {
-        doSomething: thunk(async () => {
-          throw err;
-        }),
-      },
-    };
-    const trackActions = trackActionsMiddleware();
-    const store = createStore(model, { middleware: [trackActions] });
-    const payload = 'a payload';
-
-    try {
-      // act
-      await store.getActions().foo.doSomething(payload);
-    } catch (e) {
-      // assert
-      expect(trackActions.actions).toEqual([
-        { type: '@thunk.foo.doSomething(started)', payload },
         {
-          type: '@thunk.foo.doSomething(failed)',
+          type: '@thunk.foo.doSomething',
           payload,
-          error: undefined,
+          error: err,
         },
       ]);
 
