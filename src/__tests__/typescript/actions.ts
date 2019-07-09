@@ -7,6 +7,8 @@ import {
   Action,
   Reducer,
   Computed,
+  ActionOn,
+  ThunkOn,
 } from 'easy-peasy';
 
 type Model = {
@@ -23,6 +25,8 @@ type Model = {
   thunkImp: Thunk<Model, string | undefined | null>;
   reducerImp: Reducer<number>;
   computedImp: Computed<Model, number>;
+  onAction: ActionOn<Model, string>;
+  onThunk: ThunkOn<Model, string>;
   // push: Action<Model>;
   // pop: Action<Model>;
   nested: {
@@ -80,6 +84,16 @@ assert.reducerImp;
 assert.computedImp;
 assert.actionImp(1);
 assert.thunkImp('foo').then(() => 'zing');
+assert.onAction({
+  payload: 'foo',
+  type: 'foo',
+  resolvedTargets: ['foo'],
+});
+assert.onThunk({
+  payload: 'foo',
+  type: 'foo',
+  resolvedTargets: ['foo'],
+});
 
 // typings:expect-error
 assert.nested.stateArray;

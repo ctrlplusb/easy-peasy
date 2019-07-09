@@ -37,7 +37,11 @@ type IndexSignatureKeysOfType<A extends Object> = {
     : never;
 }[keyof A];
 
-type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
+type ActionTypes =
+  | Action<any, any>
+  | Thunk<any, any, any, any, any>
+  | ActionOn<any, any, any>
+  | ThunkOn<any, any, any, any>;
 
 interface ActionCreator {
   (): void;
@@ -86,13 +90,14 @@ export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 // #region Actions
 
 type ActionMapper<ActionsModel extends object, Depth extends string> = {
-  [P in keyof ActionsModel]: ActionsModel[P] extends Thunk<
-    any,
-    any,
-    any,
-    any,
-    any
-  >
+  [P in keyof ActionsModel]: ActionsModel[P] extends ActionOn<any, any, any>
+    ? ActionCreatorWithPayload<ListenerTarget<ActionsModel[P]['payload']>>
+    : ActionsModel[P] extends ThunkOn<any, any, any, any, any>
+    ? ThunkActionCreatorWithPayload<
+        ListenerTarget<ActionsModel[P]['payload']>,
+        ActionsModel[P]['result']
+      >
+    : ActionsModel[P] extends Thunk<any, any, any, any, any>
     ? ActionsModel[P]['payload'] extends void
       ? ThunkActionCreator<Promise<ActionsModel[P]['result']>>
       : ThunkActionCreatorWithPayload<
