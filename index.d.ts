@@ -39,13 +39,41 @@ type IndexSignatureKeysOfType<A extends Object> = {
 
 type ActionTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
-type ActionCreator<Result> = () => Result;
+interface ActionCreator {
+  (): void;
+  type: string;
+  z__creator: 'actionNoPayload';
+}
 
-type ActionCreatorWithPayload<Payload, Result> = (payload: Payload) => Result;
+interface ActionCreatorWithPayload<Payload> {
+  (payload: Payload): void;
+  type: string;
+  z__creator: 'actionWithPayload';
+}
+
+interface ThunkActionCreator<Result> {
+  (): Result;
+  type: string;
+  startedType: string;
+  succeededType: string;
+  failedType: string;
+  z__creator: 'thunkNoPayload';
+}
+
+interface ThunkActionCreatorWithPayload<Payload, Result> {
+  (payload: Payload): Result;
+  type: string;
+  startedType: string;
+  succeededType: string;
+  failedType: string;
+  z__creator: 'thunkWithPayload';
+}
 
 type ActionCreators<Payload = any, Result = any> =
-  | ActionCreator<Result>
-  | ActionCreatorWithPayload<Payload, Result>;
+  | ActionCreator
+  | ActionCreatorWithPayload<Payload>
+  | ThunkActionCreator<Result>
+  | ThunkActionCreatorWithPayload<Payload, Result>;
 
 // #region Helpers
 
@@ -66,15 +94,15 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
     any
   >
     ? ActionsModel[P]['payload'] extends void
-      ? ActionCreator<Promise<ActionsModel[P]['result']>>
-      : ActionCreatorWithPayload<
+      ? ThunkActionCreator<Promise<ActionsModel[P]['result']>>
+      : ThunkActionCreatorWithPayload<
           ActionsModel[P]['payload'],
           Promise<ActionsModel[P]['result']>
         >
     : ActionsModel[P] extends Action<any, any>
     ? ActionsModel[P]['payload'] extends void
-      ? ActionCreator<void>
-      : ActionCreatorWithPayload<ActionsModel[P]['payload'], void>
+      ? ActionCreator
+      : ActionCreatorWithPayload<ActionsModel[P]['payload']>
     : ActionsModel[P] extends object
     ? RecursiveActions<
         ActionsModel[P],

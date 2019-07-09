@@ -65,7 +65,13 @@ const multiListenAction: ListenerThunk<Model, string> = listenerThunk(
   (actions, target) => {
     actions.log(target.payload);
   },
-  actions => [actions.doAction, actions.doThunk],
+  actions => [
+    actions.doAction.type,
+    actions.doThunk.type,
+    actions.doThunk.startedType,
+    actions.doThunk.succeededType,
+    actions.doThunk.failedType,
+  ],
 );
 
 const multiListenActionInvalidThunk: ListenerThunk<
