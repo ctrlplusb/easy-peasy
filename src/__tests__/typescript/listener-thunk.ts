@@ -1,4 +1,4 @@
-import { Action, Thunk, ListenerThunk, listenerThunk } from 'easy-peasy';
+import { Action, Thunk, ThunkOn, thunkOn } from 'easy-peasy';
 
 interface Model {
   log: Action<Model, string>;
@@ -8,14 +8,21 @@ interface Model {
   doThunkInvalid: Thunk<Model, number>;
 }
 
-const listenAction: ListenerThunk<Model, string> = listenerThunk(
-  (actions, target) => {
+const listenAction: ThunkOn<Model, string> = thunkOn(
+  (actions, target, { targets }) => {
+    const [foo] = targets;
+    foo + 'bar';
+    target.type + 'foo';
+    target.name + 'foo';
+    if (target.error != null) {
+      target.error.stack;
+    }
     actions.log(target.payload);
   },
   actions => actions.doAction,
 );
 
-const listenActionInvalidThunk: ListenerThunk<Model, string> = listenerThunk(
+const listenActionInvalidThunk: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
@@ -23,14 +30,14 @@ const listenActionInvalidThunk: ListenerThunk<Model, string> = listenerThunk(
   actions => actions.doActionInvalid,
 );
 
-const listenThunk: ListenerThunk<Model, string> = listenerThunk(
+const listenThunk: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
   actions => actions.doThunk,
 );
 
-const listenThunkInvalidPaylod: ListenerThunk<Model, string> = listenerThunk(
+const listenThunkInvalidPaylod: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
@@ -38,14 +45,14 @@ const listenThunkInvalidPaylod: ListenerThunk<Model, string> = listenerThunk(
   actions => actions.doThunkInvalid,
 );
 
-const listenString: ListenerThunk<Model, string> = listenerThunk(
+const listenString: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
   () => 'ADD_TODO',
 );
 
-const listenInvalid: ListenerThunk<Model, string> = listenerThunk(
+const listenInvalid: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
@@ -53,7 +60,7 @@ const listenInvalid: ListenerThunk<Model, string> = listenerThunk(
   () => 1,
 );
 
-const listenInvalidFunc: ListenerThunk<Model, string> = listenerThunk(
+const listenInvalidFunc: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
@@ -61,7 +68,7 @@ const listenInvalidFunc: ListenerThunk<Model, string> = listenerThunk(
   () => undefined,
 );
 
-const multiListenAction: ListenerThunk<Model, string> = listenerThunk(
+const multiListenAction: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
@@ -74,10 +81,7 @@ const multiListenAction: ListenerThunk<Model, string> = listenerThunk(
   ],
 );
 
-const multiListenActionInvalidThunk: ListenerThunk<
-  Model,
-  string
-> = listenerThunk(
+const multiListenActionInvalidThunk: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
@@ -85,14 +89,14 @@ const multiListenActionInvalidThunk: ListenerThunk<
   actions => [actions.doAction, actions.doThunkInvalid],
 );
 
-const multiListeningActionString: ListenerThunk<Model, string> = listenerThunk(
+const multiListeningActionString: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },
   () => ['foo', 'bar'],
 );
 
-const listeningActionString: ListenerThunk<Model, string> = listenerThunk(
+const listeningActionString: ThunkOn<Model, string> = thunkOn(
   (actions, target) => {
     actions.log(target.payload);
   },

@@ -1,10 +1,4 @@
-import {
-  action,
-  createStore,
-  thunk,
-  listenerAction,
-  listenerThunk,
-} from '../index';
+import { action, createStore, thunk, actionOn, thunkOn } from '../index';
 
 it('listening to an action, firing an action', () => {
   // arrange
@@ -16,7 +10,7 @@ it('listening to an action, firing an action', () => {
   };
   const audit = {
     logs: [],
-    onMathAdd: listenerAction(
+    onMathAdd: actionOn(
       (state, target) => {
         state.logs.push(`Added ${target.payload}`);
       },
@@ -50,7 +44,7 @@ it('listening to an action, firing a thunk', done => {
       expect(payload).toBe('Added 10');
       done();
     }),
-    onMathAdd: listenerThunk(
+    onMathAdd: thunkOn(
       (actions, target) => {
         actions.add(`Added ${target.payload}`);
       },
@@ -76,7 +70,7 @@ it('listening to a thunk, firing an action', async () => {
   };
   const audit = {
     logs: [],
-    onMathAdd: listenerAction(
+    onMathAdd: actionOn(
       (state, target) => {
         state.logs.push(`Added ${target.payload}`);
       },
@@ -110,7 +104,7 @@ it('listening to a thunk, firing a thunk', async done => {
       expect(payload).toEqual('Added 10');
       done();
     }),
-    onMathAdd: listenerThunk(
+    onMathAdd: thunkOn(
       (actions, target) => {
         actions.add(`Added ${target.payload}`);
       },
@@ -130,7 +124,7 @@ it('listening to a string, firing an action', async () => {
   // arrange
   const audit = {
     logs: [],
-    onMathAdd: listenerAction(
+    onMathAdd: actionOn(
       (state, target) => {
         state.logs.push(`Added ${target.payload}`);
       },
@@ -157,7 +151,7 @@ it('listening to an string, firing a thunk', done => {
       expect(payload).toBe('Added 10');
       done();
     }),
-    onMathAdd: listenerThunk(
+    onMathAdd: thunkOn(
       (actions, target) => {
         actions.add(`Added ${target.payload}`);
       },
@@ -178,7 +172,7 @@ it('action listening to multiple actions', async () => {
     logs: [],
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
-    onActions: listenerAction(
+    onActions: actionOn(
       (state, target) => {
         state.logs.push(target.payload);
       },
@@ -202,7 +196,7 @@ it('thunk listening to multiple actions', async () => {
     logs: [],
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
-    onActions: listenerThunk(thunkSpy, actions => [
+    onActions: thunkOn(thunkSpy, actions => [
       actions.actionTarget,
       actions.thunkTarget,
     ]),

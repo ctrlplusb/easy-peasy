@@ -1,4 +1,4 @@
-import { listenerAction, ListenerAction, Action, Thunk } from 'easy-peasy';
+import { actionOn, ActionOn, Action, Thunk } from 'easy-peasy';
 
 interface ListeningModel {
   logs: string[];
@@ -18,12 +18,10 @@ interface StoreModel {
   other: OtherModel;
 }
 
-const listeningAction: ListenerAction<
-  ListeningModel,
-  string,
-  StoreModel
-> = listenerAction(
-  (state, target) => {
+const listeningAction: ActionOn<ListeningModel, string, StoreModel> = actionOn(
+  (state, target, { targets }) => {
+    const [foo] = targets;
+    foo + 'bar';
     target.type + 'foo';
     target.name + 'foo';
     if (target.error != null) {
@@ -34,10 +32,10 @@ const listeningAction: ListenerAction<
   actions => actions.doAction,
 );
 
-const listeningActionInvalidPayload: ListenerAction<
+const listeningActionInvalidPayload: ActionOn<
   ListeningModel,
   string
-> = listenerAction(
+> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
@@ -45,17 +43,14 @@ const listeningActionInvalidPayload: ListenerAction<
   actions => actions.doActionInvalid,
 );
 
-const listeningThunk: ListenerAction<ListeningModel, string> = listenerAction(
+const listeningThunk: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
   actions => actions.doThunk,
 );
 
-const listeningThunkInvalidPayload: ListenerAction<
-  ListeningModel,
-  string
-> = listenerAction(
+const listeningThunkInvalidPayload: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
@@ -63,14 +58,14 @@ const listeningThunkInvalidPayload: ListenerAction<
   actions => actions.doThunkInvalid,
 );
 
-const listeningString: ListenerAction<ListeningModel, string> = listenerAction(
+const listeningString: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
   () => 'ADD_TODO',
 );
 
-const listeningInvalid: ListenerAction<ListeningModel, string> = listenerAction(
+const listeningInvalid: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
@@ -78,10 +73,7 @@ const listeningInvalid: ListenerAction<ListeningModel, string> = listenerAction(
   () => 1,
 );
 
-const listeningInvalidFunc: ListenerAction<
-  ListeningModel,
-  string
-> = listenerAction(
+const listeningInvalidFunc: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
@@ -89,20 +81,14 @@ const listeningInvalidFunc: ListenerAction<
   () => undefined,
 );
 
-const multiListeningAction: ListenerAction<
-  ListeningModel,
-  string
-> = listenerAction(
+const multiListeningAction: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
   actions => [actions.doAction, actions.doThunk],
 );
 
-const multiListeningActionInvalid: ListenerAction<
-  ListeningModel,
-  string
-> = listenerAction(
+const multiListeningActionInvalid: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
@@ -110,20 +96,14 @@ const multiListeningActionInvalid: ListenerAction<
   actions => [actions.doAction, actions.doThunkInvalid],
 );
 
-const multiListeningActionString: ListenerAction<
-  ListeningModel,
-  string
-> = listenerAction(
+const multiListeningActionString: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },
   () => ['foo', 'bar'],
 );
 
-const listeningActionString: ListenerAction<
-  ListeningModel,
-  string
-> = listenerAction(
+const listeningActionString: ActionOn<ListeningModel, string> = actionOn(
   (state, target) => {
     state.logs.push(target.payload);
   },

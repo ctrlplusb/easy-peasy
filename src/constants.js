@@ -11,7 +11,7 @@ export const metaSymbol = '🙈meta🙈';
 
 export const thunkSymbol = '🙈thunk🙈';
 
-export const listenerThunkSymbol = '🙈listenerThunk🙈';
+export const listenerThunkSymbol = '🙈thunkOn🙈';
 export const thunkStateSymbol = '🙈thunkState🙈';
 
 export const reducerSymbol = '🙈reducer🙈';

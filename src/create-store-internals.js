@@ -220,15 +220,15 @@ export default function createStoreInternals({
 
   recursiveExtractDefsFromModel(model, []);
 
-  listenerActionDefinitions.forEach(listenerAction => {
+  listenerActionDefinitions.forEach(actionOn => {
     const { targetResolver } =
-      listenerAction[actionStateSymbol] || listenerAction[thunkStateSymbol];
+      actionOn[actionStateSymbol] || actionOn[thunkStateSymbol];
 
     if (typeof targetResolver !== 'function') {
       return;
     }
 
-    const { parent } = listenerAction[metaSymbol];
+    const { parent } = actionOn[metaSymbol];
 
     const targets = targetResolver(get(parent, actionCreators), actionCreators);
 
@@ -249,7 +249,7 @@ export default function createStoreInternals({
         targetName = target;
       }
       const listenerReg = listenerActionMap[targetName] || [];
-      listenerReg.push(actionCreatorDict[listenerAction.type]);
+      listenerReg.push(actionCreatorDict[actionOn.type]);
       listenerActionMap[targetName] = listenerReg;
     };
 

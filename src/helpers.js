@@ -21,7 +21,7 @@ export const debug = state => {
 
 export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
 
-export const listenerAction = (fn, targetResolver) => {
+export const actionOn = (fn, targetResolver) => {
   fn[listenerActionSymbol] = true;
   fn[actionStateSymbol] = {
     targetResolver,
@@ -44,7 +44,7 @@ export const computed = (fn, stateResolvers = defaultStateResolvers) => {
   return fn;
 };
 
-export const listenerThunk = (fn, targetResolver) => {
+export const thunkOn = (fn, targetResolver) => {
   fn[listenerThunkSymbol] = true;
   fn[thunkStateSymbol] = {
     targetResolver,

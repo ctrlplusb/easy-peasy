@@ -11,8 +11,8 @@ import {
   memo,
   reducer,
   thunk,
-  listenerAction,
-  listenerThunk,
+  actionOn,
+  thunkOn,
 } from './helpers';
 
 /**
@@ -28,8 +28,8 @@ export {
   createComponentStore,
   createStore,
   debug,
-  listenerAction,
-  listenerThunk,
+  actionOn,
+  thunkOn,
   memo,
   reducer,
   StoreProvider,
