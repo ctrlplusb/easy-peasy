@@ -6,6 +6,7 @@ import {
   Action,
   Reducer,
   State,
+  createTypedHooks,
   useStoreActions,
   useStoreDispatch,
   useStoreState,
@@ -30,7 +31,7 @@ interface Model {
   };
 }
 
-const dispatch = useStoreDispatch();
+let dispatch = useStoreDispatch();
 dispatch({ type: 'FOO' });
 
 let useStoreResult = useStoreState((state: State<Model>) => state.stateNumber);
@@ -39,3 +40,14 @@ let useActionResult = useStoreActions(
   (actions: Actions<Model>) => actions.actionImp,
 );
 useActionResult(1);
+
+const typedHooks = createTypedHooks<Model>();
+
+useStoreResult = typedHooks.useStoreState(state => state.stateNumber);
+useStoreResult + 1;
+useActionResult = typedHooks.useStoreActions(actions => actions.actionImp);
+useActionResult(1);
+dispatch = typedHooks.useStoreDispatch();
+dispatch({
+  type: 'FOO',
+});

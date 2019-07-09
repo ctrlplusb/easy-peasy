@@ -1,6 +1,6 @@
 # Creating your store
 
-The heart of the Typescript integration with Easy Peasy are the typing definitions you define to represent your [store's](/docs/api/store) model. This typing information can then be used by the various Easy Peasy APIs to provide you with assertions, code completions, etc.
+The heart of the TypeScript integration with Easy Peasy are the typing definitions you define to represent your [store's](/docs/api/store) model. This typing information can then be used by the various Easy Peasy APIs to provide you with assertions, code completions, etc.
 
 For this tutorial we will create a model consisting of two slices; todos and an audit log. 
 
@@ -45,11 +45,11 @@ const storeModel: StoreModel = {
 }
 ```
 
-Good ol' Typescript will make sure that we implement the model in full.
+Good ol' TypeScript will make sure that we implement the model in full.
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typing-model.png" />
-  <span class="caption">Typescript powered model implementation</span>
+  <span class="caption">TypeScript powered model implementation</span>
 </div>
 
 ## File structure

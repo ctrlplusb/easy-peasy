@@ -27,7 +27,7 @@ module.exports = {
       { text: 'Quick Start', link: '/docs/quick-start/' },
       { text: 'Tutorial', link: '/docs/tutorial/' },
       { text: 'API', link: '/docs/api/' },
-      { text: 'Typescript', link: '/docs/typescript-tutorial/' },
+      { text: 'TypeScript', link: '/docs/typescript-tutorial/' },
     ],
 
     sidebarDepth: 0,
@@ -56,7 +56,7 @@ module.exports = {
           ],
         },
         {
-          title: 'Typescript Tutorial',
+          title: 'TypeScript Tutorial',
           children: [
             'typescript-tutorial/',
             'typescript-tutorial/create-your-store',
@@ -78,6 +78,7 @@ module.exports = {
             'api/action',
             'api/computed',
             'api/create-store',
+            'api/create-typed-hooks',
             'api/debug',
             'api/listen-to',
             'api/memo',

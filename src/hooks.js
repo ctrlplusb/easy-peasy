@@ -94,3 +94,11 @@ export function createStoreDispatchHook(Context) {
 }
 
 export const useStoreDispatch = createStoreDispatchHook(EasyPeasyContext);
+
+export function createTypedHooks() {
+  return {
+    useStoreActions,
+    useStoreDispatch,
+    useStoreState,
+  };
+}
