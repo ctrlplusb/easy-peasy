@@ -6,6 +6,8 @@ import {
   Thunk,
   Action,
   Reducer,
+  ActionOn,
+  ThunkOn,
   createStore,
 } from 'easy-peasy';
 
@@ -40,6 +42,8 @@ type Model = {
   thunkImp: Thunk<Model, string>;
   reducerImp: Reducer<number>;
   computedImp: Computed<Model, number>;
+  onAction: ActionOn<Model, string>;
+  onThunk: ThunkOn<Model, string>;
   nested: {
     stateMap: { [key: string]: Array<string> };
     numberStateMap: { [key: number]: boolean };
@@ -158,3 +162,15 @@ assert.nested.reducerImp + 10;
 assert.actionImp(1);
 // typings:expect-error
 assert.thunkImp('foo');
+// typings:expect-error
+assert.onAction({
+  payload: 'foo',
+  type: 'foo',
+  resolvedTargets: ['foo'],
+});
+// typings:expect-error
+assert.onThunk({
+  payload: 'foo',
+  type: 'foo',
+  resolvedTargets: ['foo'],
+});

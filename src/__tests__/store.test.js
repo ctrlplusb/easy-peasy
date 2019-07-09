@@ -145,13 +145,18 @@ test('allows custom middleware', done => {
   // arrange
   const customMiddleware = () => next => _action => {
     // assert
-    expect(_action.type).toMatch(/@thunk.logFullState\((started|completed)\)/);
+    expect(_action.type).toEqual('@action.doFoo');
     next(_action);
     done();
   };
   // act
-  const store = createStore({}, { middleware: [customMiddleware] });
-  store.getActions().logFullState();
+  const store = createStore(
+    {
+      doFoo: action(() => {}),
+    },
+    { middleware: [customMiddleware] },
+  );
+  store.getActions().doFoo();
 });
 
 test('allows custom middleware with mockActions=true', () => {
@@ -248,12 +253,14 @@ test('supports initial state', () => {
 });
 
 test('complex configuration', async () => {
+  // arrange
   const wrappedThunk = fn =>
     thunk(async (actions, payload, helpers) => {
       try {
-        return await fn(actions, payload, helpers);
+        const result = await fn(actions, payload, helpers);
+        return result;
       } catch (err) {
-        helpers.dispatch.error.unexpectedError(err);
+        helpers.geStoreActions().error.unexpectedError(err);
         return undefined;
       }
     });
@@ -261,6 +268,9 @@ test('complex configuration', async () => {
   const store = createStore({
     error: {
       message: undefined,
+      unexpectedError: action((state, payload) => {
+        state.message = payload.message;
+      }),
     },
     session: {
       isInitialised: false,
@@ -274,7 +284,10 @@ test('complex configuration', async () => {
     },
   });
 
+  // act
   const result = await store.getActions().session.initialise();
+
+  // assert
   expect(store.getState().session.isInitialised).toBe(true);
   expect(result).toBe('done');
 });
