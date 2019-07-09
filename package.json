@@ -51,7 +51,7 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0",
-    "ts-toolbelt": "3.0.0-6"
+    "ts-toolbelt": "3.0.0-9"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",
