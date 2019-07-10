@@ -22,16 +22,6 @@ addTodo: action((state, payload) => {
 
       The payload, if any, that was provided to the [action](/docs/api/action) when it was dispatched.
 
-  - `options` (Object, *optional*)
-
-    Additional configuration for the [action](/docs/api/action). It current supports the following
-    properties:
-
-    - `listenTo` (Function, *optional*)
-
-      Setting this allows your [action](/docs/api/action) to act as a *listener*, automatically firing in response to the *target* actions that are resolved by your `listenTo` callback function.
-
-      Please see the [listenTo](/docs/api/listen-to) documentation for full details on this configuration value.
 
 ## Actions are synchronous
 

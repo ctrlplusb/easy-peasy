@@ -81,16 +81,6 @@ thunk(async (actions, payload) => {
           }
         });
         ```
-  - `options` (Object, *optional*)
-
-    Additional configuration for the [thunk](/docs/api/thunk). It current supports the following
-    properties:
-
-    - `listenTo` (Function, *optional*)
-
-      Setting this allows your [thunk](/docs/api/thunk) to act as a *listener*, automatically firing in response to the *target* actions that are resolved by your `listenTo` callback function.
-
-      Please see the [listenTo](/docs/api/listen-to) documentation for full details on this configuration value.
 
 ## Thunks are asynchronous
 
