@@ -1,6 +1,6 @@
 # Creating your store
 
-The heart of your Easy Peasy [store](/docs/api/store) is the model definition that you provide to it. Your model is an object based structure describing the state and behaviour ([actions](/docs/api/action) etc) of your [store](/docs/api/store). It can be as deep as you like and can be split across multiple files, allowing you to import and compose them as you please.
+The heart of your Easy Peasy [store](/docs/api/store) is the model definition that you provide to it. A model definition is an object based structure describing the state and behaviour ([actions](/docs/api/action) etc) of your [store](/docs/api/store). It can be as deep as you like, and can be split across multiple files, allowing you to import and compose your model as you please.
 
 Our [application's](https://codesandbox.io/s/easy-peasy-tutorial-start-8qz5k) state is currently being imported from the `src/data.js` file. Let's create a model that represents the data contained within that file. After that we will be able to use our model to create the [store](/docs/api/store).
 
@@ -83,7 +83,7 @@ const store = createStore(storeModel); // 👈 create our store
 export default store;
 ```
 
-> The returned [store](/docs/api/create-store) instance is actually a [redux](https://redux.js.org/) store. You could use this store with any library that expects a [redux](https://redux.js.org/) store - for example the [react-redux](https://github.com/reduxjs/react-redux) library. One use case for this is if you would like to slowly migrate an existing application from React Redux to Easy Peasy.
+> The returned [store](/docs/api/create-store) instance is actually a [redux](https://redux.js.org/) store. You can use this store with any library that expects a [redux](https://redux.js.org/) store - for example the [react-redux](https://github.com/reduxjs/react-redux) library. One use case for this is if you would like to slowly migrate an existing application from React Redux to Easy Peasy.
 
 ## Review
 
