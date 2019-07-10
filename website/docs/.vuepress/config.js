@@ -53,6 +53,9 @@ module.exports = {
             'tutorial/using-actions-to-update-state',
             'tutorial/using-thunks-to-perform-side-effects',
             'tutorial/using-computed-properties',
+            'tutorial/using-listeners',
+            'tutorial/redux-dev-tools',
+            'tutorial/final-notes',
           ],
         },
         {
