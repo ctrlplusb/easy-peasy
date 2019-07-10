@@ -5,11 +5,12 @@ Let's imagine a new requirement for our application, where we would like to disp
 We could naively implement it like so.
 
 ```typescript
-import { useStoreState } from './my-store';
+import { useStoreState } from './hooks';
 
 export default function NextTodos() {
-  const todos = useStoreState(state => state.todos.items);
-  const nextThree = todos.slice(0, 3);
+  //                                         We derive data from our state
+  //                                                           👇
+  const nextThree = useStoreState(state => state.todos.items.slice(0, 3));
   return (
     <ul>
       {nextThree.map(todo => <li>{todo}</li>)}
@@ -107,9 +108,10 @@ Again, as we declared the `Computed` property against our model, TypeScript woul
 Now let's go back to our `NextTodos` component and refactor it to use our [computed](/docs/api/computed) property.
 
 ```typescript
-import { useStoreState } from '../store';
+import { useStoreState } from '../hooks';
 
 export default function NextTodos() {
+  //                                                 👇
   const todos = useStoreState(state => state.todos.nextTodos);
   return (
     <ul>
@@ -119,6 +121,6 @@ export default function NextTodos() {
 }
 ```
 
-## Demo Application
+## Review
 
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-computed-y2t4r)
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-computed-u4r39)

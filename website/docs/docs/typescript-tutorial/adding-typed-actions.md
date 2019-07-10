@@ -4,7 +4,7 @@ Easy Peasy exports an `Action` type, allowing you declare an [action](/docs/api/
 
 ```typescript
 type Action<
-  Model extends Object = {}, 
+  Model extends Object = {},
   Payload = void
 >
 ```
@@ -63,7 +63,7 @@ You will have noted that TypeScript was providing us with the typing information
 We can now consume the [action](/docs/api/action) within our components, whilst making sure that we use the typed `useStoreActions` that we exported from our [store](/docs/api/store).
 
 ```typescript
-import { useStoreActions } from '../store'; // 👈 import typed hook
+import { useStoreActions } from '../hooks'; // 👈 import typed hook
 
 function AddTodo() {
   //                                  map the addTodo action 👇
@@ -89,6 +89,6 @@ function AddTodo() {
   <span class="caption">Typing info available for action dispatch</span>
 </div>
 
-## Demo Application
+## Review
 
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-actions-hf53f).
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-actions-o47xt).
