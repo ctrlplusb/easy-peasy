@@ -2,7 +2,7 @@
 
 This API is only helpful in the context of TypeScript projects.
 
-Allows you to create typed versions of all the hooks so that you don't need to constantly apply typing information against them.
+Allows you to create typed versions of all the hooks so that you don't need to apply typing information against them whilst using them within your components.
 
 ## Example
 
@@ -20,10 +20,10 @@ export default {
 }
 ```
 
-And then use your typed hooks in your components:
+And then use them within your components:
 
 ```typescript
-import { useStoreState } from './hooks';
+import { useStoreState } from './hooks';  // 👈 import the typed hooks
 
 export default MyComponent() {
   //                          This will be typed

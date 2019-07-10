@@ -197,27 +197,28 @@ function ProductCount() {
 }
 ```
 
-## Listening to actions
+## Action/Thunk Listeners
 
-[Actions](/docs/api/action) or [thunks](/docs/api/thunk) can be configured to listen to any other [action](/docs/api/action)/[thunk](/docs/api/thunk).
+You can create listener actions or thunks via the [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs respectively. These APIs allow you to create an action or thunk that will execute in response to target actions being fired.
 
 ```javascript
-import { action } from 'easy-peasy';
+import { actionOn } from 'easy-peasy';
+//          👆
 
 const auditModel = {
   logs: [],
   onAddedToBasket: action(
-    (state, payload) => {
-      state.logs(`Added product ${payload} to basket`);
+    // targetResolver function receives actions and resolves the targets:
+    (actions, storeActions) => storeActions.basket.addProduct
+    // action handler that executes when target is executed:
+    (state, target) => {
+      state.logs(`Added product ${target.payload} to basket`);
     },
-    //  👇 listen configuration
-    { listenTo: actions => actions.basket.addProduct }
-    //               the action to listen to 👆
   )
 }
 ```
 
-They will receive the same payload as was provided to the action/thunk being listened to.
+A listener will receive the same payload as was provided to the target being listened to.
 
 ## Closing notes
 
