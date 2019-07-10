@@ -4,7 +4,7 @@ If you import the Easy Peasy hooks directly you need to provide your model to th
 
 ```typescript
 import { useStoreState } from 'easy-peasy';
-import { StoreModel } from '../store/model'; // 👈 you would need to do this
+import { StoreModel } from '../model'; // 👈 you would need to do this
 
 function MyComponent() {
   //            and then this 👇
@@ -12,28 +12,27 @@ function MyComponent() {
 }
 ```
 
-That is slightly cumbersome, therefore for convenience sake, we bind typed versions of the hooks against every [store](/docs/api/store) instance. If you use the hooks bound to your [store](/docs/api/store) instance you wouldn't need to provide any model information.
+That is slightly cumbersome, therefore for convenience sake, we expose a [createTypedHooks](/docs/api/create-typed-hooks) API which allows you to create versions of the hooks which are pre-bound within your StoreModel. Using the hooks returned by this API allows you to avoid having to provide your StoreModel every time you use one of the hooks.
 
-We therefore recommend that you extract the typed hooks off your [store](/docs/api/store) instance and export them so that you can use them within your components.
+We therefore recommend that you use the [createTypedHooks](/docs/api/create-typed-hooks) API to create typed hooks and then export them so that you can use them within your components.
 
 ## Exporting the typed hooks
 
-The following example will demonstrate how we can extract and export our typed hooks.
+The following example will demonstrate how we can create and export our typed hooks.
 
 ```typescript
-// store.ts
+// src/hooks.ts
 
-import { createStore } from 'easy-peasy';
-import storeModel from './model';
+import { createTypedHooks } from 'easy-peasy'; // 👈import the helper
+import { StoreModel } from './model'; // 👈 import our model type
 
-const store = createStore(storeModel);
+// Provide our model to the helper      👇
+const typedHooks = createTypedHooks<StoreModel>();
 
-// 👇export the typed hooks
-export const useStoreActions = store.useStoreActions;
-export const useStoreDispatch = store.useStoreDispatch;
-export const useStoreState = store.useStoreState;
-
-export default store;
+// 👇 export the typed hooks
+export const useStoreActions = typedHooks.useStoreActions;
+export const useStoreDispatch = typedHooks.useStoreDispatch;
+export const useStoreState = typedHooks.useStoreState;
 ```
 
 ## Using the typed hooks
@@ -41,7 +40,7 @@ export default store;
 We can now import the typed hooks into a component.
 
 ```typescript
-import { useStoreState } from '../store'; // 👈 import the typed hook
+import { useStoreState } from '../hooks'; // 👈 import the typed hook
 
 function TodoList() {
   const todos = useStoreState(state => state.todos.items);
@@ -58,23 +57,6 @@ function TodoList() {
   <span class="caption">Typing info available on typed hook</span>
 </div>
 
-## Alternative approach
+## Review
 
-There may be cases where extracting the hooks off your [store](/docs/api/store) instance may be inconvenient. For example, if you are using a factory function to create your store. 
-
-An alternative approach would be to create typed versions of your hooks manually.
-
-```typescript
-// hooks.ts
-
-import * as EasyPeasy from 'easy-peasy';
-import { StoreModel } from './model';
-
-export const useStoreActions = EasyPeasy.useStoreActions<StoreModel>;
-export const useStoreDispatch = EasyPeasy.useStoreDispatch<StoreModel>;
-export const useStoreState = EasyPeasy.useStoreState<StoreModel>;
-```
-
-## Demo Application
-
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-hooks-8jonb).
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-hooks-mzkp8).
