@@ -357,3 +357,71 @@ test('supports non literal objects as state - i.e. classes etc', () => {
   // assert
   expect(store.getState().person).toBeInstanceOf(Person);
 });
+
+test('support model reconfiguration', () => {
+  // arrange
+  const store = createStore({
+    todos: {
+      items: [],
+      addTodo: action((state, payload) => {
+        state.items.push(payload);
+      }),
+    },
+  });
+  store.getActions().todos.addTodo('support hot reloading');
+
+  // act
+  store.reconfigure({
+    todos: {
+      items: [],
+      addTodo: action((state, payload) => {
+        state.items.push(payload);
+      }),
+      bob: 1,
+    },
+  });
+  store.getActions().todos.addTodo('zing');
+
+  // assert
+  expect(store.getState()).toEqual({
+    todos: {
+      items: ['support hot reloading', 'zing'],
+      bob: 1,
+    },
+  });
+
+  // act
+  store.reconfigure({
+    todos: {
+      items: [],
+      addTodo: action((state, payload) => {
+        state.items.push(payload);
+      }),
+      removeTodo: action(state => {
+        state.items.pop();
+      }),
+    },
+  });
+  store.getActions().todos.removeTodo();
+
+  // assert
+  expect(store.getState()).toEqual({
+    todos: {
+      items: ['support hot reloading'],
+      bob: 1,
+    },
+  });
+
+  // act
+  store.reconfigure({
+    todos: {
+      items: [],
+      removeTodo: action(state => {
+        state.items.pop();
+      }),
+    },
+  });
+
+  // assert
+  expect(store.getActions().todos.addTodo).toBeUndefined();
+});

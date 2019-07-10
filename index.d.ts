@@ -265,10 +265,16 @@ export type Store<
 > = O.Merge<
   O.Omit<ReduxStore<State<StoreModel>>, 'dispatch'>,
   {
+    addModel: <ModelSlice extends object>(
+      key: string,
+      modelSlice: ModelSlice,
+    ) => void;
+    clearMockedActions: () => void;
     dispatch: Dispatch<StoreModel>;
     getActions: () => Actions<StoreModel>;
     getMockedActions: () => MockedAction[];
-    clearMockedActions: () => void;
+    reconfigure: <NewStoreModel extends object>(model: NewStoreModel) => void;
+    removeModel: (key: string) => void;
     useStoreActions: <Result = any>(
       mapActions: (actions: Actions<StoreModel>) => Result,
     ) => Result;
