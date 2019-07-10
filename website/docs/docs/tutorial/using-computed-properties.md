@@ -93,6 +93,11 @@ const basketModel = {
 We can now update our `Basket` component to instead use our [computed](/docs/api/computed) property.
 
 ```diff
+// src/components/basket.js
+
+import { useStoreActions, useStoreState } from "easy-peasy";
+
+export default function Basket() {
   const removeProductFromBasket = useStoreActions(
     actions => actions.basket.removeProduct,
   );
@@ -108,7 +113,51 @@ We can now update our `Basket` component to instead use our [computed](/docs/api
 
 **Getting a product by id**
 
-todo...
+The `mapState` function of our `Product`'s [useStoreState](/docs/api/use-store-state) hook utilises an incoming `id` property to derive the target product to render.
+
+We can utilise [computed](/docs/api/computed) properties, returning a function within them, which would then allow for runtime arguments to be used within our [computed](/docs/api/computed).
+
+Let's add a `getById` [computed](/docs/api/computed) property to our product model.
+
+```javascript
+// src/model/products-model.js
+
+import { computed } from "easy-peasy";
+//          👆 import the helper
+
+const productsModel = {
+  //           👇 define our computed property
+  getById: computed(state => 
+    // return a function that accepts an "id" argument
+    id => state.items.find(product => product.id === id)
+  ),
+  // ...
+```
+
+We can then refactor the `Product` component to use this [computed](/docs/api/computed) property.
+
+```diff
+// src/components/product.js
+
+import React, { useCallback, useState } from 'react';
+import { useStoreActions, useStoreState } from 'easy-peasy';
+
+export default function Product({ id }) {
+  const addProductToBasket = useStoreActions(
+    actions => actions.basket.addProduct,
+  );
+-  const product = useStoreState(state =>
+-    state.products.items.find(product => product.id === id),
+-  );
++  const product = useStoreState(state => state.products.getById(id));
+
+  // state to track when we are saving to basket
+  const [adding, setAdding] = useState(false);
+
+  // ...
+```
+
+Note how we are executing the [computed](/docs/api/computed) property function, providing the `id` prop to it.
 
 ## Review
 
