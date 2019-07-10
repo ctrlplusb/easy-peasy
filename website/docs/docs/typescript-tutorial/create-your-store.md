@@ -2,7 +2,7 @@
 
 The heart of the TypeScript integration with Easy Peasy are the typing definitions you define to represent your [store's](/docs/api/store) model. This typing information can then be used by the various Easy Peasy APIs to provide you with assertions, code completions, etc.
 
-For this tutorial we will create a model consisting of two slices; todos and an audit log. 
+For this tutorial we will create a model consisting of two slices; todos and an audit log.
 
 ## Interface declaration
 
@@ -87,6 +87,6 @@ The [store](/docs/api/store) that is returned will be fully typed. If you try to
   <span class="caption">Typed store APIs</span>
 </div>
 
-## Demo Application
+## Review
 
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialcreate-store-fkxw2).
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialcreate-store-h7btv).

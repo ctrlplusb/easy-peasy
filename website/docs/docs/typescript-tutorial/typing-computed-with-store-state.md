@@ -41,7 +41,7 @@ const basketModel: BasketModel = {
 We may now have the requirement to view our basket within our application. We could implement it like so.
 
 ```typescript
-import { useStoreState } from '../store';
+import { useStoreState } from '../hooks';
 
 function Basket() {
   const productIds = useStoreState(state => state.basket.productIds);
@@ -70,7 +70,7 @@ Using our extended models, lets define a [computed](/docs/api/computed) property
 ```typescript
 import { Computed, ResolvedState2 } from 'easy-peasy';
 import { Product } from './products';
-import { StoreModel } from './model';
+import { StoreModel } from './index';
 
 interface BasketModel {
   productIds: number[];
@@ -98,7 +98,7 @@ We will not provide the implementation for the [computed](/docs/api/computed) pr
 const basketModel: BasketModel = {
   productIds: [1],
   productsInBasket: computed(
-    (productIds, products) => productIds.map(id => 
+    (productIds, products) => productIds.map(id =>
       products.find(product => product.id === id)
     ),
     // 👇 note our state resolvers, resolving two pieces of state
@@ -117,7 +117,7 @@ const basketModel: BasketModel = {
 We can now access the [computed](/docs/api/computed) property the same as any other piece of state.
 
 ```typescript
-import { useStoreState } from 'easy-peasy';
+import { useStoreState } from '../hooks';
 
 function BasketProducts() {
   const products = useStoreState(state => state.basket.productsInBasket);
@@ -131,6 +131,6 @@ function BasketProducts() {
 
 If the `basket.productIds` or `products.items` states change then our computed property will be updated and our component will re-render accordingly. 👍
 
-## Demo Application
+## Review
 
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-computed-entire-state-niw08)
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-computed-entire-state-tcyb0)

@@ -25,19 +25,19 @@ const audit: AuditModel = {
 Now let's update our [thunk](/docs/api/thunk) configuration so that it is aware of the typings that represent our entire [store](/docs/api/store).
 
 ```typescript
-import { StoreModel } from './model';
+import { StoreModel } from '../model';
 //          👆 import the interface that represents our store model
 //              don't worry about circular references, this is allowed
 
 export interface TodosModel {
   items: string[];
-  addTodo: Action<TodosModel, string>; 
+  addTodo: Action<TodosModel, string>;
   saveTodo: Thunk<
-    TodosModel, 
-    string, 
+    TodosModel,
+    string,
     Injections,
     StoreModel // 👈 provide the store model interface
-  >; 
+  >;
 }
 ```
 
@@ -54,12 +54,12 @@ const todosModel: TodosModel = {
     await todosService.save(payload);
     actions.addTodo(payload);
     // 👇 accessing global actions
-    getStoreActions().audit.addLog(`Added todo: ${payload}`); 
+    getStoreActions().audit.addLog(`Added todo: ${payload}`);
   })
 };
 ```
 
-As you can see above we were able to get full type information against the `getStoreActions` helper, allowing us to add a log entry. 
+As you can see above we were able to get full type information against the `getStoreActions` helper, allowing us to add a log entry.
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-thunk-globals.png" />
@@ -78,4 +78,4 @@ thunk(async (actions, payload, { getStoreState }) => {
 
 ## Demo Application
 
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-thunk-global-qo7ep)
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-thunk-global-870xx)

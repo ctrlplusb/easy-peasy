@@ -14,7 +14,7 @@ type Thunk<
 
 ## Type parameters
 
-As you can see it accepts five type parameters, all of them optional. This may seem like a lot, but in most cases you will likely only need to provide two. We have tried to order the type parameters from the most to the least frequently used. 
+As you can see it accepts five type parameters, all of them optional. This may seem like a lot, but in most cases you will likely only need to provide two. We have tried to order the type parameters from the most to the least frequently used.
 
 The type parameters can be described as follows.
 
@@ -34,8 +34,8 @@ The type parameters can be described as follows.
 
 - `StoreModel`
 
-  The `helpers` argument to your [thunks](/docs/api/thunk) exposes APIs which allow you to get the entire store state (via `getStoreState`), or all the actions for your store (via `getStoreActions`). 
-  
+  The `helpers` argument to your [thunks](/docs/api/thunk) exposes APIs which allow you to get the entire store state (via `getStoreState`), or all the actions for your store (via `getStoreActions`).
+
   For these to be correctly typed we need to ensure that we provide the model interface for our store to this type parameter.
 
 - `Result`
@@ -53,7 +53,7 @@ import { Thunk } from 'easy-peasy';
 
 export interface TodosModel {
   items: string[];
-  addTodo: Action<TodosModel, string>; 
+  addTodo: Action<TodosModel, string>;
   saveTodo: Thunk<TodosModel, string>; // 👈 declaring our thunk
 }
 ```
@@ -91,7 +91,7 @@ You will have noted that TypeScript was providing us with the typing information
 We can now consume the [thunk](/docs/api/thunk) within our component, making sure we use the typed version of `useStoreActions` that we exported from our store. We will refactor our component from earlier.
 
 ```typescript
-import { useStoreActions } from './store'; // 👈 import typed hook
+import { useStoreActions } from '../hooks'; // 👈 import typed hook
 
 function AddTodo() {
   //                                    map the saveTodo thunk 👇
@@ -119,4 +119,4 @@ function AddTodo() {
 
 ## Demo Application
 
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-thunks-lwi6o)
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-thunks-j4b3p)
