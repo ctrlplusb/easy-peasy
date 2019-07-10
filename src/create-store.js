@@ -21,10 +21,14 @@ export default function createStore(model, options = {}) {
     reducerEnhancer = rootReducer => rootReducer,
   } = options;
 
-  const modelDefinition = {
-    ...model,
-    replaceState: helpers.action((state, payload) => payload),
+  const bindReplaceState = modelDef => {
+    return {
+      ...modelDef,
+      replaceState: helpers.action((state, payload) => payload),
+    };
   };
+
+  let modelDefinition = bindReplaceState(model);
 
   const references = {};
 
@@ -139,6 +143,11 @@ export default function createStore(model, options = {}) {
     store.replaceReducer(references.internals.reducer);
     store.getActions().replaceState(references.internals.defaultState);
     bindActionCreators();
+  };
+
+  store.reconfigure = newModel => {
+    modelDefinition = bindReplaceState(newModel);
+    rebindStore();
   };
 
   store.addModel = (key, modelForKey) => {
