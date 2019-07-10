@@ -7,7 +7,7 @@ Let's refactor our [thunk](/docs/api/thunk) from earlier so that the `todosServi
 Firstly, let's define an interface to represent our injections.
 
 ```typescript
-// store.ts
+// src/store/index.ts
 
 import * as todosService from '../services/todos-service';
 
@@ -21,7 +21,7 @@ export interface Injections {
 Now, let's update the code used to create our [store](/docs/api/store).
 
 ```typescript
-import * as todosServive from './services/todos';
+// src/store/index.ts
 
 const store = createStore(model, {
   // 👇 provide injections to our store
@@ -34,12 +34,12 @@ const store = createStore(model, {
 Then we will update the [thunk](/docs/api/thunk) definition on our model interface.
 
 ```typescript
-import { Injections } from './store';
+import { Injections } from '../store';
 //          👆import the injections type
 
 export interface TodosModel {
   items: string[];
-  addTodo: Action<TodosModel, string>; 
+  addTodo: Action<TodosModel, string>;
   saveTodo: Thunk<TodosModel, string, Injections>; // 👈 provide the type
 }
 ```
@@ -71,4 +71,4 @@ Again you should have noted all the typing information being available.
 
 ## Demo Application
 
-You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-injections-m06gk)
+You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-injections-fgeqk)
