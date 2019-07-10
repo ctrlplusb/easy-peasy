@@ -14,19 +14,19 @@ import { computed } from 'easy-peasy'; // 👈 import the helper
 const sessionModel = {
   user: { username: 'jane' },
   //            👇 define a computed property
-  isLoggedIn: computed(state => state.user != null) 
+  isLoggedIn: computed(state => state.user != null)
 }
 ```
 
 You can access [computed](/docs/api/computed) state just like any other state via the [useStoreState](/docs/api/use-store-state) hook.
 
-Apart from helping you to avoid repeating state deriving logic across your application, they also have really nice performance characteristics. For instance, they are only computed on-demand (i.e. only if they are actually being used within a mounted component).
+Apart from helping you to avoid repeating logic that derives state within your application, they also have really nice performance characteristics. For instance, they are only computed on-demand (i.e. only if they are currently being accessed by a mounted component).
 
-In addition to this they will only be recalculated if their input state changes. This means that you can return any data type you like within a computed property (e.g. a new array/object instance) and they won't fall into the same performance pitfalls that can be experienced when deriving state within a [useStoreState](/docs/api/use-store-state) hook.
+In addition to this [computed](/docs/api/computed) properties will only be recalculated if their input state changes. This means that you can resolve any data type from a [computed](/docs/api/computed) property (e.g. a new array/object instance) and they won't fall into the same [performance pitfalls](/docs/tutorial/consuming-state#a-note-on-optimisation) that can be experienced when deriving state within a [useStoreState](/docs/api/use-store-state) hook.
 
 ## Refactoring the application to use computed properties
 
-[Computed](/docs/api/computed) properties are the perfect candidate to help us clean up the more advanced state mapping that is happening within some of our [application's](https://codesandbox.io/s/easy-peasy-tutorial-actions-1e62s) components.
+[Computed](/docs/api/computed) properties are the perfect candidate to help us clean up the more advanced state mapping that is happening within some of our [application's](https://codesandbox.io/s/easy-peasy-tutorial-actions-1e62s) components. Let's refactor each derived data case.
 
 **Basket count**
 
@@ -56,41 +56,36 @@ export default function BasketCount() {
 
 **Products in basket**
 
-Next up, we will add a [computed](/docs/api/computed) property to represent the products that are currently in our basket. This is a more advanced implementation as we will reach from our basket model to state within our product model.
+Next up, we will add a [computed](/docs/api/computed) property to represent the products that are currently in our basket. This is a more advanced implementation as we will use data from both our our basket model and our product model.
 
-[Computed](/docs/api/computed) properties optionally allow you to define an array of state resolver functions as the second argument to the [computed](/docs/api/computed) property definition. These state resolver functions will receive the state that is local to the [computed](/docs/api/computed) property, as well as the entire store state.
+[Computed](/docs/api/computed) properties optionally allow you to provide an array of state resolver functions as the second argument to the [computed](/docs/api/computed) property definition. These state resolver functions will receive the state that is local to the [computed](/docs/api/computed) property, as well as the entire store state, and allow you to return the specific slices of state that your [computed] property will depend on.
 
-This exposes two benefits:
+Apart from granting you access to the entire store state, state resolver functions also open up a performance optimisation as they allow you to isolate the specific slices of state that your [computed](/docs/api/computed) property depends on, thereby reducing the likelihood of your [computed](/docs/api/computed) property needing to be recalculated (i.e. they are only recalculated when their input state changes).
 
-1. You will be able to access state from across your entire store within your [computed](/docs/api/computed) property,
-2. You can isolate the specific slices of state that your [computed](/docs/api/computed) property depends on, thereby reducing the likelihood of your [computed](/docs/api/computed) property being recalculated.
-
-Let's go ahead and define our [computed](/docs/api/computed) property, utilising state resolvers.
+Let's go ahead and define a [computed](/docs/api/computed) property, utilising state resolvers, which will allow us to represent the products currently in our basket.
 
 ```javascript
 // src/model/basket-model.js
 
 // ...
 const basketModel = {
-  //        👇 define the computed property
+  productIds: [2],
   products: computed(
-    // The state resolver results become the argument inputs
+    // These arguments are the results of our state resolvers below
     //   👇         👇
     (productIds, products) => productIds.map(productId =>
       products.find(product => product.id === productId)
     ),
     // 👇 These are our state resolvers...
     [
-      // Resolve the product ids
       state => state.productIds,
-      // And then resolve the products from the products model
       (state, storeState) => storeState.products.items
     ],
   ),
   // ...
 ```
 
-We can now update our `Basket` component to instead use our [computed](/docs/api/computed) property.
+We can now update our `Basket` component to use our [computed](/docs/api/computed) property.
 
 ```diff
 // src/components/basket.js
@@ -111,11 +106,13 @@ export default function Basket() {
   return (
 ```
 
+This is far cleaner, and should we need to access the products that are in our basket anywhere else in our application we have a much simpler mechanism by which do so, without the need to do any complicated state mapping.
+
 **Getting a product by id**
 
-The `mapState` function of our `Product`'s [useStoreState](/docs/api/use-store-state) hook utilises an incoming `id` property to derive the target product to render.
+The `mapState` function of our `Product`'s [useStoreState](/docs/api/use-store-state) hook utilises an incoming `id` property to derive the product to render.
 
-We can utilise [computed](/docs/api/computed) properties, returning a function within them, which would then allow for runtime arguments to be used within our [computed](/docs/api/computed).
+We can create a [computed](/docs/api/computed) property that supports runtime arguments (such as component props) by returning a function within the [computed](/docs/api/computed) property definition.
 
 Let's add a `getById` [computed](/docs/api/computed) property to our product model.
 
@@ -123,12 +120,14 @@ Let's add a `getById` [computed](/docs/api/computed) property to our product mod
 // src/model/products-model.js
 
 import { computed } from "easy-peasy";
-//          👆 import the helper
 
 const productsModel = {
-  //           👇 define our computed property
-  getById: computed(state => 
-    // return a function that accepts an "id" argument
+  items: [
+    { id: 1, name: "Broccoli", price: 2.5 },
+    { id: 2, name: "Carrots", price: 4 }
+  ],
+  getById: computed(state =>
+    // 👇 return a function that accepts an "id" argument
     id => state.items.find(product => product.id === id)
   ),
   // ...
@@ -157,8 +156,16 @@ export default function Product({ id }) {
   // ...
 ```
 
-Note how we are executing the [computed](/docs/api/computed) property function, providing the `id` prop to it.
+Note how we are executing the `getById` [computed](/docs/api/computed) property function, providing the `id` prop to it.
+
+```javascript
+useStoreState(state => state.products.getById(id));
+```
 
 ## Review
+
+We have now covered [computed](/docs/api/computed), a very powerful mechanism that allows us to easily derive data and unlock some really awesome performance characteristics.
+
+In the next section we will review the final piece of our API - action listeners.
 
 You can view the progress of our application refactor [here](https://codesandbox.io/s/easy-peasy-tutorial-computed-uohgr).

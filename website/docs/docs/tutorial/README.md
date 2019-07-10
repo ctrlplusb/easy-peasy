@@ -11,9 +11,3 @@ In refactoring [the application](https://codesandbox.io/s/easy-peasy-tutorial-st
 Each section will end with a link to a snapshot of [the application](https://codesandbox.io/s/easy-peasy-tutorial-start-8qz5k) with the all the refactoring up to that point applied to it.
 
 We hope that you find this tutorial helpful and invite you to provide feedback on the [GitHub repo](https://github.com/ctrlplusb/easy-peasy).
-
-Todo
-- [ ] Computed properties
-- [ ] Listener actions
-- [ ] Debugging your application with Redux Dev Tools
-- [ ] Final notes
