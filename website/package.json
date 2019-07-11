@@ -2,7 +2,8 @@
   "private": true,
   "scripts": {
     "dev": "vuepress dev docs",
-    "build": "vuepress build docs"
+    "build": "vuepress build docs",
+    "now-build": "vuepress build docs"
   },
   "devDependencies": {
     "@vuepress/plugin-google-analytics": "^1.0.2",
