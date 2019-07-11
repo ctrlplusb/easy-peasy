@@ -6,7 +6,6 @@ import {
 import reduxThunk from 'redux-thunk';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
-import { useStoreActions, useStoreDispatch, useStoreState } from './hooks';
 
 export default function createStore(model, options = {}) {
   const {
@@ -175,10 +174,6 @@ export default function createStore(model, options = {}) {
     delete modelDefinition[key];
     rebindStore(key);
   };
-
-  store.useStoreActions = useStoreActions;
-  store.useStoreDispatch = useStoreDispatch;
-  store.useStoreState = useStoreState;
 
   return store;
 }

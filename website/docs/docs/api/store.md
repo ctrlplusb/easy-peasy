@@ -52,17 +52,4 @@ A store is created via the [createStore](/docs/api/create-store) API. A store in
     store.removeModel('todos');
     store.getState().todos; // undefined
     ```
-
-  - `useStoreActions` (Function)
-
-    The [useStoreActions](/docs/api/use-store-actions) hook. This is typically useful when using TypeScript with Easy Peasy, as this hook will be typed against your store.
-
-  - `useStoreDispatch` (Function)
-
-    The [useStoreDispatch](/docs/api/use-store-dispatch) hook. This is typically useful when using TypeScript with Easy Peasy, as this hook will be typed against your store.
-
-  - `useStoreState` (Function)
-
-    The [useStoreState](/docs/api/use-store-state) hook. This is typically useful when using TypeScript with Easy Peasy, as this hook will be typed against your store.
-
-It may be useful to note that a store is a Redux store, with enhancements. All the standard APIs that are available on Redux store are available on an Easy Peasy store.
+    

@@ -14,15 +14,6 @@ const model: Model = {
 
 const store = createStore(model);
 
-const doAction = store.useStoreActions(actions => actions.doAction);
-doAction(true);
-
-const dispatch = store.useStoreDispatch();
-dispatch({ type: 'FOO' });
-
-const count = store.useStoreState(state => state.count);
-count + 10;
-
 store.getActions().doAction(true);
 store.dispatch.doAction(true);
 
