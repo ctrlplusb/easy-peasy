@@ -109,8 +109,9 @@ module.exports = {
           children: [
             'testing/',
             'testing/testing-actions',
-            'testing/testing-thunks',
             'testing/testing-components',
+            'testing/testing-computed-properties',
+            'testing/testing-thunks',
           ],
         },
         {

@@ -1,16 +1,16 @@
 # Testing thunks
 
-[Thunks](/docs/api/thunk) are more complicated to test than [actions](/docs/api/action) as they can perform side effects, such as invoking network requests, and can dispatch [actions](/docs/api/action).
+[Thunks](/docs/api/thunk) are more complicated to test than [actions](/docs/api/action) as they can perform side effects, such as invoking network requests, and they can additionally dispatch other [actions](/docs/api/action) or [thunks](/docs/api/thunk).
 
-We recommend that you have tests for your [actions](/docs/api/action), and therefore you shouldn't need to test for state changes that resulted from [actions](/docs/api/action) that were dispatched by your [thunk](/docs/api/thunk). 
+Each of your [actions](/docs/api/action) should ideally have their own isolated tests, therefore it may be unnecessary to test the state changes that resulted from [actions](/docs/api/action) being dispatched by your [thunk](/docs/api/thunk) under test. An alternative strategy would be to assert that the expected actions were dispatched from your [thunk](/docs/api/thunk) under test with the expected payloads. 
 
-We rather recommend that you test for what actions were fired from your thunk under test.
+To support this strategy we expose an configuration value on the `createStore` API named `mockActions`. If you set the `mockActions` configuration value to `true`, then all actions that any action that is dispatched will not be executed, and will instead be recorded, along with their payloads. You can then access the recorded actions via the `getMockedActions` function that is available on the store instance. 
 
-To do this we expose an additional configuration value on the `createStore` API, specifically `mockActions`. If you set the `mockActions` configuration value, then all actions that are dispatched will not affect state, and will instead be mocked and recorded. You can get access to the recorded actions via the `getMockedActions` function that is available on the store instance. We took inspiration for this functionality from the awesome [`redux-mock-store`](https://github.com/dmitry-zaets/redux-mock-store) package.
+> We took inspiration for this strategy from the awesome [`redux-mock-store`](https://github.com/dmitry-zaets/redux-mock-store) package.
 
-In addition to this approach, if you perform side effects such as network requests within your thunks, we highly recommend that you expose the modules you use to do so via the `injections` configuration variable of your store. If you do this then it makes it significantly easier to provide mocked instances to your thunks when testing.
+In addition to this, if you perform side effects such as network requests within your thunks, we highly recommend that you encapsulate these services within modules that are then exposed to your store via the `injections` configuration property of the store. Doing this will allow you to inject mocked versions of your services when you are testing your [thunks](/docs/api/thunk).
 
-We will demonstrate all of the above within the below example.
+## Example
 
 Given the following model under test:
 
@@ -19,31 +19,33 @@ import { action, thunk } from 'thunk';
 
 const todosModel = {
   items: {},
-  add: action((state, payload) => {
+  fetchedTodo: action((state, payload) => {
     state.items[payload.id] = payload
   }),
-  fetchById: thunk(async (actions, payload, helpers) => {
-    const { injections } = helpers
-    const todo = await injections.fetch(`/todos/${payload}`).then(r => r.json())
-    actions.add(todo)
-  }),
-}
+  fetchById: thunk(async (actions, payload, { injections }) => {
+    const { todosService } = injections;
+    const todo = await todosService.fetchById(payload);
+    actions.fetchedTodo(todo);
+  })
+};
 ```
 
-We could test it like so:
+We could test the `fetchById` thunk like so:
 
 ```typescript
-import { createStore, actionName, thunkStartName, thunkCompleteName, thunkFailName } from 'easy-peasy'
+import { createStore, actionName } from 'easy-peasy'
 
-const createFetchMock = response =>
+const createMockTodosService = result =>
   jest.fn(() => Promise.resolve({ json: () => Promise.resolve(response) }))
 
 test('fetchById', async () => {
   // arrange
-  const todo = { id: 1, text: 'Test my store' }
-  const fetch = createFetchMock(todo)
+  const todo = { id: 1, text: 'Test my store' };
+  const mockTodosService = {
+    fetchById: jest.fn(() => Promise.resolve(todo))
+  };
   const store = createStore(todosModel, {
-    injections: { fetch },
+    injections: { todosService: mockService },
     mockActions: true,
   })
 
@@ -51,11 +53,12 @@ test('fetchById', async () => {
   await store.getActions().fetchById(todo.id)
 
   // assert
-  expect(fetch).toHaveBeenCalledWith(`/todos/${todo.id}`)
+  expect(mockTodosService.fetchById).toHaveBeenCalledWith(todo.id);
   expect(store.getMockedActions()).toEqual([
-    { type: thunkStartName(todosModel.fetchById), payload: todo.id },
-    { type: actionName(todosModel.add), payload: todo },
-    { type: thunkCompleteName(todosModel.fetchById), payload: todo.id },
-  ])
+    { type: '@thunk.fetchById(start)', payload: todo.id },
+    { type: '@action.fetchedTodo', payload: todo },
+    { type: '@thunk.fetchById(success)', payload: todo.id },
+    { type: '@thunk.fetchById', payload: todo.id }
+  ]);
 })
 ```
