@@ -24,7 +24,7 @@ module.exports = {
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Quick Start', link: '/docs/quick-start/' },
+      { text: 'Quick Start', link: '/docs/quick-start' },
       { text: 'Tutorial', link: '/docs/tutorial/' },
       { text: 'API', link: '/docs/api/' },
       { text: 'TypeScript', link: '/docs/typescript-tutorial/' },
@@ -116,9 +116,20 @@ module.exports = {
         {
           title: 'Recipes',
           children: [
-            'recipes/react-native-devtools',
+            'recipes/',
+            'recipes/connecting-to-reactotron',
             'recipes/generalising-models',
+            'recipes/hot-reloading',
+            'recipes/interop-with-existing-react-redux-app',
+            'recipes/react-native-devtools',
             'recipes/usage-with-react-redux',
+          ],
+        },
+        {
+          title: 'Known Issues',
+          children: [
+            'known-issues/',
+            'known-issues/using-keyof-in-generic-typescript-model',
           ],
         },
       ],
