@@ -111,6 +111,7 @@ module.exports = {
             'testing/testing-actions',
             'testing/testing-components',
             'testing/testing-computed-properties',
+            'testing/testing-listeners',
             'testing/testing-thunks',
           ],
         },
