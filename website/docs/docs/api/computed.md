@@ -200,3 +200,42 @@ const todosModel = {
   )
 }
 ```
+
+## Computed properties with runtime arguments
+
+You can return a function from your computed property to support runtime arguments.
+
+```javascript
+const todos = {
+  items: [{ id: 1, text: 'answer questions' }],
+  // Note how we are returning a function instead of state
+  //                          👇
+  todoById: computed(state => id => state.items.find(todo => todo.id === id)) 
+}
+```
+
+You can then use the function based property similar to the deprecated selector.
+
+```javascript
+function Todo({ id }) {
+  //                                      execute the todo 👇
+  const todo = useStoreState(state => state.todos.todoById(id));
+  return todo ? <div>{todo.text}</div> : null;
+}
+```
+
+You can even memoize your functions by utilising the `memo` helper.
+
+```javascript
+import { memo } from 'easy-peasy';
+
+const todos = {
+  items: [{ id: 1, text: 'answer questions' }],
+  // Wrap your function with memo and set the cache size
+  //                          👇
+  todoById: computed(state => memo(
+    id => state.items.find(todo => todo.id === id),
+    100 // 👈 cache size  
+  ))
+}
+```

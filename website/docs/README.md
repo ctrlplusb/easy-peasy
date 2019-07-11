@@ -67,6 +67,6 @@ function TodoList() {
   - Supports Redux middleware
 
 <p class="action">
-  <a href="/docs/introduction/quick-start" class="action-button">Quick Start</a>
+  <a href="/docs/quick-start.html" class="action-button">Quick Start</a>
   <a href="/docs/tutorial/" class="action-button">Full Tutorial</a>
 </p>
