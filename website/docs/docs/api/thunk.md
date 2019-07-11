@@ -35,6 +35,8 @@ thunk(async (actions, payload) => {
 
         When executed it will provide the state that is local to the thunk.
 
+        > Note: whilst you are able to access the store's state via this API your thunk should not perform any mutation of this state. That would be considered an anti pattern. All state updates must be contained within actions. This API exists within a thunk purely for convenience sake - allowing you to perform logic based on the existing state.
+
       - `getStoreActions` (Function)
 
         When executed it will get the [actions](/docs/api/action). i.e. all of the [actions](/docs/api/action) across your entire store.
@@ -44,6 +46,8 @@ thunk(async (actions, payload) => {
       - `getStoreState` (Function)
 
         When executed it will provide the entire state of your store.
+
+        > Note: whilst you are able to access the store's state via this API your thunk should not perform any mutation of this state. That would be considered an anti pattern. All state updates must be contained within actions. This API exists within a thunk purely for convenience sake - allowing you to perform logic based on the existing state.
 
       - `injections` (Any, default=undefined)
 

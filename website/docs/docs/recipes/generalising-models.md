@@ -86,3 +86,35 @@ const store = createStore({
 ```
 
 This produces an implementation that is like for like in terms of functionality but far less verbose.
+
+
+## TypeScript version
+
+We can utilise TypeScript to create model helpers too. Here is the same example adapted for TypeScript.
+
+```typescript
+export interface ObjectWithId {
+  id: string;
+}
+
+export interface DataModel<DataItem extends ObjectWithId> {
+  data: { [key: string]: DataItem };
+  ids: Select<DataModel<DataItem>, string[]>;
+  fetch: Thunk<DataModel<DataItem>>;
+  fetched: Action<DataModel<DataItem>, DataItem[]>;
+}
+
+export const dataModel = <Items extends ObjectWithId>(
+  endpoint: () => Promise<Items[]>
+): DataModel<Items> => ({
+  data: {},
+  ids: select(state => Object.keys(state.data)),
+  fetched: (state, items) => {
+    state.data = items;
+  },
+  fetch: thunk(async (actions, payload) => {
+    const data = await endpoint();
+    actions.fetched(data);
+  })
+});
+```

@@ -77,3 +77,39 @@ const model = {
   })
 };
 ```
+
+## Don't destructure the state argument
+
+In order to support the mutation to immutable update feature of actions we utilise [immer](https://github.com/mweststrate/immer). Under the hood immer utilises Proxies in order to perform this tracking. Therefore if you destructure your state you will likely break it out of the Proxy, after which any update you perform to the state will not be applied.
+
+Below are a couple examples of this antipattern.
+
+```javascript
+addTodo: action(({ items }, payload) => {
+  items.push(payload);
+})
+```
+
+_or_
+
+```javascript
+addTodo: action((state, payload) => {
+  const { items } = state;
+  items.push(payload);
+})
+```
+
+That being said if you are returning new "immutable" versions of your state from your action then this warning does not apply. For example.
+
+```javascript
+addTodo: action((state, payload) => {
+  const { items } = state;
+  return {
+    ...state,
+    items: [
+      ...items,
+      payload
+    ]
+  };
+})
+```
