@@ -1,3 +1,0 @@
-# Testing selectors
-
-Todo
