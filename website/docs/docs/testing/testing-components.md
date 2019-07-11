@@ -1,6 +1,12 @@
 # Testing components
 
-When testing your components I strongly recommend the approach recommended by Kent C. Dodd's awesome [Testing Javascript](https://testingjavascript.com/) course, where you try to test the behaviour of your components using a natural DOM API, rather than reaching into the internals of your components. He has published a very useful package by the name of [`@testing-library/react`](https://github.com/testing-library/react-testing-library) to help us do so. The tests below shall be adopting this package and strategy.
+When testing your components I strongly recommend the approach recommended by Kent C. Dodd's awesome [Testing Javascript](https://testingjavascript.com/) course, where you try to test the behaviour of your components using a natural DOM API, rather than reaching into the internals of your components. 
+
+He has published a very useful package by the name of [`@testing-library/react`](https://github.com/testing-library/react-testing-library) which allows us to follow this paradigm whilst providing very useful mechanisms by which to interact with the DOM created by our React components. 
+
+The tests below shall be adopting this package and strategy.
+
+## Example
 
 Imagine we were trying to test the following component.
 
@@ -56,19 +62,36 @@ We then interact with our component using the DOM API exposed by the render.
 
 This grants us great power in being able to test our components with a great degree of confidence that they will behave as expected.
 
-Some other strategies that you could employ whilst using this pattern include:
+## Utilising initialState to predefine state
 
-  - Providing an initial state to your store within the test.
+It is also to preload your store with some state by utilising the `initialState` configuration property of the store. This may help you test specific conditions of your component.
+  
+```javascript
+test('Counter', () => {
+  // arrange
+  const store = createStore(model, { initialState: initialStateForTest })
 
-    ```typescript
-    test('Counter', () => {
-      // arrange
-      const store = createStore(model, { initialState: initialStateForTest })
+  // ...
+})
+```
 
-      // ...
-    })
-    ```
+## Mocking calls to services
 
-  - Utilising the `injections` and `mockActions` configurations of the `createStore` to avoid performing actions with side effects in your test.
+If your thunks make calls to external services we recommend encapsulating these services within a module and then exposing them to your store via the `injection` configuration property of the store. Doing this will allow you to easily inject mock versions of your services when testing them.
 
-There is no one way to test your components, but it is good to know of the tools available to you. However you choose to test your components, I do recommend that you try to test them as close to their real behaviour as possible - i.e. try your best to prevent implementation details leaking into your tests.
+```javascript
+test('saving a todo', () => {
+  // arrange
+  const mockTodoService = {
+    save: jest.fn()
+  };
+  const store = createStore(model, { 
+    injections: {
+      todoService: mockTodoService
+    }
+  });
+
+  // ...
+})
+
+```
