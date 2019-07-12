@@ -425,3 +425,29 @@ test('support model reconfiguration', () => {
   // assert
   expect(store.getActions().todos.addTodo).toBeUndefined();
 });
+
+test('mocking actions', () => {
+  // arrange
+  const store = createStore(
+    {
+      counter: 0,
+      inc: action(state => {
+        state.counter += 1;
+      }),
+    },
+    { mockActions: true },
+  );
+
+  // act
+  store.getActions().inc();
+
+  // assert
+  expect(store.getState().counter).toBe(0);
+  expect(store.getMockedActions()).toMatchObject([{ type: '@action.inc' }]);
+
+  // act
+  store.clearMockedActions();
+
+  // assert
+  expect(store.getMockedActions()).toEqual([]);
+});

@@ -28,22 +28,10 @@ export default function createStore(model, options = {}) {
   };
 
   let modelDefinition = bindReplaceState(model);
-
+  let mockedActions = [];
   const references = {};
 
-  let mockedActions = [];
-
-  const composeEnhancers =
-    compose ||
-    (devTools &&
-    typeof window !== 'undefined' &&
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-          name: storeName,
-        })
-      : reduxCompose);
-
-  const bindStoreInternals = state => {
+  const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({
       initialState: state,
       injections,
@@ -97,6 +85,16 @@ export default function createStore(model, options = {}) {
     return next(action);
   };
 
+  const composeEnhancers =
+    compose ||
+    (devTools &&
+    typeof window !== 'undefined' &&
+    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+          name: storeName,
+        })
+      : reduxCompose);
+
   const store = reduxCreateStore(
     references.internals.reducer,
     references.internals.defaultState,
@@ -111,15 +109,14 @@ export default function createStore(model, options = {}) {
       ...enhancers,
     ),
   );
+  references.dispatch = store.dispatch;
+  references.getState = store.getState;
 
   store.getMockedActions = () => [...mockedActions];
   store.clearMockedActions = () => {
     mockedActions = [];
   };
   store.getActions = () => references.internals.actionCreators;
-
-  references.dispatch = store.dispatch;
-  references.getState = store.getState;
 
   // attaches the action creators to the stores dispatch
   const bindActionCreators = () => {
