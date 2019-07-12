@@ -11,6 +11,12 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
 
 <p>&nbsp;</p>
 
+```bash
+npm install easy-peasy@3.0.0-rc.0
+```
+
+<p>&nbsp;</p>
+
 **Step 1 - Create your store**
 
 ```javascript
