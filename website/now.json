@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "name": "easy-peasy",
+  "alias": "easy-peasy",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@now/static-build",
+      "config": { "distDir": "docs/.vuepress/dist" }
+    }
+  ]
+}
