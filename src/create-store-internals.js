@@ -1,7 +1,6 @@
 import memoizerific from 'memoizerific';
-import { createDraft, finishDraft, nothing, isDraft } from 'immer-peasy';
+import { createDraft, finishDraft, isDraft } from 'immer-peasy';
 import {
-  actionInternalMetaSymbol,
   actionStateSymbol,
   actionSymbol,
   computedSymbol,
@@ -18,9 +17,6 @@ import { isStateObject, get, set } from './lib';
 function simpleProduce(state, fn) {
   const draft = createDraft(state);
   const result = fn(draft);
-  if (result === nothing) {
-    return undefined;
-  }
   if (result !== undefined) {
     return isDraft(result) ? finishDraft(result) : result;
   }
@@ -40,7 +36,7 @@ export default function createStoreInternals({
 }) {
   let isInReducer = false;
 
-  const defaultState = initialState || {};
+  const defaultState = initialState;
 
   const actionCreatorDict = {};
   const actionCreators = {};
@@ -183,11 +179,7 @@ export default function createStoreInternals({
             listenerActionDefinitions.push(value);
           }
         } else if (value[computedSymbol]) {
-          let target = get(parentPath, defaultState);
-          if (!target) {
-            target = {};
-            set(parentPath, defaultState, target);
-          }
+          const parent = get(parentPath, defaultState);
           const config = value[computedConfigSymbol];
           const { stateResolvers } = config;
           const memoisedResultFn = memoizerific(1)(value);
@@ -207,16 +199,9 @@ export default function createStoreInternals({
                 cache = memoisedResultFn(...inputs);
                 return cache;
               },
-              set: () => {
-                throw new Error(
-                  `Easy Peasy: You attempted to set "${path.join(
-                    '.',
-                  )}", which is a computed property set a computed property`,
-                );
-              },
             });
           };
-          createComputedProperty(target);
+          createComputedProperty(parent);
           computedProperties.push({ key, parentPath, createComputedProperty });
         } else if (value[reducerSymbol]) {
           customReducers.push({ path, reducer: value });
@@ -240,10 +225,6 @@ export default function createStoreInternals({
     const { targetResolver } =
       listenerActionOrThunk[actionStateSymbol] ||
       listenerActionOrThunk[thunkStateSymbol];
-
-    if (typeof targetResolver !== 'function') {
-      return;
-    }
 
     const { parent } = listenerActionOrThunk[metaSymbol];
 

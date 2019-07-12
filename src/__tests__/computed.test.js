@@ -428,3 +428,23 @@ test('updating nested state', () => {
   expect(store.getState().nested.numbers).toEqual([5]);
   expect(store.getState().list).toEqual([{ id: 1, text: 'foo' }]);
 });
+
+test('writes to a computed property are ignored', () => {
+  // arrange
+  const store = createStore({
+    items: ['oi'],
+    count: computed(state => state.items.length),
+    naughtyAction: action(state => {
+      state.count = 10;
+    }),
+  });
+
+  // assert
+  expect(store.getState().count).toBe(1);
+
+  // act
+  store.getActions().naughtyAction();
+
+  // assert
+  expect(store.getState().count).toBe(1);
+});

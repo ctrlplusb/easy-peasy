@@ -1,10 +1,9 @@
 import {
-  useLayoutEffect,
-  useEffect,
   useContext,
-  useRef,
+  useEffect,
+  useLayoutEffect,
   useReducer,
-  useMemo,
+  useRef,
 } from 'react';
 import EasyPeasyContext from './context';
 
@@ -29,9 +28,9 @@ export function createStoreStateHook(Context) {
     const [, forceRender] = useReducer(s => s + 1, 0);
 
     if (
-      stateRef.current == null ||
+      subscriptionMapStateError.current ||
       mapStateRef.current !== mapState ||
-      subscriptionMapStateError.current
+      stateRef.current === undefined
     ) {
       try {
         stateRef.current = mapState(store.getState());
