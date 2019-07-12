@@ -11,7 +11,7 @@ This quick fire overview will provide you with a brief introduction to 90% of Ea
 ## Installation
 
 ```bash
-npm install easy-peasy
+npm install easy-peasy@3.0.0-rc.0
 ```
 
 ## Use a model to define your store
