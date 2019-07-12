@@ -1,4 +1,4 @@
-import { isStateObject } from '../lib';
+import { isStateObject, get } from '../lib';
 
 describe('isObject', () => {
   test('anon functions', () => {
@@ -47,5 +47,11 @@ describe('isObject', () => {
 
   test('array', () => {
     expect(isStateObject([])).toBe(false);
+  });
+});
+
+describe('get', () => {
+  test('invalid target', () => {
+    expect(get(['foo'], 12345)).toBeUndefined();
   });
 });
