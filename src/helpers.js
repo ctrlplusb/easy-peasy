@@ -1,14 +1,11 @@
 import { isDraft, createDraft, finishDraft } from 'immer-peasy';
 import memoizerific from 'memoizerific';
 import {
-  actionStateSymbol,
+  actionOnSymbol,
   actionSymbol,
-  listenerActionSymbol,
-  listenerThunkSymbol,
   computedSymbol,
-  computedConfigSymbol,
   reducerSymbol,
-  thunkStateSymbol,
+  thunkOnSymbol,
   thunkSymbol,
 } from './constants';
 
@@ -22,42 +19,39 @@ export const debug = state => {
 export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
 
 export const actionOn = (targetResolver, fn) => {
-  fn[listenerActionSymbol] = true;
-  fn[actionStateSymbol] = {
+  fn[actionOnSymbol] = {
     targetResolver,
   };
   return fn;
 };
 
 export const action = fn => {
-  fn[actionSymbol] = true;
+  fn[actionSymbol] = {};
   return fn;
 };
 
 const defaultStateResolvers = [state => state];
 
 export const computed = (fn, stateResolvers = defaultStateResolvers) => {
-  fn[computedSymbol] = true;
-  fn[computedConfigSymbol] = {
+  fn[computedSymbol] = {
     stateResolvers,
   };
   return fn;
 };
 
 export const thunkOn = (targetResolver, fn) => {
-  fn[listenerThunkSymbol] = true;
-  fn[thunkStateSymbol] = {
+  fn[thunkOnSymbol] = {
     targetResolver,
   };
   return fn;
 };
 
 export const thunk = fn => {
-  fn[thunkSymbol] = true;
+  fn[thunkSymbol] = {};
   return fn;
 };
 
 export const reducer = fn => {
-  fn[reducerSymbol] = true;
+  fn[reducerSymbol] = {};
   return fn;
 };
