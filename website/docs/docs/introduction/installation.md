@@ -16,5 +16,3 @@ npm install easy-peasy
 ```
 
 We're off to the races!
-
-Now let's learn how to use Easy Peasy...
