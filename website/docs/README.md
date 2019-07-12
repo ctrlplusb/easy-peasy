@@ -55,16 +55,15 @@ function TodoList() {
 
   - Zero configuration
   - No boilerplate
-  - React hooks to use store within components
-  - Thunks for data fetching and side effects
+  - React hooks based API
   - Computed properties - i.e. derived data
-  - Immutable data store under the hood
-  - Includes robust TypeScript definitions
+  - Data fetching / side effects
+  - Testing helpers
+  - TypeScript definitions included
   - Global, shared, or component level stores
   - React Native supported
-  - Includes APIs to aid testing
-  - Redux Dev Tools support preconfigured
-  - Supports Redux middleware
+  - Redux Dev Tools supported
+  - Hot Reloading supported
 
 <p class="action">
   <a href="/docs/quick-start.html" class="action-button">Quick Start</a>

@@ -2,7 +2,7 @@
 <p align='center'>
   <img src="https://i.imgur.com/UnPLVly.png" width="280" />
 </p>
-<p align='center'>Easy peasy state for React</p>
+<p align='center'>Vegetarian friendly state for React</p>
 <p>&nbsp;</p>
 
 [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
@@ -54,18 +54,15 @@ function TodoList() {
 
   - Zero configuration
   - No boilerplate
-  - Intuitive API
-  - React hooks to use store within components
-  - Thunks for data fetching and side effects
+  - React hooks based API
   - Computed properties - i.e. derived data
+  - Data fetching / side effects
+  - Testing helpers
+  - TypeScript definitions included
   - Global, shared, or component level stores
-  - Immutable data store under the hood
-  - Includes robust TypeScript definitions
   - React Native supported
-  - Includes APIs to aid testing
-  - Wraps Redux, all the radness, without the boilerplate
-  - Redux Dev Tools support preconfigured
-  - Supports customisation of the underlying Redux store
+  - Redux Dev Tools supported
+  - Hot Reloading supported
 
 ## Introduction
 
@@ -73,4 +70,4 @@ Easy Peasy provides you with an intuitive API to quickly and easily manage the s
 
 ## Documentation
 
-The [official website](https://easy-peasy.now.sh) contains all the tutorials and documentation you will need to get started.
+See the [official website](https://easy-peasy.now.sh) for tutorials, API docs, recipes, and more.
