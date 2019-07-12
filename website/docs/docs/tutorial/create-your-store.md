@@ -2,13 +2,13 @@
 
 The heart of your Easy Peasy [store](/docs/api/store) is the model definition that you provide to it. A model definition is an object based structure describing the state and behaviour ([actions](/docs/api/action) etc) of your [store](/docs/api/store). It can be as deep as you like, and can be split across multiple files, allowing you to import and compose your model as you please.
 
-Our [application's](https://codesandbox.io/s/easy-peasy-tutorial-start-8qz5k) state is currently being imported from the `src/data.js` file. Let's create a model that represents the data contained within that file. After that we will be able to use our model to create the [store](/docs/api/store).
+## Reviewing the applications state needs
 
-## The src/data.js file
-
-Below are the contents of the data file currently being used by our application.
+Our [application's](https://codesandbox.io/s/easy-peasy-tutorial-start-8qz5k) state is currently being imported from the `src/data.js` file. 
 
 ```javascript
+// src/data.js
+
 export const products = [
   { id: 1, name: 'Broccoli', price: 2.5 },
   { id: 2, name: 'Carrots', price: 4 },
@@ -18,6 +18,8 @@ export const basket = [2];
 ```
 
 We have a set of products, as well as a basket containing the ids of the products that have been added to it.
+
+Let's create a model that represents the data contained within this file. After that we will be able to use our model to create the [store](/docs/api/store).
 
 ## Creating our models
 

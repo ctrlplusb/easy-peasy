@@ -1,6 +1,8 @@
 # Prior Art
 
-This library was massively inspired by the following awesome projects. We tried to take the best bits we liked about them all and create this package. Huge love to all contributors involved in the below.
+Easy Peasy has take a lot of inspiration from the following awesome projects. 
+
+Huge love to all contributors involved in the below.
 
  - [mobx-state-tree](https://github.com/mobxjs/mobx-state-tree)
 

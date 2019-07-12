@@ -60,7 +60,7 @@ export default function Basket() {
   // ...
 ```
 
-The above mapping function looks fairly complicated, it is performing a fair amount of state deriving. Later on in the tutorial we learn an API that can help us with this type of derived data, allowing optimisation and promoting re-use.
+The above mapping function looks fairly complicated, it is performing a fair amount of state deriving. Later on in the tutorial we introduce the [computed](/docs/api/computed) API to help us with this case, providing us with performance optimisations and promoting re-use.
 
 **ProductList**
 
@@ -96,15 +96,15 @@ export default function Product({ id }) {
   // ...
 ```
 
-This is another example of our `mapState` function performing some state deriving, however, in this case we are also using an incoming `id` prop within the state deriving process. Again, we will late introduce an API to help deal with these cases.
+This is another example of our `mapState` function performing some state deriving, however, in this case we are also using an incoming `id` prop within the state deriving process. Again, we shall later show how we can leverage the [computed](/docs/api/computed) to help with this case.
 
 ## A note on optimisation
 
 Under the hood the [useStoreState](/docs/api/use-store-state) will execute its `mapState` function any time an update to your [store's](/docs/api/store) state occurs. It will then check the result of the newly mapped state against the previously mapped state using strict equality (`===`) checking.
 
-If the newly mapped state _is not equal_ to the previously mapped state (`nextMappedState !== prevMappedState`) your component will be rendered, receiving the new value. If the newly mapped state _is equal_ to the previously mapped state (`nextMappedState === prevMappedState`) no render will occur.
+If the newly mapped state ***is not equal*** to the previously mapped state (`nextMappedState !== prevMappedState`) your component will be rendered, receiving the new value. If the newly mapped state ***is equal*** to the previously mapped state (`nextMappedState === prevMappedState`) no render will occur.
 
-With this in mind you should take care not to return a new Array or Object within your `mapState` function as these will break the equality check, forcing your component to render for _any_ state update across your store.
+With this in mind you should take care not to return a new Array or Object within your `mapState` function as these will break the equality check, forcing your component to render for ***any*** state update across your store.
 
 An example.
 
