@@ -22,6 +22,12 @@
 [![Travis](https://img.shields.io/travis/ctrlplusb/easy-peasy.svg?style=flat-square)](https://travis-ci.org/ctrlplusb/easy-peasy)
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
+
+```
+npm install easy-peasy@3.0.0-rc.0
+```
+
+
 **Step 1 - Create your store**
 
 ```javascript
