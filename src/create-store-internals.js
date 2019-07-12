@@ -1,15 +1,11 @@
 import memoizerific from 'memoizerific';
 import { createDraft, finishDraft, isDraft } from 'immer-peasy';
 import {
-  actionStateSymbol,
+  actionOnSymbol,
   actionSymbol,
   computedSymbol,
-  computedConfigSymbol,
-  listenerActionSymbol,
-  listenerThunkSymbol,
-  metaSymbol,
   reducerSymbol,
-  thunkStateSymbol,
+  thunkOnSymbol,
   thunkSymbol,
 } from './constants';
 import { isStateObject, get, set } from './lib';
@@ -35,17 +31,14 @@ export default function createStoreInternals({
   references,
 }) {
   let isInReducer = false;
-
   const defaultState = initialState;
-
   const actionCreatorDict = {};
   const actionCreators = {};
   const actionReducersDict = {};
-  const actionReducersForPath = {};
   const actionThunks = {};
   const computedProperties = [];
   const customReducers = [];
-  const listenerActionDefinitions = [];
+  const listenerDefinitions = [];
   const listenerActionMap = {};
 
   const recursiveExtractDefsFromModel = (current, parentPath) =>
@@ -64,47 +57,44 @@ export default function createStoreInternals({
           set(path, defaultState, value);
         }
       };
-
       if (typeof value === 'function') {
-        if (value[actionSymbol] || value[listenerActionSymbol]) {
+        if (value[actionSymbol] || value[actionOnSymbol]) {
           const type = `@action.${path.join('.')}`;
-          value.actionName = key;
-          value.type = type;
-          value[metaSymbol] = meta;
+          const actionMeta = value[actionSymbol] || value[actionOnSymbol];
+          actionMeta.actionName = key;
+          actionMeta.type = type;
+          actionMeta.parent = meta.parent;
+          actionMeta.path = meta.path;
 
           // Action Reducer
-          const actionReducer = value;
-          actionReducer.type = type;
-          actionReducersDict[type] = actionReducer;
-          actionReducersForPath[parentPath] = actionReducer;
+          actionReducersDict[type] = value;
 
           // Action Creator
           const actionCreator = payload => {
             const actionDefinition = {
-              type: actionReducer.type,
+              type,
               payload,
             };
-            if (value[listenerActionSymbol] && actionCreator.resolvedTargets) {
-              payload.resolvedTargets = [...actionCreator.resolvedTargets];
+            if (value[actionOnSymbol] && actionMeta.resolvedTargets) {
+              payload.resolvedTargets = [...actionMeta.resolvedTargets];
             }
             const result = references.dispatch(actionDefinition);
             return result;
           };
-          actionCreator.actionName = key;
           actionCreator.type = type;
-          actionCreator[actionSymbol] = true;
-          actionCreatorDict[type] = actionCreator;
-          value.actionCreator = actionCreator;
-          set(path, actionCreators, actionCreator);
 
-          if (value[listenerActionSymbol]) {
-            listenerActionDefinitions.push(value);
+          actionCreatorDict[type] = actionCreator;
+          set(path, actionCreators, actionCreator);
+          if (value[actionOnSymbol]) {
+            listenerDefinitions.push(value);
           }
-        } else if (value[thunkSymbol] || value[listenerThunkSymbol]) {
+        } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
           const type = `@thunk.${path.join('.')}`;
-          value.actionName = key;
-          value.type = type;
-          value[metaSymbol] = meta;
+          const thunkMeta = value[thunkSymbol] || value[thunkOnSymbol];
+          thunkMeta.actionName = key;
+          thunkMeta.type = type;
+          thunkMeta.parent = meta.parent;
+          thunkMeta.path = meta.path;
 
           // Thunk Action
           const thunkHandler = payload => {
@@ -116,18 +106,17 @@ export default function createStoreInternals({
               injections,
               meta,
             };
-            if (value[listenerThunkSymbol] && thunkHandler.resolvedTargets) {
-              payload.resolvedTargets = [...thunkHandler.resolvedTargets];
+            if (value[thunkOnSymbol] && thunkMeta.resolvedTargets) {
+              payload.resolvedTargets = [...thunkMeta.resolvedTargets];
             }
             return value(get(parentPath, actionCreators), payload, helpers);
           };
           set(path, actionThunks, thunkHandler);
 
+          // Thunk Action Creator
           const startType = `${type}(start)`;
           const successType = `${type}(success)`;
           const failType = `${type}(fail)`;
-
-          // Thunk Action Creator
           const actionCreator = payload =>
             tick()
               .then(() =>
@@ -163,27 +152,20 @@ export default function createStoreInternals({
                 });
                 throw err;
               });
-
-          actionCreator.actionName = key;
           actionCreator.type = type;
           actionCreator.startType = startType;
           actionCreator.successType = successType;
           actionCreator.failType = failType;
-          actionCreator[thunkSymbol] = true;
-          actionCreatorDict[type] = actionCreator;
+
           set(path, actionCreators, actionCreator);
-
-          value.thunkHandler = thunkHandler;
-
-          if (value[listenerThunkSymbol]) {
-            listenerActionDefinitions.push(value);
+          actionCreatorDict[type] = actionCreator;
+          if (value[thunkOnSymbol]) {
+            listenerDefinitions.push(value);
           }
         } else if (value[computedSymbol]) {
           const parent = get(parentPath, defaultState);
-          const config = value[computedConfigSymbol];
-          const { stateResolvers } = config;
+          const computedMeta = value[computedSymbol];
           const memoisedResultFn = memoizerific(1)(value);
-          let cache;
           const createComputedProperty = o => {
             Object.defineProperty(o, key, {
               configurable: true,
@@ -193,11 +175,10 @@ export default function createStoreInternals({
                   ? references.currentState
                   : references.getState();
                 const state = get(parentPath, storeState);
-                const inputs = stateResolvers.map(resolver =>
+                const inputs = computedMeta.stateResolvers.map(resolver =>
                   resolver(state, storeState),
                 );
-                cache = memoisedResultFn(...inputs);
-                return cache;
+                return memoisedResultFn(...inputs);
               },
             });
           };
@@ -221,39 +202,36 @@ export default function createStoreInternals({
 
   recursiveExtractDefsFromModel(model, []);
 
-  listenerActionDefinitions.forEach(listenerActionOrThunk => {
-    const { targetResolver } =
-      listenerActionOrThunk[actionStateSymbol] ||
-      listenerActionOrThunk[thunkStateSymbol];
+  listenerDefinitions.forEach(listenerActionOrThunk => {
+    const listenerMeta =
+      listenerActionOrThunk[actionOnSymbol] ||
+      listenerActionOrThunk[thunkOnSymbol];
 
-    const { parent } = listenerActionOrThunk[metaSymbol];
+    const targets = listenerMeta.targetResolver(
+      get(listenerMeta.parent, actionCreators),
+      actionCreators,
+    );
+    const targetTypes = (Array.isArray(targets) ? targets : [targets]).reduce(
+      (acc, target) => {
+        if (
+          typeof target === 'function' &&
+          target.type &&
+          actionCreatorDict[target.type]
+        ) {
+          acc.push(target.type);
+        } else if (typeof target === 'string') {
+          acc.push(target);
+        }
+        return acc;
+      },
+      [],
+    );
 
-    const targets = targetResolver(get(parent, actionCreators), actionCreators);
-    const resolvedTargets = (Array.isArray(targets)
-      ? targets
-      : [targets]
-    ).reduce((acc, target) => {
-      if (
-        typeof target === 'function' &&
-        target.type &&
-        actionCreatorDict[target.type]
-      ) {
-        acc.push(target.type);
-      } else if (typeof target === 'string') {
-        acc.push(target);
-      }
-      return acc;
-    }, []);
+    listenerMeta.resolvedTargets = targetTypes;
 
-    if (listenerActionOrThunk.thunkHandler) {
-      listenerActionOrThunk.thunkHandler.resolvedTargets = resolvedTargets;
-    } else if (listenerActionOrThunk.actionCreator) {
-      listenerActionOrThunk.actionCreator.resolvedTargets = resolvedTargets;
-    }
-
-    resolvedTargets.forEach(targetType => {
+    targetTypes.forEach(targetType => {
       const listenerReg = listenerActionMap[targetType] || [];
-      listenerReg.push(actionCreatorDict[listenerActionOrThunk.type]);
+      listenerReg.push(actionCreatorDict[listenerMeta.type]);
       listenerActionMap[targetType] = listenerReg;
     });
   });
@@ -267,8 +245,10 @@ export default function createStoreInternals({
       }
       const current = get(path, state);
       return simpleProduce(state, draft => {
+        const actionMeta =
+          actionReducer[actionSymbol] || actionReducer[actionOnSymbol];
         set(
-          actionReducer[metaSymbol].parent,
+          actionMeta.parent,
           draft,
           simpleProduce(current, _draft =>
             actionReducer(_draft, action.payload),
@@ -280,11 +260,13 @@ export default function createStoreInternals({
     const reducerForActions = (state, action) => {
       const actionReducer = actionReducersDict[action.type];
       if (actionReducer) {
+        const actionMeta =
+          actionReducer[actionSymbol] || actionReducer[actionOnSymbol];
         return runActionReducerAtPath(
           state,
           action,
           actionReducer,
-          actionReducer[metaSymbol].parent,
+          actionMeta.parent,
         );
       }
       return state;
@@ -302,7 +284,10 @@ export default function createStoreInternals({
     const rootReducer = (state, action) => {
       isInReducer = true;
       const stateAfterActions = reducerForActions(state, action);
-      const result = reducerForCustomReducers(stateAfterActions, action);
+      const result =
+        customReducers.length > 0
+          ? reducerForCustomReducers(stateAfterActions, action)
+          : stateAfterActions;
       isInReducer = false;
       if (result !== state) {
         computedProperties.forEach(({ parentPath, createComputedProperty }) => {
