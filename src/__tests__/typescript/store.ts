@@ -2,17 +2,21 @@ import { createStore, Action, action, Thunk, thunk } from 'easy-peasy';
 
 interface Model {
   count: number;
+  doActionVoid: Action<Model>;
   doAction: Action<Model, boolean>;
   doThunk: Thunk<Model, number>;
 }
 
 const model: Model = {
   count: 0,
+  doActionVoid: action(() => {}),
   doAction: action(() => {}),
   doThunk: thunk(() => {}),
 };
 
 const store = createStore(model);
+
+store.getActions().doActionVoid();
 
 store.getActions().doAction(true);
 store.dispatch.doAction(true);
