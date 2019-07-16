@@ -25,8 +25,8 @@ type Model = {
   thunkImp: Thunk<Model, string | undefined | null>;
   reducerImp: Reducer<number>;
   computedImp: Computed<Model, number>;
-  onAction: ActionOn<Model, string>;
-  onThunk: ThunkOn<Model, string>;
+  onAction: ActionOn<Model>;
+  onThunk: ThunkOn<Model>;
   // push: Action<Model>;
   // pop: Action<Model>;
   nested: {
