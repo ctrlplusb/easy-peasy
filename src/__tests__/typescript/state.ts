@@ -42,8 +42,8 @@ type Model = {
   thunkImp: Thunk<Model, string>;
   reducerImp: Reducer<number>;
   computedImp: Computed<Model, number>;
-  onAction: ActionOn<Model, string>;
-  onThunk: ThunkOn<Model, string>;
+  onAction: ActionOn<Model>;
+  onThunk: ThunkOn<Model>;
   nested: {
     stateMap: { [key: string]: Array<string> };
     numberStateMap: { [key: number]: boolean };

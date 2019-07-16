@@ -8,7 +8,7 @@ interface Model {
   doThunkNumber: Thunk<Model, number>;
 }
 
-const valid1: ThunkOn<Model, string> = thunkOn(
+const valid1: ThunkOn<Model> = thunkOn(
   actions => actions.doActionString,
   (actions, target) => {
     const [foo] = target.resolvedTargets;
@@ -21,7 +21,7 @@ const valid1: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const invalid1: ThunkOn<Model, string> = thunkOn(
+const invalid1: ThunkOn<Model> = thunkOn(
   actions => actions.doActionNumber,
   (actions, target) => {
     // typings:expect-error
@@ -29,14 +29,14 @@ const invalid1: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const listenThunk: ThunkOn<Model, string> = thunkOn(
+const valid2: ThunkOn<Model> = thunkOn(
   actions => actions.doThunkString,
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const listenThunkInvalidPaylod: ThunkOn<Model, string> = thunkOn(
+const invalid2: ThunkOn<Model> = thunkOn(
   actions => actions.doThunkNumber,
   (actions, target) => {
     // typings:expect-error
@@ -44,14 +44,14 @@ const listenThunkInvalidPaylod: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const listenString: ThunkOn<Model, string> = thunkOn(
+const valid3: ThunkOn<Model> = thunkOn(
   () => 'ADD_TODO',
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const listenInvalid: ThunkOn<Model, string> = thunkOn(
+const invalid3: ThunkOn<Model> = thunkOn(
   // typings:expect-error
   () => 1,
   // typings:expect-error
@@ -60,7 +60,7 @@ const listenInvalid: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const listenInvalidFunc: ThunkOn<Model, string> = thunkOn(
+const invalid4: ThunkOn<Model> = thunkOn(
   // typings:expect-error
   () => undefined,
   // typings:expect-error
@@ -69,7 +69,7 @@ const listenInvalidFunc: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const multiListenAction: ThunkOn<Model, string> = thunkOn(
+const valid4: ThunkOn<Model> = thunkOn(
   actions => [
     actions.doActionString.type,
     actions.doThunkString.type,
@@ -82,21 +82,32 @@ const multiListenAction: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const multiListenActionInvalidThunk: ThunkOn<Model, boolean> = thunkOn(
+const invalid5: ThunkOn<Model> = thunkOn(
   actions => [actions.doActionString, actions.doThunkNumber],
   (actions, target) => {
+    // typings:expect-error
     actions.log(target.payload);
   },
 );
 
-const multiListeningActionString: ThunkOn<Model, string> = thunkOn(
+const valid5: ThunkOn<Model> = thunkOn(
+  actions => [actions.doActionString, actions.doThunkNumber],
+  (actions, target) => {
+    if (typeof target.payload === 'number') {
+    } else {
+      actions.log(target.payload);
+    }
+  },
+);
+
+const valid6: ThunkOn<Model> = thunkOn(
   () => ['foo', 'bar'],
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const listeningActionString: ThunkOn<Model, string> = thunkOn(
+const valid7: ThunkOn<Model> = thunkOn(
   () => 'foo',
   (actions, target) => {
     actions.log(target.payload);
@@ -110,7 +121,7 @@ interface User {
   lastName: string;
 }
 
-export interface SessionModel {
+interface SessionModel {
   user?: User;
   register: Action<SessionModel, User>;
   unregister: Action<SessionModel>;
@@ -129,10 +140,12 @@ const sessionModel: SessionModel = {
     actions => [actions.register, actions.unregister],
     (actions, target) => {
       const { payload } = target;
+      if (payload == null) {
+      } else {
+        payload.firstName + payload.lastName;
+      }
     },
   ),
 };
-
-export default sessionModel;
 
 // #endregion

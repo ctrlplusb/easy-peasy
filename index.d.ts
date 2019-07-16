@@ -40,8 +40,8 @@ type IndexSignatureKeysOfType<A extends Object> = {
 type ActionTypes =
   | Action<any, any>
   | Thunk<any, any, any, any, any>
-  | ActionOn<any, any, any>
-  | ThunkOn<any, any, any, any, any>;
+  | ActionOn<any, any>
+  | ThunkOn<any, any, any, any>;
 
 interface ActionCreator<Payload> {
   (payload: Payload): void;
@@ -73,13 +73,10 @@ export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 // #region Actions
 
 type ActionMapper<ActionsModel extends object, Depth extends string> = {
-  [P in keyof ActionsModel]: ActionsModel[P] extends ActionOn<any, any, any>
-    ? ActionCreator<ListenerTarget<ActionsModel[P]['payload']>>
-    : ActionsModel[P] extends ThunkOn<any, any, any, any, any>
-    ? ThunkCreator<
-        ListenerTarget<ActionsModel[P]['payload']>,
-        ActionsModel[P]['result']
-      >
+  [P in keyof ActionsModel]: ActionsModel[P] extends ActionOn<any, any>
+    ? ActionCreator<TargetPayload<any>>
+    : ActionsModel[P] extends ThunkOn<any, any, any, any>
+    ? ThunkCreator<TargetPayload<any>, ActionsModel[P]['result']>
     : ActionsModel[P] extends Thunk<any, any, any, any, any>
     ? ActionsModel[P]['payload'] extends void
       ? ThunkCreator<void, Promise<ActionsModel[P]['result']>>
@@ -279,7 +276,7 @@ export type Dispatch<
 
 // #endregion
 
-// #region Types for actionOn/thunkOn resolveTargets
+// #region Types shared by ActionOn and ThunkOn
 
 type Target = ActionOrThunkCreator<any> | string;
 
@@ -288,7 +285,7 @@ type TargetResolver<Model extends object, StoreModel extends object> = (
   storeActions: Actions<StoreModel>,
 ) => Target | Array<Target>;
 
-interface ListenerTarget<Payload> {
+interface TargetPayload<Payload> {
   type: string;
   payload: Payload;
   result?: any;
@@ -296,21 +293,16 @@ interface ListenerTarget<Payload> {
   resolvedTargets: Array<string>;
 }
 
-type PayloadFromResolved<
+type PayloadFromResolver<
   Resolver extends TargetResolver<any, any>,
-  ExplicitPayload = unknown,
   Resolved = ReturnType<Resolver>
 > = Resolved extends string
-  ? ExplicitPayload extends unknown
-    ? boolean
-    : ExplicitPayload
+  ? any
   : Resolved extends ActionOrThunkCreator<infer Payload>
   ? Payload
   : Resolved extends Array<infer T>
   ? T extends string
-    ? ExplicitPayload extends unknown
-      ? any
-      : ExplicitPayload
+    ? any
     : T extends ActionOrThunkCreator<infer Payload>
     ? Payload
     : T
@@ -394,31 +386,28 @@ export function thunk<
 
 export interface ThunkOn<
   Model extends object = {},
-  Payload = unknown,
   Injections = any,
   StoreModel extends object = {},
   Result = any
 > {
   type: 'thunkOn';
-  payload: Payload;
   result: Result;
 }
 
 export function thunkOn<
   Model extends object = {},
-  Payload = unknown,
   Injections = any,
   StoreModel extends object = {},
   Result = any,
-  Resolved extends TargetResolver<Model, StoreModel> = TargetResolver<
+  Resolver extends TargetResolver<Model, StoreModel> = TargetResolver<
     Model,
     StoreModel
   >
 >(
-  targetResolver: Resolved,
+  targetResolver: Resolver,
   handler: (
     actions: Actions<Model>,
-    target: ListenerTarget<PayloadFromResolved<Resolved, Payload>>,
+    target: TargetPayload<PayloadFromResolver<Resolver>>,
     helpers: {
       dispatch: Dispatch<StoreModel>;
       getState: () => State<Model>;
@@ -428,7 +417,7 @@ export function thunkOn<
       meta: Meta;
     },
   ) => Result,
-): ThunkOn<Model, Payload, Injections, StoreModel, Result>;
+): ThunkOn<Model, Injections, StoreModel, Result>;
 
 // #endregion
 
@@ -480,27 +469,26 @@ export function action<Model extends object = {}, Payload = any>(
 
 export interface ActionOn<
   Model extends object = {},
-  Payload = void,
   StoreModel extends object = {}
 > {
   type: 'actionOn';
-  payload: Payload;
   result: void | State<Model>;
 }
 
 export function actionOn<
   Model extends object = {},
-  Payload = any,
   StoreModel extends object = {},
-  Target extends ListenerTarget<Payload> = ListenerTarget<Payload>,
   Resolver extends TargetResolver<Model, StoreModel> = TargetResolver<
     Model,
     StoreModel
   >
 >(
   targetResolver: Resolver,
-  handler: (state: State<Model>, target: Target) => void | State<Model>,
-): ActionOn<Model, Payload, StoreModel>;
+  handler: (
+    state: State<Model>,
+    target: TargetPayload<PayloadFromResolver<Resolver>>,
+  ) => void | State<Model>,
+): ActionOn<Model, StoreModel>;
 
 // #endregion
 

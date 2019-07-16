@@ -15,11 +15,11 @@ import { StoreModel } from './index';
 interface AuditModel {
   log: string[];
   addLog: Action<AuditModel, string>;
-  onTodoAdded: ActionOn<AuditModel, string, StoreModel>; // 👈 new action listener
+  onTodoAdded: ActionOn<AuditModel, StoreModel>; // 👈 define a listener
 }
 ```
 
-Note that we also provided the `StoreModel` to our `ActionOn` definition, this is because we anticipate that we will need to resolve an action from another part of our model. If your `ActionOn` instance was going to listen to an action that is local to the listener you wouldn't need to provide this argument.
+Note that we have provided both the `AuditModel` and the `StoreModel` to our `ActionOn` definition, this is because we anticipate the implementation to target an action from another part of our model. If your `ActionOn` listener was going only going to target [actions](/docs/api/action)/[thunks](/docs/api/thunks) that are local to the listener you wouldn't need to provide the `StoreModel`.
 
 ## Implementing the actionOn listener
 
@@ -34,7 +34,7 @@ const auditModel: AuditModel = {
     state.logs.push(payload)
   }),
   onTodoAdded: actionOn(
-    // targetResolver resolving the addTodo
+    // targetResolver resolving the addTodo action
     (actions, storeActions) => storeActions.todos.addTodo,
     // action handler:
     (state, target) => {
@@ -69,5 +69,7 @@ const todosModel: TodosModel = {
 ```
 
 ## Review
+
+We added an [actionOn](/docs/api/action-on) listener, but you could very similarly have defined a [thunkOn](/docs/api/thunk-on) listener.
 
 You can view the progress of our demo application [here](https://codesandbox.io/s/easy-peasytypescript-tutorialtyped-listeners-0w1rv)
