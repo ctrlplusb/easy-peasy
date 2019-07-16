@@ -33,7 +33,7 @@ function CountDisplay() {
   return (
     <>
       <div>{state.count + 1}</div>
-      <button onClick={actions.inc} type="button">
+      <button onClick={() => actions.inc()} type="button">
         +
       </button>
     </>
