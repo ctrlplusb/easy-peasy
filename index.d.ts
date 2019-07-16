@@ -105,18 +105,14 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
 };
 
 type RecursiveActions<
-  Model extends Object,
+  Model extends object,
   Depth extends string
 > = Depth extends '6'
   ? Model
   : ActionMapper<
       O.Filter<
         O.Select<Model, object>,
-        | Array<any>
-        | RegExp
-        | Date
-        | Reducer<any, any>
-        | Computed<any, any, any, any>
+        Array<any> | RegExp | Date | Reducer<any, any> | Computed<any, any, any>
       >,
       Depth
     >;
@@ -128,14 +124,14 @@ type RecursiveActions<
  *
  * type OnlyActions = Actions<Model>;
  */
-export type Actions<Model extends Object> = RecursiveActions<Model, '1'>;
+export type Actions<Model extends object> = RecursiveActions<Model, '1'>;
 
 // #endregion
 
 // #region State
 
 type StateMapper<StateModel extends object, Depth extends string> = {
-  [P in keyof StateModel]: StateModel[P] extends Computed<any, any, any, any>
+  [P in keyof StateModel]: StateModel[P] extends Computed<any, any, any>
     ? StateModel[P]['result']
     : StateModel[P] extends Reducer<any, any>
     ? StateModel[P]['result']
@@ -494,11 +490,10 @@ export function actionOn<
 
 // #region Computed
 
-type StateResolver<
-  Model extends {},
-  StoreModel extends {},
-  Result extends any
-> = (state: State<Model>, storeState: State<StoreModel>) => Result;
+type StateResolver<Model extends {}, StoreModel extends {}, Result = any> = (
+  state: State<Model>,
+  storeState: State<StoreModel>,
+) => Result;
 
 type StateResolvers1<Model, StoreModel, Arg1> = [
   StateResolver<Model, StoreModel, Arg1>,
@@ -530,6 +525,13 @@ type StateResolvers5<Model, StoreModel, Arg1, Arg2, Arg3, Arg4, Arg5> = [
   StateResolver<Model, StoreModel, Arg5>,
 ];
 
+type StateResolvers<Model, StoreModel> =
+  | StateResolvers1<Model, StoreModel, any>
+  | StateResolvers2<Model, StoreModel, any, any>
+  | StateResolvers3<Model, StoreModel, any, any, any>
+  | undefined;
+
+/*
 export type ResolvedState1<Arg1> = [Arg1];
 export type ResolvedState2<Arg1, Arg2> = [Arg1, Arg2];
 export type ResolvedState3<Arg1, Arg2, Arg3> = [Arg1, Arg2, Arg3];
@@ -548,6 +550,7 @@ type ResolvedStates =
   | ResolvedState3<any, any, any>
   | ResolvedState4<any, any, any, any>
   | ResolvedState5<any, any, any, any, any>;
+*/
 
 /**
  * A computed type.
@@ -566,49 +569,39 @@ type ResolvedStates =
 export type Computed<
   Model extends object = {},
   Result = any,
-  ResolvedState extends ResolvedStates | void = void,
+  // ResolvedState extends ResolvedStates | void = void,
   StoreModel extends object = {}
 > = {
   type: 'computed';
   result: Result;
 };
 
+// type StateResolver<
+//   Model extends object,
+//   StoreModel extends object,
+//   Result = any
+// > = (state: State<Model>, storeState: State<StoreModel>) => Result;
+
 export function computed<
   Model extends object = {},
   Result = any,
-  ResolvedState extends ResolvedStates | void = void,
-  StoreModel extends object = {}
+  StoreModel extends object = {},
+  Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
+    Model,
+    StoreModel
+  >
 >(
   computationFunc: (
-    ...args: ResolvedState extends ResolvedStates
-      ? ResolvedState
+    ...args: Resolvers extends undefined
+      ? [State<Model>]
+      : Resolvers extends StateResolvers2<any, any, infer Arg1, infer Arg2>
+      ? [Arg1, Arg2]
+      : Resolvers extends StateResolvers1<any, any, infer Arg1>
+      ? [Arg1]
       : [State<Model>]
   ) => Result,
-  stateResolvers?: ResolvedState extends ResolvedStates
-    ? ResolvedState extends ResolvedState1<infer Arg1>
-      ? StateResolvers1<Model, StoreModel, Arg1>
-      : ResolvedState extends ResolvedState2<infer Arg1, infer Arg2>
-      ? StateResolvers2<Model, StoreModel, Arg1, Arg2>
-      : ResolvedState extends ResolvedState3<infer Arg1, infer Arg2, infer Arg3>
-      ? StateResolvers3<Model, StoreModel, Arg1, Arg2, Arg3>
-      : ResolvedState extends ResolvedState4<
-          infer Arg1,
-          infer Arg2,
-          infer Arg3,
-          infer Arg4
-        >
-      ? StateResolvers4<Model, StoreModel, Arg1, Arg2, Arg3, Arg4>
-      : ResolvedState extends ResolvedState5<
-          infer Arg1,
-          infer Arg2,
-          infer Arg3,
-          infer Arg4,
-          infer Arg5
-        >
-      ? StateResolvers5<Model, StoreModel, Arg1, Arg2, Arg3, Arg4, Arg5>
-      : StateResolver<Model, StoreModel, any>[]
-    : void,
-): Computed<Model, Result, ResolvedState, StoreModel>;
+  stateResolvers?: Resolvers,
+): Computed<Model, Result, StoreModel>;
 
 // #endregion
 

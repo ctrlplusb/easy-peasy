@@ -9,17 +9,12 @@ interface Product {
 interface ProductsModel {
   products: Product[];
   totalPrice: Computed<ProductsModel, number>;
-  totalPriceVerbose: Computed<ProductsModel, number, ResolvedState1<Product[]>>;
+  totalPriceVerbose: Computed<ProductsModel, number>;
 }
 
 interface BasketModel {
   productIds: number[];
-  products: Computed<
-    BasketModel,
-    Product[],
-    ResolvedState2<number[], Product[]>,
-    StoreModel
-  >;
+  products: Computed<BasketModel, Product[], StoreModel>;
 }
 
 interface StoreModel {
@@ -34,8 +29,13 @@ const mode: StoreModel = {
       state.products.reduce((total, product) => total + product.price, 0),
     ),
     totalPriceVerbose: computed(
-      products => products.reduce((total, product) => total + product.price, 0),
-      [state => state.products],
+      (products, products2) => {
+        products;
+        products2;
+        products;
+        return products.reduce((total, product) => total + product.price, 0);
+      },
+      [state => state.products, state => state.products],
     ),
   },
   baskets: {
