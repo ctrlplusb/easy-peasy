@@ -1,15 +1,15 @@
-import { Action, Thunk, ThunkOn, thunkOn } from 'easy-peasy';
+import { action, Action, Thunk, ThunkOn, thunkOn } from 'easy-peasy';
 
 interface Model {
   log: Action<Model, string>;
-  doAction: Action<Model, string>;
-  doThunk: Thunk<Model, string>;
-  doActionInvalid: Action<Model, number>;
-  doThunkInvalid: Thunk<Model, number>;
+  doActionString: Action<Model, string>;
+  doThunkString: Thunk<Model, string>;
+  doActionNumber: Action<Model, number>;
+  doThunkNumber: Thunk<Model, number>;
 }
 
-const listenAction: ThunkOn<Model, string> = thunkOn(
-  actions => actions.doAction,
+const valid1: ThunkOn<Model> = thunkOn(
+  actions => actions.doActionString,
   (actions, target) => {
     const [foo] = target.resolvedTargets;
     foo + 'bar';
@@ -21,37 +21,37 @@ const listenAction: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const listenActionInvalidThunk: ThunkOn<Model, string> = thunkOn(
-  // typings:expect-error
-  actions => actions.doActionInvalid,
+const invalid1: ThunkOn<Model> = thunkOn(
+  actions => actions.doActionNumber,
+  (actions, target) => {
+    // typings:expect-error
+    actions.log(target.payload);
+  },
+);
+
+const valid2: ThunkOn<Model> = thunkOn(
+  actions => actions.doThunkString,
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const listenThunk: ThunkOn<Model, string> = thunkOn(
-  actions => actions.doThunk,
+const invalid2: ThunkOn<Model> = thunkOn(
+  actions => actions.doThunkNumber,
   (actions, target) => {
+    // typings:expect-error
     actions.log(target.payload);
   },
 );
 
-const listenThunkInvalidPaylod: ThunkOn<Model, string> = thunkOn(
-  // typings:expect-error
-  actions => actions.doThunkInvalid,
-  (actions, target) => {
-    actions.log(target.payload);
-  },
-);
-
-const listenString: ThunkOn<Model, string> = thunkOn(
+const valid3: ThunkOn<Model> = thunkOn(
   () => 'ADD_TODO',
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const listenInvalid: ThunkOn<Model, string> = thunkOn(
+const invalid3: ThunkOn<Model> = thunkOn(
   // typings:expect-error
   () => 1,
   // typings:expect-error
@@ -60,7 +60,7 @@ const listenInvalid: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const listenInvalidFunc: ThunkOn<Model, string> = thunkOn(
+const invalid4: ThunkOn<Model> = thunkOn(
   // typings:expect-error
   () => undefined,
   // typings:expect-error
@@ -69,37 +69,83 @@ const listenInvalidFunc: ThunkOn<Model, string> = thunkOn(
   },
 );
 
-const multiListenAction: ThunkOn<Model, string> = thunkOn(
+const valid4: ThunkOn<Model> = thunkOn(
   actions => [
-    actions.doAction.type,
-    actions.doThunk.type,
-    actions.doThunk.startType,
-    actions.doThunk.successType,
-    actions.doThunk.failType,
+    actions.doActionString.type,
+    actions.doThunkString.type,
+    actions.doThunkString.startType,
+    actions.doThunkString.successType,
+    actions.doThunkString.failType,
   ],
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const multiListenActionInvalidThunk: ThunkOn<Model, string> = thunkOn(
-  // typings:expect-error
-  actions => [actions.doAction, actions.doThunkInvalid],
+const invalid5: ThunkOn<Model> = thunkOn(
+  actions => [actions.doActionString, actions.doThunkNumber],
   (actions, target) => {
+    // typings:expect-error
     actions.log(target.payload);
   },
 );
 
-const multiListeningActionString: ThunkOn<Model, string> = thunkOn(
+const valid5: ThunkOn<Model> = thunkOn(
+  actions => [actions.doActionString, actions.doThunkNumber],
+  (actions, target) => {
+    if (typeof target.payload === 'number') {
+    } else {
+      actions.log(target.payload);
+    }
+  },
+);
+
+const valid6: ThunkOn<Model> = thunkOn(
   () => ['foo', 'bar'],
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const listeningActionString: ThunkOn<Model, string> = thunkOn(
+const valid7: ThunkOn<Model> = thunkOn(
   () => 'foo',
   (actions, target) => {
     actions.log(target.payload);
   },
 );
+
+// #region multiple listeners with different payload types
+
+interface User {
+  firstName: string;
+  lastName: string;
+}
+
+interface SessionModel {
+  user?: User;
+  register: Action<SessionModel, User>;
+  unregister: Action<SessionModel>;
+  sessionListeners: ThunkOn<SessionModel, boolean>;
+}
+
+const sessionModel: SessionModel = {
+  user: undefined,
+  register: action((state, payload) => {
+    state.user = payload;
+  }),
+  unregister: action(state => {
+    state.user = undefined;
+  }),
+  sessionListeners: thunkOn(
+    actions => [actions.register, actions.unregister],
+    (actions, target) => {
+      const { payload } = target;
+      if (payload == null) {
+      } else {
+        payload.firstName + payload.lastName;
+      }
+    },
+  ),
+};
+
+// #endregion

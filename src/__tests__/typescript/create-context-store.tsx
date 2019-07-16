@@ -34,7 +34,7 @@ function CountDisplay() {
   return (
     <>
       <div>{count + 1}</div>
-      <button onClick={inc} type="button">
+      <button onClick={() => inc()} type="button">
         +
       </button>
     </>
@@ -46,7 +46,7 @@ function CountDisplayUseStore() {
   return (
     <>
       <div>{store.getState().count + 1}</div>
-      <button onClick={store.getActions().inc} type="button">
+      <button onClick={() => store.getActions().inc()} type="button">
         +
       </button>
     </>
