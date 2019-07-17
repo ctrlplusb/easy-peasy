@@ -14,6 +14,10 @@ We have split the configuration parameters into two groupings, standard and adva
 
   Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
+- `disableImmer` (boolean, *optional*, default=false)
+
+  If you set this to true, then [immer](https://github.com/mweststrate/immer) will be disabled, meaning you can no longer mutate state directly within actions and will instead have to return immutable state as in a standard Redux reducer.
+
 - `initialState` (Object, *optional*, default=undefined)
 
   Allows you to hydrate your store with initial state (for example state received from your server in a server rendering context).
