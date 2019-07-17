@@ -58,9 +58,9 @@ export default function BasketCount() {
 
 Next up, we will add a [computed](/docs/api/computed) property to represent the products that are currently in our basket. This is a more advanced implementation as we will use data from both our our basket model and our product model.
 
-[Computed](/docs/api/computed) properties optionally allow you to provide an array of state resolver functions as the second argument to the [computed](/docs/api/computed) property definition. These state resolver functions will receive the state that is local to the [computed](/docs/api/computed) property, as well as the entire store state, and allow you to return the specific slices of state that your [computed] property will depend on.
+[Computed](/docs/api/computed) properties optionally allow you to provide an array of state resolver functions as the first argument to the [computed](/docs/api/computed) property definition. These state resolver functions will receive the state that is local to the [computed](/docs/api/computed) property, as well as the entire store state, and allow you to resolve specific slices of state that your [computed](/docs/api/computed) function will take as an input.
 
-Apart from granting you access to the entire store state, state resolver functions also open up a performance optimisation as they allow you to isolate the specific slices of state that your [computed](/docs/api/computed) property depends on, thereby reducing the likelihood of your [computed](/docs/api/computed) property needing to be recalculated (i.e. they are only recalculated when their input state changes).
+Apart from granting you access to the entire store state, using resolver functions enables performance optimisations as they reduce the likelihood of your [computed](/docs/api/computed) property needing to be recalculated (i.e. they are only recalculated when their input state changes).
 
 Let's go ahead and define a [computed](/docs/api/computed) property, utilising state resolvers, which will allow us to represent the products currently in our basket.
 
@@ -71,16 +71,16 @@ Let's go ahead and define a [computed](/docs/api/computed) property, utilising s
 const basketModel = {
   productIds: [2],
   products: computed(
-    // These arguments are the results of our state resolvers below
-    //   👇         👇
-    (productIds, products) => productIds.map(productId =>
-      products.find(product => product.id === productId)
-    ),
-    // 👇 These are our state resolvers...
+    // 👇 These are our state resolvers, ...
     [
       state => state.productIds,
       (state, storeState) => storeState.products.items
     ],
+    // the results of our state resolvers become the input args
+    //   👇         👇
+    (productIds, products) => productIds.map(productId =>
+      products.find(product => product.id === productId)
+    ),
   ),
   // ...
 ```
@@ -169,3 +169,27 @@ We have now covered [computed](/docs/api/computed), a very powerful mechanism th
 In the next section we will review the final piece of our API - action listeners.
 
 You can view the progress of our application refactor [here](https://codesandbox.io/s/easy-peasy-tutorial-computed-uohgr).
+
+## Bonus Points
+
+You can add internal memoisation to the function that you return within your computed property by leveraging the [memo](/docs/api/memo) API.
+
+```javascript
+// src/model/products-model.js
+
+import { computed, memo } from "easy-peasy";
+//                  👆
+
+const productsModel = {
+  items: [
+    { id: 1, name: "Broccoli", price: 2.5 },
+    { id: 2, name: "Carrots", price: 4 }
+  ],
+  getById: computed(state =>
+    memo(id => state.items.find(product => product.id === id), 100)
+    //                                              cache size 👆 
+  ),
+  // ...
+```
+
+I wouldn't suggest doing this unless you anticipated the function to be called multiple times with varying arguments _and_ the function is also doing complex/expensive deriving.

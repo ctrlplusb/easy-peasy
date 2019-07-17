@@ -78,17 +78,10 @@ interface BasketModel {
   productsInBasket: Computed<
     BasketModel, // 👈 lives on the basket model
     Product[], // 👈 will return an array of products
-    ResolvedState2<number[], Product[]>, // 👈 will use two pieces of resolved
-                                         //     state. An array of numbers, and
-                                        //      and array of products.
     StoreModel // 👈 the store model to ensure our store state resolver is typed
   >
 }
 ```
-
-Note the import of the `ResolvedState2` type. Easy Peasy includes a set of types that can be used to represent the types for the resolved state that your `stateResolvers` will resolve. Remember, the `stateResolvers` are an array of functions that you provide as the 2nd argument to your [computed](/docs/api/computed) properties which allow you to resolve and isolate the local/store state that your [computed](/docs/api/computed) property will use to derive their value.
-
-In this case we expect to have two state resolvers, so we have therefore used the `ResolvedState2` type. We export 5 variations of this type; `ResolvedState1`, `ResolvedState2`, `ResolvedState3`, `ResolvedState4`, and `ResolvedState5`. These allow you to represent the expected types for your state resolvers when you are using one, two, three, four, or five state resolvers respectively. Please notify us via the GitHub issues should you need more than five state resolvers.
 
 ## Implementing the computed property
 
@@ -98,16 +91,18 @@ We will not provide the implementation for the [computed](/docs/api/computed) pr
 const basketModel: BasketModel = {
   productIds: [1],
   productsInBasket: computed(
-    (productIds, products) => productIds.map(id =>
-      products.find(product => product.id === id)
-    ),
-    // 👇 note our state resolvers, resolving two pieces of state
+    // 👇 note how we are first defining an array of state resolvers
     [
       state => state.productIds,
       // this state resolver uses store state, accessing the products
       //      👇                      👇
       (_, storeState) => storeState.products.items
     ]
+    // the output of our state resolvers become the input args to our 
+    // compute function
+    (productIds, products) => productIds.map(id =>
+      products.find(product => product.id === id)
+    ),
   )
 }
 ```

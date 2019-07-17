@@ -1,43 +1,13 @@
-This section provides you with an overview of the type
+# Typescript API
 
-Action<Model extends object = {}, Payload = void>
+This section provides you with an overview of the primary types you are likely to use from Easy Peasy.
 
-ActionOn<
-  Model extends object = {},
-  StoreModel extends object = {}
->
+Generally you only need to explicitly impor and use the types when defining your model interfaces.
 
-Actions<Model extends Object>
+If you are unfamiliar with using Easy Peasy with TypeScript then we would recommend that you read the [TypeScript tutorial](/docs/typescript-tutorial). 
 
-createTypedHooks<StoreModel extends Object = {}>
 
-ResolvedState1<Arg1>
-ResolvedState2<Arg1, Arg2>
-ResolvedState3<Arg1, Arg2, Arg3>
-ResolvedState4<Arg1, Arg2, Arg3, Arg4>
-ResolvedState5<Arg1, Arg2, Arg3, Arg4, Arg5>
-Computed<
-  Model extends object = {},
-  Result = any,
-  ResolvedState extends ResolvedStates | void = void,
-  StoreModel extends object = {}
->
 
-Reducer<State = any, Action extends ReduxAction = AnyAction>
 
-State<Model extends object>
 
-Thunk<
-  Model extends object = {},
-  Payload = void,
-  Injections = any,
-  StoreModel extends object = {},
-  Result = any
->
 
-ThunkOn<
-  Model extends object = {},
-  Injections = any,
-  StoreModel extends object = {},
-  Result = any
->
