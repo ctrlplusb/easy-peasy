@@ -1,4 +1,4 @@
-import { Computed, computed, ResolvedState1, ResolvedState2 } from 'easy-peasy';
+import { Computed, computed } from 'easy-peasy';
 
 interface Product {
   id: number;
@@ -28,19 +28,17 @@ const mode: StoreModel = {
     totalPrice: computed(state =>
       state.products.reduce((total, product) => total + product.price, 0),
     ),
-    totalPriceVerbose: computed(
-      (products, products2) => {
-        products;
-        products2;
-        products;
-        return products.reduce((total, product) => total + product.price, 0);
-      },
-      [state => state.products, state => state.products],
-    ),
+    totalPriceVerbose: computed([state => state.products], products => {
+      return products.reduce((total, product) => total + product.price, 0);
+    }),
   },
   baskets: {
     productIds: [1],
     products: computed(
+      [
+        state => state.productIds,
+        (state, storeState) => storeState.products.products,
+      ],
       (productIds, products) =>
         productIds.reduce<Product[]>((acc, id) => {
           const product = products.find(p => p.id === id);
@@ -49,10 +47,6 @@ const mode: StoreModel = {
           }
           return acc;
         }, []),
-      [
-        state => state.productIds,
-        (state, storeState) => storeState.products.products,
-      ],
     ),
   },
 };
