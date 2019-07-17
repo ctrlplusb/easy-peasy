@@ -56,10 +56,10 @@ test('defining and accessing a computed property', () => {
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
-    fullName: computed((firstName, lastName) => `${firstName} ${lastName}`, [
-      state => state.firstName,
-      state => state.lastName,
-    ]),
+    fullName: computed(
+      [state => state.firstName, state => state.lastName],
+      (firstName, lastName) => `${firstName} ${lastName}`,
+    ),
   });
 
   // act
@@ -105,11 +105,11 @@ test('computed properties are memoized', () => {
     firstName: 'Mary',
     lastName: 'Poppins',
     fullName: computed(
+      [state => state.firstName, state => state.lastName],
       (firstName, lastName) => {
         computedCount += 1;
         return `${firstName} ${lastName}`;
       },
-      [state => state.firstName, state => state.lastName],
     ),
     setFirstName: action((state, payload) => {
       state.firstName = payload;
@@ -163,9 +163,8 @@ test('computed properties can access global state', () => {
   const store = createStore({
     products: {
       items: [{ id: 1, name: 'boots', price: 20 }],
-      itemMap: computed(
-        items => items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
-        [state => state.items],
+      itemMap: computed([state => state.items], items =>
+        items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
       ),
       setProductName: action((state, payload) => {
         const product = state.items.find(p => p.id === payload.id);
@@ -175,11 +174,11 @@ test('computed properties can access global state', () => {
     basket: {
       productIds: [1],
       products: computed(
-        (productMap, productIds) => productIds.map(id => productMap[id]),
         [
           (state, storeState) => storeState.products.itemMap,
           state => state.productIds,
         ],
+        (productMap, productIds) => productIds.map(id => productMap[id]),
       ),
     },
   });
@@ -228,9 +227,8 @@ test('computed properties work in a React component', () => {
   const store = createStore({
     products: {
       items: [{ id: 1, name: 'boots' }],
-      itemMap: computed(
-        items => items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
-        [state => state.items],
+      itemMap: computed([state => state.items], items =>
+        items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
       ),
       setProductName: action((state, payload) => {
         const product = state.items.find(p => p.id === payload.id);
@@ -309,9 +307,8 @@ test('computed properties accessing others in React component', () => {
         { id: 1, name: 'boots', price: 20 },
         { id: 2, name: 'shirt', price: 50 },
       ],
-      itemMap: computed(
-        items => items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
-        [state => state.items],
+      itemMap: computed([state => state.items], items =>
+        items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
       ),
       setProductName: action((state, payload) => {
         const product = state.items.find(p => p.id === payload.id);
@@ -322,11 +319,11 @@ test('computed properties accessing others in React component', () => {
     basket: {
       productIds: [1],
       products: computed(
-        (productMap, productIds) => productIds.map(id => productMap[id]),
         [
           (state, storeState) => storeState.products.itemMap,
           state => state.productIds,
         ],
+        (productMap, productIds) => productIds.map(id => productMap[id]),
       ),
       addProductToBasket: action((state, payload) => {
         state.productIds.push(payload);
@@ -384,7 +381,7 @@ test('nested computed properties', () => {
     },
 
     // selectors
-    list: computed(items => Object.values(items), [state => state.items]),
+    list: computed([state => state.items], items => Object.values(items)),
 
     // actions
     fetched: action((state, payload) => {
@@ -416,7 +413,7 @@ test('updating nested state', () => {
       }),
     },
 
-    list: computed(items => Object.values(items), [state => state.items]),
+    list: computed([state => state.items], items => Object.values(items)),
   };
 
   const store = createStore(model);
