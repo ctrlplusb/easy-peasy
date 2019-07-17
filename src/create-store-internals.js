@@ -10,26 +10,30 @@ import {
 } from './constants';
 import { isStateObject, get, set } from './lib';
 
-function simpleProduce(state, fn) {
-  const draft = createDraft(state);
-  const result = fn(draft);
-  if (result !== undefined) {
-    return isDraft(result) ? finishDraft(result) : result;
-  }
-  return finishDraft(draft);
-}
-
 function tick() {
   return new Promise(resolve => setTimeout(resolve));
 }
 
 export default function createStoreInternals({
+  disableImmer,
   initialState,
   injections,
   model,
   reducerEnhancer,
   references,
 }) {
+  function simpleProduce(state, fn) {
+    if (disableImmer) {
+      return fn(state);
+    }
+    const draft = createDraft(state);
+    const result = fn(draft);
+    if (result !== undefined) {
+      return isDraft(result) ? finishDraft(result) : result;
+    }
+    return finishDraft(draft);
+  }
+
   let isInReducer = false;
   const defaultState = initialState;
   const actionCreatorDict = {};
@@ -170,6 +174,7 @@ export default function createStoreInternals({
             Object.defineProperty(o, key, {
               configurable: true,
               enumerable: true,
+              // writable: false,
               get: () => {
                 const storeState = isInReducer
                   ? references.currentState
@@ -179,6 +184,9 @@ export default function createStoreInternals({
                   resolver(state, storeState),
                 );
                 return memoisedResultFn(...inputs);
+              },
+              set: () => {
+                // do nothing
               },
             });
           };

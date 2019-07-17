@@ -11,6 +11,7 @@ export default function createStore(model, options = {}) {
   const {
     compose,
     devTools = true,
+    disableImmer = false,
     enhancers = [],
     initialState = {},
     injections,
@@ -33,6 +34,7 @@ export default function createStore(model, options = {}) {
 
   const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({
+      disableImmer,
       initialState: state,
       injections,
       model: modelDefinition,

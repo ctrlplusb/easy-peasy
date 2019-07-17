@@ -16,6 +16,16 @@ const model: Model = {
 
 const store = createStore(model);
 
+const configuredStore = createStore(model, {
+  disableImmer: false,
+  devTools: false,
+  initialState: { foo: 'bar' },
+  injections: { foo: 'bar' },
+  mockActions: true,
+  name: 'bob',
+  reducerEnhancer: reducer => reducer,
+});
+
 store.getActions().doActionVoid();
 
 store.getActions().doAction(true);

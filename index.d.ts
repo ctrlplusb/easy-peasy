@@ -202,8 +202,12 @@ export type State<Model extends object = {}> = RecursiveState<Model, '1'>;
  */
 export function createStore<
   StoreModel extends Object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = any
->(model: StoreModel, config?: StoreConfig): Store<StoreModel, StoreConfig>;
+  InitialState extends object = {},
+  Injections = any
+>(
+  model: StoreModel,
+  config?: EasyPeasyConfig<InitialState, Injections>,
+): Store<StoreModel, EasyPeasyConfig<InitialState, Injections>>;
 
 /**
  * Configuration interface for the createStore
@@ -214,6 +218,7 @@ export interface EasyPeasyConfig<
 > {
   compose?: typeof compose;
   devTools?: boolean;
+  disableImmer?: boolean;
   enhancers?: StoreEnhancer[];
   initialState?: InitialState;
   injections?: Injections;
