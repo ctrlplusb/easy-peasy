@@ -32,11 +32,17 @@ export const action = fn => {
 
 const defaultStateResolvers = [state => state];
 
-export const computed = (fn, stateResolvers = defaultStateResolvers) => {
-  fn[computedSymbol] = {
-    stateResolvers,
+export const computed = (fnOrStateResolvers, fn) => {
+  if (typeof fn === 'function') {
+    fn[computedSymbol] = {
+      stateResolvers: fnOrStateResolvers,
+    };
+    return fn;
+  }
+  fnOrStateResolvers[computedSymbol] = {
+    stateResolvers: defaultStateResolvers,
   };
-  return fn;
+  return fnOrStateResolvers;
 };
 
 export const thunkOn = (targetResolver, fn) => {

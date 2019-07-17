@@ -8,7 +8,6 @@ import {
   Reducer,
   ActionOn,
   ThunkOn,
-  createStore,
 } from 'easy-peasy';
 
 class Person {

@@ -124,7 +124,7 @@ type RecursiveActions<
  *
  * type OnlyActions = Actions<Model>;
  */
-export type Actions<Model extends object> = RecursiveActions<Model, '1'>;
+export type Actions<Model extends object = {}> = RecursiveActions<Model, '1'>;
 
 // #endregion
 
@@ -173,7 +173,7 @@ type RecursiveState<
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends object> = RecursiveState<Model, '1'>;
+export type State<Model extends object = {}> = RecursiveState<Model, '1'>;
 
 // #endregion
 
@@ -236,7 +236,7 @@ export interface MockedAction {
  * type EnhancedReduxStore = Store<StoreModel>;
  */
 export type Store<
-  StoreModel extends object,
+  StoreModel extends object = {},
   StoreConfig extends EasyPeasyConfig<any, any> = any
 > = O.Merge<
   O.Omit<ReduxStore<State<StoreModel>>, 'dispatch'>,
@@ -266,7 +266,7 @@ export type Store<
  * type DispatchWithActions = Dispatch<StoreModel>;
  */
 export type Dispatch<
-  StoreModel,
+  StoreModel extends object = {},
   Action extends ReduxAction = ReduxAction<any>
 > = Actions<StoreModel> & ReduxDispatch<Action>;
 
@@ -420,9 +420,7 @@ export function thunkOn<
 // #region Action
 
 /**
- * An action type.
- *
- * Useful when declaring your model.
+ * Represents an action.
  *
  * @example
  *
@@ -440,9 +438,9 @@ export type Action<Model extends object = {}, Payload = void> = {
 };
 
 /**
- * Declares an action type against your model.
+ * Declares an action.
  *
- * https://github.com/ctrlplusb/easy-peasy#action
+ * https://easy-peasy.now.sh/docs/api/action
  *
  * @example
  *
@@ -472,12 +470,9 @@ export interface ActionOn<
 }
 
 export function actionOn<
-  Model extends object = {},
-  StoreModel extends object = {},
-  Resolver extends TargetResolver<Model, StoreModel> = TargetResolver<
-    Model,
-    StoreModel
-  >
+  Model extends object,
+  StoreModel extends object,
+  Resolver extends TargetResolver<Model, StoreModel>
 >(
   targetResolver: Resolver,
   handler: (
@@ -490,72 +485,8 @@ export function actionOn<
 
 // #region Computed
 
-type StateResolver<Model extends {}, StoreModel extends {}, Result = any> = (
-  state: State<Model>,
-  storeState: State<StoreModel>,
-) => Result;
-
-type StateResolvers1<Model, StoreModel, Arg1> = [
-  StateResolver<Model, StoreModel, Arg1>,
-];
-
-type StateResolvers2<Model, StoreModel, Arg1, Arg2> = [
-  StateResolver<Model, StoreModel, Arg1>,
-  StateResolver<Model, StoreModel, Arg2>,
-];
-
-type StateResolvers3<Model, StoreModel, Arg1, Arg2, Arg3> = [
-  StateResolver<Model, StoreModel, Arg1>,
-  StateResolver<Model, StoreModel, Arg2>,
-  StateResolver<Model, StoreModel, Arg3>,
-];
-
-type StateResolvers4<Model, StoreModel, Arg1, Arg2, Arg3, Arg4> = [
-  StateResolver<Model, StoreModel, Arg1>,
-  StateResolver<Model, StoreModel, Arg2>,
-  StateResolver<Model, StoreModel, Arg3>,
-  StateResolver<Model, StoreModel, Arg4>,
-];
-
-type StateResolvers5<Model, StoreModel, Arg1, Arg2, Arg3, Arg4, Arg5> = [
-  StateResolver<Model, StoreModel, Arg1>,
-  StateResolver<Model, StoreModel, Arg2>,
-  StateResolver<Model, StoreModel, Arg3>,
-  StateResolver<Model, StoreModel, Arg4>,
-  StateResolver<Model, StoreModel, Arg5>,
-];
-
-type StateResolvers<Model, StoreModel> =
-  | StateResolvers1<Model, StoreModel, any>
-  | StateResolvers2<Model, StoreModel, any, any>
-  | StateResolvers3<Model, StoreModel, any, any, any>
-  | undefined;
-
-/*
-export type ResolvedState1<Arg1> = [Arg1];
-export type ResolvedState2<Arg1, Arg2> = [Arg1, Arg2];
-export type ResolvedState3<Arg1, Arg2, Arg3> = [Arg1, Arg2, Arg3];
-export type ResolvedState4<Arg1, Arg2, Arg3, Arg4> = [Arg1, Arg2, Arg3, Arg4];
-export type ResolvedState5<Arg1, Arg2, Arg3, Arg4, Arg5> = [
-  Arg1,
-  Arg2,
-  Arg3,
-  Arg4,
-  Arg5,
-];
-
-type ResolvedStates =
-  | ResolvedState1<any>
-  | ResolvedState2<any, any>
-  | ResolvedState3<any, any, any>
-  | ResolvedState4<any, any, any, any>
-  | ResolvedState5<any, any, any, any, any>;
-*/
-
 /**
- * A computed type.
- *
- * Useful when declaring your model.
+ * Represents a computed property.
  *
  * @example
  *
@@ -569,38 +500,35 @@ type ResolvedStates =
 export type Computed<
   Model extends object = {},
   Result = any,
-  // ResolvedState extends ResolvedStates | void = void,
   StoreModel extends object = {}
 > = {
   type: 'computed';
   result: Result;
 };
 
-// type StateResolver<
-//   Model extends object,
-//   StoreModel extends object,
-//   Result = any
-// > = (state: State<Model>, storeState: State<StoreModel>) => Result;
+type Resolver<Model extends object, StoreModel extends object> = (
+  state: State<Model>,
+  storeState: State<StoreModel>,
+) => any;
+
+type DefaultComputationFunc<Model extends object, Result> = (
+  state: State<Model>,
+) => Result;
 
 export function computed<
-  Model extends object = {},
-  Result = any,
-  StoreModel extends object = {},
-  Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
-    Model,
-    StoreModel
-  >
+  Model extends object,
+  Result,
+  StoreModel extends object,
+  Resolvers extends Resolver<Model, StoreModel>[]
 >(
-  computationFunc: (
-    ...args: Resolvers extends undefined
-      ? [State<Model>]
-      : Resolvers extends StateResolvers2<any, any, infer Arg1, infer Arg2>
-      ? [Arg1, Arg2]
-      : Resolvers extends StateResolvers1<any, any, infer Arg1>
-      ? [Arg1]
-      : [State<Model>]
+  resolversOrCompFunc: (Resolvers | []) | DefaultComputationFunc<Model, Result>,
+  compFunc?: (
+    ...args: {
+      [K in keyof Resolvers]: Resolvers[K] extends (...args: any[]) => any
+        ? ReturnType<Resolvers[K]>
+        : string;
+    }
   ) => Result,
-  stateResolvers?: Resolvers,
 ): Computed<Model, Result, StoreModel>;
 
 // #endregion
@@ -643,9 +571,7 @@ export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
  *   })
  * });
  */
-export function reducer<State = any>(
-  state: ReduxReducer<State>,
-): Reducer<State>;
+export function reducer<State>(state: ReduxReducer<State>): Reducer<State>;
 
 // #endregion
 
@@ -665,7 +591,7 @@ export function reducer<State = any>(
  *   return todos.map(todo => <Todo todo={todo} />);
  * }
  */
-export function useStoreState<StoreState extends State<any> = {}, Result = any>(
+export function useStoreState<StoreState extends State<any>, Result>(
   mapState: (state: StoreState) => Result,
 ): Result;
 
@@ -683,10 +609,9 @@ export function useStoreState<StoreState extends State<any> = {}, Result = any>(
  *   return <AddTodoForm save={addTodo} />;
  * }
  */
-export function useStoreActions<
-  StoreActions extends Actions<any> = {},
-  Result = any
->(mapActions: (actions: StoreActions) => Result): Result;
+export function useStoreActions<StoreActions extends Actions<any>, Result>(
+  mapActions: (actions: StoreActions) => Result,
+): Result;
 
 /**
  * A React Hook allowing you to use the store's dispatch within your component.
@@ -715,11 +640,11 @@ export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
  * useStoreActions(actions => actions.todo.add); // fully typed
  */
 export function createTypedHooks<StoreModel extends Object = {}>(): {
-  useStoreActions: <Result = any>(
+  useStoreActions: <Result>(
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
   useStoreDispatch: () => Dispatch<StoreModel>;
-  useStoreState: <Result = any>(
+  useStoreState: <Result>(
     mapState: (state: State<StoreModel>) => Result,
     dependencies?: Array<any>,
   ) => Result;
@@ -744,7 +669,7 @@ export function createTypedHooks<StoreModel extends Object = {}>(): {
  *   </StoreProvider>
  * );
  */
-export class StoreProvider<StoreModel extends object = any> extends Component<{
+export class StoreProvider<StoreModel extends object = {}> extends Component<{
   store: Store<StoreModel>;
 }> {}
 
@@ -779,10 +704,7 @@ export function createContextStore<
   useStoreDispatch: () => Dispatch<StoreModel>;
 };
 
-export interface UseLocalStore<
-  StoreModel extends object = {},
-  InitialData = any
-> {
+interface UseLocalStore<StoreModel extends object, InitialData> {
   (initialData?: InitialData): [State<StoreModel>, Actions<StoreModel>];
 }
 
