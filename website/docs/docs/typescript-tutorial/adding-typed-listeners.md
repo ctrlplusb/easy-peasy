@@ -46,7 +46,7 @@ const auditModel: AuditModel = {
 
 Now every time the `addTodo` [action](/docs/api/action) is fired our `onTodoAdded` listener will fire and add an audit log.
 
-Remember, the [actionOn](/docs/api/action-on) listener will receive the same payload as the target [action](/docs/api/action). Therefore we need to ensure that the payload types will match across the listener and target. If they do not match a TypeScript error will occur warning you of this fact.
+> The `target.payload` type of our action handler will automatically be typed to match the resolved action(s). If you resolve a "string" name of an action then the payload will be typed as `any`.
 
 ## Refactor the `saveTodo` thunk
 

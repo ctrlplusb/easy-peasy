@@ -1,8 +1,6 @@
 # createTypedHooks
 
-This API is only helpful in the context of TypeScript projects.
-
-Allows you to create typed versions of all the hooks so that you don't need to apply typing information against them whilst using them within your components.
+Creates typed versions of the hooks so that you don't need to apply typing information against them when using them within your components.
 
 ## Example
 

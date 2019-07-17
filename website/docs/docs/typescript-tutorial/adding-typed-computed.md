@@ -31,7 +31,6 @@ Easy Peasy exports a `Computed` type allowing you to declare a [computed](/docs/
 Computed<
   Model,
   Result,
-  ResolvedState,
   StoreModel
 >
 ```
@@ -50,13 +49,11 @@ The type arguments can be described as follows.
 
   This allows you to declare the type of the data that will be returned by the [computed](/docs/api/computed) property.
 
-- `ResolvedState`
-
-  This type is only required if you are using `stateResolvers` within your [computed](/docs/api/computed) property. The next section will cover how to define these.
-
 - `StoreModel`
 
-  If your state resolvers will operate against global state you will need to provide your store's model interface so that the global state is typed correctly.
+  If you use state resolvers within your computed property, and you would like to operate against the entire store state within them, then you will need to provide your store's model interface here so that the store state is typed correctly.
+
+  > We will introduce state resolvers in the following section.
 
 ## Declaring a computed property
 
