@@ -113,3 +113,27 @@ addTodo: action((state, payload) => {
   };
 })
 ```
+
+## Switching actions into immutable based updates
+
+Although we use [immer](https://github.com/mweststrate/immer) to convert the mutations that you perform on state within actions into immutable updates on your store, you may prefer to explicitly return new immutable state.
+
+You can do so by setting the `disableImmer` [configuration](/docs/api/store-config) of the [createStore](/docs/api/create-store). You would then have to return new immutable state within your action handlers as you would within a standard Redux reducer.
+
+```javascript
+import { createStore, action } from 'easy-peasy';
+
+const model = {
+  todos: [],
+  addTodo: action((state, payload) => {
+    // 👇 new immutable state returned
+    return [...state, payload];
+  })
+}
+
+const store = createStore(model, {
+  disableImmer: true // 👈 set the flag
+})
+```
+
+If you don't set this flag and return new immutable state you may experience errors when utilising [computed](/docs/api/computed) properties.

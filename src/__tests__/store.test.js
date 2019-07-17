@@ -1,4 +1,4 @@
-import { action, createStore, thunk } from '../index';
+import { action, computed, createStore, thunk } from '../index';
 
 test('empty object in state', () => {
   // arrange
@@ -450,4 +450,22 @@ test('mocking actions', () => {
 
   // assert
   expect(store.getMockedActions()).toEqual([]);
+});
+
+test('disableImmer', () => {
+  // arrange
+  const model = {
+    foo: 0,
+    setFoo: action((state, foo) => ({ ...state, foo })),
+    doubleFoo: computed(state => state.foo * 2),
+  };
+  const store = createStore(model, {
+    disableImmer: true,
+  });
+
+  // act
+  store.getActions().setFoo(5);
+
+  // assert
+  expect(store.getState().doubleFoo).toBe(10);
 });
