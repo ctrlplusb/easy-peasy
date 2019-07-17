@@ -25,9 +25,7 @@ module.exports = {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Quick Start', link: '/docs/quick-start' },
-      { text: 'Tutorial', link: '/docs/tutorial/' },
-      { text: 'API', link: '/docs/api/' },
-      { text: 'TypeScript', link: '/docs/typescript-tutorial/' },
+      { text: 'Docs', link: '/docs/introduction/' },
     ],
 
     sidebarDepth: 0,
@@ -37,7 +35,7 @@ module.exports = {
         {
           title: 'Introduction',
           children: [
-            'introduction/overview',
+            'introduction/',
             'introduction/installation',
             'introduction/examples',
             'introduction/prior-art',
@@ -59,22 +57,6 @@ module.exports = {
           ],
         },
         {
-          title: 'TypeScript Tutorial',
-          children: [
-            'typescript-tutorial/',
-            'typescript-tutorial/create-your-store',
-            'typescript-tutorial/typed-hooks',
-            'typescript-tutorial/adding-typed-actions',
-            'typescript-tutorial/adding-typed-thunks',
-            'typescript-tutorial/using-typed-injections',
-            'typescript-tutorial/typing-thunk-against-the-store',
-            'typescript-tutorial/adding-typed-listeners',
-            'typescript-tutorial/adding-typed-computed',
-            'typescript-tutorial/typing-computed-with-store-state',
-            'typescript-tutorial/final-notes',
-          ],
-        },
-        {
           title: 'API',
           children: [
             'api/',
@@ -82,7 +64,6 @@ module.exports = {
             'api/action-on',
             'api/computed',
             'api/create-store',
-            'api/create-typed-hooks',
             'api/debug',
             'api/listeners',
             'api/memo',
@@ -102,6 +83,37 @@ module.exports = {
           children: [
             'extended-api/create-component-store',
             'extended-api/create-context-store',
+          ],
+        },
+        {
+          title: 'TypeScript Tutorial',
+          children: [
+            'typescript-tutorial/',
+            'typescript-tutorial/create-your-store',
+            'typescript-tutorial/typed-hooks',
+            'typescript-tutorial/adding-typed-actions',
+            'typescript-tutorial/adding-typed-thunks',
+            'typescript-tutorial/using-typed-injections',
+            'typescript-tutorial/typing-thunk-against-the-store',
+            'typescript-tutorial/adding-typed-listeners',
+            'typescript-tutorial/adding-typed-computed',
+            'typescript-tutorial/typing-computed-with-store-state',
+            'typescript-tutorial/final-notes',
+          ],
+        },
+        {
+          title: 'Typescript API',
+          children: [
+            'typescript-api/',
+            'typescript-api/action',
+            'typescript-api/action-on',
+            'typescript-api/actions',
+            'typescript-api/computed',
+            'typescript-api/create-typed-hooks',
+            'typescript-api/reducer',
+            'typescript-api/state',
+            'typescript-api/thunk',
+            'typescript-api/thunk-on',
           ],
         },
         {

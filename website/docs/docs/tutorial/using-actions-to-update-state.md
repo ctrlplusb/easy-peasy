@@ -1,4 +1,4 @@
-# Using Actions to update state
+# Using actions to update state
 
 Our [application](https://codesandbox.io/s/easy-peasy-tutorial-component-state-28cjm) has the ability to consume state, but no way to update it.
 

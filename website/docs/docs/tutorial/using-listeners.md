@@ -1,8 +1,8 @@
 # Using listeners
 
-Our [application](https://codesandbox.io/s/easy-peasy-tutorial-computed-uohgr) is looking pretty well rounded, having introduced [computed](/docs/api/computed) properties. We have covered most of teh Easy Peasy API, but there is still one powerful concept you should be aware of; listeners.
+Our [application](https://codesandbox.io/s/easy-peasy-tutorial-computed-uohgr) is looking pretty well rounded, having introduced [computed](/docs/api/computed) properties. We have covered most of the Easy Peasy API, but there is still one powerful concept you should be aware of; listeners.
 
-Easy Peasy provides [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs which allow you to declare an action/thunk which is fired in response to target actions being executed. i.e. listeners.
+Easy Peasy provides [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs which allow you to declare an action/thunk which is fired in response to target actions being executed - i.e. listeners.
 
 This allows for an interesting reactive model that can solve use cases like being able to clear up your state when a user logs out, or keeping a simple audit log of important actions that have been performed by a user.
 
