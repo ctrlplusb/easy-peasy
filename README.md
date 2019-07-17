@@ -1,15 +1,3 @@
-> Howdy 👋
->
-> We have a release candidate (RC) for v3. 🎉
->
-> v3 is aimed at being our long term support (LTS) release, with the intention to avoid breaking changes and minimise the features that we add to the library.
->
-> [The website for the RC can be found here](https://easy-peasy-v3.now.sh)
->
-> For those currently using v2; you can find the notes on the breaking changes included within the [v3 PR](https://github.com/ctrlplusb/easy-peasy/pull/216).
-
----
-
 <p>&nbsp;</p>
 <p align='center'>
   <img src="https://i.imgur.com/UnPLVly.png" width="280" />
@@ -24,7 +12,7 @@
 
 
 ```
-npm install easy-peasy@3.0.0-rc.0
+npm install easy-peasy@3.0.0-rc.1
 ```
 
 
