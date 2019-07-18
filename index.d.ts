@@ -70,13 +70,70 @@ export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 // #endregion
 
-// #region Actions
+// #region Listeners
 
-type ActionMapper<ActionsModel extends object, Depth extends string> = {
+type ListenerMapper<ActionsModel extends object, Depth extends string> = {
   [P in keyof ActionsModel]: ActionsModel[P] extends ActionOn<any, any>
     ? ActionCreator<TargetPayload<any>>
     : ActionsModel[P] extends ThunkOn<any, any, any, any>
     ? ThunkCreator<TargetPayload<any>, ActionsModel[P]['result']>
+    : ActionsModel[P] extends object
+    ? RecursiveListeners<
+        ActionsModel[P],
+        Depth extends '1'
+          ? '2'
+          : Depth extends '2'
+          ? '3'
+          : Depth extends '3'
+          ? '4'
+          : Depth extends '4'
+          ? '5'
+          : '6'
+      >
+    : unknown;
+};
+
+type RecursiveListeners<
+  Model extends object,
+  Depth extends string
+> = Depth extends '6'
+  ? Model
+  : ListenerMapper<
+      O.Filter<
+        O.Select<Model, object>,
+        | Array<any>
+        | RegExp
+        | Date
+        | string
+        | Reducer<any, any>
+        | Computed<any, any, any>
+        | Action<any, any>
+        | Thunk<any, any>
+      >,
+      Depth
+    >;
+
+/**
+ * Filters a model into a type that represents the listeners action creators
+ *
+ * @example
+ *
+ * type OnlyActions = Actions<Model>;
+ */
+export type Listeners<Model extends object = {}> = RecursiveListeners<
+  Model,
+  '1'
+>;
+
+// #endregion
+
+// #region Actions
+
+type ActionMapper<ActionsModel extends object, Depth extends string> = {
+  [P in keyof ActionsModel]: ActionsModel[P] extends Action<any, any>
+    ? ActionsModel[P]['payload'] extends void
+      ? ActionCreator<void>
+      : ActionCreator<ActionsModel[P]['payload']>
     : ActionsModel[P] extends Thunk<any, any, any, any, any>
     ? ActionsModel[P]['payload'] extends void
       ? ThunkCreator<void, Promise<ActionsModel[P]['result']>>
@@ -84,10 +141,6 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
           ActionsModel[P]['payload'],
           Promise<ActionsModel[P]['result']>
         >
-    : ActionsModel[P] extends Action<any, any>
-    ? ActionsModel[P]['payload'] extends void
-      ? ActionCreator<void>
-      : ActionCreator<ActionsModel[P]['payload']>
     : ActionsModel[P] extends object
     ? RecursiveActions<
         ActionsModel[P],
@@ -112,13 +165,20 @@ type RecursiveActions<
   : ActionMapper<
       O.Filter<
         O.Select<Model, object>,
-        Array<any> | RegExp | Date | Reducer<any, any> | Computed<any, any, any>
+        | Array<any>
+        | RegExp
+        | Date
+        | string
+        | Reducer<any, any>
+        | Computed<any, any, any>
+        | ActionOn<any, any>
+        | ThunkOn<any, any, any, any>
       >,
       Depth
     >;
 
 /**
- * Filters a model into a type that represents the actions (and effects) only
+ * Filters a model into a type that represents the action/thunk creators
  *
  * @example
  *
@@ -253,6 +313,7 @@ export type Store<
     clearMockedActions: () => void;
     dispatch: Dispatch<StoreModel>;
     getActions: () => Actions<StoreModel>;
+    getListeners: () => Listeners<StoreModel>;
     getMockedActions: () => MockedAction[];
     reconfigure: <NewStoreModel extends object>(model: NewStoreModel) => void;
     removeModel: (key: string) => void;
