@@ -12,7 +12,7 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
 <p>&nbsp;</p>
 
 ```bash
-npm install easy-peasy@3.0.0-rc.1
+npm install easy-peasy@3.0.0-rc.2
 ```
 
 <p>&nbsp;</p>
