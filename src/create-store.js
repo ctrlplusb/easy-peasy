@@ -67,25 +67,28 @@ export default function createStore(model, options = {}) {
     return result;
   };
 
-  const mockActionsMiddleware = () => next => action => {
-    if (mockActions) {
-      if (
-        action == null ||
-        (typeof action === 'object' && action.type === '@@EP/LISTENER')
-      ) {
-        // DO NOTHING
-      } else {
-        mockedActions.push(action);
-      }
-      return undefined;
+  const mockActionsMiddleware = () => () => action => {
+    if (action != null) {
+      mockedActions.push(action);
     }
-    return next(action);
+    return undefined;
   };
 
   const currentStateMiddleware = () => next => action => {
     references.currentState = references.getState();
     return next(action);
   };
+
+  const easyPeasyMiddleware = [
+    reduxThunk,
+    ...middleware,
+    listenerActionsMiddleware,
+    currentStateMiddleware,
+  ];
+
+  if (mockActions) {
+    easyPeasyMiddleware.push(mockActionsMiddleware);
+  }
 
   const composeEnhancers =
     compose ||
@@ -100,27 +103,12 @@ export default function createStore(model, options = {}) {
   const store = reduxCreateStore(
     references.internals.reducer,
     references.internals.defaultState,
-    composeEnhancers(
-      applyMiddleware(
-        reduxThunk,
-        ...middleware,
-        listenerActionsMiddleware,
-        currentStateMiddleware,
-        mockActionsMiddleware,
-      ),
-      ...enhancers,
-    ),
+    composeEnhancers(applyMiddleware(...easyPeasyMiddleware), ...enhancers),
   );
+
   references.dispatch = store.dispatch;
   references.getState = store.getState;
 
-  store.getMockedActions = () => [...mockedActions];
-  store.clearMockedActions = () => {
-    mockedActions = [];
-  };
-  store.getActions = () => references.internals.actionCreators;
-
-  // attaches the action creators to the stores dispatch
   const bindActionCreators = () => {
     Object.keys(store.dispatch).forEach(actionsKey => {
       delete store.dispatch[actionsKey];
@@ -139,40 +127,45 @@ export default function createStore(model, options = {}) {
     }
     bindStoreInternals(store.getState());
     store.replaceReducer(references.internals.reducer);
-    store.getActions().replaceState(references.internals.defaultState);
+    references.internals.actionCreators.replaceState(
+      references.internals.defaultState,
+    );
     bindActionCreators();
   };
 
-  store.reconfigure = newModel => {
-    modelDefinition = bindReplaceState(newModel);
-    rebindStore();
-  };
-
-  store.addModel = (key, modelForKey) => {
-    if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `easy-peasy: The store model already contains a model definition for "${key}"`,
-      );
-      store.removeModel(key);
-    }
-    modelDefinition[key] = modelForKey;
-    rebindStore();
-  };
-
-  store.removeModel = key => {
-    if (!modelDefinition[key]) {
-      if (process.env.NODE_ENV !== 'production') {
+  return Object.assign(store, {
+    addModel: (key, modelForKey) => {
+      if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
         // eslint-disable-next-line no-console
         console.warn(
-          `easy-peasy: The store model does not contain a model definition for "${key}"`,
+          `easy-peasy: The store model already contains a model definition for "${key}"`,
         );
+        store.removeModel(key);
       }
-      return;
-    }
-    delete modelDefinition[key];
-    rebindStore(key);
-  };
-
-  return store;
+      modelDefinition[key] = modelForKey;
+      rebindStore();
+    },
+    clearMockedActions: () => {
+      mockedActions = [];
+    },
+    getActions: () => references.internals.actionCreators,
+    getMockedActions: () => [...mockedActions],
+    reconfigure: newModel => {
+      modelDefinition = bindReplaceState(newModel);
+      rebindStore();
+    },
+    removeModel: key => {
+      if (!modelDefinition[key]) {
+        if (process.env.NODE_ENV !== 'production') {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `easy-peasy: The store model does not contain a model definition for "${key}"`,
+          );
+        }
+        return;
+      }
+      delete modelDefinition[key];
+      rebindStore(key);
+    },
+  });
 }
