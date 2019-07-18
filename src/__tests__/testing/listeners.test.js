@@ -27,7 +27,7 @@ test('listener gets dispatched when target fires', () => {
   expect(store.getMockedActions()).toMatchObject([
     { type: '@action.addTodo', payload: 'Write docs' },
     {
-      type: '@action.onTodoAdded',
+      type: '@actionOn.onTodoAdded',
       payload: {
         type: '@action.addTodo',
         payload: 'Write docs',

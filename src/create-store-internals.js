@@ -63,7 +63,8 @@ export default function createStoreInternals({
       };
       if (typeof value === 'function') {
         if (value[actionSymbol] || value[actionOnSymbol]) {
-          const type = `@action.${path.join('.')}`;
+          const prefix = value[actionSymbol] ? '@action' : '@actionOn';
+          const type = `${prefix}.${path.join('.')}`;
           const actionMeta = value[actionSymbol] || value[actionOnSymbol];
           actionMeta.actionName = key;
           actionMeta.type = type;
@@ -93,7 +94,8 @@ export default function createStoreInternals({
             listenerDefinitions.push(value);
           }
         } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
-          const type = `@thunk.${path.join('.')}`;
+          const prefix = value[thunkSymbol] ? '@thunk' : '@thunkOn';
+          const type = `${prefix}.${path.join('.')}`;
           const thunkMeta = value[thunkSymbol] || value[thunkOnSymbol];
           thunkMeta.actionName = key;
           thunkMeta.type = type;
@@ -174,7 +176,6 @@ export default function createStoreInternals({
             Object.defineProperty(o, key, {
               configurable: true,
               enumerable: true,
-              // writable: false,
               get: () => {
                 const storeState = isInReducer
                   ? references.currentState
@@ -185,9 +186,6 @@ export default function createStoreInternals({
                 );
                 return memoisedResultFn(...inputs);
               },
-              set: () => {
-                // do nothing
-              },
             });
           };
           createComputedProperty(parent);
@@ -197,7 +195,7 @@ export default function createStoreInternals({
         } else {
           handleValueAsState();
         }
-      } else if (isStateObject(value) && Object.keys(value).length > 0) {
+      } else if (isStateObject(value)) {
         const existing = get(path, defaultState);
         if (existing == null) {
           set(path, defaultState, {});
