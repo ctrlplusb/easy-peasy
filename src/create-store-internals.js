@@ -50,10 +50,6 @@ export default function createStoreInternals({
     Object.keys(current).forEach(key => {
       const value = current[key];
       const path = [...parentPath, key];
-      const meta = {
-        parent: parentPath,
-        path,
-      };
       const handleValueAsState = () => {
         const initialParentRef = get(parentPath, initialState);
         if (initialParentRef && key in initialParentRef) {
@@ -69,17 +65,25 @@ export default function createStoreInternals({
           const actionMeta = value[actionSymbol] || value[actionOnSymbol];
           actionMeta.actionName = key;
           actionMeta.type = type;
-          actionMeta.parent = meta.parent;
-          actionMeta.path = meta.path;
+          actionMeta.parent = parentPath;
+          actionMeta.path = path;
 
           // Action Reducer
           actionReducersDict[type] = value;
 
           // Action Creator
-          const actionCreator = payload => {
+          const actionCreator = (payload, runtimeMeta = {}) => {
+            const finalMeta = {
+              ...(actionMeta.config.meta || {}),
+              ...runtimeMeta,
+              parent: parentPath,
+              path,
+            };
+
             const actionDefinition = {
               type,
               payload,
+              meta: finalMeta,
             };
             if (value[actionOnSymbol] && actionMeta.resolvedTargets) {
               payload.resolvedTargets = [...actionMeta.resolvedTargets];
@@ -104,18 +108,18 @@ export default function createStoreInternals({
           const thunkMeta = value[thunkSymbol] || value[thunkOnSymbol];
           thunkMeta.actionName = key;
           thunkMeta.type = type;
-          thunkMeta.parent = meta.parent;
-          thunkMeta.path = meta.path;
+          thunkMeta.parent = parentPath;
+          thunkMeta.path = path;
 
           // Thunk Action
-          const thunkHandler = payload => {
+          const thunkHandler = (payload, meta) => {
             const helpers = {
               dispatch: references.dispatch,
               getState: () => get(parentPath, references.getState()),
               getStoreActions: () => actionCreators,
               getStoreState: references.getState,
               injections,
-              meta,
+              meta: { ...meta, type },
             };
             if (value[thunkOnSymbol] && thunkMeta.resolvedTargets) {
               payload.resolvedTargets = [...thunkMeta.resolvedTargets];
@@ -128,25 +132,36 @@ export default function createStoreInternals({
           const startType = `${type}(start)`;
           const successType = `${type}(success)`;
           const failType = `${type}(fail)`;
-          const actionCreator = payload =>
-            tick()
+          const actionCreator = (payload, runtimeMeta = {}) => {
+            const meta = {
+              ...(thunkMeta.config.meta || {}),
+              ...runtimeMeta,
+              parent: parentPath,
+              path,
+            };
+            return tick()
               .then(() =>
                 references.dispatch({
                   type: startType,
                   payload,
+                  meta,
                 }),
               )
-              .then(() => references.dispatch(() => thunkHandler(payload)))
+              .then(() =>
+                references.dispatch(() => thunkHandler(payload, meta)),
+              )
               .then(result => {
                 references.dispatch({
                   type: successType,
                   payload,
                   result,
+                  meta,
                 });
                 references.dispatch({
                   type,
                   payload,
                   result,
+                  meta,
                 });
                 return result;
               })
@@ -155,14 +170,17 @@ export default function createStoreInternals({
                   type: failType,
                   payload,
                   error: err,
+                  meta,
                 });
                 references.dispatch({
                   type,
                   payload,
                   error: err,
+                  meta,
                 });
                 throw err;
               });
+          };
           actionCreator.type = type;
           actionCreator.startType = startType;
           actionCreator.successType = successType;
@@ -254,7 +272,9 @@ export default function createStoreInternals({
     const runActionReducerAtPath = (state, action, actionReducer, path) => {
       if (path.length === 0) {
         return simpleProduce(state, draft =>
-          actionReducer(draft, action.payload),
+          actionReducer(draft, action.payload, {
+            meta: { ...action.meta, type: action.type },
+          }),
         );
       }
       const current = get(path, state);

@@ -74,7 +74,7 @@ describe('with mocking actions', () => {
 
     // assert
     expect(mockTodosService.fetchById).toHaveBeenCalledWith(todo.id);
-    expect(store.getMockedActions()).toEqual([
+    expect(store.getMockedActions()).toMatchObject([
       { type: '@thunk.fetchById(start)', payload: todo.id },
       { type: '@action.fetchedTodo', payload: todo },
       { type: '@thunk.fetchById(success)', payload: todo.id },
@@ -139,11 +139,107 @@ describe('with mocking actions', () => {
     await store.getActions().add();
 
     // assert
-    expect(store.getMockedActions()).toEqual([
+    expect(store.getMockedActions()).toMatchObject([
       { type: '@thunk.add(start)', payload: undefined },
       { type: 'CUSTOM_ACTION', payload: 'the payload' },
       { type: '@thunk.add(success)', payload: undefined },
       { type: '@thunk.add', payload: undefined },
     ]);
   });
+});
+
+test('supports meta data', async () => {
+  // arrange
+  const someMiddlware = () => next => action => {
+    if (action && action.type === '@thunk.foo') {
+      expect(action.meta).toEqual({
+        foo: 'bar',
+        parent: [],
+        path: ['foo'],
+      });
+    }
+    return next(action);
+  };
+
+  const store = createStore(
+    {
+      count: 1,
+      foo: thunk(
+        (actions, payload, { meta }) => {
+          expect(meta).toEqual({
+            foo: 'bar',
+            parent: [],
+            path: ['foo'],
+            type: '@thunk.foo',
+          });
+        },
+        {
+          meta: {
+            foo: 'bar',
+          },
+        },
+      ),
+    },
+    {
+      middleware: [someMiddlware],
+    },
+  );
+
+  // act
+  await store.getActions().foo();
+
+  // assert
+  expect().toBeUndefined();
+});
+
+test('supports runtime meta data', async () => {
+  // arrange
+  const someMiddlware = () => next => action => {
+    if (action && action.type === '@thunk.foo') {
+      expect(action.meta).toEqual({
+        foo: 'bar',
+        name: 'mary',
+        age: 30,
+        parent: [],
+        path: ['foo'],
+      });
+    }
+    return next(action);
+  };
+
+  const store = createStore(
+    {
+      count: 1,
+      foo: thunk(
+        (actions, payload, { meta }) => {
+          expect(meta).toEqual({
+            foo: 'bar',
+            name: 'mary',
+            age: 30,
+            parent: [],
+            path: ['foo'],
+            type: '@thunk.foo',
+          });
+        },
+        {
+          meta: {
+            foo: 'bar',
+            name: 'bob',
+          },
+        },
+      ),
+    },
+    {
+      middleware: [someMiddlware],
+    },
+  );
+
+  // act
+  await store.getActions().foo(undefined, {
+    name: 'mary',
+    age: 30,
+  });
+
+  // assert
+  expect().toBeUndefined();
 });

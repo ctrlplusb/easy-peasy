@@ -27,3 +27,99 @@ test('returning the state has no effect', () => {
   // assert
   expect(store.getState()).toBe(prevState);
 });
+
+test('supports meta data', () => {
+  // arrange
+  const someMiddlware = () => next => action => {
+    if (action && action.type === '@action.foo') {
+      expect(action.meta).toEqual({
+        foo: 'bar',
+        parent: [],
+        path: ['foo'],
+      });
+    }
+    return next(action);
+  };
+
+  const store = createStore(
+    {
+      count: 1,
+      foo: action(
+        (state, payload, { meta }) => {
+          expect(meta).toEqual({
+            foo: 'bar',
+            parent: [],
+            path: ['foo'],
+            type: '@action.foo',
+          });
+        },
+        {
+          meta: {
+            foo: 'bar',
+          },
+        },
+      ),
+    },
+    {
+      middleware: [someMiddlware],
+    },
+  );
+
+  // act
+  store.getActions().foo();
+
+  // assert
+  expect().toBeUndefined();
+});
+
+test('supports runtime meta data', () => {
+  // arrange
+  const someMiddleware = () => next => action => {
+    if (action && action.type === '@action.foo') {
+      expect(action.meta).toEqual({
+        foo: 'bar',
+        name: 'mary',
+        age: 30,
+        parent: [],
+        path: ['foo'],
+      });
+    }
+    return next(action);
+  };
+
+  const store = createStore(
+    {
+      count: 1,
+      foo: action(
+        (state, payload, { meta }) => {
+          expect(meta).toEqual({
+            foo: 'bar',
+            name: 'mary',
+            age: 30,
+            parent: [],
+            path: ['foo'],
+            type: '@action.foo',
+          });
+        },
+        {
+          meta: {
+            foo: 'bar',
+            name: 'bob',
+          },
+        },
+      ),
+    },
+    {
+      middleware: [someMiddleware],
+    },
+  );
+
+  // act
+  store.getActions().foo(undefined, {
+    name: 'mary',
+    age: 30,
+  });
+
+  // assert
+  expect().toBeUndefined();
+});

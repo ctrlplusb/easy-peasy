@@ -18,15 +18,18 @@ export const debug = state => {
 
 export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
 
-export const actionOn = (targetResolver, fn) => {
+export const actionOn = (targetResolver, fn, config = {}) => {
   fn[actionOnSymbol] = {
+    config,
     targetResolver,
   };
   return fn;
 };
 
-export const action = fn => {
-  fn[actionSymbol] = {};
+export const action = (fn, config = {}) => {
+  fn[actionSymbol] = {
+    config,
+  };
   return fn;
 };
 
@@ -45,15 +48,18 @@ export const computed = (fnOrStateResolvers, fn) => {
   return fnOrStateResolvers;
 };
 
-export const thunkOn = (targetResolver, fn) => {
+export const thunkOn = (targetResolver, fn, config = {}) => {
   fn[thunkOnSymbol] = {
+    config,
     targetResolver,
   };
   return fn;
 };
 
-export const thunk = fn => {
-  fn[thunkSymbol] = {};
+export const thunk = (fn, config = {}) => {
+  fn[thunkSymbol] = {
+    config,
+  };
   return fn;
 };
 

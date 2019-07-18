@@ -32,7 +32,7 @@ test('dispatches actions to represent a succeeded thunk', async () => {
   // act
   const actualResult = await store.getActions().foo.doSomething(payload);
   // assert
-  expect(trackActions.actions).toEqual([
+  expect(trackActions.actions).toMatchObject([
     { type: '@thunk.foo.doSomething(start)', payload },
     { type: '@action.foo.increment', payload: undefined },
     {
@@ -65,7 +65,7 @@ describe('errors', () => {
       await store.getActions().foo.doSomething(payload);
     } catch (e) {
       // assert
-      expect(trackActions.actions).toEqual([
+      expect(trackActions.actions).toMatchObject([
         { type: '@thunk.foo.doSomething(start)', payload },
         {
           type: '@thunk.foo.doSomething(fail)',
@@ -105,7 +105,7 @@ describe('errors', () => {
       await store.getActions().foo.doSomething(payload);
     } catch (e) {
       // assert
-      expect(trackActions.actions).toEqual([
+      expect(trackActions.actions).toMatchObject([
         { type: '@thunk.foo.doSomething(start)', payload },
         { type: '@thunk.foo.error(start)', payload: undefined },
         {
@@ -296,6 +296,7 @@ test('meta values are exposed', async () => {
   expect(actualMeta).toEqual({
     parent: ['foo'],
     path: ['foo', 'doSomething'],
+    type: '@thunk.foo.doSomething',
   });
 });
 
