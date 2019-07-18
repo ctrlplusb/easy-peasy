@@ -14,6 +14,20 @@ function tick() {
   return new Promise(resolve => setTimeout(resolve));
 }
 
+const newify = (currentPath, currentState, finalValue) => {
+  if (currentPath.length === 0) {
+    return finalValue;
+  }
+  const newState = { ...currentState };
+  const key = currentPath[0];
+  if (currentPath.length === 1) {
+    newState[key] = finalValue;
+  } else {
+    newState[key] = newify(currentPath.slice(1), newState[key], finalValue);
+  }
+  return newState;
+};
+
 export default function createStoreInternals({
   disableImmer,
   initialState,
@@ -22,15 +36,18 @@ export default function createStoreInternals({
   reducerEnhancer,
   references,
 }) {
-  function simpleProduce(state, fn) {
+  function simpleProduce(path, state, fn) {
     if (disableImmer) {
-      return fn(state);
+      const current = get(path, state);
+      const next = fn(current);
+      if (current !== next) {
+        return newify(path, state, next);
+      }
+      return state;
     }
     const draft = createDraft(state);
-    const result = fn(draft);
-    if (result !== undefined) {
-      return isDraft(result) ? finishDraft(result) : result;
-    }
+    const current = get(path, draft);
+    fn(current);
     return finishDraft(draft);
   }
 
@@ -199,7 +216,7 @@ export default function createStoreInternals({
           createComputedProperty(parent);
           computedProperties.push({ key, parentPath, createComputedProperty });
         } else if (value[reducerSymbol]) {
-          customReducers.push({ path, reducer: value });
+          customReducers.push({ key, parentPath, reducer: value });
         } else {
           handleValueAsState();
         }
@@ -252,23 +269,9 @@ export default function createStoreInternals({
 
   const createReducer = () => {
     const runActionReducerAtPath = (state, action, actionReducer, path) => {
-      if (path.length === 0) {
-        return simpleProduce(state, draft =>
-          actionReducer(draft, action.payload),
-        );
-      }
-      const current = get(path, state);
-      return simpleProduce(state, draft => {
-        const actionMeta =
-          actionReducer[actionSymbol] || actionReducer[actionOnSymbol];
-        set(
-          actionMeta.parent,
-          draft,
-          simpleProduce(current, _draft =>
-            actionReducer(_draft, action.payload),
-          ),
-        );
-      });
+      return simpleProduce(path, state, draft =>
+        actionReducer(draft, action.payload),
+      );
     };
 
     const reducerForActions = (state, action) => {
@@ -287,12 +290,12 @@ export default function createStoreInternals({
     };
 
     const reducerForCustomReducers = (state, action) => {
-      return simpleProduce(state, draft => {
-        customReducers.forEach(({ path: p, reducer: red }) => {
-          const current = get(p, draft);
-          set(p, draft, red(current, action));
+      return customReducers.reduce((acc, { parentPath, key, reducer: red }) => {
+        return simpleProduce(parentPath, acc, draft => {
+          draft[key] = red(draft[key], action);
+          return draft;
         });
-      });
+      }, state);
     };
 
     const rootReducer = (state, action) => {

@@ -1,4 +1,4 @@
-import { action, computed, createStore, thunk } from '../index';
+import { action, computed, createStore, reducer, thunk } from '../index';
 
 test('empty object in state', () => {
   // arrange
@@ -468,4 +468,69 @@ test('disableImmer', () => {
 
   // assert
   expect(store.getState().doubleFoo).toBe(10);
+});
+
+test('disableImmer - nested update', () => {
+  // arrange
+  const model = {
+    nested: {
+      foo: 0,
+      setFoo: action((state, foo) => ({ ...state, foo })),
+    },
+  };
+  const store = createStore(model, { disableImmer: true });
+
+  // act
+  store.dispatch.nested.setFoo(5);
+
+  // assert
+  expect(store.getState()).toEqual({ nested: { foo: 5 } });
+});
+
+test('disableImmer - deeply nested update', () => {
+  // arrange
+  const model = {
+    deeply: {
+      nested: {
+        foo: 0,
+        setFoo: action((state, foo) => ({ ...state, foo })),
+      },
+    },
+  };
+  const store = createStore(model, { disableImmer: true });
+
+  // act
+  store.dispatch.deeply.nested.setFoo(5);
+
+  // assert
+  expect(store.getState()).toEqual({ deeply: { nested: { foo: 5 } } });
+});
+
+it('disableImmer - nested reducer', () => {
+  // arrange
+  const store = createStore(
+    {
+      stuff: {
+        counter: reducer((state = 1, _action) => {
+          if (_action.type === 'INCREMENT') {
+            return state + 1;
+          }
+          return state;
+        }),
+      },
+    },
+    {
+      disableImmer: true,
+    },
+  );
+
+  // act
+  store.dispatch({ type: 'INCREMENT' });
+
+  // assert
+  expect(store.getState()).toEqual({
+    stuff: {
+      counter: 2,
+    },
+  });
 });
