@@ -24,7 +24,7 @@ export default function createStore(model, options = {}) {
   const bindReplaceState = modelDef => {
     return {
       ...modelDef,
-      replaceState: helpers.action((state, payload) => payload),
+      easyPeasyReplaceState: helpers.action((state, payload) => payload),
     };
   };
 
@@ -127,7 +127,7 @@ export default function createStore(model, options = {}) {
     }
     bindStoreInternals(store.getState());
     store.replaceReducer(references.internals.reducer);
-    references.internals.actionCreators.replaceState(
+    references.internals.actionCreatorDict['@action.easyPeasyReplaceState'](
       references.internals.defaultState,
     );
     bindActionCreators();
@@ -149,6 +149,7 @@ export default function createStore(model, options = {}) {
       mockedActions = [];
     },
     getActions: () => references.internals.actionCreators,
+    getListeners: () => references.internals.listenerActionCreators,
     getMockedActions: () => [...mockedActions],
     reconfigure: newModel => {
       modelDefinition = bindReplaceState(newModel);

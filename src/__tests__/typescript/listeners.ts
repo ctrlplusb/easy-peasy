@@ -2,7 +2,7 @@
 
 import {
   createStore,
-  Actions,
+  Listeners,
   Thunk,
   Action,
   Reducer,
@@ -27,8 +27,6 @@ type Model = {
   computedImp: Computed<Model, number>;
   onAction: ActionOn<Model>;
   onThunk: ThunkOn<Model>;
-  // push: Action<Model>;
-  // pop: Action<Model>;
   nested: {
     stateArray: Array<string>;
     stateBoolean: boolean;
@@ -43,20 +41,23 @@ type Model = {
     thunkImp: Thunk<Model, string>;
     reducerImp: Reducer<number>;
     computedImp: Computed<Model, number>;
+    onAction: ActionOn<Model>;
+    onThunk: ThunkOn<Model>;
   };
 };
 
-type ModelActions = Actions<Model>;
+const model = ({} as unknown) as Model;
 
-// @ts-ignore
-const store = createStore<Model>({});
+const store = createStore<Model>(model);
 
-store.getActions().push();
-store.getActions().pop();
-store.getActions().actionImp(1);
-store.getActions().thunkImp(null);
+store.getListeners().onAction({
+  type: 'foo',
+  payload: undefined,
+  resolvedTargets: [],
+});
 
-const assert = {} as ModelActions;
+type ModelListeners = Listeners<Model>;
+const assert = {} as ModelListeners;
 
 // typings:expect-error
 assert.stateArray;
@@ -82,15 +83,15 @@ assert.reducerImp;
 assert.reducerImp;
 // typings:expect-error
 assert.computedImp;
-assert.actionImp(1);
-assert.thunkImp('foo').then(() => 'zing');
 // typings:expect-error
+assert.actionImp(1);
+// typings:expect-error
+assert.thunkImp('foo').then(() => 'zing');
 assert.onAction({
   payload: 'foo',
   type: 'foo',
   resolvedTargets: ['foo'],
 });
-// typings:expect-error
 assert.onThunk({
   payload: 'foo',
   type: 'foo',
@@ -121,5 +122,17 @@ assert.nested.reducerImp;
 assert.nested.reducerImp;
 // typings:expect-error
 assert.nested.computedImp;
+// typings:expect-error
 assert.nested.actionImp(1);
+// typings:expect-error
 assert.nested.thunkImp('foo').then(() => 'zing');
+assert.nested.onAction({
+  payload: 'foo',
+  type: 'foo',
+  resolvedTargets: ['foo'],
+});
+assert.nested.onThunk({
+  payload: 'foo',
+  type: 'foo',
+  resolvedTargets: ['foo'],
+});

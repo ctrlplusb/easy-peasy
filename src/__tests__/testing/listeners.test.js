@@ -41,7 +41,7 @@ test('listener acts as expected', () => {
   const store = createStore(model);
 
   // act
-  store.getActions().onTodoAdded({
+  store.getListeners().onTodoAdded({
     type: '@action.addTodo',
     payload: 'Test listeners',
   });
