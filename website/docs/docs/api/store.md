@@ -28,7 +28,7 @@ A store is created via the [createStore](/docs/api/create-store) API. A store in
 
   - `getListeners` (Function)
 
-    Returns the listener actions of your store. Useful if you would like to manually execute a listener for the purpose of testing.
+    Returns the listener actions of your store (i.e. [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on)). Useful if you would like to manually execute a listener for the purpose of testing.
 
   - `getMockedActions` (Function)
 
