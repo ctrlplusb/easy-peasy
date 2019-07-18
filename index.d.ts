@@ -41,7 +41,7 @@ type ActionTypes =
   | Action<any, any>
   | Thunk<any, any, any, any, any>
   | ActionOn<any, any>
-  | ThunkOn<any, any, any, any>;
+  | ThunkOn<any, any, any>;
 
 interface ActionCreator<Payload> {
   (payload: Payload): void;
@@ -75,8 +75,8 @@ export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 type ListenerMapper<ActionsModel extends object, Depth extends string> = {
   [P in keyof ActionsModel]: ActionsModel[P] extends ActionOn<any, any>
     ? ActionCreator<TargetPayload<any>>
-    : ActionsModel[P] extends ThunkOn<any, any, any, any>
-    ? ThunkCreator<TargetPayload<any>, ActionsModel[P]['result']>
+    : ActionsModel[P] extends ThunkOn<any, any, any>
+    ? ThunkCreator<TargetPayload<any>, any>
     : ActionsModel[P] extends object
     ? RecursiveListeners<
         ActionsModel[P],
@@ -172,7 +172,7 @@ type RecursiveActions<
         | Reducer<any, any>
         | Computed<any, any, any>
         | ActionOn<any, any>
-        | ThunkOn<any, any, any, any>
+        | ThunkOn<any, any, any>
       >,
       Depth
     >;
@@ -449,18 +449,15 @@ export function thunk<
 export interface ThunkOn<
   Model extends object = {},
   Injections = any,
-  StoreModel extends object = {},
-  Result = any
+  StoreModel extends object = {}
 > {
   type: 'thunkOn';
-  result: Result;
 }
 
 export function thunkOn<
   Model extends object = {},
   Injections = any,
   StoreModel extends object = {},
-  Result = any,
   Resolver extends TargetResolver<Model, StoreModel> = TargetResolver<
     Model,
     StoreModel
@@ -478,8 +475,8 @@ export function thunkOn<
       injections: Injections;
       meta: Meta;
     },
-  ) => Result,
-): ThunkOn<Model, Injections, StoreModel, Result>;
+  ) => any,
+): ThunkOn<Model, Injections, StoreModel>;
 
 // #endregion
 
