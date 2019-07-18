@@ -12,7 +12,7 @@ npm install react-dom
 Then install Easy Peasy.
 
 ```bash
-npm install easy-peasy@3.0.0-rc.3
+npm install easy-peasy@3.0.0-rc.4
 ```
 
 We're off to the races!

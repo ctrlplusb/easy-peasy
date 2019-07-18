@@ -285,11 +285,7 @@ export interface EasyPeasyConfig<
   middleware?: Array<Middleware<any, any, any>>;
   mockActions?: boolean;
   name?: string;
-  reducerEnhancer?: <
-    Reducer extends ReduxReducer = ReduxReducer<any, AnyAction>
-  >(
-    reducer: Reducer,
-  ) => Reducer;
+  reducerEnhancer?: (reducer: ReduxReducer<any, any>) => ReduxReducer<any, any>;
 }
 
 export interface MockedAction {
