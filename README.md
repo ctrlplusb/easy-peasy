@@ -12,7 +12,7 @@
 
 
 ```
-npm install easy-peasy@3.0.0-rc.3
+npm install easy-peasy@3.0.0-rc.4
 ```
 
 

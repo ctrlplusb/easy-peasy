@@ -1,4 +1,5 @@
 import { createStore, Action, action, Thunk, thunk } from 'easy-peasy';
+import { Reducer } from 'redux';
 
 interface Model {
   count: number;
@@ -14,7 +15,19 @@ const model: Model = {
   doThunk: thunk(() => {}),
 };
 
-const store = createStore(model);
+interface PersistPartial {
+  persist: string;
+}
+
+function persistReducer<S, A extends Action>(
+  baseReducer: Reducer<S, A>,
+): Reducer<S & PersistPartial, A> {
+  return (baseReducer as unknown) as Reducer<S & PersistPartial, A>;
+}
+
+const store = createStore(model, {
+  reducerEnhancer: reducer => persistReducer(reducer),
+});
 
 const configuredStore = createStore(model, {
   disableImmer: false,
