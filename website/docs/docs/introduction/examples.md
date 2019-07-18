@@ -10,5 +10,5 @@ A simple todo list that utilises a mock service to illustrate data fetching/pers
 
 This example provides a basic illustration of how to use Easy Peasy in a TypeScript based project.
 
-[View on CodeSandbox](https://codesandbox.io/s/easy-peasy-typescript-ycur0)
+[View on CodeSandbox](https://codesandbox.io/s/easy-peasy-typescript-v3-riqbl)
 
