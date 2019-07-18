@@ -26,13 +26,17 @@ A store is created via the [createStore](/docs/api/create-store) API. A store in
 
     Returns the actions of your store.
 
-  - `getState` (Function, required)
+  - `getListeners` (Function)
 
-    Returns the state of your store.
+    Returns the listener actions of your store. Useful if you would like to manually execute a listener for the purpose of testing.
 
   - `getMockedActions` (Function)
 
     If the `mockActions` configuration value was passed to the `createStore` then calling this function will return the actions that have been dispatched (and mocked). This is useful in the context of testing - especially thunks and listeners.
+
+  - `getState` (Function, required)
+
+    Returns the state of your store.
 
   - `reconfigure` (Function)
 

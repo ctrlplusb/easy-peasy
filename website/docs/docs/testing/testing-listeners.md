@@ -63,9 +63,11 @@ test('listener gets dispatched when target fires', () => {
 
 ## Testing if the listener performs as expected
 
-We may also want to test that our listeners perform the expected. It is possible to dispatch our listeners manually just like we would any other action. However, unlike other actions you will need to provide a specific payload that matches what a listener would expect from its `target` argument.
+We may also want to test that our listeners perform the expected. It is possible to dispatch our listeners manually by using the `store.getListeners()` API. 
 
-The `target` argument that a *listener* handler receives contains the following properties:
+When dispatch a listener action it is important to note that a very specific payload structure is expected. This payload becomes the `target` argument to the listener handler.
+
+Below is an overview of the payload object that you need to provide when manually dispatching a listener action:
 
 - `type` (string)
 
@@ -87,12 +89,12 @@ The `target` argument that a *listener* handler receives contains the following 
 
   An array containing a list of the resolved targets, resolved by the `targetResolver` function. This aids in performing target based logic within a listener handler.
 
-You need not provide a full `target` argument if you know that your listener only uses parts of it. You could instead only populate the parts of the `target` object that you expect your listener to be using.
+You need not provide all the values if you know that your listener only uses some of them. You could instead only populate the parts of the `target` object that you expect your listener to be using.
 
 For example, below we will manually dispatch a listener, providing only the payload.
 
 ```javascript
-store.getActions().onTodoAdded({
+store.getListeners().onTodoAdded({
   payload: 'Write docs on testing'
 })
 ```
@@ -107,7 +109,7 @@ test('onTodoAdded adds a log entry', () => {
   const store = createStore(model);
 
   // act
-  store.getActions().onTodoAdded({
+  store.getListeners().onTodoAdded({
     payload: 'Test listeners',
   });
 

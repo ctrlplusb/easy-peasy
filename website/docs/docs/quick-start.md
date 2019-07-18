@@ -222,8 +222,6 @@ A listener will receive the same payload as was provided to the target being lis
 
 ## Closing notes
 
-That concludes the quick start overview of Easy Peasy.
+That concludes the quick start overview of Easy Peasy. Whilst this should have provided enough of an overview to immediately begin developing with Easy Peasy we highly recommend that you review the [documentation](/docs/introduction) for a more detailed overview of the APIs.
 
-From here we would recommend either looking at the [live examples](/docs/introduction/examples), the [full tutorial](/docs/tutorial) or the [API docs](/docs/api).
-
-Have fun. 👋
+Within the [documentation](/docs/introduction) section you will find detailed tutorials, API docs, TypeScript tutorials, recipes, etc.
