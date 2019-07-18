@@ -22,10 +22,10 @@ Under the hood we use Redux to power the store. 😱
 
 Yes, we have noticed a lot of negative sentiment toward Redux recently. However, we feel that this is usually directed at the boilerplate and configuration that is typical within a Redux application. Discounting the boilerplate, the architectural design of Redux is awesome, providing us with characteristics that fit well into the React paradigm.
 
-Therefore we provide a complete abstraction over Redux, providing an API that is both intuitive and quick to develop against. By wrapping Redux we get to leverage its mature architecture, whilst also being able to support the amazing tooling that has formed around it. For example, we support the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) out of the box. 
+Easy Peasy is a full abstraction over Redux, providing an API that is both intuitive and quick to develop against, whilst removing any need for boilerplate. By wrapping Redux we get to leverage its mature architecture, whilst also being able to support the amazing tooling that has formed around it. For example, we support the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension) out of the box. 
 
-We have even taken this further by outputing a Redux store, which would allow you to interop your Easy Peasy created store with existing libraries and applications based on Redux / React Redux. This unlocks a kinder migration path for those currently using React Redux. 
+In addition to this, as we are outputing a Redux store, this allows interop with existing libraries and applications that are using React Redux. A big benefit of this is that you can apply a gradual migration of your existing applications from React Redux into Easy Peasy. 
 
-Finally, for the most advanced use cases, we allow extension of the underlying Redux store via middleware and enhancers - provided via our `createStore` configuration.
+To help support migration and interoperability we expose configuration allowing the extension of the underlying Redux store via middleware and enhancers.
 
-That being said, absolutely no Redux experience is required to use Easy Peasy. Once you read through the tutorial you should have all the knowledge and confidence you need to be able to integrate Easy Peasy into your application.
+That being said, absolutely no Redux experience is required to use Easy Peasy.
