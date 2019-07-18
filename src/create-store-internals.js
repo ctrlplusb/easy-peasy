@@ -42,8 +42,9 @@ export default function createStoreInternals({
   const actionThunks = {};
   const computedProperties = [];
   const customReducers = [];
-  const listenerDefinitions = [];
+  const listenerActionCreators = {};
   const listenerActionMap = {};
+  const listenerDefinitions = [];
 
   const recursiveExtractDefsFromModel = (current, parentPath) =>
     Object.keys(current).forEach(key => {
@@ -89,9 +90,13 @@ export default function createStoreInternals({
           actionCreator.type = type;
 
           actionCreatorDict[type] = actionCreator;
-          set(path, actionCreators, actionCreator);
-          if (value[actionOnSymbol]) {
-            listenerDefinitions.push(value);
+          if (key !== 'easyPeasyReplaceState') {
+            if (value[actionOnSymbol]) {
+              listenerDefinitions.push(value);
+              set(path, listenerActionCreators, actionCreator);
+            } else {
+              set(path, actionCreators, actionCreator);
+            }
           }
         } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
           const prefix = value[thunkSymbol] ? '@thunk' : '@thunkOn';
@@ -163,10 +168,13 @@ export default function createStoreInternals({
           actionCreator.successType = successType;
           actionCreator.failType = failType;
 
-          set(path, actionCreators, actionCreator);
           actionCreatorDict[type] = actionCreator;
+
           if (value[thunkOnSymbol]) {
             listenerDefinitions.push(value);
+            set(path, listenerActionCreators, actionCreator);
+          } else {
+            set(path, actionCreators, actionCreator);
           }
         } else if (value[computedSymbol]) {
           const parent = get(parentPath, defaultState);
@@ -310,6 +318,7 @@ export default function createStoreInternals({
     actionCreatorDict,
     actionCreators,
     defaultState,
+    listenerActionCreators,
     listenerActionMap,
     reducer: reducerEnhancer(createReducer()),
   };
