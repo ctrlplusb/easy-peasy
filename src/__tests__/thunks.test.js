@@ -12,7 +12,7 @@ const trackActionsMiddleware = () => {
   return middleware;
 };
 
-test('dispatches actions to represent a succeeded thunk', async () => {
+test('dispatches actions to represent a succeeded thunk', () => {
   // arrange
   const model = {
     foo: {
@@ -30,9 +30,9 @@ test('dispatches actions to represent a succeeded thunk', async () => {
   const store = createStore(model, { middleware: [trackActions] });
   const payload = 'hello';
   // act
-  const actualResult = await store.getActions().foo.doSomething(payload);
+  const actualResult = store.getActions().foo.doSomething(payload);
   // assert
-  expect(trackActions.actions).toEqual([
+  expect(trackActions.actions).toMatchObject([
     { type: '@thunk.foo.doSomething(start)', payload },
     { type: '@action.foo.increment', payload: undefined },
     {
@@ -175,17 +175,6 @@ test('async', async () => {
       },
     },
   });
-});
-
-test('is always promise chainable', done => {
-  // arrange
-  const model = { doSomething: thunk(() => undefined) };
-  const store = createStore(model);
-  // act
-  store
-    .getActions()
-    .doSomething()
-    .then(done);
 });
 
 test('dispatch an action via redux dispatch', async () => {

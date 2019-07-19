@@ -1,6 +1,8 @@
 # Thunk
 
-Defines a [thunk](/docs/api/thunk) against your model
+Defines a [thunk](/docs/api/thunk) against your model. Thunks can be synchronous or asynchronous. To enable asyncronous behaviour within a thunk simply use async/await or return a Promise from the thunk.
+
+Thunks are typically used to encapsulate side effects, however, you can also use them to introduce complex workflows around action dispatches.
 
 ## API
 
@@ -32,7 +34,7 @@ Thunk<
 
 - `Result`
 
-  If your [thunk](/docs/api/thunk) returns a value then the type of the value should be defined here. The result is returned to the calling point of the dispatch. It should be encapsulated within a Promise. e.g. `Promise<number>`.
+  If your [thunk](/docs/api/thunk) returns a value then the type of the value should be defined here. The result is returned to the calling point of the dispatch.
 
 
 ## Example

@@ -80,7 +80,7 @@ const model = {
 
 ## Don't destructure the state argument
 
-In order to support the mutation to immutable update feature of actions we utilise [immer](https://github.com/mweststrate/immer). Under the hood immer utilises Proxies in order to perform this tracking. Therefore if you destructure your state you will likely break it out of the Proxy, after which any update you perform to the state will not be applied.
+In order to support the mutation API we utilise [immer](https://github.com/mweststrate/immer). Under the hood immer utilises Proxies in order to track our mutations, converting them into immutable updates. Therefore if you destructure the state that is provided to your action you break out of the Proxy, after which any update you perform to the state will not be applied.
 
 Below are a couple examples of this antipattern.
 
@@ -99,26 +99,13 @@ addTodo: action((state, payload) => {
 })
 ```
 
-That being said if you are returning new "immutable" versions of your state from your action then this warning does not apply. For example.
+## Switching to an immutable API
 
-```javascript
-addTodo: action((state, payload) => {
-  const { items } = state;
-  return {
-    ...state,
-    items: [
-      ...items,
-      payload
-    ]
-  };
-})
-```
+By default we use [immer](https://github.com/mweststrate/immer) to provide a mutation based API. 
 
-## Switching actions into immutable based updates
+If you prefer to explicitly return new immutable state you set the `disableImmer` [configuration](/docs/api/store-config) value of [createStore](/docs/api/create-store). 
 
-Although we use [immer](https://github.com/mweststrate/immer) to convert the mutations that you perform on state within actions into immutable updates on your store, you may prefer to explicitly return new immutable state.
-
-You can do so by setting the `disableImmer` [configuration](/docs/api/store-config) of the [createStore](/docs/api/create-store). You would then have to return new immutable state within your action handlers as you would within a standard Redux reducer.
+Doing so will disable `immer` and require you to return new immutable state within your actions.
 
 ```javascript
 import { createStore, action } from 'easy-peasy';
@@ -136,4 +123,4 @@ const store = createStore(model, {
 })
 ```
 
-If you don't set this flag and return new immutable state you may experience errors when utilising [computed](/docs/api/computed) properties.
+If you don't set this flag and return new immutable state you may experience errors when utilising [computed](/docs/api/computed) properties, so it is best to disable `immer` explicitly.

@@ -108,7 +108,7 @@ type RecursiveListeners<
         | Reducer<any, any>
         | Computed<any, any, any>
         | Action<any, any>
-        | Thunk<any, any>
+        | Thunk<any, any, any, any, any>
       >,
       Depth
     >;
@@ -136,11 +136,8 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
       : ActionCreator<ActionsModel[P]['payload']>
     : ActionsModel[P] extends Thunk<any, any, any, any, any>
     ? ActionsModel[P]['payload'] extends void
-      ? ThunkCreator<void, Promise<ActionsModel[P]['result']>>
-      : ThunkCreator<
-          ActionsModel[P]['payload'],
-          Promise<ActionsModel[P]['result']>
-        >
+      ? ThunkCreator<void, ActionsModel[P]['result']>
+      : ThunkCreator<ActionsModel[P]['payload'], ActionsModel[P]['result']>
     : ActionsModel[P] extends object
     ? RecursiveActions<
         ActionsModel[P],

@@ -2,7 +2,9 @@
 
 We have refactored our [application](https://codesandbox.io/s/easy-peasy-tutorial-actions-1e62s) with the capability to update state by dispatching [actions](/docs/api/action). 
 
-We did however note that there is a network request being made to a basket service. We can encapsulate this side effect within a [thunk](/docs/api/thunk). Doing so allows us to encapsulate side effects that ultimately affect our state within our [store](/docs/api/store).
+We did however note that there is a network request being made to the basket service within the `Product` component. After the request to the basket service has completed an [action](/docs/api/action) is dispatched to add the respective product to the basket state. This type of side effect, which has a direct correlation to our state is perfect for encapsulation within a [thunk](/docs/api/thunk).
+
+[Thunks](/docs/api/thunk) cannot modify state directly, however, they can dispatch [actions](/docs/api/action) to do so. Therefore we can manage the network effect within our thunk, and when it has completed call an [action](/docs/api/action) to update our state appropriately. [Thunks](/docs/api/thunk) also have first class support for asynchronous code - i.e. `async/await` or `Promise`.
 
 ## Defining a thunk on our model
 
@@ -35,9 +37,11 @@ const basketModel = {
 
 Quite a hefty update, but a lot of behaviour has now been encapsulated within our store.
 
-[Thunks](/docs/api/thunk) are asynchronous in nature. Therefore we can use async/await within our [thunk](/docs/api/thunk) handler to easily manage our asynchronous workflow. 
+> [Thunks](/docs/api/thunk) can be asynchronous or synchronous. If you use `async/await` or return a `Promise` from your [thunk](/docs/api/thunk) it will be considered asynchronous. Easy Peasy has special logic to monitor asynchronous [thunks](/docs/api/thunk) and will ensure listeners (we will cover them later) are only dispatched when an asynchronous [thunk](/docs/api/thunk) has resolved. A use-case for a synchronous thunk would be to encapsulate if/else logic around the dispatching of actions. That being said, using thunks in an asynchronous manner to encapsulate side effects is by far the more common use-case.
 
-It is important to note that [thunks](/docs/api/thunk) are unable to update state directly - they are instead provided the [actions](/docs/api/action), allowing us to dispatch these [actions](/docs/api/action) to update our state appropriately. You can dispatch as many [actions](/docs/api/action) as you like, and can even dispatch [actions](/docs/api/action) to represent an error that may have occurred when attempting to call the service.
+It is important to remember that [thunks](/docs/api/thunk) are unable to update state directly - they are instead provided the local [actions](/docs/api/action) and [thunks](/docs/api/thunk) via the `actions` argument. We can dispatch the provided actions to update our state appropriately.
+
+> You can dispatch as many [actions](/docs/api/action) as you like. Consider the case of dispatching different actions to represent a failed or successful network request.
 
 ## Refactoring our Product component
 
@@ -66,11 +70,9 @@ export default function Product({ id }) {
   // ...
 ```
 
-As we refactored our `addProduct` [action](/docs/api/action) into a [thunk](/docs/api/thunk) we don't need to import our [thunk](/docs/api/thunk) and dispatch it.
+As we refactored our `addProduct` [action](/docs/api/action) into a [thunk](/docs/api/thunk) we don't change our `useStoreActions` code, instead we are prefixing our `addProduct` dispatch with an an `await`, leveraging the `Promise` that will be returned by our asynchronous thunk. This allows us to maintain the existing behaviour around setting the `adding` flag which indicates to the UI when the adding operation is in progress.
 
-Note that we have prefixed the dispatch of our [thunk](/docs/api/thunk) with the `await` keyword. [Thunk](/docs/api/thunk) always return a `Promise` when they are dispatched. When the `Promise` resolves you can be sure that the [thunk](/docs/api/thunk) has completed its execution. This is handy in our current case as it allows us to maintain the logic where we set a flag indicating that the adding operation is in progress.
-
-Once  you have made this change you will be able to run your application and then test the [thunk](/docs/api/thunk) by adding a product to your basket.
+Once  you have made this change you will be able to run your application and then test the [thunk](/sdocs/api/thunk) by adding a product to your basket.
 
 ## Review
 

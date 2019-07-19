@@ -2,7 +2,7 @@
 
 Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickly</strong> and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, performance optimisation, developer tools etc.
 
-## Highlights
+## Features
 
   - Zero configuration
   - No boilerplate
@@ -10,7 +10,7 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
   - Computed properties - i.e. derived data
   - Data fetching / side effects
   - Testing helpers
-  - TypeScript definitions included
+  - Extensive TypeScript support
   - Global, shared, or component level stores
   - React Native supported
   - Redux Dev Tools supported

@@ -1,17 +1,18 @@
 # listeners
 
-This is the shared documentation for the [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs. Both APIs allow you to declare a listener, which gets executed in response to configured actions having been executed.
+This is the shared documentation for the [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs. Both APIs allow you to declare a listener, which gets executed in response to configured [actions](/docs/api/action) or [thunks](/docs/api/thunk) having been executed.
 
-The [actionOn](/docs/api/action-on) API allows you to declare a listener which will be used to update state, much like a standard [action](/docs/api/action). It shares the same characteristics as an [action](/docs/api/action), so we recommend that you are familiar with [actions](/docs/api/action).
+The [actionOn](/docs/api/action-on) API allows you to declare a listener which will be used to update state, similar to a standard [action](/docs/api/action). It shares many characteristics of [actions](/docs/api/action), so we recommend that you are familiarise yourself with [actions](/docs/api/action) first.
 
-The [thunkOn](/docs/api/thunk-on) API allows you to declare a listener which will be used to perform side effects, much like a standard [thunk](/docs/api/thunk). It shares the same characteristics as a [thunk](/docs/api/thunk), so we recommend that you are familiar with [thunks](/docs/api/thunk).
+The [thunkOn](/docs/api/thunk-on) API allows you to declare a listener which will be used to perform side effects, or logic based action dispatching, similar to a standard [thunk](/docs/api/thunk). It shares many characteristics of a [thunk](/docs/api/thunk), so we recommend that you are familiarise yourself with [thunks](/docs/api/thunk) first.
 
 Whilst [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) are similar to [action](/docs/api/action) and [thunk](/docs/api/thunk) respectively they do have the following distinctions:
 
 1. They require you define a `targetResolver` function as the first argument to your *listener* definitions. The `targetResolver` will receive the store actions and is responsible for resolving the target(s) to listen to.
 2. The handler for the action/thunk listener will receive a `target` argument instead of a `payload` argument. This `target` argument is an object containing a lot of useful information about the target being handled, including the payload.
+3. They will not be provided via the store's `getActions` API, or via the `actions` argument that are provided to thunks. A store instance does however expose a `getListeners` API which would allow you to manually trigger listeners - although we recommend that you strictly use this for testing only.
 
-We will cover of both of these points in more detail below, but first, let's provide a brief example of each of the APIs.
+Let's explore a brief example of each of the listener APIs.
 
 ## actionOn
 
@@ -30,7 +31,7 @@ onAddTodo: actionOn(
 
 ## thunkOn
 
-A *listener* thunk is responsible for performing side effects (e.g. a call to an HTTP endpoint) in response to configured *targets* being executed.
+A *listener* thunk is responsible for performing side effects (e.g. a call to an HTTP endpoint), or logic based action dispatching, in response to configured *targets* being executed.
 
 ```javascript
 onAddTodo: thunkOn(
@@ -45,7 +46,18 @@ onAddTodo: thunkOn(
 
 ## `targetResolver`
 
-The first argument you provide to a *listener* definition is the `targetResolver` function. This function will receive the following arguments:
+The first argument you provide to a *listener* definition is the `targetResolver` function. 
+
+```javascript
+onAddTodo: thunkOn(
+  actions => actions.addTodo, // 👈 the targetResolver function
+  async (actions, target) => {
+    await auditService.add(`Added a todo: ${target.payload}`);
+  }
+)
+```
+
+This function will receive the following arguments:
 
 - `actions` (Object)
 
@@ -86,15 +98,28 @@ The function should then resolve one of the following:
 
 ## `target` Argument
 
-The `target` argument that a *listener* handler receives contains the following properties:
+Instead of a `payload` argument, listeners recieve a `target` argument.
+
+```javascript
+onAddTodo: thunkOn(
+  actions => actions.addTodo, 
+  //  The target argument
+  //                👇
+  async (actions, target) => {
+    await auditService.add(`Added a todo: ${target.payload}`);
+  }
+)
+```
+
+The `target` argument is an object containing the following properties:
 
 - `type` (string)
 
-  The type of the target action being responded to. e.g. `"@actions.todos.addTodo"`
+  The type of the target action that is being responded to. e.g. `"@actions.todos.addTodo"`. This can be helpful as a mechanism of distinguishing if you are targeting multiple actions.
 
 - `payload` (any)
 
-  This will contain the same payload of the target action being responded to.
+  This will contain the same payload that the target action received.
 
 - `result` (any | null)
 
@@ -106,36 +131,11 @@ The `target` argument that a *listener* handler receives contains the following 
 
 - `resolvedTargets` (Array\<string\>)
 
-  An array containing a list of the resolved targets, resolved by the `targetResolver` function. This aids in performing target based logic within a listener handler.
-
-## Listening to thunks
-
-In the examples above the listeners were configured to listen to an [action](https://easy-peasy.now.sh/docs/api/action).
-
-You can just as easily target a [thunk](https://easy-peasy.now.sh/docs/api/thunk).
-
-```javascript
-onAddTodo: actionOn(
-  actions => actions.saveTodo, // 👈 targeting a thunk
-  (state, target) => {
-    if (target.error) {
-      state.auditLog.push(`Failed to save a todo: ${target.error.message}`);
-    } else {
-      state.auditLog.push(`Saved a todo: ${target.payload}`);
-    }
-  }
-)
-```
-
-When you listen to a [thunk](https://easy-peasy.now.sh/docs/api/thunk) your *listener* will be fired any time the target [thunk](https://easy-peasy.now.sh/docs/api/thunk) succeeds or fails.
-
-If the [thunk](https://easy-peasy.now.sh/docs/api/thunk) failed the `error` property of the `target` argument will be populated.
-
-If the [thunk](https://easy-peasy.now.sh/docs/api/thunk) succeeded and returns a value, then the `result` property of the `target` argument will be populated with the returned value.
+  An array containing a list of the targets resolved by the `targetResolver` function. This aids in performing target based logic within a listener handler. We will provide an example of this below.
 
 ## Listening to multiple actions
 
-A *listener* can have multiple *targets*. To aid having logic specific to each target type, both the `actionOn` and `thunkOn` handlers will receive a `resolvedTargets` array contained within the `target` object.
+A *listener* can have multiple *targets*. To aid having logic specific to each target type, both the `actionOn` and `thunkOn` handlers will receive a `resolvedTargets` array within the `target` argument.
 
 The `resolvedTargets` array contains the list of the action types resolved by the `targetResolver` function you provided to the *listener*. This array will match the index order of the types resolved by the `targetResolver`.
 

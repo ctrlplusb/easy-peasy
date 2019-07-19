@@ -12,7 +12,7 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
 <p>&nbsp;</p>
 
 ```bash
-npm install easy-peasy@3.0.0-rc.4
+npm install easy-peasy@3.0.0-rc.5
 ```
 
 <p>&nbsp;</p>
@@ -65,7 +65,7 @@ function TodoList() {
   - Computed properties - i.e. derived data
   - Data fetching / side effects
   - Testing helpers
-  - TypeScript definitions included
+  - Extensive TypeScript support
   - Global, shared, or component level stores
   - React Native supported
   - Redux Dev Tools supported

@@ -8,8 +8,9 @@ interface Injections {
 
 interface AuditModel {
   logs: string[];
-  log: Thunk<AuditModel, string, Injections, StoreModel, number>;
+  log: Thunk<AuditModel, string, Injections, StoreModel, Promise<number>>;
   empty: Thunk<AuditModel>;
+  syncThunk: Thunk<AuditModel, undefined, undefined, StoreModel, string>;
 }
 
 interface StoreModel {
@@ -20,7 +21,7 @@ const model: StoreModel = {
   audit: {
     logs: [],
     log: thunk(
-      (
+      async (
         actions,
         payload,
         {
@@ -43,12 +44,19 @@ const model: StoreModel = {
         return 1;
       },
     ),
+    syncThunk: thunk((actions, payload) => {
+      return 'Woot!';
+    }),
     empty: thunk(() => {}),
   },
 };
 
 const store = createStore(model);
 
+store
+  .getActions()
+  .audit.syncThunk()
+  .toUpperCase();
 store
   .getActions()
   .audit.log('foo')
