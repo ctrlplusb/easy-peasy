@@ -4,7 +4,7 @@ This helper is useful in the context of [actions](/docs/api/action). [Actions](/
 
 Use this helper in order to convert your `state` into its native representation.
 
-Before:
+_Before:_
 
 ```javascript
 const model = {
@@ -14,7 +14,7 @@ const model = {
 }
 ```
 
-After:
+_After:_
 
 ```javascript
 import { debug } from 'easy-peasy';
@@ -25,3 +25,5 @@ const model = {
   })
 }
 ```
+
+> If you have set the `disableImmer` configuration value on the store you will not need to use this helper.

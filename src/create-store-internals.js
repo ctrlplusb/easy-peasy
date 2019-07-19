@@ -1,5 +1,5 @@
 import memoizerific from 'memoizerific';
-import { createDraft, finishDraft, isDraft } from 'immer-peasy';
+import { createDraft, finishDraft } from 'immer-peasy';
 import {
   actionOnSymbol,
   actionSymbol,
@@ -9,10 +9,6 @@ import {
   thunkSymbol,
 } from './constants';
 import { isStateObject, get, set } from './lib';
-
-function tick() {
-  return new Promise(resolve => setTimeout(resolve));
-}
 
 const newify = (currentPath, currentState, finalValue) => {
   if (currentPath.length === 0) {
@@ -145,41 +141,60 @@ export default function createStoreInternals({
           const startType = `${type}(start)`;
           const successType = `${type}(success)`;
           const failType = `${type}(fail)`;
-          const actionCreator = payload =>
-            tick()
-              .then(() =>
-                references.dispatch({
-                  type: startType,
-                  payload,
-                }),
-              )
-              .then(() => references.dispatch(() => thunkHandler(payload)))
-              .then(result => {
-                references.dispatch({
-                  type: successType,
-                  payload,
-                  result,
-                });
-                references.dispatch({
-                  type,
-                  payload,
-                  result,
-                });
-                return result;
-              })
-              .catch(err => {
-                references.dispatch({
-                  type: failType,
-                  payload,
-                  error: err,
-                });
-                references.dispatch({
-                  type,
-                  payload,
-                  error: err,
-                });
-                throw err;
+          const actionCreator = payload => {
+            const dispatchError = err => {
+              references.dispatch({
+                type: failType,
+                payload,
+                error: err,
               });
+              references.dispatch({
+                type,
+                payload,
+                error: err,
+              });
+            };
+            const dispatchSuccess = result => {
+              references.dispatch({
+                type: successType,
+                payload,
+                result,
+              });
+              references.dispatch({
+                type,
+                payload,
+                result,
+              });
+            };
+
+            references.dispatch({
+              type: startType,
+              payload,
+            });
+            try {
+              const result = references.dispatch(() => thunkHandler(payload));
+              if (
+                typeof result === 'object' &&
+                typeof result.then === 'function'
+              ) {
+                return result
+                  .then(resolved => {
+                    dispatchSuccess(resolved);
+                    return resolved;
+                  })
+                  .catch(err => {
+                    dispatchError(err);
+                    throw err;
+                  });
+              }
+              dispatchSuccess(result);
+              return result;
+            } catch (err) {
+              dispatchError(err);
+              throw err;
+            }
+          };
+
           actionCreator.type = type;
           actionCreator.startType = startType;
           actionCreator.successType = successType;

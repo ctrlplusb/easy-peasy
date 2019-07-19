@@ -1,6 +1,12 @@
 # thunk
 
-Declares a thunk action on your model. A thunk typically encapsulates side effects (e.g. calls to an API). It is always executed asynchronously, returning a `Promise`. Thunks cannot modify state directly, however, they can dispatch other actions to do so.
+Declares a [thunk](docs/api/thunk) action on your model. [Thunks](docs/api/thunk) cannot modify state directly, however, they can dispatch [actions](/docs/api/action) to do so. 
+
+[Thunks](docs/api/thunk) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
+
+When you use `async/await` or return a `Promise` from your [thunk](docs/api/thunk), Easy Peasy will wait for the asynchronous work to complete prior to firing any listeners that are targeting the [thunk](docs/api/thunk).
+
+Another interesting property of [thunks](docs/api/thunk) is that any value that is returned from a [thunk](docs/api/thunk) will be provided to the caller - i.e. where it was dispatched from. Therefore if you were using `async/await`, or returned a `Promise`, from your [thunk](docs/api/thunk) the caller would be able to chain off the returned `Promise` to know when the [thunk](docs/api/thunk) has completed execution.
 
 ```javascript
 thunk(async (actions, payload) => {
@@ -8,6 +14,19 @@ thunk(async (actions, payload) => {
   actions.loginSucceeded(user);
 })
 ```
+
+_or_
+
+```javascript
+thunk((actions, payload) => {
+  if (payload.valid) {
+    actions.doValid();
+  } else {
+    actions.doInvalid();
+  }
+})
+```
+
 
 ## Arguments
 
@@ -29,7 +48,7 @@ thunk(async (actions, payload) => {
 
       - `dispatch` (Function)
 
-        The Redux dispatch function, allowing you to dispatch "custom" actions.
+        The Redux dispatch function, allowing you to dispatch "standard" Redux actions.
 
       - `getState` (Function)
 
@@ -41,7 +60,7 @@ thunk(async (actions, payload) => {
 
         When executed it will get the [actions](/docs/api/action). i.e. all of the [actions](/docs/api/action) across your entire store.
 
-        We don't recommend dispatching actions like this, and invite you to consider creating a *listener* [action](/docs/api/action) or [thunk](/docs/api/thunk), which instead promotes a reactive model and generally allows responsiblity to be at the right place.
+        We don't recommend dispatching actions like this, and invite you to consider creating an [actionOn](/docs/api/action-on) or [thunkOn](/docs/api/thunk-on) listener instead.
 
       - `getStoreState` (Function)
 
@@ -70,39 +89,45 @@ thunk(async (actions, payload) => {
             An array representing the full path to the thunk based on where it
             was attached within your model.
 
-        For example:
+## Asynchronous Execution
 
-        ```javascript
-        const store = createStore({
-          products: {
-            fetchById: thunk((actions, payload, { meta }) => {
-              console.log(meta);
-              // {
-              //   parent: ['products'],
-              //   path: ['products', 'fetchById']
-              // }
-            })
-          }
-        });
-        ```
-
-## Thunks are asynchronous
-
-There is an important distinction to be made of [thunks](/docs/api/thunk), when compared to [actions](/docs/api/action). [Thunks](/docs/api/thunk) are executed asynchronously, _always_ returning a `Promise`.
-
-This is especially important in the cases that you would like to execute some code after the [thunk](/docs/api/thunk) has completed. In this case you would need to wait for the `Promise` that is returned to resolve.
-
-For example, if you wanted to inspect the state changes that occurred after your [thunk](/docs/api/thunk) completed you would have to do the following.
+To enable a [thunk](/docs/api/thunk) to be asynchronous simply use `async/await` or return a `Promise` from your [thunk](/docs/api/thunk).  Doing this allows you to manage asynchronous calls to APIs for example.
 
 ```javascript
-store.getActions().todos.saveTodo('Learn easy peasy')
-  // 👇 we chain on the promise returned by dispatching the thunk
-  .then(() => {
-    console.log(store.getState());
-  });
+const todosModel = {
+  todos: [],
+  savedTodo: action((state, payload) => {
+    state.todos.push(payload);
+  }),
+  //     👇 our asynchronous thunk makes use of async/await 
+  saveTodo: thunk(async (actions, payload) => {
+    const saved = await todoService.save(payload);
+    actions.addTodo(saved);
+  })
+};
 ```
 
-This mechanism is useful within your React components. For example you may use a [thunk](/docs/api/thunk) to handle a form submission (e.g. login), and then perform a redirect after the [thunk](/docs/api/thunk) has completed.
+An asynchronous [thunk](/docs/api/thunk) will have its `Promise` returned to the code that dispatched the [thunk](/docs/api/thunk). This is especially important in the cases that you would like to execute some code after the [thunk](/docs/api/thunk) has completed. 
+
+```javascript
+function MyComponent() {
+  const saveTodo = useStoreActions(actions => actions.todos.saveTodo);
+  const onSaveClick = useCallback(
+    // We chain on the promise returned by dispatching the thunk
+    //                                  👇
+    () => saveTodo('Learn easy peasy').then(() => {
+      // redirect on success
+      history.push('/done');
+    }),
+    [saveTodo]
+  );
+}
+store.getActions().todos.
+```
+
+## Synchronous Execution
+
+
 
 ## Debugging Thunks
 
@@ -117,41 +142,9 @@ Using the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extensi
 
 <img src="../../assets/devtools-thunk.png" />
 
-## Example
+## Accessing state within a thunk
 
-This is a fully integrated example show how you can declare and use a thunk.
-
-```javascript
-import { action, createStore, thunk, useStoreActions } from 'easy-peasy';
-
-const store = createStore({
-  session: {
-    user: undefined,
-    //  👇 our thunk
-    login: thunk(async (actions, payload) => {
-      const user = await loginService(payload)
-      actions.loginSucceeded(user)
-    }),
-    loginSucceeded: action((state, payload) => {
-      state.user = payload
-    })
-  }
-});
-
-function LoginButton({ username, password }) {
-  const login = useStoreActions(actions => actions.session.login);
-  return (
-    //                       👇 dispatch with a payload
-    <button onClick={() => login({ username, password }))}>
-      Login
-    </button>
-  );
-}
-```
-
-## Accessing local state
-
-In this example our thunk will use the state that is local to it.
+You can access the local state via `getState`, or the entire store state via `getStoreState`.
 
 ```javascript
 import { createStore, thunk } from 'easy-peasy';
@@ -159,35 +152,16 @@ import { createStore, thunk } from 'easy-peasy';
 const store = createStore({
   counter: {
     count: 1,
-    debug: thunk(async (actions, payload, { getState }) => {
+    debug: thunk((actions, payload, { getState, getStoreState }) => {
       console.log(getState());
+      console.log(getStoreState());
       // { count: 1 }
     }),
   }
 });
 ```
 
-## Accessing full store state
-
-In this example our thunk will use the full state of our store.
-
-```javascript
-import { createStore, thunk } from 'easy-peasy';
-
-const store = createStore({
-  session: {
-    username: 'mary',
-  },
-  counter: {
-    count: 1,
-    debug: thunk(async (actions, payload, { getStoreState }) => {
-      const state = getStoreState();
-      console.log(state);
-      // { session: { username: 'mary' }, counter: { count: 1 } }
-    }),
-  }
-});
-```
+Just remember, if you are executing actions within your [thunk](/docs/api/thunk) then you may need to call `getState` or `getStoreState` after the action if you need to see/use the updated state.
 
 ## Dispatching an action on another part of your model
 
@@ -211,31 +185,27 @@ const store = createStore({
 });
 ```
 
-We don't recommend doing the above, and instead encourage you to define a listener [action](/docs/api/action) or [thunk](/docs/api/thunk), which promotes a better separation of concerns.
+We don't recommend doing the above, and instead encourage you to define an [actionOn](/docs/api/action-on) or [thunkOn](/docs/api/thunk-on) listener, which promotes a better separation of concerns.
 
 ## Dependency injection
 
-In this example we will use an injected util provided to our store via the store configuration.
+In this example we will use injections to provide an API service to our thunk.
 
 ```javascript
-import { createStore, thunk } from 'easy-peasy';
-import api from './api'
-
 const model = {
-  foo: 'bar',
-  doSomething: thunk(async (dispatch, payload, { injections }) => {
+  saveTodo: thunk(async (dispatch, payload, { injections }) => {
     //                                              👆
     //                 |- Consuming the injections -|
     //                👇
-    const { api } = injections
-    await api.foo()
-  }),
+    const { todosService } = injections;
+    await todosService.save(payload);
+  })
 };
 
 const store = createStore(model, {
-  // 👇 injections defined here
+  // 👇 injections are configured against the store
   injections: {
-    api,
+    todosService,
   }
 });
 ```

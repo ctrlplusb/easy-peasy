@@ -14,7 +14,7 @@ isLoggedIn: computed(state => state.user != null)
 
   > Note: this is an optional parameter, you can omit it and instead just provide a `computationFunc`.
 
-  State selectors allows you to isolate the specific parts of your state as inputs to your computation function. Each state selector function receives the following arguments:
+  State selectors allows you to isolate the specific parts of your state as inputs to your computation function. They also have the added benefit of being able to expose the entire store state to your computed property. Each state selector function receives the following arguments:
 
   - `state` (Object)
 
@@ -24,7 +24,7 @@ isLoggedIn: computed(state => state.user != null)
 
     The entire store state
 
-  In general it is recommended that you only use state selectors if you need resolve store state, i.e from another part of your model. There are some performance benefits to be had by isolating local state, but in almost every case this would be insignificant.
+  In general it is recommended that you only use state selectors if you need to resolve state from another part of your model. There are some performance benefits to be had by isolating local state, but in almost every case this would be insignificant.
 
   It is also worth noting that the `state` and `storeState` that are provided to your state selectors will include [computed](/docs/api/computed) properties too. Computed properties are allowed to reference each other.
 
@@ -32,11 +32,7 @@ isLoggedIn: computed(state => state.user != null)
 
   The `computationFunc` that will receive the input state and return the derived value. If no `stateResolvers` were defined the `computationFunc` will receive the local state as its input.
 
-## Defining computed properties
-
-This section will demonstrate various use cases in terms of defining [computed](/docs/api/computed) properties.
-
-### Simple computed property
+## Simple computed property
 
 This is the simplest form of computed properties, and the form that should be used in most cases.
 
@@ -49,7 +45,7 @@ const model = {
 }
 ```
 
-### Utilising state resolvers
+## Utilising state resolvers
 
 In this example we will use state resolvers to isolate different parts of our store state.
 
@@ -74,7 +70,7 @@ const model = {
 }
 ```
 
-### Supporting runtime arguments
+## Supporting runtime arguments
 
 You can return a function from your computed property to support runtime arguments.
 
@@ -113,11 +109,7 @@ const todos = {
 }
 ```
 
-## Accessing computed properties
-
-Now we will cover the various ways you can consume [computed](/docs/api/computed) properties within your application.
-
-### Accessing via a component
+## Accessing via a component
 
 You access computed properties in the same manner as any other state within your components, i.e. via the [useStoreState](/docs/api/use-store-state) hook. Any updates to our [computed](/docs/api/computed) property, i.e. the input state to our [computed](/docs/api/computed) property changed, will automatically re-render your component.
 
@@ -130,7 +122,7 @@ function TotalPriceOfProducts() {
 }
 ```
 
-### Accessing via the store instance
+## Accessing via the store instance
 
 You can also access the computed property via the [store's](/docs/api/store) `getState` API.
 
