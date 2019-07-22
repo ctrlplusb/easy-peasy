@@ -47,7 +47,6 @@ export default function createStoreInternals({
     return finishDraft(draft);
   }
 
-  let isInReducer = false;
   const defaultState = initialState;
   const actionCreatorDict = {};
   const actionCreators = {};
@@ -58,6 +57,11 @@ export default function createStoreInternals({
   const listenerActionCreators = {};
   const listenerActionMap = {};
   const listenerDefinitions = [];
+
+  const computedState = {
+    isInReducer: false,
+    currentState: defaultState,
+  };
 
   const recursiveExtractDefsFromModel = (current, parentPath) =>
     Object.keys(current).forEach(key => {
@@ -217,9 +221,14 @@ export default function createStoreInternals({
               configurable: true,
               enumerable: true,
               get: () => {
-                const storeState = isInReducer
-                  ? references.currentState
-                  : references.getState();
+                let storeState;
+                if (computedState.isInReducer) {
+                  storeState = computedState.currentState;
+                } else if (references.getState == null) {
+                  return undefined;
+                } else {
+                  storeState = references.getState();
+                }
                 const state = get(parentPath, storeState);
                 const inputs = computedMeta.stateResolvers.map(resolver =>
                   resolver(state, storeState),
@@ -314,19 +323,17 @@ export default function createStoreInternals({
     };
 
     const rootReducer = (state, action) => {
-      isInReducer = true;
       const stateAfterActions = reducerForActions(state, action);
-      const result =
+      const next =
         customReducers.length > 0
           ? reducerForCustomReducers(stateAfterActions, action)
           : stateAfterActions;
-      isInReducer = false;
-      if (result !== state) {
+      if (state !== next) {
         computedProperties.forEach(({ parentPath, createComputedProperty }) => {
-          createComputedProperty(get(parentPath, result));
+          createComputedProperty(get(parentPath, next));
         });
       }
-      return result;
+      return next;
     };
 
     return rootReducer;
@@ -335,6 +342,8 @@ export default function createStoreInternals({
   return {
     actionCreatorDict,
     actionCreators,
+    computedProperties,
+    computedState,
     defaultState,
     listenerActionCreators,
     listenerActionMap,

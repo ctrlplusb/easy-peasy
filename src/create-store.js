@@ -74,16 +74,17 @@ export default function createStore(model, options = {}) {
     return undefined;
   };
 
-  const currentStateMiddleware = () => next => action => {
-    references.currentState = references.getState();
+  const computedPropertiesMiddleware = store => next => action => {
+    references.internals.computedState.currentState = store.getState();
+    references.internals.computedState.isInReducer = true;
     return next(action);
   };
 
   const easyPeasyMiddleware = [
+    computedPropertiesMiddleware,
     reduxThunk,
     ...middleware,
     listenerActionsMiddleware,
-    currentStateMiddleware,
   ];
 
   if (mockActions) {
@@ -105,6 +106,10 @@ export default function createStore(model, options = {}) {
     references.internals.defaultState,
     composeEnhancers(applyMiddleware(...easyPeasyMiddleware), ...enhancers),
   );
+
+  store.subscribe(() => {
+    references.internals.computedState.isInReducer = false;
+  });
 
   references.dispatch = store.dispatch;
   references.getState = store.getState;

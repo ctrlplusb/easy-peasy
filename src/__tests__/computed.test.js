@@ -265,7 +265,9 @@ test('computed properties work in a React component', () => {
   });
 
   // assert
+  expect(store.getState().products.items).toEqual([{ id: 1, name: 'shoes' }]);
   expect(getByTestId('name').textContent).toBe('shoes');
+
   expect(renderCount).toBe(2);
 
   // act
@@ -312,7 +314,6 @@ test('computed properties accessing others in React component', () => {
       ),
       setProductName: action((state, payload) => {
         const product = state.items.find(p => p.id === payload.id);
-        console.log(product);
         product.name = payload.name;
       }),
     },
