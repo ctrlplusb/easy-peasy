@@ -15,18 +15,6 @@ thunk(async (actions, payload) => {
 })
 ```
 
-_or_
-
-```javascript
-thunk((actions, payload) => {
-  if (payload.valid) {
-    actions.doValid();
-  } else {
-    actions.doInvalid();
-  }
-})
-```
-
 
 ## Arguments
 
@@ -127,7 +115,17 @@ store.getActions().todos.
 
 ## Synchronous Execution
 
+[Thunks](/docs/api/thunk) can also be synchronous, which is useful for encapsulating logic around action dispatching.
 
+```javascript
+thunk((actions, payload) => {
+  if (payload.valid) {
+    actions.doValid();
+  } else {
+    actions.doInvalid();
+  }
+})
+```
 
 ## Debugging Thunks
 
