@@ -24,7 +24,7 @@ We have split the configuration parameters into two groupings, standard and adva
 
 - `injections` (any, *optional*, default=undefined)
 
-  Any dependencies you would like to inject, making them available to your effect actions. They will become available as the 4th parameter to the effect handler. See the [effect](#effectaction) docs for more.
+  Any dependencies you would like to inject. They will be made available to your [thunks](/docs/api/thunk).
 
 - `mockActions` (boolean, *optional*, default=false)
 
