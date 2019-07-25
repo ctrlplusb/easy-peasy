@@ -207,7 +207,7 @@ import { actionOn } from 'easy-peasy';
 
 const auditModel = {
   logs: [],
-  onAddedToBasket: action(
+  onAddedToBasket: actionOn(
     // targetResolver function receives actions and resolves the targets:
     (actions, storeActions) => storeActions.basket.addProduct
     // action handler that executes when target is executed:
