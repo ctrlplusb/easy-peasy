@@ -113,6 +113,8 @@ function MyComponent() {
 store.getActions().todos.
 ```
 
+> **Note:** If you are using a `Promise` within your thunk, rather than `async/await`, you need to ensure that you return the `Promise` from your thunk so that Easy Peasy is able to track it internally.
+
 ## Synchronous Execution
 
 [Thunks](/docs/api/thunk) can also be synchronous, which is useful for encapsulating logic around action dispatching.
