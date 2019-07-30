@@ -19,7 +19,7 @@ npm install easy-peasy
 Your [store](/docs/api/store) definition is represented via an object-based model.
 
 ```javascript
-const productsModel = : {
+const productsModel = {
   items: {
     1: { id: 1, name: 'Peas', price: 10 }
   }
