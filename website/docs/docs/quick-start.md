@@ -192,7 +192,7 @@ import { useStoreState } from 'easy-peasy';
 
 function ProductCount() {
   //               👇
-  const count = useState(state => state.products.count);
+  const count = useStoreState(state => state.products.count);
   return <div>{count} products</div>;
 }
 ```
