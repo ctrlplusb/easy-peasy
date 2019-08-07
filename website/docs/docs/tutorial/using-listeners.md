@@ -1,8 +1,8 @@
 # Using listeners
 
-Our [application](https://codesandbox.io/s/easy-peasy-tutorial-computed-uohgr) is looking pretty well rounded, having introduced [computed](/docs/api/computed) properties. We have covered most of the Easy Peasy API, but there is still one powerful concept you should be aware of; listeners.
+Our [application](https://codesandbox.io/s/easy-peasy-tutorial-computed-uohgr) is looking pretty well rounded, having introduced [computed](/docs/api/computed.html) properties. We have covered most of the Easy Peasy API, but there is still one powerful concept you should be aware of; listeners.
 
-Easy Peasy provides [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs which allow you to declare an action/thunk which is fired in response to target actions being executed - i.e. listeners.
+Easy Peasy provides [actionOn](/docs/api/action-on.html) and [thunkOn](/docs/api/thunk-on.html) APIs which allow you to declare an action/thunk which is fired in response to target actions being executed - i.e. listeners.
 
 This allows for an interesting reactive model that can solve use cases like being able to clear up your state when a user logs out, or keeping a simple audit log of important actions that have been performed by a user.
 
@@ -99,7 +99,7 @@ Great! We have the mechanisms by which to store and render logs, however, we hav
 
 ## Adding an actionOn listener
 
-Let's add an [actionOn](/docs/api/action-on) listener which we will configure to execute any time a product is added to our basket.
+Let's add an [actionOn](/docs/api/action-on.html) listener which we will configure to execute any time a product is added to our basket.
 
 We'll extend our `auditModel` directly with this listener.
 
@@ -128,14 +128,14 @@ const auditModel = {
 export default auditModel;
 ```
 
-Note how the first parameter of [actionOn](/docs/api/action-on) is a `resolverFunction` which receives both the local actions as well as the store actions. We used the store actions to resolve the `addedProduct` action as our target.
+Note how the first parameter of [actionOn](/docs/api/action-on.html) is a `resolverFunction` which receives both the local actions as well as the store actions. We used the store actions to resolve the `addedProduct` action as our target.
 
-The second parameter to our [actionOn](/docs/api/action-on)  listener is the action handler itself,  which will be executed every time our target `addedProduct` action has fired. The action handler will receive as it's first argument the local `state` (i.e. audit model state), allowing us to update it. It's second argument is a `target` object containing the following properties:
+The second parameter to our [actionOn](/docs/api/action-on.html)  listener is the action handler itself,  which will be executed every time our target `addedProduct` action has fired. The action handler will receive as it's first argument the local `state` (i.e. audit model state), allowing us to update it. It's second argument is a `target` object containing the following properties:
 
 - `payload`: The same payload that the target received
 - `type`: The fully qualified action type of the target being responded to
 
-There are some additional properties, however, we won't cover them here. Read the API docs for [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) for full specifications as well as further use cases.
+There are some additional properties, however, we won't cover them here. Read the API docs for [actionOn](/docs/api/action-on.html) and [thunkOn](/docs/api/thunk-on.html) for full specifications as well as further use cases.
 
 Our action handler uses the payload to create an entry to our audit log, recording the id of the product that was added to our basket.
 

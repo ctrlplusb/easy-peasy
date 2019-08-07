@@ -1,6 +1,6 @@
 # Creating your store
 
-The heart of your Easy Peasy [store](/docs/api/store) is the model definition that you provide to it. A model definition is an object based structure describing the state and behaviour ([actions](/docs/api/action) etc) of your [store](/docs/api/store). It can be as deep as you like, and can be split across multiple files, allowing you to import and compose your model as you please.
+The heart of your Easy Peasy [store](/docs/api/store.html) is the model definition that you provide to it. A model definition is an object based structure describing the state and behaviour ([actions](/docs/api/action.html) etc) of your [store](/docs/api/store.html). It can be as deep as you like, and can be split across multiple files, allowing you to import and compose your model as you please.
 
 ## Reviewing the applications state needs
 
@@ -19,7 +19,7 @@ export const basket = [2];
 
 We have a set of products, as well as a basket containing the ids of the products that have been added to it.
 
-Let's create a model that represents the data contained within this file. After that we will be able to use our model to create the [store](/docs/api/store).
+Let's create a model that represents the data contained within this file. After that we will be able to use our model to create the [store](/docs/api/store.html).
 
 ## Creating our models
 
@@ -52,7 +52,7 @@ const basketModel = {
 export default basketModel;
 ```
 
-Finally, we will compose our models into a single [store](/docs/api/store) model.
+Finally, we will compose our models into a single [store](/docs/api/store.html) model.
 
 ```javascript
 // src/model/index.js
@@ -68,11 +68,11 @@ const storeModel = {
 export default storeModel;
 ```
 
-Now that we have our [store](/docs/api/store) model we can go ahead and create our [store](/docs/api/store).
+Now that we have our [store](/docs/api/store.html) model we can go ahead and create our [store](/docs/api/store.html).
 
 ## Creating the store
 
-We can create a [store](/docs/api/store) via the [createStore](/docs/api/create-store) API, providing it our model.
+We can create a [store](/docs/api/store.html) via the [createStore](/docs/api/create-store.html) API, providing it our model.
 
 ```typescript
 // src/store/index.js
@@ -85,12 +85,12 @@ const store = createStore(storeModel); // 👈 create our store
 export default store;
 ```
 
-> The returned [store](/docs/api/create-store) instance is actually a [redux](https://redux.js.org/) store. You can use this store with any library that expects a [redux](https://redux.js.org/) store - for example the [react-redux](https://github.com/reduxjs/react-redux) library. One use case for this is if you would like to slowly migrate an existing application from React Redux to Easy Peasy.
+> The returned [store](/docs/api/create-store.html) instance is actually a [redux](https://redux.js.org/) store. You can use this store with any library that expects a [redux](https://redux.js.org/) store - for example the [react-redux](https://github.com/reduxjs/react-redux) library. One use case for this is if you would like to slowly migrate an existing application from React Redux to Easy Peasy.
 
 ## Review
 
-Great, we now have a [store](/docs/api/create-store) with our state representing the dummy data from the `src/data.js` file.
+Great, we now have a [store](/docs/api/create-store.html) with our state representing the dummy data from the `src/data.js` file.
 
-In the next section we will connect the [store](/docs/api/store) to our application.
+In the next section we will connect the [store](/docs/api/store.html) to our application.
 
 You can view the progress of our application refactor [here](https://codesandbox.io/s/easy-peasy-tutorial-store-zgtwh).

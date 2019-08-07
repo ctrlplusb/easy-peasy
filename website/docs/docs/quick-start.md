@@ -16,7 +16,7 @@ npm install easy-peasy
 
 ## Use a model to define your store
 
-Your [store](/docs/api/store) definition is represented via an object-based model.
+Your [store](/docs/api/store.html) definition is represented via an object-based model.
 
 ```javascript
 const productsModel = {
@@ -39,7 +39,7 @@ Feel free to split your model into separate files, importing them and composing 
 
 ## Create the store
 
-Provide your model to [createStore](/docs/api/create-store) in order to get a [store](/docs/api/store) instance.
+Provide your model to [createStore](/docs/api/create-store.html) in order to get a [store](/docs/api/store.html) instance.
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -51,7 +51,7 @@ const store = createStore(storeModel);
 
 ## Wrap your application
 
-Use the [StoreProvider](/docs/api/store-provider) component to connect the [store](/docs/api/store) to your application.
+Use the [StoreProvider](/docs/api/store-provider.html) component to connect the [store](/docs/api/store.html) to your application.
 
 ```javascript
 import { StoreProvider } from 'easy-peasy';
@@ -66,7 +66,7 @@ ReactDOM.render(
 
 ## Consume state
 
-The [useStoreState](/docs/api/use-store-state) hook allows you to consume state.
+The [useStoreState](/docs/api/use-store-state.html) hook allows you to consume state.
 
 ```javascript
 import { useStoreState } from 'easy-peasy';
@@ -79,7 +79,7 @@ function ProductsInBasket() {
 
 ## Adding actions to your model
 
-Define an [action](/docs/api/action) against your model to support updates.
+Define an [action](/docs/api/action.html) against your model to support updates.
 
 ```javascript
 import { action } from 'easy-peasy';
@@ -94,13 +94,13 @@ const basketModel = {
 };
 ```
 
-The [action](/docs/api/action) will receive the state which is local to it.
+The [action](/docs/api/action.html) will receive the state which is local to it.
 
-By default you need to mutate the state with the action, which we convert to an immutable update via [immer](https://github.com/immerjs/immer). If you prefer to return new immutable instances of your state, like a standard Redux reducer, you can set the `disableImmer` [configuration](/docs/api/store-config) of the [createStore](/docs/api/create-store).
+By default you need to mutate the state with the action, which we convert to an immutable update via [immer](https://github.com/immerjs/immer). If you prefer to return new immutable instances of your state, like a standard Redux reducer, you can set the `disableImmer` [configuration](/docs/api/store-config.html) of the [createStore](/docs/api/create-store.html).
 
 ## Dispatching your actions
 
-The [useStoreActions](/docs/api/use-store-actions) hook allows you to access an [action](/docs/api/action) within a component.
+The [useStoreActions](/docs/api/use-store-actions.html) hook allows you to access an [action](/docs/api/action.html) within a component.
 
 ```javascript
 import { useStoreActions } from 'easy-peasy';
@@ -123,7 +123,7 @@ function Product({ product }) {
 
 ## Add thunks to perform side effects
 
-Define a [thunk](/docs/api/thunk) in order to perform a side effect, such as making a request to an API.
+Define a [thunk](/docs/api/thunk.html) in order to perform a side effect, such as making a request to an API.
 
 ```javascript
 import { thunk } from 'easy-peasy';
@@ -146,7 +146,7 @@ const productsModel = {
 
 ## Dispatch your thunks
 
-The [useStoreActions](/docs/api/use-store-actions) hook allows you to access a [thunk](/docs/api/action) within a component.
+The [useStoreActions](/docs/api/use-store-actions.html) hook allows you to access a [thunk](/docs/api/action.html) within a component.
 
 ```javascript
 import { useStoreActions } from 'easy-peasy';
@@ -167,7 +167,7 @@ function EditProduct({ product }) {
 
 ## Computed properties
 
-You can create derived state via [computed](/docs/api/computed).
+You can create derived state via [computed](/docs/api/computed.html).
 
 ```javascript
 import { computed } from 'easy-peasy';
@@ -184,7 +184,7 @@ const productsModel = {
 
 ## Consuming computed properties
 
-[Computed](/docs/api/computed) properties are accessed via the [useStoreState](/docs/api/use-store-state) hook, just like any other state.
+[Computed](/docs/api/computed.html) properties are accessed via the [useStoreState](/docs/api/use-store-state.html) hook, just like any other state.
 
 ```javascript
 import { useStoreState } from 'easy-peasy';
@@ -199,7 +199,7 @@ function ProductCount() {
 
 ## Action/Thunk Listeners
 
-You can create listener actions or thunks via the [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs respectively. These APIs allow you to create an action or thunk that will execute in response to target actions being fired.
+You can create listener actions or thunks via the [actionOn](/docs/api/action-on.html) and [thunkOn](/docs/api/thunk-on.html) APIs respectively. These APIs allow you to create an action or thunk that will execute in response to target actions being fired.
 
 ```javascript
 import { actionOn } from 'easy-peasy';
@@ -222,6 +222,6 @@ A listener will receive the same payload as was provided to the target being lis
 
 ## Closing notes
 
-That concludes the quick start overview of Easy Peasy. Whilst this should have provided enough of an overview to immediately begin developing with Easy Peasy we highly recommend that you review the [documentation](/docs/introduction) for a more detailed overview of the APIs.
+That concludes the quick start overview of Easy Peasy. Whilst this should have provided enough of an overview to immediately begin developing with Easy Peasy we highly recommend that you review the [documentation](/docs/introduction.html) for a more detailed overview of the APIs.
 
-Within the [documentation](/docs/introduction) section you will find detailed tutorials, API docs, TypeScript tutorials, recipes, etc.
+Within the [documentation](/docs/introduction.html) section you will find detailed tutorials, API docs, TypeScript tutorials, recipes, etc.

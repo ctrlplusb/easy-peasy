@@ -2,7 +2,7 @@
 
 This recipe will guide you through the process of integrating Easy Peasy into your existing React Redux application. It is possible to slowly migrate an existing React Redux application to Easy Peasy without doing a full rewrite. 
 
-Easy Peasy outputs a standard Redux store, and allows customisation of the store via the [StoreConfig](/docs/api/store-config). Therefore it is possible to configure the Easy Peasy redux store to match the needs of your existing application. You will likely be able to move your store into Easy Peasy without the need to make any changes to your components.
+Easy Peasy outputs a standard Redux store, and allows customisation of the store via the [StoreConfig](/docs/api/store-config.html). Therefore it is possible to configure the Easy Peasy redux store to match the needs of your existing application. You will likely be able to move your store into Easy Peasy without the need to make any changes to your components.
 
 This would grant you the ability to slowly and carefully refactor your existing React Redux reducers into Easy Peasy models when needed, though there is nothing preventing you from keeping the concepts (Easy Peasy models, and React Redux reducers) living side by side indefinitely.
 

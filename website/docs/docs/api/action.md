@@ -1,6 +1,6 @@
 # action
 
-Allows you to declare an [action](/docs/api/action) on your model. An [action](/docs/api/action) is used to perform updates on your [store](/docs/api/store).
+Allows you to declare an [action](/docs/api/action.html) on your model. An [action](/docs/api/action.html) is used to perform updates on your [store](/docs/api/store.html).
 
 ```javascript
 addTodo: action((state, payload) => {
@@ -12,20 +12,20 @@ addTodo: action((state, payload) => {
 
   - `handler` (Function, *required*)
 
-    The handler for your [action](/docs/api/action). It will receive the following arguments:
+    The handler for your [action](/docs/api/action.html). It will receive the following arguments:
 
     - `state` (Object)
 
-      The part of the state tree that the [action](/docs/api/action) is against. You can mutate this state value directly as required by the [action](/docs/api/action). Under the hood we convert these mutations into an update against the Redux store.
+      The part of the state tree that the [action](/docs/api/action.html) is against. You can mutate this state value directly as required by the [action](/docs/api/action.html). Under the hood we convert these mutations into an update against the Redux store.
 
     - `payload` (any)
 
-      The payload, if any, that was provided to the [action](/docs/api/action) when it was dispatched.
+      The payload, if any, that was provided to the [action](/docs/api/action.html) when it was dispatched.
 
 
 ## Actions are synchronous
 
-[Actions](/docs/api/action) are executed synchronously, therefore, you can immediately query your [store](/docs/api/store) to see the updated state.
+[Actions](/docs/api/action.html) are executed synchronously, therefore, you can immediately query your [store](/docs/api/store.html) to see the updated state.
 
 ```javascript
 store.getActions().todos.addTodo('Learn Easy Peasy');
@@ -62,11 +62,11 @@ function Add10Button() {
 
 ## Using console.log within actions
 
-Despite the Redux Dev Tools extension being available there may be cases in which you would like to perform a `console.log` within the body of your [actions](/docs/api/action) to aid debugging.
+Despite the Redux Dev Tools extension being available there may be cases in which you would like to perform a `console.log` within the body of your [actions](/docs/api/action.html) to aid debugging.
 
 If you try to do so you may not that a `Proxy` object is printed out instead of your expected state. This is due to us using `immer` under the hood, which allows us to track mutation updates to the state and then convert them to immutable updates.
 
-To get around this you can use the [debug](/docs/api/debug) util.
+To get around this you can use the [debug](/docs/api/debug.html) util.
 
 ```javascript
 import { debug } from 'easy-peasy';
@@ -103,7 +103,7 @@ addTodo: action((state, payload) => {
 
 By default we use [immer](https://github.com/mweststrate/immer) to provide a mutation based API. 
 
-If you prefer to explicitly return new immutable state you set the `disableImmer` [configuration](/docs/api/store-config) value of [createStore](/docs/api/create-store). 
+If you prefer to explicitly return new immutable state you set the `disableImmer` [configuration](/docs/api/store-config.html) value of [createStore](/docs/api/create-store.html). 
 
 Doing so will disable `immer` and require you to return new immutable state within your actions.
 
@@ -123,4 +123,4 @@ const store = createStore(model, {
 })
 ```
 
-If you don't set this flag and return new immutable state you may experience errors when utilising [computed](/docs/api/computed) properties, so it is best to disable `immer` explicitly.
+If you don't set this flag and return new immutable state you may experience errors when utilising [computed](/docs/api/computed.html) properties, so it is best to disable `immer` explicitly.

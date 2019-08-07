@@ -1,8 +1,8 @@
 # computed
 
-Allows you to bind a [computed](/docs/api/computed) property against your model by providing a computation function that will take in state and return a derived value. Computed state can be accessed like any other state on your store.
+Allows you to bind a [computed](/docs/api/computed.html) property against your model by providing a computation function that will take in state and return a derived value. Computed state can be accessed like any other state on your store.
 
-The computation process is only performed when the property is accessed, i.e. lazy computation. This allows for good performance characteristics. In addition to this the results of [computed](/docs/api/computed) properties are cached, and will only be recomputed if their input state has changed.
+The computation process is only performed when the property is accessed, i.e. lazy computation. This allows for good performance characteristics. In addition to this the results of [computed](/docs/api/computed.html) properties are cached, and will only be recomputed if their input state has changed.
 
 ```javascript
 isLoggedIn: computed(state => state.user != null)
@@ -18,7 +18,7 @@ isLoggedIn: computed(state => state.user != null)
 
   - `state` (Object)
 
-    The local state against which your [computed](/docs/api/computed) property is bound.
+    The local state against which your [computed](/docs/api/computed.html) property is bound.
 
   - `storeState` (Object)
 
@@ -26,7 +26,7 @@ isLoggedIn: computed(state => state.user != null)
 
   In general it is recommended that you only use state selectors if you need to resolve state from another part of your model. There are some performance benefits to be had by isolating local state, but in almost every case this would be insignificant.
 
-  It is also worth noting that the `state` and `storeState` that are provided to your state selectors will include [computed](/docs/api/computed) properties too. Computed properties are allowed to reference each other.
+  It is also worth noting that the `state` and `storeState` that are provided to your state selectors will include [computed](/docs/api/computed.html) properties too. Computed properties are allowed to reference each other.
 
 - `computationFunc` (Function, *required*)
 
@@ -111,7 +111,7 @@ const todos = {
 
 ## Accessing via a component
 
-You access computed properties in the same manner as any other state within your components, i.e. via the [useStoreState](/docs/api/use-store-state) hook. Any updates to our [computed](/docs/api/computed) property, i.e. the input state to our [computed](/docs/api/computed) property changed, will automatically re-render your component.
+You access computed properties in the same manner as any other state within your components, i.e. via the [useStoreState](/docs/api/use-store-state.html) hook. Any updates to our [computed](/docs/api/computed.html) property, i.e. the input state to our [computed](/docs/api/computed.html) property changed, will automatically re-render your component.
 
 ```javascript
 import { useStoreState } from 'easy-peasy';

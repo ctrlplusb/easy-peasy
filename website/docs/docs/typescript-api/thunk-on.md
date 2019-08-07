@@ -1,6 +1,6 @@
 # ThunkOn
 
-Defines a [thunk-on](/docs/api/thunk-on) listener against your model
+Defines a [thunk-on](/docs/api/thunk-on.html) listener against your model
 
 ## API
 
@@ -14,17 +14,17 @@ ThunkOn<
 
 - `Model`
 
-  The model against which the [thunk-on](/docs/api/thunk-on) is being defined. You need to provide this so that the actions that will be provided to your [thunk-on](/docs/api/thunk-on) are correctly typed.
+  The model against which the [thunk-on](/docs/api/thunk-on.html) is being defined. You need to provide this so that the actions that will be provided to your [thunk-on](/docs/api/thunk-on.html) are correctly typed.
 
 - `Injections`
 
-  If your store was configured with injections, and you intend to use them within your [thunk-on](/docs/api/thunk-on), then you should provide the type of the injections here.
+  If your store was configured with injections, and you intend to use them within your [thunk-on](/docs/api/thunk-on.html), then you should provide the type of the injections here.
 
 - `StoreModel`
 
   If you plan on targeting an action from another part of your store state then you will need to provide your store model so that the provided store actions are correctly typed.
   
-  Additionally, if you plan on using the `getStoreState` or `getStoreActions` APIs of a [thunk-on](/docs/api/thunk-on) then you will also need this so that their results are correctly typed.
+  Additionally, if you plan on using the `getStoreState` or `getStoreActions` APIs of a [thunk-on](/docs/api/thunk-on.html) then you will also need this so that their results are correctly typed.
 
 
 ## Example

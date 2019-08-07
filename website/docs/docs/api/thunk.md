@@ -1,12 +1,12 @@
 # thunk
 
-Declares a [thunk](docs/api/thunk) action on your model. [Thunks](docs/api/thunk) cannot modify state directly, however, they can dispatch [actions](/docs/api/action) to do so. 
+Declares a [thunk](docs/api/thunk.html) action on your model. [Thunks](docs/api/thunk.html) cannot modify state directly, however, they can dispatch [actions](/docs/api/action.html) to do so. 
 
-[Thunks](docs/api/thunk) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
+[Thunks](docs/api/thunk.html) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
 
-When you use `async/await` or return a `Promise` from your [thunk](docs/api/thunk), Easy Peasy will wait for the asynchronous work to complete prior to firing any listeners that are targeting the [thunk](docs/api/thunk).
+When you use `async/await` or return a `Promise` from your [thunk](docs/api/thunk.html), Easy Peasy will wait for the asynchronous work to complete prior to firing any listeners that are targeting the [thunk](docs/api/thunk.html).
 
-Another interesting property of [thunks](docs/api/thunk) is that any value that is returned from a [thunk](docs/api/thunk) will be provided to the caller - i.e. where it was dispatched from. Therefore if you were using `async/await`, or returned a `Promise`, from your [thunk](docs/api/thunk) the caller would be able to chain off the returned `Promise` to know when the [thunk](docs/api/thunk) has completed execution.
+Another interesting property of [thunks](docs/api/thunk.html) is that any value that is returned from a [thunk](docs/api/thunk.html) will be provided to the caller - i.e. where it was dispatched from. Therefore if you were using `async/await`, or returned a `Promise`, from your [thunk](docs/api/thunk.html) the caller would be able to chain off the returned `Promise` to know when the [thunk](docs/api/thunk.html) has completed execution.
 
 ```javascript
 thunk(async (actions, payload) => {
@@ -20,11 +20,11 @@ thunk(async (actions, payload) => {
 
   - `handler` (Function, *required*)
 
-    The handler for your [thunk](/docs/api/thunk). It will receive the following arguments:
+    The handler for your [thunk](/docs/api/thunk.html). It will receive the following arguments:
 
     - `actions` (Object)
 
-      The [actions](/docs/api/action) that are local to the thunk. This allows you to dispatch an [action](/docs/api/action) to update state should you require.
+      The [actions](/docs/api/action.html) that are local to the thunk. This allows you to dispatch an [action](/docs/api/action.html) to update state should you require.
 
     - `payload` (any)
 
@@ -46,9 +46,9 @@ thunk(async (actions, payload) => {
 
       - `getStoreActions` (Function)
 
-        When executed it will get the [actions](/docs/api/action). i.e. all of the [actions](/docs/api/action) across your entire store.
+        When executed it will get the [actions](/docs/api/action.html). i.e. all of the [actions](/docs/api/action.html) across your entire store.
 
-        We don't recommend dispatching actions like this, and invite you to consider creating an [actionOn](/docs/api/action-on) or [thunkOn](/docs/api/thunk-on) listener instead.
+        We don't recommend dispatching actions like this, and invite you to consider creating an [actionOn](/docs/api/action-on.html) or [thunkOn](/docs/api/thunk-on.html) listener instead.
 
       - `getStoreState` (Function)
 
@@ -79,7 +79,7 @@ thunk(async (actions, payload) => {
 
 ## Asynchronous Execution
 
-To enable a [thunk](/docs/api/thunk) to be asynchronous simply use `async/await` or return a `Promise` from your [thunk](/docs/api/thunk).  Doing this allows you to manage asynchronous calls to APIs for example.
+To enable a [thunk](/docs/api/thunk.html) to be asynchronous simply use `async/await` or return a `Promise` from your [thunk](/docs/api/thunk.html).  Doing this allows you to manage asynchronous calls to APIs for example.
 
 ```javascript
 const todosModel = {
@@ -95,7 +95,7 @@ const todosModel = {
 };
 ```
 
-An asynchronous [thunk](/docs/api/thunk) will have its `Promise` returned to the code that dispatched the [thunk](/docs/api/thunk). This is especially important in the cases that you would like to execute some code after the [thunk](/docs/api/thunk) has completed. 
+An asynchronous [thunk](/docs/api/thunk.html) will have its `Promise` returned to the code that dispatched the [thunk](/docs/api/thunk.html). This is especially important in the cases that you would like to execute some code after the [thunk](/docs/api/thunk.html) has completed. 
 
 ```javascript
 function MyComponent() {
@@ -117,7 +117,7 @@ store.getActions().todos.
 
 ## Synchronous Execution
 
-[Thunks](/docs/api/thunk) can also be synchronous, which is useful for encapsulating logic around action dispatching.
+[Thunks](/docs/api/thunk.html) can also be synchronous, which is useful for encapsulating logic around action dispatching.
 
 ```javascript
 thunk((actions, payload) => {
@@ -131,14 +131,14 @@ thunk((actions, payload) => {
 
 ## Debugging Thunks
 
-[Thunks](/docs/api/thunk) represent asynchronous execution that have no effect on state, however, we believed it would be useful to dispatch [actions](/docs/api/action) that represented the various states of a [thunk](/docs/api/thunk); *started*, *completed*, or *failed*. These dispatched actions have no effect on your state, however, they are still very useful.
+[Thunks](/docs/api/thunk.html) represent asynchronous execution that have no effect on state, however, we believed it would be useful to dispatch [actions](/docs/api/action.html) that represented the various states of a [thunk](/docs/api/thunk.html); *started*, *completed*, or *failed*. These dispatched actions have no effect on your state, however, they are still very useful.
 
 Dispatching these actions results in the following benefits:
 
-1. Increased debugging experience, with greater visibility of asynchronous flow of [thunks](/docs/api/thunk) in relation to your standard [actions](/docs/api/action) being dispatched
-2. Enables listeners to be attached to specific [thunk](/docs/api/thunk) states (i.e. *started*, *completed*, or *failed*)
+1. Increased debugging experience, with greater visibility of asynchronous flow of [thunks](/docs/api/thunk.html) in relation to your standard [actions](/docs/api/action.html) being dispatched
+2. Enables listeners to be attached to specific [thunk](/docs/api/thunk.html) states (i.e. *started*, *completed*, or *failed*)
 
-Using the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension you will be able see your dispatched [thunks](/docs/api/thunk) as they flow through each of their states. You will also see the payload that was provided to the [thunk](/docs/api/thunk).
+Using the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension you will be able see your dispatched [thunks](/docs/api/thunk.html) as they flow through each of their states. You will also see the payload that was provided to the [thunk](/docs/api/thunk.html).
 
 <img src="../../assets/devtools-thunk.png" />
 
@@ -161,7 +161,7 @@ const store = createStore({
 });
 ```
 
-Just remember, if you are executing actions within your [thunk](/docs/api/thunk) then you may need to call `getState` or `getStoreState` after the action if you need to see/use the updated state.
+Just remember, if you are executing actions within your [thunk](/docs/api/thunk.html) then you may need to call `getState` or `getStoreState` after the action if you need to see/use the updated state.
 
 ## Dispatching an action on another part of your model
 
@@ -185,7 +185,7 @@ const store = createStore({
 });
 ```
 
-We don't recommend doing the above, and instead encourage you to define an [actionOn](/docs/api/action-on) or [thunkOn](/docs/api/thunk-on) listener, which promotes a better separation of concerns.
+We don't recommend doing the above, and instead encourage you to define an [actionOn](/docs/api/action-on.html) or [thunkOn](/docs/api/thunk-on.html) listener, which promotes a better separation of concerns.
 
 ## Dependency injection
 

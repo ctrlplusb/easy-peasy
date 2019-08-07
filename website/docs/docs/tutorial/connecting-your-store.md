@@ -1,12 +1,12 @@
 # Connecting the store
 
-In order to connect the [store](/docs/api/store) to our [application]((https://codesandbox.io/s/easy-peasy-tutorial-store-zgtwh)) we need to use the [StoreProvider](/docs/api/store-provider) component.
+In order to connect the [store](/docs/api/store.html) to our [application]((https://codesandbox.io/s/easy-peasy-tutorial-store-zgtwh)) we need to use the [StoreProvider](/docs/api/store-provider.html) component.
 
-Simply wrap the application with the [StoreProvider](/docs/api/store-provider), providing the [store](/docs/api/store) instance to it.
+Simply wrap the application with the [StoreProvider](/docs/api/store-provider.html), providing the [store](/docs/api/store.html) instance to it.
 
 ## Wrapping your application
 
-Firstly, we will import the [StoreProvider](/docs/api/store-provider) and our [store](/docs/api/store) instance.
+Firstly, we will import the [StoreProvider](/docs/api/store-provider.html) and our [store](/docs/api/store.html) instance.
 
 ```javascript
 // src/index.js
@@ -30,7 +30,7 @@ ReactDOM.render(
 
 ## Review
 
-Awesome, the [store](/docs/api/store) is now exposed to the application.
+Awesome, the [store](/docs/api/store.html) is now exposed to the application.
 
 Next up we will refactor our components to consume the state from the store.
 

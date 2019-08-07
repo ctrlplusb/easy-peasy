@@ -1,6 +1,6 @@
 # Reducer
 
-Defines a [reducer](/docs/api/reducer) against your model
+Defines a [reducer](/docs/api/reducer.html) against your model
 
 ## API
 
@@ -13,7 +13,7 @@ Reducer<
 
 - `State`
 
-  The type for the state that will be managed by the [reducer](/docs/api/reducer).
+  The type for the state that will be managed by the [reducer](/docs/api/reducer.html).
 
 - `Action`
 

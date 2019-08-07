@@ -72,7 +72,7 @@ export default todosModel;
 
 ## Creating the store
 
-Now that we have our model defined we can pass it to [createStore](/docs/api/create-store) in order to create our [store](/docs/api/store).
+Now that we have our model defined we can pass it to [createStore](/docs/api/create-store.html) in order to create our [store](/docs/api/store.html).
 
 ```typescript
 import storeModel from './model';
@@ -80,7 +80,7 @@ import storeModel from './model';
 const store = createStore(storeModel);
 ```
 
-The [store](/docs/api/store) that is returned will be fully typed. If you try to use the [store's](/docs/api/store) APIs you will note the typing information and code completion being offered by your IDE.
+The [store](/docs/api/store.html) that is returned will be fully typed. If you try to use the [store's](/docs/api/store) APIs you will note the typing information and code completion being offered by your IDE.
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-get-state.png" />

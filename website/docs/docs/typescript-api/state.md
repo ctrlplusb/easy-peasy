@@ -30,4 +30,4 @@ function MyComponent() {
 }
 ```
 
-That being said, we recommend you use the [createTypedHooks](/docs/typescript-api/create-typed-hooks) API instead.
+That being said, we recommend you use the [createTypedHooks](/docs/typescript-api/create-typed-hooks.html) API instead.

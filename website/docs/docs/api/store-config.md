@@ -1,6 +1,6 @@
 # StoreConfig
 
-When [creating your stores](/docs/api/create-store) you can provide configuration for more advanced scenarios. In most cases you shouldn't need to reach for these configuration options, however, they can be useful so it is good to familiarise yourself with them.
+When [creating your stores](/docs/api/create-store.html) you can provide configuration for more advanced scenarios. In most cases you shouldn't need to reach for these configuration options, however, they can be useful so it is good to familiarise yourself with them.
 
 We have split the configuration parameters into two groupings, standard and advanced. The advanced configuration options cover the options used to customise the underlying Redux store.
 
@@ -24,7 +24,7 @@ We have split the configuration parameters into two groupings, standard and adva
 
 - `injections` (any, *optional*, default=undefined)
 
-  Any dependencies you would like to inject. They will be made available to your [thunks](/docs/api/thunk).
+  Any dependencies you would like to inject. They will be made available to your [thunks](/docs/api/thunk.html).
 
 - `mockActions` (boolean, *optional*, default=false)
 

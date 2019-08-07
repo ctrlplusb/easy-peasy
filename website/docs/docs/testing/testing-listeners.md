@@ -13,7 +13,7 @@ You can utilise the `getMockedActions` function that is bound against your store
 
 This is perfect for us to establish that our listener was fired when a target executed.
 
-We will be showing an [actionOn](/docs/api/action-on) listener within this test, however, this strategy would work equally well for a [thunkOn](/docs/api/thunk-on) listener.
+We will be showing an [actionOn](/docs/api/action-on.html) listener within this test, however, this strategy would work equally well for a [thunkOn](/docs/api/thunk-on.html) listener.
 
 Given the following model.
 
@@ -99,7 +99,7 @@ store.getListeners().onTodoAdded({
 })
 ```
 
-Once you take these rules into account, you could then follow a similar strategy to [testing actions](/docs/testing/testing-actions) for [actionOn](/docs/api/action-on) listeners. Equally, you can follow a similar strategy to [testing thunks](/docs/testing/testing-thunks) for [actionThunk](/docs/api/thunk-on) listeners.
+Once you take these rules into account, you could then follow a similar strategy to [testing actions](/docs/testing/testing-actions.html) for [actionOn](/docs/api/action-on.html) listeners. Equally, you can follow a similar strategy to [testing thunks](/docs/testing/testing-thunks.html) for [actionThunk](/docs/api/thunk-on.html) listeners.
 
 Below we will show an example of how you could test the `onTodoAdded` action that we described within the model above.
 

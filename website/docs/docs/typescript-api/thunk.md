@@ -1,6 +1,6 @@
 # Thunk
 
-Defines a [thunk](/docs/api/thunk) against your model. Thunks can be synchronous or asynchronous. To enable asyncronous behaviour within a thunk simply use async/await or return a Promise from the thunk.
+Defines a [thunk](/docs/api/thunk.html) against your model. Thunks can be synchronous or asynchronous. To enable asyncronous behaviour within a thunk simply use async/await or return a Promise from the thunk.
 
 Thunks are typically used to encapsulate side effects, however, you can also use them to introduce complex workflows around action dispatches.
 
@@ -18,23 +18,23 @@ Thunk<
 
 - `Model`
 
-  The model against which the [thunk](/docs/api/thunk) is being defined. You need to provide this so that the actions that will be provided to your [thunk](/docs/api/thunk) are correctly typed.
+  The model against which the [thunk](/docs/api/thunk.html) is being defined. You need to provide this so that the actions that will be provided to your [thunk](/docs/api/thunk.html) are correctly typed.
 
 - `Payload`
 
-  The type of the payload that the [thunk](/docs/api/thunk) will receive. You can omit this if you do not expect the [thunk](/docs/api/thunk) to receive any payload.
+  The type of the payload that the [thunk](/docs/api/thunk.html) will receive. You can omit this if you do not expect the [thunk](/docs/api/thunk.html) to receive any payload.
 
 - `Injections`
 
-  If your store was configured with injections, and you intend to use them within your [thunk](/docs/api/thunk), then you should provide the type of the injections here.
+  If your store was configured with injections, and you intend to use them within your [thunk](/docs/api/thunk.html), then you should provide the type of the injections here.
 
 - `StoreModel`
 
-  If you plan on using the `getStoreState` or `getStoreActions` APIs of a [thunk](/docs/api/thunk) then you will need to provide your store model so that the results are correctly typed.
+  If you plan on using the `getStoreState` or `getStoreActions` APIs of a [thunk](/docs/api/thunk.html) then you will need to provide your store model so that the results are correctly typed.
 
 - `Result`
 
-  If your [thunk](/docs/api/thunk) returns a value then the type of the value should be defined here. The result is returned to the calling point of the dispatch.
+  If your [thunk](/docs/api/thunk.html) returns a value then the type of the value should be defined here. The result is returned to the calling point of the dispatch.
 
 
 ## Example

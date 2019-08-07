@@ -2,11 +2,11 @@
 
 Our [application](https://codesandbox.io/s/easy-peasy-tutorial-component-state-28cjm) has the ability to consume state, but no way to update it.
 
-In this section we will introduce the [action](/docs/api/action) API which will allow us to do exactly this.
+In this section we will introduce the [action](/docs/api/action.html) API which will allow us to do exactly this.
 
 ## Defining actions on our model
 
-We are going to define two [actions](/docs/api/action) on our `basketModel`; one to add a product to our basket, and another to remove a product from our basket. 
+We are going to define two [actions](/docs/api/action.html) on our `basketModel`; one to add a product to our basket, and another to remove a product from our basket. 
 
 Let's go ahead and update our `basketModel` to include these two actions.
 
@@ -48,27 +48,27 @@ addProduct: action((state, payload) => {
 })
 ```
 
-Woah! Far more verbose, and harder to grok! That being said, if you prefer this immutable form you can disable the immer-based mutation form by setting the `disableImmer` [configuration](/docs/api/store-config) of the [createStore](/docs/api/create-store). You would then have to return new immutable state within your action handlers as you would within a standard Redux reducer.
+Woah! Far more verbose, and harder to grok! That being said, if you prefer this immutable form you can disable the immer-based mutation form by setting the `disableImmer` [configuration](/docs/api/store-config.html) of the [createStore](/docs/api/create-store.html). You would then have to return new immutable state within your action handlers as you would within a standard Redux reducer.
 
-Next up let's learn how to dispatch our [actions](/docs/api/action) from our components.
+Next up let's learn how to dispatch our [actions](/docs/api/action.html) from our components.
 
 ## Introducing the useStoreActions hook
 
-We can access actions from our components via the [useStoreActions](/docs/api/use-store-actions) hook, which has the following signature.
+We can access actions from our components via the [useStoreActions](/docs/api/use-store-actions.html) hook, which has the following signature.
 
 ```
 useStoreActions(Actions => MappedAction)
 ```
 
-The hook accepts a `mapActions` function. The `mapActions` function will be provided the [actions](/docs/api/action) of your [store](/docs/api/store) and should return the [action](/docs/api/action) required by your component.
+The hook accepts a `mapActions` function. The `mapActions` function will be provided the [actions](/docs/api/action.html) of your [store](/docs/api/store.html) and should return the [action](/docs/api/action.html) required by your component.
 
 ## Dispatching actions from our components
 
-We will now refactor our components to use the [useStoreActions](/docs/api/use-store-actions) hook, allowing them to dispatch [actions](/docs/api/action) to update our state.
+We will now refactor our components to use the [useStoreActions](/docs/api/use-store-actions.html) hook, allowing them to dispatch [actions](/docs/api/action.html) to update our state.
 
 **Product**
 
-First up, we will update the `Product` component so that its `onAddToBasketClick` callback function will dispatch an [action](/docs/api/action) to add the respective product to the basket.
+First up, we will update the `Product` component so that its `onAddToBasketClick` callback function will dispatch an [action](/docs/api/action.html) to add the respective product to the basket.
 
 ```javascript
 // ...
@@ -104,7 +104,7 @@ Once you have updated your application accordingly you will be able to browse to
 
 **Basket**
 
-Next up, let's update the `Basket` component so that we can dispatch the [action](/docs/api/action) to remove a product from our basket.
+Next up, let's update the `Basket` component so that we can dispatch the [action](/docs/api/action.html) to remove a product from our basket.
 
 ```javascript
 // ...
@@ -137,9 +137,9 @@ After updating your application you should now be able to view the basket by cli
 
 ## Review
 
-Things are starting to get interesting now. We can influence the state of our application via [actions](/docs/api/action).
+Things are starting to get interesting now. We can influence the state of our application via [actions](/docs/api/action.html).
 
-Earlier we noted that an emulated network call is being made when we add a product to our basket. Easy Peasy provides us with a mechanism to encapsulate side effects, such as API requests, within a [thunk](/docs/api/thunk). We will learn this API in the next section.
+Earlier we noted that an emulated network call is being made when we add a product to our basket. Easy Peasy provides us with a mechanism to encapsulate side effects, such as API requests, within a [thunk](/docs/api/thunk.html). We will learn this API in the next section.
 
 You can view the progress of our application refactor [here](https://codesandbox.io/s/easy-peasy-tutorial-actions-1e62s).
 

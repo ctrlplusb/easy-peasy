@@ -4,7 +4,7 @@ It is possible to access the entire store state within your computed properties.
 
 ## Extending our model
 
-Ok, so let's first extend our model, so that we can produce a state where we would need to access the entire store state within our [computed](/docs/api/computed) property.
+Ok, so let's first extend our model, so that we can produce a state where we would need to access the entire store state within our [computed](/docs/api/computed.html) property.
 
 Firstly, we want some products.
 
@@ -61,11 +61,11 @@ function Basket() {
 }
 ```
 
-As you can see every time we wish to view the products in our basket we have to map multiple pieces of our state. This may be okay in most cases, but if we needed to do this in multiple locations of our application we would have to duplicate this logic.  To avoid this we could define a [computed](/docs/api/computed) property.
+As you can see every time we wish to view the products in our basket we have to map multiple pieces of our state. This may be okay in most cases, but if we needed to do this in multiple locations of our application we would have to duplicate this logic.  To avoid this we could define a [computed](/docs/api/computed.html) property.
 
 ## Defining a computed property for the basket products
 
-Using our extended models, lets define a [computed](/docs/api/computed) property on the basket model that allows us to get the products that are in our basket. This [computed](/docs/api/computed) property will require the state from the products model in order to do this.
+Using our extended models, lets define a [computed](/docs/api/computed.html) property on the basket model that allows us to get the products that are in our basket. This [computed](/docs/api/computed.html) property will require the state from the products model in order to do this.
 
 ```typescript
 import { Computed, ResolvedState2 } from 'easy-peasy';
@@ -85,7 +85,7 @@ interface BasketModel {
 
 ## Implementing the computed property
 
-We will not provide the implementation for the [computed](/docs/api/computed) property.
+We will not provide the implementation for the [computed](/docs/api/computed.html) property.
 
 ```typescript
 const basketModel: BasketModel = {
@@ -109,7 +109,7 @@ const basketModel: BasketModel = {
 
 ## Accessing the computed property
 
-We can now access the [computed](/docs/api/computed) property the same as any other piece of state.
+We can now access the [computed](/docs/api/computed.html) property the same as any other piece of state.
 
 ```typescript
 import { useStoreState } from '../hooks';

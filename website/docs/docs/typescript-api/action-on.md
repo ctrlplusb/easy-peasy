@@ -1,6 +1,6 @@
 # ActionOn
 
-Defines an [action-on](/docs/api/action-on) listener against your model
+Defines an [action-on](/docs/api/action-on.html) listener against your model
 
 ## API
 
@@ -13,7 +13,7 @@ ActionOn<
 
 - `Model`
 
-  The model against which the [action-on](/docs/api/action-on) is being defined. You need to provide this so that the state that will be provided to your [action-on](/docs/api/action-on) is correctly typed.
+  The model against which the [action-on](/docs/api/action-on.html) is being defined. You need to provide this so that the state that will be provided to your [action-on](/docs/api/action-on.html) is correctly typed.
 
 - `StoreModel`
 

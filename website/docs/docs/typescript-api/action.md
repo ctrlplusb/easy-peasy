@@ -1,6 +1,6 @@
 # Action
 
-Defines an [action](/docs/api/action) against your model
+Defines an [action](/docs/api/action.html) against your model
 
 ## API
 
@@ -13,11 +13,11 @@ Action<
 
 - `Model`
 
-  The model against which the action is being defined. You need to provide this so that the state that will be provided to your [action](/docs/api/action) is correctly typed.
+  The model against which the action is being defined. You need to provide this so that the state that will be provided to your [action](/docs/api/action.html) is correctly typed.
 
 - `Payload`
 
-  The type of the payload that the [action](/docs/api/action) will receive. You can omit this if you do not expect the [action](/docs/api/action) to receive any payload.
+  The type of the payload that the [action](/docs/api/action.html) will receive. You can omit this if you do not expect the [action](/docs/api/action.html) to receive any payload.
 
 
 ## Example

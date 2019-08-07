@@ -1,6 +1,6 @@
 # Computed
 
-Defines a [computed](/docs/api/computed) property against your model
+Defines a [computed](/docs/api/computed.html) property against your model
 
 ## API
 
@@ -14,15 +14,15 @@ Computed<
 
 - `Model`
 
-  The model against which the [computed](/docs/api/computed) property is being defined. You need to provide this so that the state that will be provided to your [computed](/docs/api/computed) property is correctly typed.
+  The model against which the [computed](/docs/api/computed.html) property is being defined. You need to provide this so that the state that will be provided to your [computed](/docs/api/computed.html) property is correctly typed.
 
 - `Result`
 
-  The type of the derived data that will be returned by your [computed](/docs/api/computed) property.
+  The type of the derived data that will be returned by your [computed](/docs/api/computed.html) property.
 
 - `StoreModel`
 
-  If you expect to using state resolvers within your [computed](/docs/api/computed) property implementation which use the entire store state then you will need to provide your store's model interface so that the store state is correctly typed.
+  If you expect to using state resolvers within your [computed](/docs/api/computed.html) property implementation which use the entire store state then you will need to provide your store's model interface so that the store state is correctly typed.
 
 
 ## Example

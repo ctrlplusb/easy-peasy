@@ -1,6 +1,6 @@
 # Testing actions
 
-[Actions](/docs/api/actions) are relatively simple to test as they are essentially an immutable update to the [store](/docs/api/store). We can therefore compare the prev and updated state to assert that our actions have had the effect against our store's state.
+[Actions](/docs/api/actions.html) are relatively simple to test as they are essentially an immutable update to the [store](/docs/api/store.html). We can therefore compare the prev and updated state to assert that our actions have had the effect against our store's state.
 
 ## Example
 

@@ -1,6 +1,6 @@
 # Testing thunks
 
-[Thunks](/docs/api/thunk) are more complicated to test than [actions](/docs/api/action) as they can perform side effects, such as invoking network requests, and they can additionally dispatch other [actions](/docs/api/action) or [thunks](/docs/api/thunk).
+[Thunks](/docs/api/thunk.html) are more complicated to test than [actions](/docs/api/action.html) as they can perform side effects, such as invoking network requests, and they can additionally dispatch other [actions](/docs/api/action.html) or [thunks](/docs/api/thunk.html).
 
 There are also 2 different strategies at testing thunks:
 
@@ -9,7 +9,7 @@ There are also 2 different strategies at testing thunks:
 
 Each strategy has it's own merits and a pragmatic approach should be taken to deciding which strategy would provide the most value on a case by case basis.
 
-Within either of these strategies your thunks may perform side effects such as making network requests. We highly recommend that you encapsulate these side effects within modules that are then exposed to your store via the `injections` configuration property of the store. Doing this will allow you to inject mocked versions of your services when you are testing your [thunks](/docs/api/thunk).
+Within either of these strategies your thunks may perform side effects such as making network requests. We highly recommend that you encapsulate these side effects within modules that are then exposed to your store via the `injections` configuration property of the store. Doing this will allow you to inject mocked versions of your services when you are testing your [thunks](/docs/api/thunk.html).
 
 ## Strategy 1: mocking actions
 

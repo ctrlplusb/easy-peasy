@@ -23,9 +23,9 @@ This is a form of derived state, where we are deriving new state within our comp
 
 Although this example looks fairly harmless, there may be cases where you the deriving process is an expensive operation. Alternatively you may have the need to display the next todos in many parts of your application, leading to duplication of the deriving logic.
 
-For these cases we recommend that you define a [computed](/docs/api/computed) property to represent the derived state.
+For these cases we recommend that you define a [computed](/docs/api/computed.html) property to represent the derived state.
 
-Easy Peasy exports a `Computed` type allowing you to declare a [computed](/docs/api/computed) on your model interface. The signature for this type is:
+Easy Peasy exports a `Computed` type allowing you to declare a [computed](/docs/api/computed.html) on your model interface. The signature for this type is:
 
 ```typescript
 Computed<
@@ -43,11 +43,11 @@ The type arguments can be described as follows.
 
 - `Model`
 
-  The model against which the [computed](/docs/api/computed) property is being bound.
+  The model against which the [computed](/docs/api/computed.html) property is being bound.
 
 - `Result`
 
-  This allows you to declare the type of the data that will be returned by the [computed](/docs/api/computed) property.
+  This allows you to declare the type of the data that will be returned by the [computed](/docs/api/computed.html) property.
 
 - `StoreModel`
 
@@ -57,7 +57,7 @@ The type arguments can be described as follows.
 
 ## Declaring a computed property
 
-Let's extends our todos model interface to include a [computed](/docs/api/computed) property.
+Let's extends our todos model interface to include a [computed](/docs/api/computed.html) property.
 
 ```typescript
 import { Computed } from 'easy-peasy';
@@ -73,7 +73,7 @@ export interface TodosModel {
 
 ## Implementing a computed property
 
-We can now implement our [computed](/docs/api/computed) property like so.
+We can now implement our [computed](/docs/api/computed.html) property like so.
 
 ```typescript
 import { computed } from 'easy-peasy';
@@ -93,7 +93,7 @@ const todosModel: TodosModel = {
 };
 ```
 
-Again, as we declared the `Computed` property against our model, TypeScript would have been making sure that we implemented our [computed](/docs/api/computere) property per spec.
+Again, as we declared the `Computed` property against our model, TypeScript would have been making sure that we implemented our [computed](/docs/api/computere.html) property per spec.
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-computed-imp.png" />
@@ -102,7 +102,7 @@ Again, as we declared the `Computed` property against our model, TypeScript woul
 
 ## Accessing a computed property
 
-Now let's go back to our `NextTodos` component and refactor it to use our [computed](/docs/api/computed) property.
+Now let's go back to our `NextTodos` component and refactor it to use our [computed](/docs/api/computed.html) property.
 
 ```typescript
 import { useStoreState } from '../hooks';

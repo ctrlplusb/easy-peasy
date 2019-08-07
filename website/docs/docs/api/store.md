@@ -1,6 +1,6 @@
 # Store
 
-A store is created via the [createStore](/docs/api/create-store) API. A store instance contains the following properties.
+A store is created via the [createStore](/docs/api/create-store.html) API. A store instance contains the following properties.
 
   - `addModel` (Function)
 
@@ -28,7 +28,7 @@ A store is created via the [createStore](/docs/api/create-store) API. A store in
 
   - `getListeners` (Function)
 
-    Returns the listener actions of your store (i.e. [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on)). Useful if you would like to manually execute a listener for the purpose of testing.
+    Returns the listener actions of your store (i.e. [actionOn](/docs/api/action-on.html) and [thunkOn](/docs/api/thunk-on.html)). Useful if you would like to manually execute a listener for the purpose of testing.
 
   - `getMockedActions` (Function)
 

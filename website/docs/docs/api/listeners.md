@@ -1,12 +1,12 @@
 # listeners
 
-This is the shared documentation for the [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) APIs. Both APIs allow you to declare a listener, which gets executed in response to configured [actions](/docs/api/action) or [thunks](/docs/api/thunk) having been executed.
+This is the shared documentation for the [actionOn](/docs/api/action-on.html) and [thunkOn](/docs/api/thunk-on.html) APIs. Both APIs allow you to declare a listener, which gets executed in response to configured [actions](/docs/api/action.html) or [thunks](/docs/api/thunk.html) having been executed.
 
-The [actionOn](/docs/api/action-on) API allows you to declare a listener which will be used to update state, similar to a standard [action](/docs/api/action). It shares many characteristics of [actions](/docs/api/action), so we recommend that you are familiarise yourself with [actions](/docs/api/action) first.
+The [actionOn](/docs/api/action-on.html) API allows you to declare a listener which will be used to update state, similar to a standard [action](/docs/api/action.html). It shares many characteristics of [actions](/docs/api/action.html), so we recommend that you are familiarise yourself with [actions](/docs/api/action.html) first.
 
-The [thunkOn](/docs/api/thunk-on) API allows you to declare a listener which will be used to perform side effects, or logic based action dispatching, similar to a standard [thunk](/docs/api/thunk). It shares many characteristics of a [thunk](/docs/api/thunk), so we recommend that you are familiarise yourself with [thunks](/docs/api/thunk) first.
+The [thunkOn](/docs/api/thunk-on.html) API allows you to declare a listener which will be used to perform side effects, or logic based action dispatching, similar to a standard [thunk](/docs/api/thunk.html). It shares many characteristics of a [thunk](/docs/api/thunk.html), so we recommend that you are familiarise yourself with [thunks](/docs/api/thunk.html) first.
 
-Whilst [actionOn](/docs/api/action-on) and [thunkOn](/docs/api/thunk-on) are similar to [action](/docs/api/action) and [thunk](/docs/api/thunk) respectively they do have the following distinctions:
+Whilst [actionOn](/docs/api/action-on.html) and [thunkOn](/docs/api/thunk-on.html) are similar to [action](/docs/api/action.html) and [thunk](/docs/api/thunk.html) respectively they do have the following distinctions:
 
 1. They require you define a `targetResolver` function as the first argument to your *listener* definitions. The `targetResolver` will receive the store actions and is responsible for resolving the target(s) to listen to.
 2. The handler for the action/thunk listener will receive a `target` argument instead of a `payload` argument. This `target` argument is an object containing a lot of useful information about the target being handled, including the payload.

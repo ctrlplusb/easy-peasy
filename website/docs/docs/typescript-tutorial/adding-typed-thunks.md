@@ -1,6 +1,6 @@
 # Adding typed thunks
 
-Easy Peasy exports a `Thunk` type, allowing you to declare a [thunk](/docs/api/thunk) against your model interface. The signature for this type is:
+Easy Peasy exports a `Thunk` type, allowing you to declare a [thunk](/docs/api/thunk.html) against your model interface. The signature for this type is:
 
 ```typescript
 type Thunk<
@@ -20,33 +20,33 @@ The type parameters can be described as follows.
 
 - `Model`
 
-  The model against which the [thunk](/docs/api/thunk) is being bound. This allows us to ensure the the `actions` argument that is provided to our [thunk](/docs/api/thunk) implementations are correctly typed.
+  The model against which the [thunk](/docs/api/thunk.html) is being bound. This allows us to ensure the the `actions` argument that is provided to our [thunk](/docs/api/thunk.html) implementations are correctly typed.
 
 - `Payload`
 
-  If you expect the [thunk](/docs/api/thunk) to receive a payload then you should provide the type for the payload. If your [thunk](/docs/api/thunk) will not receive any payload you can omit this type parameter or set it to `void`.
+  If you expect the [thunk](/docs/api/thunk.html) to receive a payload then you should provide the type for the payload. If your [thunk](/docs/api/thunk.html) will not receive any payload you can omit this type parameter or set it to `void`.
 
 - `Injections`
 
-  When [creating your store](/docs/api/create-store) you can specify `injections` via the [store configuration](/docs/api/store-config). The typical use case for the `injections` is to provide a mechanism by which to dependency injected services used to make HTTP calls. These `injections` are exposed to your your [thunks](/docs/api/thunk) via the `helpers` argument that they receive.
+  When [creating your store](/docs/api/create-store.html) you can specify `injections` via the [store configuration](/docs/api/store-config.html). The typical use case for the `injections` is to provide a mechanism by which to dependency injected services used to make HTTP calls. These `injections` are exposed to your your [thunks](/docs/api/thunk.html) via the `helpers` argument that they receive.
 
   Should you be using injections then it is useful to provide the typing information that describes them to this type parameter.
 
 - `StoreModel`
 
-  The `helpers` argument to your [thunks](/docs/api/thunk) exposes APIs which allow you to get the entire store state (via `getStoreState`), or all the actions for your store (via `getStoreActions`).
+  The `helpers` argument to your [thunks](/docs/api/thunk.html) exposes APIs which allow you to get the entire store state (via `getStoreState`), or all the actions for your store (via `getStoreActions`).
 
   For these to be correctly typed we need to ensure that we provide the model interface for our store to this type parameter.
 
 - `Result`
 
-  If you return data from your [thunk](/docs/api/thunk), then you should provide the expected type here.
+  If you return data from your [thunk](/docs/api/thunk.html), then you should provide the expected type here.
 
-  A [thunk](/docs/api/thunk) always returns a `Promise`. By default it is of type `Promise<void>`, however, if you provide this type parameter it becomes `Promise<Result>`.
+  A [thunk](/docs/api/thunk.html) always returns a `Promise`. By default it is of type `Promise<void>`, however, if you provide this type parameter it becomes `Promise<Result>`.
 
 ## Declaring a Thunk
 
-Let's define a [thunk](/docs/api/thunk) which we will use to save a todo.
+Let's define a [thunk](/docs/api/thunk.html) which we will use to save a todo.
 
 ```typescript
 import { Thunk } from 'easy-peasy';
@@ -62,7 +62,7 @@ As you can see our `Thunk` is operating against the `TodosModel` and it expects 
 
 ## Implementing a Thunk
 
-We can now implement this [thunk](/docs/api/thunk) against our model.
+We can now implement this [thunk](/docs/api/thunk.html) against our model.
 
 ```typescript
 import { thunk } from 'easy-peasy';
@@ -79,7 +79,7 @@ const todosModel: TodosModel = {
 };
 ```
 
-You will have noted that TypeScript was providing us with the typing information and assertions whilst we implemented our [thunk](/docs/api/thunk).
+You will have noted that TypeScript was providing us with the typing information and assertions whilst we implemented our [thunk](/docs/api/thunk.html).
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-thunk-imp.png" />
@@ -88,7 +88,7 @@ You will have noted that TypeScript was providing us with the typing information
 
 ## Using a thunk
 
-We can now consume the [thunk](/docs/api/thunk) within our component, making sure we use the typed version of `useStoreActions` that we exported from our store. We will refactor our component from earlier.
+We can now consume the [thunk](/docs/api/thunk.html) within our component, making sure we use the typed version of `useStoreActions` that we exported from our store. We will refactor our component from earlier.
 
 ```typescript
 import { useStoreActions } from '../hooks'; // 👈 import typed hook

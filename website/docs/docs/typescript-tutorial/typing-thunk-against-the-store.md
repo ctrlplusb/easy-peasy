@@ -1,10 +1,10 @@
 # Exposing entire store to our thunk
 
-We will now extend our [thunk](/docs/api/thunk) so that it is able to get the state/actions for the entire [store](/docs/api/store), after which we will update our [thunk](/docs/api/thunk) implementation so that it will create an audit log entry every time a todo is saved.
+We will now extend our [thunk](/docs/api/thunk.html) so that it is able to get the state/actions for the entire [store](/docs/api/store.html), after which we will update our [thunk](/docs/api/thunk.html) implementation so that it will create an audit log entry every time a todo is saved.
 
 ## Extending our audit model with an action
 
-Firstly, let's ensure that our audit model has an [action](/docs/api/action) on it which allows us to create a new log entry.
+Firstly, let's ensure that our audit model has an [action](/docs/api/action.html) on it which allows us to create a new log entry.
 
 ```typescript
 interface AuditModel {
@@ -22,7 +22,7 @@ const audit: AuditModel = {
 
 ## Calling audit model from our todo model thunk
 
-Now let's update our [thunk](/docs/api/thunk) configuration so that it is aware of the typings that represent our entire [store](/docs/api/store).
+Now let's update our [thunk](/docs/api/thunk.html) configuration so that it is aware of the typings that represent our entire [store](/docs/api/store.html).
 
 ```typescript
 import { StoreModel } from '../model';
@@ -41,7 +41,7 @@ export interface TodosModel {
 }
 ```
 
-We can now refactor our [thunk](/docs/api/thunk) implementation to make use of the `getStoreActions` helper that is provided to it.
+We can now refactor our [thunk](/docs/api/thunk.html) implementation to make use of the `getStoreActions` helper that is provided to it.
 
 ```typescript
 const todosModel: TodosModel = {

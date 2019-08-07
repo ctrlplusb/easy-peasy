@@ -1,6 +1,6 @@
 # Adding typed actions
 
-Easy Peasy exports an `Action` type, allowing you declare an [action](/docs/api/action) against your model interface. The signature for this type is:
+Easy Peasy exports an `Action` type, allowing you declare an [action](/docs/api/action.html) against your model interface. The signature for this type is:
 
 ```typescript
 type Action<
@@ -15,15 +15,15 @@ As you can see it accepts 2 type parameters, with both being optional. These typ
 
  - `Model`
 
-   The model against which the action is being bound. This allows us to ensure the the `state` that is exposed to our [action](/docs/api/action) implementation is correctly typed.
+   The model against which the action is being bound. This allows us to ensure the the `state` that is exposed to our [action](/docs/api/action.html) implementation is correctly typed.
 
 - `Payload`
 
-  If you expect the [action](/docs/api/action) implementation to receive a payload then you should provide the type for the payload. If your [action](/docs/api/action) will not receive any payload you can omit this type parameter.
+  If you expect the [action](/docs/api/action.html) implementation to receive a payload then you should provide the type for the payload. If your [action](/docs/api/action.html) will not receive any payload you can omit this type parameter.
 
 ## Declaring an Action
 
-Let's define an [action](/docs/api/action) that will allow us to add a todo.
+Let's define an [action](/docs/api/action.html) that will allow us to add a todo.
 
 ```typescript
 import { Action } from 'easy-peasy'; // 👈 import the type
@@ -38,7 +38,7 @@ We have provided type parameter to our `Action` informing it that it is operatin
 
 ## Implementing an Action
 
-We can now implement this [action](/docs/api/action) against our model.
+We can now implement this [action](/docs/api/action.html) against our model.
 
 ```typescript
 import { action } from 'easy-peasy';
@@ -51,7 +51,7 @@ const todos: TodosModel = {
 };
 ```
 
-You will have noted that TypeScript was providing us with the typing information and assertions whilst we implemented our [action](/docs/api/action).
+You will have noted that TypeScript was providing us with the typing information and assertions whilst we implemented our [action](/docs/api/action.html).
 
 <div class="screenshot">
   <img src="../../assets/typescript-tutorial/typed-action-imp.png" />
@@ -60,7 +60,7 @@ You will have noted that TypeScript was providing us with the typing information
 
 ## Using an action
 
-We can now consume the [action](/docs/api/action) within our components, whilst making sure that we use the typed `useStoreActions` that we exported from our [store](/docs/api/store).
+We can now consume the [action](/docs/api/action.html) within our components, whilst making sure that we use the typed `useStoreActions` that we exported from our [store](/docs/api/store.html).
 
 ```typescript
 import { useStoreActions } from '../hooks'; // 👈 import typed hook
