@@ -77,6 +77,7 @@ it('multiple instances', async () => {
 
 it('with initial data', () => {
   // arrange
+  // eslint-disable-next-line no-shadow
   const useCounter = createComponentStore(data => ({
     count: data.count || 0,
     inc: action(state => {
@@ -84,6 +85,7 @@ it('with initial data', () => {
     }),
   }));
 
+  // eslint-disable-next-line no-shadow
   function CountDisplay() {
     const [state, actions] = useCounter({ count: 1 });
     return (

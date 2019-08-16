@@ -1,3 +1,5 @@
+/* eslint-disable react/prop-types */
+
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import produce from 'immer-peasy';
@@ -18,7 +20,7 @@ test('immer-peasy works as expected', () => {
 
   // act
   Object.defineProperty(original, 'fullName', {
-    get: () => original.firstName + ' ' + original.lastName,
+    get: () => `${original.firstName} ${original.lastName}`,
   });
 
   // assert
@@ -120,12 +122,14 @@ test('computed properties are memoized', () => {
   expect(computedCount).toBe(0);
 
   // act
+  // eslint-disable-next-line no-unused-expressions
   store.getState().fullName;
 
   // assert
   expect(computedCount).toBe(1);
 
   // act
+  // eslint-disable-next-line no-unused-expressions
   store.getState().fullName;
 
   // assert
@@ -205,7 +209,7 @@ test('computed properties are available in actions', () => {
   const store = createStore({
     todos: ['test computed'],
     todosCount: computed(state => state.todos.length),
-    testAction: action((state, payload) => {
+    testAction: action(state => {
       // assert
       expect(state.todosCount).toBe(1);
     }),
@@ -237,7 +241,7 @@ test('computed properties work in a React component', () => {
     },
     other: {
       foo: 'bar',
-      setFoo: action((state, payload) => {
+      setFoo: action(state => {
         state.foo = 'bar';
       }),
     },

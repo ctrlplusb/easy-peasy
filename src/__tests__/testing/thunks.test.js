@@ -97,9 +97,9 @@ describe('with mocking actions', () => {
     // act
     try {
       await store.getActions().throwing('A payload');
-    } catch (err) {
+    } catch (thrownError) {
       // assert
-      expect(err.message).toEqual('poop');
+      expect(thrownError.message).toEqual('poop');
     }
 
     // assert

@@ -186,8 +186,8 @@ test('dispatch an action via redux dispatch', async () => {
         dispatch({ type: 'INCREMENT' });
       }),
     },
-    counter: reducer((state = 0, action) => {
-      switch (action.type) {
+    counter: reducer((state = 0, incomingAction) => {
+      switch (incomingAction.type) {
         case 'INCREMENT':
           return state + 1;
         default:
