@@ -234,12 +234,3 @@ describe('direct form', () => {
     expect(renderSpy).toHaveBeenCalledTimes(1);
   });
 });
-
-test('issue230', () => {
-  // arrange
-  const renderSpy = jest.fn();
-
-  // act
-
-  // assert
-});
