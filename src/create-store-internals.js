@@ -227,7 +227,16 @@ export default function createStoreInternals({
                 } else if (references.getState == null) {
                   return undefined;
                 } else {
-                  storeState = references.getState();
+                  try {
+                    storeState = references.getState();
+                  } catch (err) {
+                    if (process.env.NODE_ENV !== 'production') {
+                      console.warn(
+                        'Invalid access attempt to a computed property',
+                      );
+                    }
+                    return undefined;
+                  }
                 }
                 const state = get(parentPath, storeState);
                 const inputs = computedMeta.stateResolvers.map(resolver =>
