@@ -209,7 +209,7 @@ const auditModel = {
   logs: [],
   onAddedToBasket: actionOn(
     // targetResolver function receives actions and resolves the targets:
-    (actions, storeActions) => storeActions.basket.addProduct
+    (actions, storeActions) => storeActions.basket.addProduct,
     // action handler that executes when target is executed:
     (state, target) => {
       state.logs(`Added product ${target.payload} to basket`);
