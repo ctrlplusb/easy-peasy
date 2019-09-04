@@ -36,7 +36,9 @@ import loggerMiddleware from './middleware/logger;
 
 const model = {
   // Instead of doing a combineReducers we just bind each reducer to a key
-  // of our model using the "reducer" API from Easy Peasy
+  // of our model using the "reducer" API from Easy Peasy. You only need
+  // do this for top-level reducers. Nested reducers can continue to
+  // make use of combineReducers.
   products: reducer(productsReducer),
   basket: reducer(basketReducer),
 
