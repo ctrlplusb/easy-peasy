@@ -101,11 +101,11 @@ function AddTodo() {
   const onButtonClick = useCallback(() => {
     saveTodo(text) // 👈 dispatch our thunk with the text describing the todo
       .then(() => setText('')); // then chain off the promise returned by the thunk
-  }, [addTodo, setText, text]);
+  }, [saveTodo, setText, text]);
 
   return (
     <>
-      <input text={text} onChange={e => setText(e.target.value)} type="text />
+      <input value={text} onChange={e => setText(e.target.value)} type="text" />
       <button onClick={onButtonClick}>Add Todo</button>
     </>
   );
