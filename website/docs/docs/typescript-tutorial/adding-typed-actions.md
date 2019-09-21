@@ -77,7 +77,7 @@ function AddTodo() {
 
   return (
     <>
-      <input text={text} onChange={e => setText(e.target.value)} type="text />
+      <input value={text} onChange={e => setText(e.target.value)} type="text" />
       <button onClick={onButtonClick}>Add Todo</button>
     </>
   );
