@@ -1,6 +1,6 @@
 # useStoreActions
 
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the [store's](/docs/api/store) [actions](/docs/api/action.html).
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the [store's](/docs/api/store.html) [actions](/docs/api/action.html).
 
 ```javascript
 const addTodo = useStoreActions(actions => actions.todos.add);
