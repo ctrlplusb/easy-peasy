@@ -25,6 +25,6 @@ if (process.env.NODE_ENV === "development") {
 export default store;
 ```
 
-Note how you can call the [store's](/docs/api/store) `reconfigure` method in order to reconfigure the store with your updated model. The existing state will be maintained.
+Note how you can call the [store's](/docs/api/store.html) `reconfigure` method in order to reconfigure the store with your updated model. The existing state will be maintained.
 
 You can [view a demo repository configured for hot reloading here](https://github.com/ctrlplusb/easy-peasy-hot-reload).

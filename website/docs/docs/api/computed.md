@@ -124,7 +124,7 @@ function TotalPriceOfProducts() {
 
 ## Accessing via the store instance
 
-You can also access the computed property via the [store's](/docs/api/store) `getState` API.
+You can also access the computed property via the [store's](/docs/api/store.html) `getState` API.
 
 ```javascript
 console.log(store.getState().products.totalPrice);

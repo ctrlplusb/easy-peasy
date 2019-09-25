@@ -1,6 +1,6 @@
 # useStoreState
 
-A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the [store's](/docs/api/store) state.
+A [hook](https://reactjs.org/docs/hooks-intro.html) granting your components access to the [store's](/docs/api/store.html) state.
 
 ```javascript
 const todos = useStoreState(state => state.todos.items);

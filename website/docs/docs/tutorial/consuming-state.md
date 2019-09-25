@@ -100,7 +100,7 @@ This is another example of our `mapState` function performing some state derivin
 
 ## A note on optimisation
 
-Under the hood the [useStoreState](/docs/api/use-store-state.html) will execute its `mapState` function any time an update to your [store's](/docs/api/store) state occurs. It will then check the result of the newly mapped state against the previously mapped state using strict equality (`===`) checking.
+Under the hood the [useStoreState](/docs/api/use-store-state.html) will execute its `mapState` function any time an update to your [store's](/docs/api/store.html) state occurs. It will then check the result of the newly mapped state against the previously mapped state using strict equality (`===`) checking.
 
 If the newly mapped state ***is not equal*** to the previously mapped state (`nextMappedState !== prevMappedState`) your component will be rendered, receiving the new value. If the newly mapped state ***is equal*** to the previously mapped state (`nextMappedState === prevMappedState`) no render will occur.
 
@@ -126,7 +126,7 @@ This performance pitfall is described within the [useStoreState](/docs/api/use-s
 
 ## Review
 
-Awesome sauce, our components are hooked up to our [store's](/docs/api/store) state! As amazing as that is, our application is essentially static right now, with no ability to update our [store's](/docs/api/store) state.
+Awesome sauce, our components are hooked up to our [store's](/docs/api/store.html) state! As amazing as that is, our application is essentially static right now, with no ability to update our [store's](/docs/api/store.html) state.
 
 In the next section we'll look into how we can use [actions](/docs/api/action.html) in order to support updates.
 
