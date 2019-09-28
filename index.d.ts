@@ -215,13 +215,18 @@ type RecursiveState<
   Depth extends string
 > = Depth extends '6'
   ? Model
-  : O.Merge<
-      StateMapper<
-        O.Omit<O.Filter<Model, ActionTypes>, IndexSignatureKeysOfType<Model>>,
-        Depth
-      >,
-      O.Pick<Model, IndexSignatureKeysOfType<Model>>
-    >;
+  : {
+    [K in keyof O.Filter<Model, ActionTypes>]: K extends IndexSignatureKeysOfType<Model>
+      ? Model[K]
+      : StateMapper<{ 0: Model[K] }, Depth>[0]
+  }
+  // : O.Merge<
+  //     StateMapper<
+  //       O.Omit<O.Filter<Model, ActionTypes>, IndexSignatureKeysOfType<Model>>,
+  //       Depth
+  //     >,
+  //     O.Pick<Model, IndexSignatureKeysOfType<Model>>
+  //   >;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
