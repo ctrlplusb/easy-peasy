@@ -674,6 +674,23 @@ export function useStoreActions<StoreActions extends Actions<any>, Result>(
 ): Result;
 
 /**
+ * A react hook that returns the store instance.
+ *
+ * @example
+ *
+ * import { useStore } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const store = useStore();
+ *   return <div>{store.getState().foo}</div>;
+ * }
+ */
+export function useStore<
+  StoreModel extends object = {},
+  StoreConfig extends EasyPeasyConfig<any, any> = any
+>(): Store<StoreModel, StoreConfig>;
+
+/**
  * A React Hook allowing you to use the store's dispatch within your component.
  *
  * https://github.com/ctrlplusb/easy-peasy#usedispatch
@@ -695,7 +712,7 @@ export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
  * A utility function used to create pre-typed hooks.
  *
  * @example
- * const { useStoreActions, useStoreState, useStoreDispatch } = createTypedHooks<StoreModel>();
+ * const { useStoreActions, useStoreState, useStoreDispatch, useStore } = createTypedHooks<StoreModel>();
  *
  * useStoreActions(actions => actions.todo.add); // fully typed
  */
@@ -708,6 +725,7 @@ export function createTypedHooks<StoreModel extends Object = {}>(): {
     mapState: (state: State<StoreModel>) => Result,
     dependencies?: Array<any>,
   ) => Result;
+  useStore: () => Store<StoreModel>;
 };
 
 // #endregion

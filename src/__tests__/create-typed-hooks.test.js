@@ -3,6 +3,7 @@ import {
   useStoreActions,
   useStoreDispatch,
   useStoreState,
+  useStore,
 } from '../index';
 
 test('exports all hooks', () => {
@@ -13,4 +14,5 @@ test('exports all hooks', () => {
   expect(typedHooks.useStoreActions).toBe(useStoreActions);
   expect(typedHooks.useStoreState).toBe(useStoreState);
   expect(typedHooks.useStoreDispatch).toBe(useStoreDispatch);
+  expect(typedHooks.useStore).toBe(useStore);
 });

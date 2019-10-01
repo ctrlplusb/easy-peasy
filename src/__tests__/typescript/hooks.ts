@@ -10,6 +10,7 @@ import {
   useStoreActions,
   useStoreDispatch,
   useStoreState,
+  useStore,
 } from 'easy-peasy';
 
 interface Model {
@@ -41,6 +42,9 @@ let useActionResult = useStoreActions(
 );
 useActionResult(1);
 
+let store = useStore<Model>();
+store.getState().stateString + 'world';
+
 const typedHooks = createTypedHooks<Model>();
 
 useStoreResult = typedHooks.useStoreState(state => state.stateNumber);
@@ -51,3 +55,5 @@ dispatch = typedHooks.useStoreDispatch();
 dispatch({
   type: 'FOO',
 });
+store = typedHooks.useStore();
+store.getState().stateString + 'world';

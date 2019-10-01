@@ -9,12 +9,13 @@ Creates typed versions of the hooks so that you don't need to apply typing infor
 import { createTypedHooks } from 'easy-peasy';
 import { StoreModel } from './model';
 
-const { useStoreActions, useStoreState, useStoreDispatch } = createTypedHooks<StoreModel>();
+const { useStoreActions, useStoreState, useStoreDispatch, useStore } = createTypedHooks<StoreModel>();
 
 export default {
   useStoreActions,
   useStoreState,
-  useStoreDispatch
+  useStoreDispatch,
+  useStore
 }
 ```
 

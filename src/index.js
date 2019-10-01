@@ -4,6 +4,7 @@ import {
   useStoreActions,
   useStoreDispatch,
   useStoreState,
+  useStore,
 } from './hooks';
 import createStore from './create-store';
 import createContextStore from './create-context-store';
@@ -43,4 +44,5 @@ export {
   useStoreActions,
   useStoreDispatch,
   useStoreState,
+  useStore,
 };

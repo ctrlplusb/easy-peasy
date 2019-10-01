@@ -76,6 +76,7 @@ module.exports = {
             'api/use-store-actions',
             'api/use-store-dispatch',
             'api/use-store-state',
+            'api/use-store',
           ],
         },
         {
