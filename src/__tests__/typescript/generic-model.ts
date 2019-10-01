@@ -1,4 +1,6 @@
-import { O } from 'ts-toolbelt';
+/* eslint-disable */
+
+import { action, Action } from 'easy-peasy';
 
 /**
  * ARRANGE
@@ -7,14 +9,6 @@ import { O } from 'ts-toolbelt';
 interface Person {
   name: string;
 }
-
-type StateMapper<Model extends object> = {
-  [P in keyof Model]: Model[P];
-};
-
-type State<Model extends object> = StateMapper<O.Filter<Model, Action<any>>>;
-
-type Action<Model extends object> = (state: State<Model>) => void;
 
 /**
  * WORKING CASE - "NORMAL" MODEL INTERFACE
@@ -27,14 +21,14 @@ interface NormalModel {
 
 const normalModel: NormalModel = {
   data: [],
-  fetch: state => {
+  fetch: action(state => {
     //      👍 works
     state.data[0].name;
-  },
+  }),
 };
 
 /**
- * BROKEN CASE - "GENERIC" MODEL INTERFACE
+ * WORKING CASE - "GENERIC" MODEL INTERFACE
  */
 
 interface ObjectWithId {
@@ -49,9 +43,49 @@ interface GenericModel<Item extends ObjectWithId> {
 const createModel = <Item extends ObjectWithId>(): GenericModel<Item> => {
   return {
     data: [],
-    fetch: state => {
-      //     👇 broken
-      state.data;
-    },
+    fetch: action(state => {
+      state.data.forEach(({ id }) => id);
+    }),
+  };
+};
+
+/***
+ * BROKEN CASE - #300
+ */
+
+interface SimpleModel<T> {
+  thevalue: T;
+  theset: Action<SimpleModel<T>, T>;
+}
+
+const makeSimpleModel = <T>(initialValue: T): SimpleModel<T> => {
+  return {
+    thevalue: initialValue,
+    theset: action((state, payload) => {
+      // @ts-ignore
+      state.thevalue = payload;
+    }),
+  };
+};
+
+/**
+ * WORKAROUND - #300
+ */
+
+type Value<T> = [T];
+
+interface SimpleModelWorkaround<T> {
+  thevalue: Value<T>;
+  theset: Action<SimpleModelWorkaround<T>, T>;
+}
+
+const makeSimpleModelWorking = <T>(
+  initialValue: T,
+): SimpleModelWorkaround<T> => {
+  return {
+    thevalue: [initialValue],
+    theset: action((state, payload) => {
+      state.thevalue = [payload];
+    }),
   };
 };
