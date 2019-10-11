@@ -22,7 +22,7 @@ The following arguments are accepted:
 
   - `config` (Object, not required)
 
-    Provides custom configuration options for your store. Please see the [StoreConfig](#storeconfig) API documentation for a full list of configuration options.
+    Provides custom configuration options for your store. Please see the [StoreConfig](/docs/api/store-config.html) API documentation for a full list of configuration options.
 
 ## Returns
 
