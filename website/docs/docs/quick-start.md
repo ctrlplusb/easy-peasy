@@ -126,7 +126,7 @@ function Product({ product }) {
 Define a [thunk](/docs/api/thunk.html) in order to perform a side effect, such as making a request to an API.
 
 ```javascript
-import { thunk } from 'easy-peasy';
+import { thunk, action } from 'easy-peasy';
 //        👆
 
 const productsModel = {
