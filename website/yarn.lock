@@ -792,10 +792,10 @@
     "@vue/babel-plugin-transform-vue-jsx" "^1.0.0"
     camelcase "^5.0.0"
 
-"@vue/component-compiler-utils@^2.5.1":
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/@vue/component-compiler-utils/-/component-compiler-utils-2.6.0.tgz#aa46d2a6f7647440b0b8932434d22f12371e543b"
-  integrity sha512-IHjxt7LsOFYc0DkTncB7OXJL7UzwOLPPQCfEUNyxL2qt+tF12THV+EO33O1G2Uk4feMSWua3iD39Itszx0f0bw==
+"@vue/component-compiler-utils@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@vue/component-compiler-utils/-/component-compiler-utils-3.0.0.tgz#d16fa26b836c06df5baaeb45f3d80afc47e35634"
+  integrity sha512-am+04/0UX7ektcmvhYmrf84BDVAD8afFOf4asZjN84q8xzxFclbk5x0MtxuKGfp+zjN5WWPJn3fjFAWtDdIGSw==
   dependencies:
     consolidate "^0.15.1"
     hash-sum "^1.0.2"
@@ -807,18 +807,18 @@
     source-map "~0.6.1"
     vue-template-es2015-compiler "^1.9.0"
 
-"@vuepress/core@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/core/-/core-1.0.3.tgz#a32aedca770ee763c406a74abab2bc4fa42e9bdc"
-  integrity sha512-VUzjf2LMxy+DjiDs2QUO0R4zXATn0db7ClDETzc5D+HH08J2YwUO2YNHgIObHMyuihmDozesbYBiDp0kIxAqCw==
+"@vuepress/core@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/core/-/core-1.2.0.tgz#8e0c636b7f8676202fdd1ecfbe31bfe245dab2a8"
+  integrity sha512-ZIsUkQIF+h4Yk6q4okoRnRwRhcYePu/kNiL0WWPDGycjai8cFqFjLDP/tJjfTKXmn9A62j2ETjSwaiMxCtDkyw==
   dependencies:
     "@babel/core" "^7.0.0"
     "@vue/babel-preset-app" "^3.1.1"
-    "@vuepress/markdown" "^1.0.3"
-    "@vuepress/markdown-loader" "^1.0.3"
-    "@vuepress/plugin-last-updated" "^1.0.3"
-    "@vuepress/plugin-register-components" "^1.0.3"
-    "@vuepress/shared-utils" "^1.0.3"
+    "@vuepress/markdown" "^1.2.0"
+    "@vuepress/markdown-loader" "^1.2.0"
+    "@vuepress/plugin-last-updated" "^1.2.0"
+    "@vuepress/plugin-register-components" "^1.2.0"
+    "@vuepress/shared-utils" "^1.2.0"
     autoprefixer "^9.5.1"
     babel-loader "^8.0.4"
     cache-loader "^3.0.0"
@@ -828,7 +828,7 @@
     cross-spawn "^6.0.5"
     css-loader "^2.1.1"
     file-loader "^3.0.1"
-    js-yaml "^3.11.0"
+    js-yaml "^3.13.1"
     lru-cache "^5.1.1"
     mini-css-extract-plugin "0.6.0"
     optimize-css-assets-webpack-plugin "^5.0.1"
@@ -837,34 +837,34 @@
     postcss-safe-parser "^4.0.1"
     toml "^3.0.0"
     url-loader "^1.0.1"
-    vue "^2.5.16"
-    vue-loader "^15.2.4"
-    vue-router "^3.0.2"
-    vue-server-renderer "^2.5.16"
-    vue-template-compiler "^2.5.16"
+    vue "^2.6.10"
+    vue-loader "^15.7.1"
+    vue-router "^3.1.3"
+    vue-server-renderer "^2.6.10"
+    vue-template-compiler "^2.6.10"
     vuepress-html-webpack-plugin "^3.2.0"
-    vuepress-plugin-container "^2.0.0"
+    vuepress-plugin-container "^2.0.2"
     webpack "^4.8.1"
     webpack-chain "^4.6.0"
     webpack-dev-server "^3.5.1"
     webpack-merge "^4.1.2"
     webpackbar "3.2.0"
 
-"@vuepress/markdown-loader@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/markdown-loader/-/markdown-loader-1.0.3.tgz#8e63e66d0bb1ec75ee564424bdf8e7ee38077b63"
-  integrity sha512-2/023ghXi+7XHeHRbcXpUeWAERtSSCopPPdZqFV5/aIhW+Lv1Bl2iV1QfR2jKwlnZO/6g3HYMBq2GJaTNw0QLg==
+"@vuepress/markdown-loader@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/markdown-loader/-/markdown-loader-1.2.0.tgz#f8972014616b4ab46a99c9aaac2dd414d437411c"
+  integrity sha512-gOZzoHjfp/W6t+qKBRdbHS/9TwRnNuhY7V+yFzxofNONFHQULofIN/arG+ptYc2SuqJ541jqudNQW+ldHNMC2w==
   dependencies:
-    "@vuepress/markdown" "^1.0.3"
+    "@vuepress/markdown" "^1.2.0"
     loader-utils "^1.1.0"
     lru-cache "^5.1.1"
 
-"@vuepress/markdown@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/markdown/-/markdown-1.0.3.tgz#633e2b69ee7c00a1aaa8b71584a50e4e1518edc6"
-  integrity sha512-kauU0EZk5+Ju74MtxiBiQ6HAbcchr8UjbURHSHwJe1k6W0fy0wyQ0ND5EILLhKZl1KhZeHGGDKBW385ruRKfcQ==
+"@vuepress/markdown@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/markdown/-/markdown-1.2.0.tgz#7c457e0fab52ef8ac4dd1898ae450bc3aec30746"
+  integrity sha512-RLRQmTu5wJbCO4Qv+J0K53o5Ew7nAGItLwWyzCbIUB6pRsya3kqSCViWQVlKlS53zFTmRHuAC9tJMRdzly3mCA==
   dependencies:
-    "@vuepress/shared-utils" "^1.0.3"
+    "@vuepress/shared-utils" "^1.2.0"
     markdown-it "^8.4.1"
     markdown-it-anchor "^5.0.2"
     markdown-it-chain "^1.3.0"
@@ -872,48 +872,48 @@
     markdown-it-table-of-contents "^0.4.0"
     prismjs "^1.13.0"
 
-"@vuepress/plugin-active-header-links@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/plugin-active-header-links/-/plugin-active-header-links-1.0.3.tgz#94cae9a4e554fb7989461741748938efaa2fd65e"
-  integrity sha512-hUxGVfiQs/ywDykklSzMXT4evHe1w/DB5PMtS2LIig3sj5K+gAgNiu6L9SjXFTrYPxp9fWkYmkKPf7guV2QuRw==
+"@vuepress/plugin-active-header-links@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/plugin-active-header-links/-/plugin-active-header-links-1.2.0.tgz#46495c89e51a95e57139be007dffbcae4b229260"
+  integrity sha512-vdi7l96pElJvEmcx6t9DWJNH25TIurS8acjN3+b7o4NzdaszFn5j6klN6WtI4Z+5BVDrxHP5W1F3Ebw8SZyupA==
   dependencies:
-    lodash.throttle "^4.1.1"
+    lodash.debounce "^4.0.8"
 
-"@vuepress/plugin-google-analytics@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/plugin-google-analytics/-/plugin-google-analytics-1.0.3.tgz#2c36584d473d6d21b0880719afc83bd5b40e778b"
-  integrity sha512-mqFFQSJjQp5zscZJ0Ik+YDLV7sZSAO8w13CG8c5WsUCjy+0oWhqAw/NjpVrEK8Y/PdYPe4l/OE5jMUU5AqRRjg==
+"@vuepress/plugin-google-analytics@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/plugin-google-analytics/-/plugin-google-analytics-1.2.0.tgz#54555fd14f01a032c5acff04ecbbe0911577d7d0"
+  integrity sha512-0zol5D4Efb5GKel7ADO/s65MLtKSLnOEGkeWzuipkWomSQPzP7TJ3+/RcYBnGdyBFHd1BSpTUHGK0b/IGwM3UA==
 
-"@vuepress/plugin-last-updated@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/plugin-last-updated/-/plugin-last-updated-1.0.3.tgz#b9e3cd2d7cc27d0e70e7ea2194c171607bd61493"
-  integrity sha512-GMD9g8Lw1ASdBiRZgQotkZqOgsGuvX33sDnmRuYjUcO4f6Lo+m8JZsOTStNjcquCvykucbjYqU1LQTyGAMyZWw==
+"@vuepress/plugin-last-updated@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/plugin-last-updated/-/plugin-last-updated-1.2.0.tgz#7b34065b793848b0482a222b7a6f1b7df3668cdc"
+  integrity sha512-j4uZb/MXDyG+v9QCG3T/rkiaOhC/ib7NKCt1cjn3GOwvWTDmB5UZm9EBhUpbDNrBgxW+SaHOe3kMVNO8bGOTGw==
   dependencies:
     cross-spawn "^6.0.5"
 
-"@vuepress/plugin-nprogress@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/plugin-nprogress/-/plugin-nprogress-1.0.3.tgz#a0d6913193c933171b4695bf153efb0c29a76421"
-  integrity sha512-F7+R9EcBV0MT7dn06sUhGpsE7dzkT/eVLBNDqN3hDBedhu1XV8Ch5JYYGXKGFHrRdtDmiwyvEl4W6L6uzCVT4Q==
+"@vuepress/plugin-nprogress@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/plugin-nprogress/-/plugin-nprogress-1.2.0.tgz#ff6166946a0b118a39a562acb57983529afce4d2"
+  integrity sha512-0apt3Dp6XVCOkLViX6seKSEJgARihi+pX3/r8j8ndFp9Y+vmgLFZnQnGE5iKNi1ty+A6PZOK0RQcBjwTAU4pAw==
   dependencies:
     nprogress "^0.2.0"
 
-"@vuepress/plugin-register-components@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/plugin-register-components/-/plugin-register-components-1.0.3.tgz#5cbfd0947c904a0f4c1911746fb5586520ed9b9d"
-  integrity sha512-6vlXEuaEJtV1EIudcVzJciJf0HRAcWRd6ViB9WO87enkqeT+bR32VZENqcN43RyF8vPP+mmZ/2eDUpvM3J6a2w==
+"@vuepress/plugin-register-components@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/plugin-register-components/-/plugin-register-components-1.2.0.tgz#95aa0e0af94b2758b26ab98814c43b0f7bcd502b"
+  integrity sha512-C32b8sbGtDEX8I3SUUKS/w2rThiRFiKxmzNcJD996me7VY/4rgmZ8CxGtb6G9wByVoK0UdG1SOkrgOPdSCm80A==
   dependencies:
-    "@vuepress/shared-utils" "^1.0.3"
+    "@vuepress/shared-utils" "^1.2.0"
 
-"@vuepress/plugin-search@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/plugin-search/-/plugin-search-1.0.3.tgz#f8cd98380cc00db067fb243e4fd298c6b8b7179a"
-  integrity sha512-CD4G6BrKtS6JS9DzPMbwwovanaKMhj/KN6Bv7P5oY5inWTl3lE9KOjzr1YUkoA6wL6f69EfdB5B7cdO2d47n/w==
+"@vuepress/plugin-search@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/plugin-search/-/plugin-search-1.2.0.tgz#0b27c467b7fd42bd4d9e32de0fe2fb81a24bd311"
+  integrity sha512-QU3JfnMfImDAArbJOVH1q1iCDE5QrT99GLpNGo6KQYZWqY1TWAbgyf8C2hQdaI03co1lkU2Wn/iqzHJ5WHlueg==
 
-"@vuepress/shared-utils@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/shared-utils/-/shared-utils-1.0.3.tgz#224d2fc10fcf26d871eae8dd93b810616731123f"
-  integrity sha512-E9kh+nk+E0X6GTONXK1OWeY7Yyl/bUkWltmdh89f7hcSn2MxuBmlph4JdtZKrTK2m+9EqzpVR+CYanGjTA/ZQA==
+"@vuepress/shared-utils@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/shared-utils/-/shared-utils-1.2.0.tgz#8d9ab40c24f75f027ef32c2ad0169f0f08e949fa"
+  integrity sha512-wo5Ng2/xzsmIYCzvWxgLFlDBp7FkmJp2shAkbSurLNAh1vixhs0+LyDxsk01+m34ktJSp9rTUUsm6khw/Fvo0w==
   dependencies:
     chalk "^2.3.2"
     diacritics "^1.3.0"
@@ -925,18 +925,20 @@
     semver "^6.0.0"
     upath "^1.1.0"
 
-"@vuepress/theme-default@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@vuepress/theme-default/-/theme-default-1.0.3.tgz#a92025d9be1705ef7b95c53365a8ba3d917b6023"
-  integrity sha512-rS12CdMQwpSD7RI9XCM1gko13uPKhbVlbaxb7bd6ozjOQm4Iy1qAAyoZredRl1Sx29QvvcXZxLMGzAqx98GMCw==
+"@vuepress/theme-default@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@vuepress/theme-default/-/theme-default-1.2.0.tgz#3303af21a00031a3482ed1c494508234f545cbf1"
+  integrity sha512-mJxAMYQQv4OrGFsArMlONu8RpCzPUVx81dumkyTT4ay5PXAWTj+WDeFQLOT3j0g9QrDJGnHhbiw2aS+R/0WUyQ==
   dependencies:
-    "@vuepress/plugin-active-header-links" "^1.0.3"
-    "@vuepress/plugin-nprogress" "^1.0.3"
-    "@vuepress/plugin-search" "^1.0.3"
+    "@vuepress/plugin-active-header-links" "^1.2.0"
+    "@vuepress/plugin-nprogress" "^1.2.0"
+    "@vuepress/plugin-search" "^1.2.0"
     docsearch.js "^2.5.2"
+    lodash "^4.17.15"
     stylus "^0.54.5"
     stylus-loader "^3.0.2"
-    vuepress-plugin-container "^2.0.0"
+    vuepress-plugin-container "^2.0.2"
+    vuepress-plugin-smooth-scroll "^0.0.3"
 
 "@webassemblyjs/ast@1.8.5":
   version "1.8.5"
@@ -4150,6 +4152,11 @@ lodash.clonedeep@^4.5.0:
   resolved "https://registry.yarnpkg.com/lodash.clonedeep/-/lodash.clonedeep-4.5.0.tgz#e23f3f9c4f8fbdde872529c1071857a086e5ccef"
   integrity sha1-4j8/nE+Pvd6HJSnBBxhXoIblzO8=
 
+lodash.debounce@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.yarnpkg.com/lodash.debounce/-/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
+  integrity sha1-gteb/zCmfEAF/9XiUVMArZyk168=
+
 lodash.kebabcase@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/lodash.kebabcase/-/lodash.kebabcase-4.1.1.tgz#8489b1cb0d29ff88195cceca448ff6d6cc295c36"
@@ -4175,11 +4182,6 @@ lodash.templatesettings@^4.0.0:
   dependencies:
     lodash._reinterpolate "~3.0.0"
 
-lodash.throttle@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/lodash.throttle/-/lodash.throttle-4.1.1.tgz#c23e91b710242ac70c37f1e1cda9274cc39bf2f4"
-  integrity sha1-wj6RtxAkKscMN/HhzaknTMOb8vQ=
-
 lodash.uniq@^4.5.0:
   version "4.5.0"
   resolved "https://registry.yarnpkg.com/lodash.uniq/-/lodash.uniq-4.5.0.tgz#d0225373aeb652adc1bc82e4945339a842754773"
@@ -4189,6 +4191,11 @@ lodash@^4.17.11, lodash@^4.17.3, lodash@^4.17.5:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
+
+lodash@^4.17.15:
+  version "4.17.15"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
+  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
 
 loglevel@^1.6.2:
   version "1.6.2"
@@ -6157,6 +6164,11 @@ slash@^2.0.0:
   resolved "https://registry.yarnpkg.com/slash/-/slash-2.0.0.tgz#de552851a1759df3a8f206535442f5ec4ddeab44"
   integrity sha512-ZYKh3Wh2z1PpEXWr0MpSBZ0V6mZHAQfYevttO11c51CaWjGTaadiKZ+wVt1PbMlDV5qhMFslpZCemhwOK7C89A==
 
+smoothscroll-polyfill@^0.4.3:
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/smoothscroll-polyfill/-/smoothscroll-polyfill-0.4.4.tgz#3a259131dc6930e6ca80003e1cb03b603b69abf8"
+  integrity sha512-TK5ZA9U5RqCwMpfoMq/l1mrH0JAR7y7KRvOBx0n2869aLxch+gT9GhN3yUfjiw+d/DiF1mKo14+hd62JyMmoBg==
+
 snapdragon-node@^2.0.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/snapdragon-node/-/snapdragon-node-2.1.1.tgz#6c175f86ff14bdb0724563e8f3c1b021a286853b"
@@ -6947,23 +6959,23 @@ vue-hot-reload-api@^2.3.0:
   resolved "https://registry.yarnpkg.com/vue-hot-reload-api/-/vue-hot-reload-api-2.3.3.tgz#2756f46cb3258054c5f4723de8ae7e87302a1ccf"
   integrity sha512-KmvZVtmM26BQOMK1rwUZsrqxEGeKiYSZGA7SNWE6uExx8UX/cj9hq2MRV/wWC3Cq6AoeDGk57rL9YMFRel/q+g==
 
-vue-loader@^15.2.4:
-  version "15.7.0"
-  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-15.7.0.tgz#27275aa5a3ef4958c5379c006dd1436ad04b25b3"
-  integrity sha512-x+NZ4RIthQOxcFclEcs8sXGEWqnZHodL2J9Vq+hUz+TDZzBaDIh1j3d9M2IUlTjtrHTZy4uMuRdTi8BGws7jLA==
+vue-loader@^15.7.1:
+  version "15.7.1"
+  resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-15.7.1.tgz#6ccacd4122aa80f69baaac08ff295a62e3aefcfd"
+  integrity sha512-fwIKtA23Pl/rqfYP5TSGK7gkEuLhoTvRYW+TU7ER3q9GpNLt/PjG5NLv3XHRDiTg7OPM1JcckBgds+VnAc+HbA==
   dependencies:
-    "@vue/component-compiler-utils" "^2.5.1"
+    "@vue/component-compiler-utils" "^3.0.0"
     hash-sum "^1.0.2"
     loader-utils "^1.1.0"
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
 
-vue-router@^3.0.2:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.0.6.tgz#2e4f0f9cbb0b96d0205ab2690cfe588935136ac3"
-  integrity sha512-Ox0ciFLswtSGRTHYhGvx2L44sVbTPNS+uD2kRISuo8B39Y79rOo0Kw0hzupTmiVtftQYCZl87mwldhh2L9Aquw==
+vue-router@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-3.1.3.tgz#e6b14fabc0c0ee9fda0e2cbbda74b350e28e412b"
+  integrity sha512-8iSa4mGNXBjyuSZFCCO4fiKfvzqk+mhL0lnKuGcQtO1eoj8nq3CmbEG8FwK5QqoqwDgsjsf1GDuisDX4cdb/aQ==
 
-vue-server-renderer@^2.5.16:
+vue-server-renderer@^2.6.10:
   version "2.6.10"
   resolved "https://registry.yarnpkg.com/vue-server-renderer/-/vue-server-renderer-2.6.10.tgz#cb2558842ead360ae2ec1f3719b75564a805b375"
   integrity sha512-UYoCEutBpKzL2fKCwx8zlRtRtwxbPZXKTqbl2iIF4yRZUNO/ovrHyDAJDljft0kd+K0tZhN53XRHkgvCZoIhug==
@@ -6985,7 +6997,7 @@ vue-style-loader@^4.1.0:
     hash-sum "^1.0.2"
     loader-utils "^1.0.2"
 
-vue-template-compiler@^2.5.16:
+vue-template-compiler@^2.6.10:
   version "2.6.10"
   resolved "https://registry.yarnpkg.com/vue-template-compiler/-/vue-template-compiler-2.6.10.tgz#323b4f3495f04faa3503337a82f5d6507799c9cc"
   integrity sha512-jVZkw4/I/HT5ZMvRnhv78okGusqe0+qH2A0Em0Cp8aq78+NK9TII263CDVz2QXZsIT+yyV/gZc/j/vlwa+Epyg==
@@ -6998,7 +7010,7 @@ vue-template-es2015-compiler@^1.9.0:
   resolved "https://registry.yarnpkg.com/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.9.1.tgz#1ee3bc9a16ecbf5118be334bb15f9c46f82f5825"
   integrity sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==
 
-vue@^2.5.16:
+vue@^2.6.10:
   version "2.6.10"
   resolved "https://registry.yarnpkg.com/vue/-/vue-2.6.10.tgz#a72b1a42a4d82a721ea438d1b6bf55e66195c637"
   integrity sha512-ImThpeNU9HbdZL3utgMCq0oiMzAkt1mcgy3/E6zWC/G6AaQoeuFdsl9nDhTDU3X1R6FK7nsIUuRACVcjI+A2GQ==
@@ -7016,20 +7028,27 @@ vuepress-html-webpack-plugin@^3.2.0:
     toposort "^1.0.0"
     util.promisify "1.0.0"
 
-vuepress-plugin-container@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/vuepress-plugin-container/-/vuepress-plugin-container-2.0.1.tgz#b20ef97dd91f137c8be119460927c5ffd64e0f77"
-  integrity sha512-SMlWJl0uZYkqAxD2RUZmIrANZWKgiZdM64K7WmdyHyQPYI+NUj3ugi5D+zDn62BoO9NfQTiskEIa2u619SRweA==
+vuepress-plugin-container@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/vuepress-plugin-container/-/vuepress-plugin-container-2.0.2.tgz#3489cc732c7a210b31f202556e1346125dffeb73"
+  integrity sha512-SrGYYT7lkie7xlIlAVhn+9sDW42MytNCoxWL/2uDr+q9wZA4h1uYlQvfc2DVjy+FsM9PPPSslkeo/zCpYVY82g==
   dependencies:
     markdown-it-container "^2.0.0"
 
-vuepress@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/vuepress/-/vuepress-1.0.3.tgz#7c744061b5a3244ab86d49ac8d66417258509f13"
-  integrity sha512-+wCbyhZjaboY6VGBceai+JCdho96ZO9hVFHLnGGsj1/Zt2sKHrwWwV7lvbBO9y/IGib0YYpifpEJcpzvy3MDVg==
+vuepress-plugin-smooth-scroll@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/vuepress-plugin-smooth-scroll/-/vuepress-plugin-smooth-scroll-0.0.3.tgz#6eff2d4c186cca917cc9f7df2b0af7de7c8c6438"
+  integrity sha512-qsQkDftLVFLe8BiviIHaLV0Ea38YLZKKonDGsNQy1IE0wllFpFIEldWD8frWZtDFdx6b/O3KDMgVQ0qp5NjJCg==
   dependencies:
-    "@vuepress/core" "^1.0.3"
-    "@vuepress/theme-default" "^1.0.3"
+    smoothscroll-polyfill "^0.4.3"
+
+vuepress@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/vuepress/-/vuepress-1.2.0.tgz#2f2cdf337ad40a3e4866dfd33e97b840db386af7"
+  integrity sha512-EfHo8Cc73qo+1Pm18hM0qOGynmDr8q5fu2664obynsdCJ1zpvoShVnA0Msraw4SI2xDc0iAoIb3dTwxUIM8DAw==
+  dependencies:
+    "@vuepress/core" "^1.2.0"
+    "@vuepress/theme-default" "^1.2.0"
     cac "^6.3.9"
     envinfo "^7.2.0"
     opencollective-postinstall "^2.0.2"
