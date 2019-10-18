@@ -18,7 +18,7 @@ it('should return state with changes applied', () => {
     add: action((state, payload) => {
       expect(debug(state)).toEqual({ logs: ['foo'] });
       state.logs.push(payload);
-      expect(debug(state)).toEqual({ logs: ['foo', 'bar'] });
+      expect(debug(state)).toEqual({ logs: ['foo'] });
     }),
   });
 

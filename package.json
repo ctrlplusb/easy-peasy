@@ -51,7 +51,7 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0",
-    "ts-toolbelt": "^4.8.16"
+    "ts-toolbelt": "^4.8.19"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -93,7 +93,7 @@
     "react-dom": "^16.10.2",
     "react-redux": "^7.1.1",
     "rimraf": "^3.0.0",
-    "rollup": "^1.24.0",
+    "rollup": "^1.25.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-filesize": "^6.2.1",
