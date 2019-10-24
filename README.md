@@ -78,6 +78,10 @@ Easy Peasy provides you with an intuitive API to quickly and easily manage the s
 
 See the [official website](https://easy-peasy.now.sh) for tutorials, API docs, recipes, and more.
 
-## Support 
+## Backers
 
-<a href="https://www.patreon.com/bePatron?u=4829984" data-patreon-widget-type="become-patron-button">Become a Patron!</a>
+Thank goes to all our backers! [[Become a backer](https://opencollective.com/easy-peasy#backer)].
+
+<a href="https://opencollective.com/easy-peasy#backers">
+    <img src="https://opencollective.com/easy-peasy/backers.svg?width=950" />
+</a>
