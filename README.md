@@ -77,3 +77,7 @@ Easy Peasy provides you with an intuitive API to quickly and easily manage the s
 ## Documentation
 
 See the [official website](https://easy-peasy.now.sh) for tutorials, API docs, recipes, and more.
+
+## Support 
+
+<a href="https://www.patreon.com/bePatron?u=4829984" data-patreon-widget-type="become-patron-button">Become a Patron!</a>
