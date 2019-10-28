@@ -39,7 +39,7 @@
     }
   },
   "resolutions": {
-    "@types/react": "16.9.9"
+    "@types/react": "16.9.11"
   },
   "peerDependencies": {
     "react": "^16.8.0"
@@ -51,7 +51,7 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0",
-    "ts-toolbelt": "^4.8.19"
+    "ts-toolbelt": "^4.9.9"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -65,12 +65,12 @@
     "@babel/preset-react": "^7.6.3",
     "@babel/preset-typescript": "^7.6.0",
     "@babel/register": "^7.6.2",
-    "@testing-library/jest-dom": "^4.1.2",
+    "@testing-library/jest-dom": "^4.2.0",
     "@testing-library/react": "^9.3.0",
     "@testing-library/react-hooks": "^2.0.3",
-    "@types/react": "^16.9.9",
-    "@types/react-dom": "^16.9.2",
-    "@types/react-redux": "^7.1.4",
+    "@types/react": "^16.9.11",
+    "@types/react-dom": "^16.9.3",
+    "@types/react-redux": "^7.1.5",
     "app-root-dir": "^1.0.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.3",
@@ -78,9 +78,9 @@
     "babel-plugin-transform-react-remove-prop-types": "^0.4.24",
     "change-case": "^3.1.0",
     "codecov": "^3.6.1",
-    "eslint": "^6.5.1",
+    "eslint": "^6.6.0",
     "eslint-config-airbnb": "^17.1.1",
-    "eslint-config-prettier": "^6.4.0",
+    "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
     "eslint-plugin-react": "^7.16.0",
@@ -89,11 +89,11 @@
     "lint-staged": "^9.4.2",
     "prettier": "^1.18.2",
     "prettier-eslint": "^9.0.0",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
     "react-redux": "^7.1.1",
     "rimraf": "^3.0.0",
-    "rollup": "^1.25.0",
+    "rollup": "^1.26.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-filesize": "^6.2.1",
