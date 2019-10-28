@@ -1,3 +1,5 @@
+/// <reference types="symbol-observable" />
+
 /* eslint-disable */
 
 import { Component } from 'react';
@@ -10,6 +12,7 @@ import {
   Store as ReduxStore,
   StoreEnhancer,
   Middleware,
+  Observable,
 } from 'redux';
 import { O } from 'ts-toolbelt';
 
@@ -297,25 +300,30 @@ export interface MockedAction {
  *
  * type EnhancedReduxStore = Store<StoreModel>;
  */
-export type Store<
+export interface Store<
   StoreModel extends object = {},
   StoreConfig extends EasyPeasyConfig<any, any> = any
-> = O.Merge<
-  O.Omit<ReduxStore<State<StoreModel>>, 'dispatch'>,
-  {
-    addModel: <ModelSlice extends object>(
-      key: string,
-      modelSlice: ModelSlice,
-    ) => void;
-    clearMockedActions: () => void;
-    dispatch: Dispatch<StoreModel>;
-    getActions: () => Actions<StoreModel>;
-    getListeners: () => Listeners<StoreModel>;
-    getMockedActions: () => MockedAction[];
-    reconfigure: <NewStoreModel extends object>(model: NewStoreModel) => void;
-    removeModel: (key: string) => void;
-  }
->;
+> extends ReduxStore<State<StoreModel>> {
+  addModel: <ModelSlice extends object>(
+    key: string,
+    modelSlice: ModelSlice,
+  ) => void;
+  clearMockedActions: () => void;
+  dispatch: Dispatch<StoreModel>;
+  getActions: () => Actions<StoreModel>;
+  getListeners: () => Listeners<StoreModel>;
+  getMockedActions: () => MockedAction[];
+  reconfigure: <NewStoreModel extends object>(model: NewStoreModel) => void;
+  removeModel: (key: string) => void;
+
+  /**
+   * Interoperability point for observable/reactive libraries.
+   * @returns {observable} A minimal observable of state changes.
+   * For more information, see the observable proposal:
+   * https://github.com/tc39/proposal-observable
+   */
+  [Symbol.observable](): Observable<State<StoreModel>>;
+}
 
 // #endregion
 

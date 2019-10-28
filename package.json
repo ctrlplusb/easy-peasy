@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
@@ -51,6 +51,7 @@
     "redux": "^4.0.4",
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0",
+    "symbol-observable": "^1.2.0",
     "ts-toolbelt": "^4.9.9"
   },
   "devDependencies": {
