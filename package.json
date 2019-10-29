@@ -52,7 +52,7 @@
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0",
     "symbol-observable": "^1.2.0",
-    "ts-toolbelt": "^4.9.9"
+    "ts-toolbelt": "^4.9.14"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -101,7 +101,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-replace": "^2.2.0",
     "rollup-plugin-uglify": "^6.0.3",
-    "typescript": "3.6.4",
+    "typescript": "3.7.1-rc",
     "typings-tester": "^0.3.2"
   },
   "jest": {

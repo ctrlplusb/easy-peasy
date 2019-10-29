@@ -6926,10 +6926,10 @@ trim-right@^1.0.1:
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
   integrity sha1-yy4SAwZ+DI3h9hQJS5/kVwTqYAM=
 
-ts-toolbelt@^4.9.9:
-  version "4.9.9"
-  resolved "https://registry.yarnpkg.com/ts-toolbelt/-/ts-toolbelt-4.9.9.tgz#1a5870096430a15f5a694d53c40705473cd7b131"
-  integrity sha512-syHEGzoVahm9PoUgeN5Q3d/Dcn3nHGko26Zhxq6T9WfOyADgrg3OXP/Fp6GOpfuZt5Ln9IJW+zn+rQ9C8FqeIg==
+ts-toolbelt@^4.9.14:
+  version "4.9.14"
+  resolved "https://registry.yarnpkg.com/ts-toolbelt/-/ts-toolbelt-4.9.14.tgz#22458514e7472b8e061463f0e7192a2cd49f53dd"
+  integrity sha512-xp84yyzqhKyYYvrLbdfguPwb1wwzk9HMZwM4FLM0B5ug/UfSHCEtDYzMXGLRn6Xa1pVvWiqa9pePp6eOZcwRkQ==
 
 tslib@^1.9.0:
   version "1.9.3"
@@ -6965,10 +6965,10 @@ type-fest@^0.6.0:
   resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-0.6.0.tgz#8d2a2370d3df886eb5c90ada1c5bf6188acf838b"
   integrity sha512-q+MB8nYR1KDLrgr4G5yemftpMC7/QLqVndBmEEdqzmNj5dcFOO4Oo8qlwZE3ULT3+Zim1F8Kq4cBnikNhlCMlg==
 
-typescript@3.6.4:
-  version "3.6.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.4.tgz#b18752bb3792bc1a0281335f7f6ebf1bbfc5b91d"
-  integrity sha512-unoCll1+l+YK4i4F8f22TaNVPRHcD9PA3yCuZ8g5e0qGqlVlJ/8FSateOLLSagn+Yg5+ZwuPkL8LFUc0Jcvksg==
+typescript@3.7.1-rc:
+  version "3.7.1-rc"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.1-rc.tgz#2054b872d67f8dc732e36c1df397f9327f37ada0"
+  integrity sha512-2rMtWppLsaPvmpXsoIAXWDBQVnJMw1ITGGSnidMuayLj9iCmMRT69ncKZw/Mk5rXfJkilApKucWQZxproALoRw==
 
 typescript@^3.2.1:
   version "3.5.2"
