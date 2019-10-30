@@ -1,4 +1,13 @@
-import { createStore, action, persist } from '../';
+import React from 'react';
+import { act } from 'react-dom/test-utils';
+import { render } from '@testing-library/react';
+import {
+  createStore,
+  action,
+  persist,
+  RehydrateBoundary,
+  StoreProvider,
+} from '../';
 
 jest.mock('debounce', () => fn => fn);
 
@@ -453,4 +462,68 @@ test('multiple stores', () => {
     counter: 99,
     msg: 'i am store 2',
   });
+});
+
+test('RehydrateBoundary with loading component', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage(undefined, { async: true });
+  const store = makeStore({
+    storage: memoryStorage,
+  });
+  const App = () => (
+    <StoreProvider store={store}>
+      <div>
+        <h1>App Title</h1>
+        <RehydrateBoundary loading={<p>Loading...</p>}>
+          <div>Loaded</div>
+        </RehydrateBoundary>
+        >
+      </div>
+    </StoreProvider>
+  );
+  const wrapper = render(<App />);
+
+  // ASSERT
+  expect(wrapper.queryByText('Loading...')).not.toBeNull();
+  expect(wrapper.queryByText('Loaded')).toBeNull();
+
+  // ACT
+  await act(async () => {
+    await store.persist.resolveRehydration();
+  });
+
+  // ASSERT
+  expect(wrapper.queryByText('Loading...')).toBeNull();
+  expect(wrapper.queryByText('Loaded')).not.toBeNull();
+});
+
+test('RehydrateBoundary without loading component', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage(undefined, { async: true });
+  const store = makeStore({
+    storage: memoryStorage,
+  });
+  const App = () => (
+    <StoreProvider store={store}>
+      <div>
+        <h1>App Title</h1>
+        <RehydrateBoundary>
+          <div>Loaded</div>
+        </RehydrateBoundary>
+        >
+      </div>
+    </StoreProvider>
+  );
+  const wrapper = render(<App />);
+
+  // ASSERT
+  expect(wrapper.queryByText('Loaded')).toBeNull();
+
+  // ACT
+  await act(async () => {
+    await store.persist.resolveRehydration();
+  });
+
+  // ASSERT
+  expect(wrapper.queryByText('Loaded')).not.toBeNull();
 });

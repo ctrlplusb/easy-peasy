@@ -10,6 +10,7 @@ import createStore from './create-store';
 import createContextStore from './create-context-store';
 import createComponentStore from './create-component-store';
 import StoreProvider from './provider';
+import RehydrateBoundary from './rehydrate-boundary';
 import {
   action,
   actionOn,
@@ -40,6 +41,7 @@ export {
   memo,
   persist,
   reducer,
+  RehydrateBoundary,
   StoreProvider,
   thunk,
   thunkOn,
