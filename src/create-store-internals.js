@@ -1,5 +1,5 @@
 import memoizerific from 'memoizerific';
-import { createDraft, finishDraft } from 'immer-peasy';
+import { createDraft, finishDraft, isDraft } from 'immer-peasy';
 import {
   actionOnSymbol,
   actionSymbol,
@@ -41,10 +41,25 @@ export default function createStoreInternals({
       }
       return state;
     }
-    const draft = createDraft(state);
-    const current = get(path, draft);
-    fn(current);
-    return finishDraft(draft);
+    if (path.length === 0) {
+      const draft = createDraft(state);
+      const result = fn(draft);
+      if (result) {
+        return isDraft(result) ? finishDraft(result) : result;
+      }
+      return finishDraft(draft);
+    } else {
+      const parentPath = path.slice(0, path.length - 1);
+      const draft = createDraft(state);
+      const parent = get(parentPath, state);
+      const current = get(path, draft);
+      const result = fn(current);
+
+      if (result) {
+        parent[path[path.length - 1]] = result;
+      }
+      return finishDraft(draft);
+    }
   }
 
   const defaultState = initialState;

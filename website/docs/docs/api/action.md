@@ -103,12 +103,10 @@ addTodo: action((state, payload) => {
 
 By default we use [immer](https://github.com/mweststrate/immer) to provide a mutation based API. 
 
-If you prefer to explicitly return new immutable state you set the `disableImmer` [configuration](/docs/api/store-config.html) value of [createStore](/docs/api/create-store.html). 
-
-Doing so will disable `immer` and require you to return new immutable state within your actions.
+This is completely optional, you can instead return new state from your actions like below.
 
 ```javascript
-import { createStore, action } from 'easy-peasy';
+import { action } from 'easy-peasy';
 
 const model = {
   todos: [],
@@ -117,10 +115,14 @@ const model = {
     return [...state, payload];
   })
 }
+```
+
+Should you prefer this approach you can explicitly disable `immer` via the `disableImmer` [configuration](/docs/api/store-config.html) value of [createStore](/docs/api/create-store.html). 
+
+```javascript
+import { createStore } from 'easy-peasy';
 
 const store = createStore(model, {
   disableImmer: true // 👈 set the flag
 })
 ```
-
-If you don't set this flag and return new immutable state you may experience errors when utilising [computed](/docs/api/computed.html) properties, so it is best to disable `immer` explicitly.

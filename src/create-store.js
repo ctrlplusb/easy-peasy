@@ -130,7 +130,7 @@ export default function createStore(model, options = {}) {
     if (removeKey) {
       delete currentState[removeKey];
     }
-    bindStoreInternals(store.getState());
+    bindStoreInternals(currentState);
     store.replaceReducer(references.internals.reducer);
     references.internals.actionCreatorDict['@action.easyPeasyReplaceState'](
       references.internals.defaultState,
