@@ -96,7 +96,7 @@ const basketModel = {
 
 The [action](/docs/api/action.html) will receive the state which is local to it.
 
-By default you need to mutate the state with the action, which we convert to an immutable update via [immer](https://github.com/immerjs/immer). If you prefer to return new immutable instances of your state, like a standard Redux reducer, you can set the `disableImmer` [configuration](/docs/api/store-config.html) of the [createStore](/docs/api/create-store.html).
+By default you need to mutate the state with the action, which we convert to an immutable update via [immer](https://github.com/immerjs/immer). If you prefer you can instead return new immutable instances of your state, like a standard Redux reducer.
 
 ## Dispatching your actions
 
