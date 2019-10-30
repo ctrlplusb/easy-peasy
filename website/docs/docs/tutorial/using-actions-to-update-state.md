@@ -48,7 +48,7 @@ addProduct: action((state, payload) => {
 })
 ```
 
-Woah! Far more verbose, and harder to grok! That being said, if you prefer this immutable form you can disable the immer-based mutation form by setting the `disableImmer` [configuration](/docs/api/store-config.html) of the [createStore](/docs/api/create-store.html). You would then have to return new immutable state within your action handlers as you would within a standard Redux reducer.
+Woah! Far more verbose, and harder to grok! That being said, you can use this approach if you prefer. 😀
 
 Next up let's learn how to dispatch our [actions](/docs/api/action.html) from our components.
 
