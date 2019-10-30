@@ -47,8 +47,7 @@ export default function createStore(model, options = {}) {
 
   bindStoreInternals(initialState);
 
-  const resolvePersistTargets = (state, root, whitelist, blacklist) => {
-    const target = get(root, state);
+  const resolvePersistTargets = (target, whitelist, blacklist) => {
     let targets = Object.keys(target);
     if (whitelist.length > 0) {
       targets = targets.reduce((acc, cur) => {
@@ -74,7 +73,8 @@ export default function createStore(model, options = {}) {
       const { path, config } = persistInstance;
       const { storage, whitelist, blacklist } = config;
       const state = references.getState();
-      const targets = resolvePersistTargets(state, path, whitelist, blacklist);
+      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
       targets.forEach(key => {
         const targetPath = [...path, key];
         storage.setItem(
@@ -83,15 +83,15 @@ export default function createStore(model, options = {}) {
         );
       });
     });
-  }, 128);
+  }, 1000);
 
   const clearPersistance = () =>
     new Promise((resolve, reject) => {
       references.internals.persistenceConfig.forEach(({ path, config }) => {
         const { storage, whitelist, blacklist } = config;
+        const persistRoot = get(path, references.getState());
         const targets = resolvePersistTargets(
-          references.getState(),
-          path,
+          persistRoot,
           whitelist,
           blacklist,
         );
@@ -227,11 +227,9 @@ export default function createStore(model, options = {}) {
         whitelist,
       } = config;
 
-      const state = deepCloneStateWithoutComputed(
-        references.internals.defaultState,
-      );
-
-      const targets = resolvePersistTargets(state, path, whitelist, blacklist);
+      const state = references.internals.defaultState;
+      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
 
       const applyRehydrationStrategy = (state, next) => {
         if (mergeStrategy === 'overwrite') {
