@@ -7,6 +7,7 @@ import {
   persist,
   RehydrateBoundary,
   StoreProvider,
+  computed,
 } from '../';
 
 jest.mock('debounce', () => fn => fn);
@@ -526,4 +527,46 @@ test('RehydrateBoundary without loading component', async () => {
 
   // ASSERT
   expect(wrapper.queryByText('Loaded')).not.toBeNull();
+});
+
+test('computed properties', () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage();
+  const makeStore = () =>
+    createStore(
+      persist(
+        {
+          todos: ['write tests'],
+          todoCount: computed(state => state.todos.length),
+          addTodo: action((state, payload) => {
+            state.todos.push(payload);
+          }),
+          nested: {
+            todos: ['write tests'],
+            todoCount: computed(state => state.todos.length),
+            addTodo: action((state, payload) => {
+              state.todos.push(payload);
+            }),
+          },
+        },
+        { storage: memoryStorage },
+      ),
+    );
+  const store = makeStore();
+
+  // ACT
+  store.getActions().addTodo('write more tests');
+  store.getActions().nested.addTodo('write more tests');
+
+  const rehydratedStore = makeStore();
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    todos: ['write tests', 'write more tests'],
+    todoCount: 2,
+    nested: {
+      todos: ['write tests', 'write more tests'],
+      todoCount: 2,
+    },
+  });
 });

@@ -7,7 +7,7 @@ import reduxThunk from 'redux-thunk';
 import debounce from 'debounce';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
-import { get, set, isPromise, deepCloneObjectStructure } from './lib';
+import { get, set, isPromise, deepCloneStateWithoutComputed } from './lib';
 
 export default function createStore(model, options = {}) {
   const {
@@ -48,7 +48,8 @@ export default function createStore(model, options = {}) {
   bindStoreInternals(initialState);
 
   const resolvePersistTargets = (state, root, whitelist, blacklist) => {
-    let targets = Object.keys(get(root, state));
+    const target = get(root, state);
+    let targets = Object.keys(target);
     if (whitelist.length > 0) {
       targets = targets.reduce((acc, cur) => {
         if (whitelist.findIndex(x => x === cur) !== -1) {
@@ -67,100 +68,6 @@ export default function createStore(model, options = {}) {
     }
     return targets;
   };
-
-  // Perform state rehydration...
-  let resolveRehydration = Promise.resolve();
-  if (references.internals.persistenceConfig.length > 0) {
-    references.internals.persistenceConfig.forEach(persistInstance => {
-      const { path, config } = persistInstance;
-      const {
-        blacklist,
-        isAsyncStorage,
-        mergeStrategy = 'merge',
-        storage,
-        whitelist,
-      } = config;
-
-      const targets = resolvePersistTargets(
-        references.internals.defaultState,
-        path,
-        whitelist,
-        blacklist,
-      );
-
-      const applyRehydrationStrategy = (state, next) => {
-        if (mergeStrategy === 'overwrite') {
-          set(path, state, next);
-        } else if (mergeStrategy === 'merge') {
-          const target = get(path, state);
-          Object.keys(next).forEach(key => {
-            target[key] = next[key];
-          });
-        } else if (mergeStrategy === 'mergeDeep') {
-          const target = get(path, state);
-          const setAt = (currentTarget, currentNext) => {
-            Object.keys(currentNext).forEach(key => {
-              const data = currentNext[key];
-              if (typeof data === 'object') {
-                setAt(currentTarget[key], data);
-              } else {
-                currentTarget[key] = data;
-              }
-            });
-          };
-          setAt(target, next);
-        }
-      };
-
-      if (isAsyncStorage) {
-        const asyncStateResolvers = targets.reduce((acc, key) => {
-          const targetPath = [...path, key];
-          const dataPromise = storage.getItem(
-            `[${storeName}]@${targetPath.join('.')}`,
-          );
-          if (isPromise(dataPromise)) {
-            acc.push({
-              key,
-              dataPromise,
-            });
-          }
-          return acc;
-        }, []);
-        if (asyncStateResolvers.length > 0) {
-          resolveRehydration = Promise.all(
-            asyncStateResolvers.map(x => x.dataPromise),
-          ).then(resolvedData => {
-            const next = resolvedData.reduce((acc, cur, idx) => {
-              const { key } = asyncStateResolvers[idx];
-              if (cur !== undefined) {
-                acc[key] = cur;
-              }
-              return acc;
-            }, {});
-            if (Object.keys(next).length === 0) {
-              return;
-            }
-            const state = deepCloneObjectStructure(references.getState());
-            applyRehydrationStrategy(state, next);
-            references.internals.actionCreatorDict[
-              '@action.easyPeasyReplaceState'
-            ](state);
-          });
-        }
-      } else {
-        const next = targets.reduce((acc, key) => {
-          const targetPath = [...path, key];
-          const storeKey = `[${storeName}]@${targetPath.join('.')}`;
-          const data = storage.getItem(storeKey);
-          if (data !== undefined) {
-            acc[key] = data;
-          }
-          return acc;
-        }, {});
-        applyRehydrationStrategy(references.internals.defaultState, next);
-      }
-    });
-  }
 
   const persist = debounce(() => {
     references.internals.persistenceConfig.forEach(persistInstance => {
@@ -203,7 +110,11 @@ export default function createStore(model, options = {}) {
 
   const persistMiddleware = () => next => action => {
     const result = next(action);
-    if (action && references.internals.persistenceConfig.length > 0) {
+    if (
+      action &&
+      action.type !== '@action.easyPeasyReplaceState' &&
+      references.internals.persistenceConfig.length > 0
+    ) {
       persist(result);
     }
     return result;
@@ -302,6 +213,101 @@ export default function createStore(model, options = {}) {
     );
     bindActionCreators();
   };
+
+  // Perform state rehydration...
+  let resolveRehydration = Promise.resolve();
+  if (references.internals.persistenceConfig.length > 0) {
+    references.internals.persistenceConfig.forEach(persistInstance => {
+      const { path, config } = persistInstance;
+      const {
+        blacklist,
+        isAsyncStorage,
+        mergeStrategy = 'merge',
+        storage,
+        whitelist,
+      } = config;
+
+      const state = deepCloneStateWithoutComputed(
+        references.internals.defaultState,
+      );
+
+      const targets = resolvePersistTargets(state, path, whitelist, blacklist);
+
+      const applyRehydrationStrategy = (state, next) => {
+        if (mergeStrategy === 'overwrite') {
+          set(path, state, next);
+        } else if (mergeStrategy === 'merge') {
+          const target = get(path, state);
+          Object.keys(next).forEach(key => {
+            target[key] = next[key];
+          });
+        } else if (mergeStrategy === 'mergeDeep') {
+          const target = get(path, state);
+          const setAt = (currentTarget, currentNext) => {
+            Object.keys(currentNext).forEach(key => {
+              const data = currentNext[key];
+              if (typeof data === 'object') {
+                setAt(currentTarget[key], data);
+              } else {
+                currentTarget[key] = data;
+              }
+            });
+          };
+          setAt(target, next);
+        }
+      };
+
+      if (isAsyncStorage) {
+        const asyncStateResolvers = targets.reduce((acc, key) => {
+          const targetPath = [...path, key];
+          const dataPromise = storage.getItem(
+            `[${storeName}]@${targetPath.join('.')}`,
+          );
+          if (isPromise(dataPromise)) {
+            acc.push({
+              key,
+              dataPromise,
+            });
+          }
+          return acc;
+        }, []);
+        if (asyncStateResolvers.length > 0) {
+          resolveRehydration = Promise.all(
+            asyncStateResolvers.map(x => x.dataPromise),
+          ).then(resolvedData => {
+            const next = resolvedData.reduce((acc, cur, idx) => {
+              const { key } = asyncStateResolvers[idx];
+              if (cur !== undefined) {
+                acc[key] = cur;
+              }
+              return acc;
+            }, {});
+            if (Object.keys(next).length === 0) {
+              return;
+            }
+            applyRehydrationStrategy(state, next);
+            references.internals.actionCreatorDict[
+              '@action.easyPeasyReplaceState'
+            ](state);
+          });
+        }
+      } else {
+        const next = targets.reduce((acc, key) => {
+          const targetPath = [...path, key];
+          const storeKey = `[${storeName}]@${targetPath.join('.')}`;
+          const data = storage.getItem(storeKey);
+          if (data !== undefined) {
+            acc[key] = data;
+          }
+          return acc;
+        }, {});
+        applyRehydrationStrategy(state, next);
+        references.internals.actionCreatorDict['@action.easyPeasyReplaceState'](
+          state,
+        );
+      }
+    });
+  }
 
   return Object.assign(store, {
     addModel: (key, modelForKey) => {
