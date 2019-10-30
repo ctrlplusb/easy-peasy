@@ -15,6 +15,7 @@ process.env.BABEL_ENV = 'production';
 
 const baseConfig = {
   external: [
+    'debounce',
     'immer-peasy',
     'memoizerific',
     'react',
@@ -59,6 +60,7 @@ const commonUMD = config =>
     draft.external.splice(draft.external.indexOf('shallowequal'), 1);
     draft.output.format = 'umd';
     draft.output.globals = {
+      debounce: 'debounce',
       memoizerific: 'memoizerific',
       'redux-thunk': 'ReduxThunk',
       'immer-peasy': 'produce',

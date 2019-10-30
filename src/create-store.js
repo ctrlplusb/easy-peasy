@@ -4,8 +4,10 @@ import {
   createStore as reduxCreateStore,
 } from 'redux';
 import reduxThunk from 'redux-thunk';
+import debounce from 'debounce';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
+import { get, set, isPromise, deepCloneObjectStructure } from './lib';
 
 export default function createStore(model, options = {}) {
   const {
@@ -44,6 +46,175 @@ export default function createStore(model, options = {}) {
   };
 
   bindStoreInternals(initialState);
+
+  const noopStorage = {
+    getItem: () => undefined,
+    setItem: () => undefined,
+    removeItem: () => undefined,
+  };
+
+  const localStorage =
+    typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+      ? window.localStorage
+      : noopStorage;
+
+  const sessionStorage =
+    typeof window !== 'undefined' &&
+    typeof window.sessionStorage !== 'undefined'
+      ? window.sessionStorage
+      : noopStorage;
+
+  const resolvePersistTargets = (state, root, whitelist, blacklist) => {
+    let targets = Object.keys(get(root, state));
+    if (whitelist) {
+      targets = targets.reduce((acc, cur) => {
+        if (whitelist.findIndex(x => x === cur) !== -1) {
+          return [...acc, cur];
+        }
+        return acc;
+      }, []);
+    }
+    if (blacklist) {
+      targets = targets.reduce((acc, cur) => {
+        if (blacklist.findIndex(x => x === cur) !== -1) {
+          return acc;
+        }
+        return [...acc, cur];
+      }, []);
+    }
+    return targets;
+  };
+
+  // Perform state rehydration...
+  let resolveRehydration = Promise.resolve();
+  if (references.internals.persistenceConfig.length > 0) {
+    references.internals.persistenceConfig.forEach(persistInstance => {
+      const { path, config, whitelist, blacklist } = persistInstance;
+      const { strategy = 'merge' } = config;
+      let storage;
+      if (config.storage == null) {
+        storage = localStorage;
+      } else if (typeof config.storage === 'string') {
+        if (config.storage === 'local') {
+          config.storage = localStorage;
+        } else if (config.storage === 'session') {
+          config.storage = sessionStorage;
+        } else {
+          // TODO: Should we print a warning to console
+          config.storage = noop;
+        }
+      } else {
+        // TODO: Validate the storage is valid?
+        storage = config.storage;
+      }
+      const isAsyncStorage = isPromise(storage.getItem('__fooooooo__'));
+
+      const targets = resolvePersistTargets(
+        references.internals.defaultState,
+        path,
+        whitelist,
+        blacklist,
+      );
+
+      const applyRehydrationStrategy = (state, next) => {
+        if (strategy === 'overwrite') {
+          set(path, state, next);
+        } else if (strategy === 'merge') {
+          const target = get(path, state);
+          Object.keys(next).forEach(key => {
+            target[key] = next[key];
+          });
+        } else if (strategy === 'mergeDeep') {
+          const target = get(path, state);
+          const setAt = (currentTarget, currentNext) => {
+            Object.keys(currentNext).forEach(key => {
+              const data = currentNext[key];
+              if (typeof data === 'object') {
+                if (typeof currentTarget[key] !== 'object') {
+                  currentTarget[key] = {};
+                }
+                setAt(currentTarget[key], data);
+              } else {
+                currentTarget[key] = data;
+              }
+            });
+          };
+          setAt(target, next);
+        }
+      };
+
+      if (isAsyncStorage) {
+        const asyncStateResolvers = targets.reduce((acc, key) => {
+          const targetPath = [...path, key];
+          const dataPromise = storage.getItem(targetPath.join('.'));
+          if (isPromise(dataPromise)) {
+            acc.push({
+              key,
+              dataPromise,
+            });
+          }
+          return acc;
+        }, []);
+        if (asyncStateResolvers.length > 0) {
+          resolveRehydration = Promise.all(
+            asyncStateResolvers.map(x => x.dataPromise),
+          ).then(resolvedData => {
+            const next = resolvedData.reduce((acc, cur, idx) => {
+              const { key } = asyncStateResolvers[idx];
+              if (cur !== undefined) {
+                acc[key] = cur;
+              }
+              return acc;
+            }, {});
+            if (Object.keys(next).length === 0) {
+              return;
+            }
+            const state = deepCloneObjectStructure(references.getState());
+            applyRehydrationStrategy(state, next);
+            references.internals.actionCreatorDict[
+              '@action.easyPeasyReplaceState'
+            ](state);
+          });
+        }
+      } else {
+        const next = targets.reduce((acc, key) => {
+          const targetPath = [...path, key];
+          const data = storage.getItem(targetPath.join('.'));
+          if (data !== undefined) {
+            acc[key] = data;
+          }
+          return acc;
+        }, {});
+        applyRehydrationStrategy(references.internals.defaultState, next);
+      }
+    });
+  }
+
+  const persist = debounce(() => {
+    references.internals.persistenceConfig.forEach(persistInstance => {
+      const { path, config } = persistInstance;
+      const { storage, whitelist, blacklist } = config;
+      const state = references.getState();
+      let targets = resolvePersistTargets(
+        references.getState(),
+        path,
+        whitelist,
+        blacklist,
+      );
+      targets.forEach(key => {
+        const targetPath = [...path, key];
+        storage.setItem(targetPath.join('.'), get(targetPath, state));
+      });
+    });
+  }, 128);
+
+  const persistMiddleware = () => next => action => {
+    const result = next(action);
+    if (action && references.internals.persistenceConfig.length > 0) {
+      persist(result);
+    }
+    return result;
+  };
 
   const listenerActionsMiddleware = () => next => action => {
     const result = next(action);
@@ -85,6 +256,7 @@ export default function createStore(model, options = {}) {
     reduxThunk,
     ...middleware,
     listenerActionsMiddleware,
+    persistMiddleware,
   ];
 
   if (mockActions) {
@@ -156,6 +328,11 @@ export default function createStore(model, options = {}) {
     getActions: () => references.internals.actionCreators,
     getListeners: () => references.internals.listenerActionCreators,
     getMockedActions: () => [...mockedActions],
+    persist: {
+      clear: () => undefined,
+      flush: () => persist.flush(),
+      resolveRehydration: () => resolveRehydration,
+    },
     reconfigure: newModel => {
       modelDefinition = bindReplaceState(newModel);
       rebindStore();

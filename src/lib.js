@@ -1,3 +1,20 @@
+export const deepCloneObjectStructure = x => {
+  const recursiveClone = current => {
+    const next = { ...current };
+    Object.keys(next).forEach(key => {
+      if (typeof next[key] === 'object') {
+        next[key] = recursiveClone(next[key]);
+      }
+    });
+    return next;
+  };
+  return recursiveClone(x);
+};
+
+export const isPromise = x => {
+  return typeof x === 'object' && typeof x.then === 'function';
+};
+
 export const isStateObject = x =>
   x !== null &&
   typeof x === 'object' &&

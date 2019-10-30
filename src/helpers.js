@@ -4,6 +4,7 @@ import {
   actionOnSymbol,
   actionSymbol,
   computedSymbol,
+  persistSymbol,
   reducerSymbol,
   thunkOnSymbol,
   thunkSymbol,
@@ -43,6 +44,13 @@ export const computed = (fnOrStateResolvers, fn) => {
     stateResolvers: defaultStateResolvers,
   };
   return fnOrStateResolvers;
+};
+
+export const persist = (state, config) => {
+  return {
+    ...state,
+    [persistSymbol]: config,
+  };
 };
 
 export const thunkOn = (targetResolver, fn) => {

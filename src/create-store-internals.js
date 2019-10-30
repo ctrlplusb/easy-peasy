@@ -4,6 +4,7 @@ import {
   actionOnSymbol,
   actionSymbol,
   computedSymbol,
+  persistSymbol,
   reducerSymbol,
   thunkOnSymbol,
   thunkSymbol,
@@ -72,6 +73,7 @@ export default function createStoreInternals({
   const listenerActionCreators = {};
   const listenerActionMap = {};
   const listenerDefinitions = [];
+  const persistenceConfig = [];
 
   const computedState = {
     isInReducer: false,
@@ -94,6 +96,14 @@ export default function createStoreInternals({
           set(path, defaultState, value);
         }
       };
+      if (key === persistSymbol) {
+        persistenceConfig.push({
+          path: parentPath,
+          config: value,
+        });
+        delete current[key];
+        return;
+      }
       if (typeof value === 'function') {
         if (value[actionSymbol] || value[actionOnSymbol]) {
           const prefix = value[actionSymbol] ? '@action' : '@actionOn';
@@ -371,6 +381,7 @@ export default function createStoreInternals({
     defaultState,
     listenerActionCreators,
     listenerActionMap,
+    persistenceConfig,
     reducer: reducerEnhancer(createReducer()),
   };
 }
