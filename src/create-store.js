@@ -47,26 +47,9 @@ export default function createStore(model, options = {}) {
 
   bindStoreInternals(initialState);
 
-  const noopStorage = {
-    getItem: () => undefined,
-    setItem: () => undefined,
-    removeItem: () => undefined,
-  };
-
-  const localStorage =
-    typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
-      ? window.localStorage
-      : noopStorage;
-
-  const sessionStorage =
-    typeof window !== 'undefined' &&
-    typeof window.sessionStorage !== 'undefined'
-      ? window.sessionStorage
-      : noopStorage;
-
   const resolvePersistTargets = (state, root, whitelist, blacklist) => {
     let targets = Object.keys(get(root, state));
-    if (whitelist) {
+    if (whitelist.length > 0) {
       targets = targets.reduce((acc, cur) => {
         if (whitelist.findIndex(x => x === cur) !== -1) {
           return [...acc, cur];
@@ -74,7 +57,7 @@ export default function createStore(model, options = {}) {
         return acc;
       }, []);
     }
-    if (blacklist) {
+    if (blacklist.length > 0) {
       targets = targets.reduce((acc, cur) => {
         if (blacklist.findIndex(x => x === cur) !== -1) {
           return acc;
@@ -89,25 +72,14 @@ export default function createStore(model, options = {}) {
   let resolveRehydration = Promise.resolve();
   if (references.internals.persistenceConfig.length > 0) {
     references.internals.persistenceConfig.forEach(persistInstance => {
-      const { path, config, whitelist, blacklist } = persistInstance;
-      const { strategy = 'merge' } = config;
-      let storage;
-      if (config.storage == null) {
-        storage = localStorage;
-      } else if (typeof config.storage === 'string') {
-        if (config.storage === 'local') {
-          config.storage = localStorage;
-        } else if (config.storage === 'session') {
-          config.storage = sessionStorage;
-        } else {
-          // TODO: Should we print a warning to console
-          config.storage = noop;
-        }
-      } else {
-        // TODO: Validate the storage is valid?
-        storage = config.storage;
-      }
-      const isAsyncStorage = isPromise(storage.getItem('__fooooooo__'));
+      const { path, config } = persistInstance;
+      const {
+        blacklist,
+        isAsyncStorage,
+        mergeStrategy = 'merge',
+        storage,
+        whitelist,
+      } = config;
 
       const targets = resolvePersistTargets(
         references.internals.defaultState,
@@ -117,22 +89,19 @@ export default function createStore(model, options = {}) {
       );
 
       const applyRehydrationStrategy = (state, next) => {
-        if (strategy === 'overwrite') {
+        if (mergeStrategy === 'overwrite') {
           set(path, state, next);
-        } else if (strategy === 'merge') {
+        } else if (mergeStrategy === 'merge') {
           const target = get(path, state);
           Object.keys(next).forEach(key => {
             target[key] = next[key];
           });
-        } else if (strategy === 'mergeDeep') {
+        } else if (mergeStrategy === 'mergeDeep') {
           const target = get(path, state);
           const setAt = (currentTarget, currentNext) => {
             Object.keys(currentNext).forEach(key => {
               const data = currentNext[key];
               if (typeof data === 'object') {
-                if (typeof currentTarget[key] !== 'object') {
-                  currentTarget[key] = {};
-                }
                 setAt(currentTarget[key], data);
               } else {
                 currentTarget[key] = data;
@@ -146,7 +115,9 @@ export default function createStore(model, options = {}) {
       if (isAsyncStorage) {
         const asyncStateResolvers = targets.reduce((acc, key) => {
           const targetPath = [...path, key];
-          const dataPromise = storage.getItem(targetPath.join('.'));
+          const dataPromise = storage.getItem(
+            `[${storeName}]@${targetPath.join('.')}`,
+          );
           if (isPromise(dataPromise)) {
             acc.push({
               key,
@@ -179,7 +150,8 @@ export default function createStore(model, options = {}) {
       } else {
         const next = targets.reduce((acc, key) => {
           const targetPath = [...path, key];
-          const data = storage.getItem(targetPath.join('.'));
+          const storeKey = `[${storeName}]@${targetPath.join('.')}`;
+          const data = storage.getItem(storeKey);
           if (data !== undefined) {
             acc[key] = data;
           }
@@ -195,18 +167,39 @@ export default function createStore(model, options = {}) {
       const { path, config } = persistInstance;
       const { storage, whitelist, blacklist } = config;
       const state = references.getState();
-      let targets = resolvePersistTargets(
-        references.getState(),
-        path,
-        whitelist,
-        blacklist,
-      );
+      const targets = resolvePersistTargets(state, path, whitelist, blacklist);
       targets.forEach(key => {
         const targetPath = [...path, key];
-        storage.setItem(targetPath.join('.'), get(targetPath, state));
+        storage.setItem(
+          `[${storeName}]@${targetPath.join('.')}`,
+          get(targetPath, state),
+        );
       });
     });
   }, 128);
+
+  const clearPersistance = () =>
+    new Promise((resolve, reject) => {
+      references.internals.persistenceConfig.forEach(({ path, config }) => {
+        const { storage, whitelist, blacklist } = config;
+        const targets = resolvePersistTargets(
+          references.getState(),
+          path,
+          whitelist,
+          blacklist,
+        );
+        if (targets.length > 0) {
+          Promise.all(
+            targets.map(key => {
+              const targetPath = [...path, key];
+              storage.removeItem(`[${storeName}]@${targetPath.join('.')}`);
+            }),
+          ).then(() => resolve(), reject);
+        } else {
+          resolve();
+        }
+      });
+    });
 
   const persistMiddleware = () => next => action => {
     const result = next(action);
@@ -329,7 +322,7 @@ export default function createStore(model, options = {}) {
     getListeners: () => references.internals.listenerActionCreators,
     getMockedActions: () => [...mockedActions],
     persist: {
-      clear: () => undefined,
+      clear: clearPersistance,
       flush: () => persist.flush(),
       resolveRehydration: () => resolveRehydration,
     },

@@ -9,7 +9,7 @@ import {
   thunkOnSymbol,
   thunkSymbol,
 } from './constants';
-import { isStateObject, get, set } from './lib';
+import { isStateObject, get, set, isPromise } from './lib';
 
 const newify = (currentPath, currentState, finalValue) => {
   if (currentPath.length === 0) {
@@ -24,6 +24,22 @@ const newify = (currentPath, currentState, finalValue) => {
   }
   return newState;
 };
+
+const noopStorage = {
+  getItem: () => undefined,
+  setItem: () => undefined,
+  removeItem: () => undefined,
+};
+
+const localStorage =
+  typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
+    ? window.localStorage
+    : noopStorage;
+
+const sessionStorage =
+  typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined'
+    ? window.sessionStorage
+    : noopStorage;
 
 export default function createStoreInternals({
   disableImmer,
@@ -96,14 +112,89 @@ export default function createStoreInternals({
           set(path, defaultState, value);
         }
       };
+
       if (key === persistSymbol) {
+        let config = value || {};
+        const {
+          blacklist = [],
+          mergeStrategy = 'merge',
+          persistMiddleware = [],
+          rehydrateMiddleware = [],
+          whitelist = [],
+        } = config;
+        let storage;
+        if (config.storage == null) {
+          storage = localStorage;
+        } else if (typeof config.storage === 'string') {
+          if (config.storage === 'localStorage') {
+            storage = localStorage;
+          } else if (config.storage === 'sessionStorage') {
+            storage = sessionStorage;
+          } else {
+            if (process.env.NODE_ENV === 'development') {
+              console.warn(
+                `Invalid storage provider specified for Easy Peasy persist: ${config.storage}\nValid values include "localStorage", "sessionStorage" or a custom storage engine.`,
+              );
+            }
+            storage = noopStorage;
+          }
+        } else {
+          storage = config.storage;
+        }
+        const serialize = (data, key) => {
+          const simpleKey = key.substr(key.indexOf('@') + 1);
+          const transformed = persistMiddleware.reduce((acc, cur) => {
+            return cur(acc, simpleKey);
+          }, data);
+          return storage === localStorage || storage === sessionStorage
+            ? JSON.stringify({ data: transformed })
+            : transformed;
+        };
+        const deserialize = (data, key) => {
+          const simpleKey = key.substr(key.indexOf('@') + 1);
+          const result =
+            storage === localStorage || storage === sessionStorage
+              ? JSON.parse(data).data
+              : data;
+          return rehydrateMiddleware.reduce((acc, cur) => {
+            return cur(acc, simpleKey);
+          }, result);
+        };
+        const storageWrapper = {
+          getItem: key => {
+            if (isAsyncStorage) {
+              return storage.getItem(key).then(wrapped => {
+                return wrapped != null ? deserialize(wrapped, key) : wrapped;
+              });
+            }
+            const wrapped = storage.getItem(key);
+            return wrapped != null ? deserialize(wrapped, key) : wrapped;
+          },
+          setItem: (key, data) => {
+            return storage.setItem(key, serialize(data, key));
+          },
+          removeItem: key => {
+            return storage.removeItem(key);
+          },
+        };
+
+        const isAsyncStorage = isPromise(storage.getItem('__fooooooo__'));
         persistenceConfig.push({
           path: parentPath,
-          config: value,
+          config: {
+            blacklist,
+            isAsyncStorage,
+            mergeStrategy,
+            persistMiddleware,
+            rehydrateMiddleware,
+            storage: storageWrapper,
+            whitelist,
+          },
         });
         delete current[key];
         return;
       }
+
       if (typeof value === 'function') {
         if (value[actionSymbol] || value[actionOnSymbol]) {
           const prefix = value[actionSymbol] ? '@action' : '@actionOn';

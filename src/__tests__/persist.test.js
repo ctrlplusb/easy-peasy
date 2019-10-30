@@ -7,15 +7,14 @@ const createMemoryStorage = (initial = {}, config = { async: false }) => {
   const { async } = config;
   return {
     setItem: (key, data) => {
-      store[key] = JSON.stringify(data);
+      store[key] = data;
       if (async) {
         return Promise.resolve({});
       }
     },
     getItem: key => {
       const data = store[key];
-      const result = data !== undefined ? JSON.parse(store[key]) : undefined;
-      return async ? Promise.resolve(result) : result;
+      return async ? Promise.resolve(data) : data;
     },
     removeItem: key => {
       delete store[key];
@@ -25,36 +24,129 @@ const createMemoryStorage = (initial = {}, config = { async: false }) => {
   };
 };
 
-const makeStore = (config = {}) =>
+const makeStore = (config = {}, model, storeConfig) =>
   createStore(
     persist(
-      {
+      model || {
         counter: 0,
         msg: 'hello world',
         change: action((_, payload) => {
-          console.log(payload);
           return payload;
         }),
       },
       config,
     ),
+    storeConfig,
   );
 
-test('persist and rehydrate', () => {
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+});
+
+afterEach(() => {
+  process.env.NODE_ENV = 'test';
+});
+
+test('default storage', () => {
   // ARRANGE
-  const memoryStorage = createMemoryStorage();
-  const store = makeStore({ storage: memoryStorage });
+  const store = makeStore();
 
   // ACT
-
-  // update the state
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
   });
 
-  // create a new store using the same storage
-  const rehydratedStore = makeStore({ storage: memoryStorage });
+  const rehydratedStore = makeStore();
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    counter: 1,
+    msg: 'hello universe',
+  });
+});
+
+test('local storage', () => {
+  // ARRANGE
+  const persistConfig = {
+    storage: 'localStorage',
+  };
+  const store = makeStore(persistConfig);
+
+  // ACT
+  store.getActions().change({
+    counter: 1,
+    msg: 'hello universe',
+  });
+
+  const rehydratedStore = makeStore(persistConfig);
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    counter: 1,
+    msg: 'hello universe',
+  });
+});
+
+test('session storage', () => {
+  // ARRANGE
+  const persistConfig = {
+    storage: 'sessionStorage',
+  };
+  const store = makeStore(persistConfig);
+
+  // ACT
+  store.getActions().change({
+    counter: 1,
+    msg: 'hello universe',
+  });
+
+  const rehydratedStore = makeStore(persistConfig);
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    counter: 1,
+    msg: 'hello universe',
+  });
+});
+
+test('invalid storage', () => {
+  // ARRANGE
+  process.env.NODE_ENV = 'development';
+  const persistConfig = {
+    storage: 'invalidStorage',
+  };
+  const store = makeStore(persistConfig);
+
+  // ACT
+  store.getActions().change({
+    counter: 1,
+    msg: 'hello universe',
+  });
+
+  const rehydratedStore = makeStore(persistConfig);
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    counter: 0,
+    msg: 'hello world',
+  });
+});
+
+test('custom sync storage', () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage();
+  const persistConfig = { storage: memoryStorage };
+  const store = makeStore(persistConfig);
+
+  // ACT
+  store.getActions().change({
+    counter: 1,
+    msg: 'hello universe',
+  });
+
+  const rehydratedStore = makeStore(persistConfig);
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -66,18 +158,16 @@ test('persist and rehydrate', () => {
 test('whitelist', () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
-  const store = makeStore({ storage: memoryStorage, whitelist: ['msg'] });
+  const persistConfig = { storage: memoryStorage, whitelist: ['msg'] };
+  const store = makeStore(persistConfig);
 
   // ACT
-
-  // update the state
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
   });
 
-  // create a new store using the same storage
-  const rehydratedStore = makeStore({ storage: memoryStorage });
+  const rehydratedStore = makeStore(persistConfig);
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -89,18 +179,16 @@ test('whitelist', () => {
 test('blacklist', () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
-  const store = makeStore({ storage: memoryStorage, blacklist: ['counter'] });
+  const persistConfig = { storage: memoryStorage, blacklist: ['counter'] };
+  const store = makeStore(persistConfig);
 
   // ACT
-
-  // update the state
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
   });
 
-  // create a new store using the same storage
-  const rehydratedStore = makeStore({ storage: memoryStorage });
+  const rehydratedStore = makeStore(persistConfig);
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -132,14 +220,11 @@ test('nested', () => {
   const store = makeStore({ storage: memoryStorage });
 
   // ACT
-
-  // update the state
   store.getActions().nested.change({
     counter: 1,
     msg: 'hello universe',
   });
 
-  // create a new store using the same storage
   const rehydratedStore = makeStore({ storage: memoryStorage });
 
   // ASSERT
@@ -158,19 +243,16 @@ test('overwrite', () => {
   const persistConfig = {
     storage: memoryStorage,
     whitelist: ['msg'],
-    strategy: 'overwrite',
+    mergeStrategy: 'overwrite',
   };
   const store = makeStore(persistConfig);
 
   // ACT
-
-  // update the state
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
   });
 
-  // create a new store using the same storage
   const rehydratedStore = makeStore(persistConfig);
 
   // ASSERT
@@ -182,15 +264,11 @@ test('overwrite', () => {
 test('mergeDeep', () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    counter: JSON.stringify(1),
-    nested: JSON.stringify({
+    '[EasyPeasyStore]@counter': 1,
+    '[EasyPeasyStore]@nested': {
       msg: 'hello universe',
-    }),
+    },
   });
-  const persistConfig = {
-    storage: memoryStorage,
-    strategy: 'mergeDeep',
-  };
 
   // ACT
   const rehydratedStore = createStore(
@@ -202,7 +280,10 @@ test('mergeDeep', () => {
           foo: 'bar',
         },
       },
-      persistConfig,
+      {
+        storage: memoryStorage,
+        mergeStrategy: 'mergeDeep',
+      },
     ),
   );
 
@@ -222,14 +303,11 @@ test('asynchronous storage', async () => {
   const store = makeStore({ storage: memoryStorage });
 
   // ACT
-
-  // update the state
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
   });
 
-  // create a new store using the same storage
   const rehydratedStore = makeStore({ storage: memoryStorage });
 
   await rehydratedStore.persist.resolveRehydration();
@@ -238,5 +316,141 @@ test('asynchronous storage', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 1,
     msg: 'hello universe',
+  });
+});
+
+test('clear', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage(undefined, { async: true });
+  const store = makeStore({ storage: memoryStorage });
+
+  // ACT
+  store.getActions().change({
+    counter: 1,
+    msg: 'hello universe',
+  });
+
+  // ASSERT
+  expect(memoryStorage.store).toEqual({
+    '[EasyPeasyStore]@counter': 1,
+    '[EasyPeasyStore]@msg': 'hello universe',
+  });
+
+  // ACT
+  await store.persist.clear();
+
+  // ASSERT
+  expect(memoryStorage.store).toEqual({});
+});
+
+test('persistMiddleware', () => {
+  // ARRANGE
+  const persistConfig = {
+    persistMiddleware: [
+      (data, key) => {
+        if (key === 'upper') {
+          return data.toUpperCase();
+        }
+        if (key === 'lower') {
+          return data.toLowerCase();
+        }
+      },
+      data => `_${data}_`,
+    ],
+  };
+  const model = {
+    upper: 'one',
+    lower: 'two',
+    change: action((_, payload) => {
+      return payload;
+    }),
+  };
+  const store = makeStore(persistConfig, model);
+
+  // ACT
+  store.getActions().change({
+    upper: 'foo',
+    lower: 'bar',
+  });
+
+  const rehydratedStore = makeStore(persistConfig, model);
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    upper: '_FOO_',
+    lower: '_bar_',
+  });
+});
+
+test('rehydrateMiddleware', () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore]@upper': 'foo',
+    '[EasyPeasyStore]@lower': 'bar',
+  });
+
+  // ACT
+  const rehydratedStore = makeStore(
+    {
+      rehydrateMiddleware: [
+        (data, key) => {
+          if (key === 'upper') {
+            return data.toUpperCase();
+          }
+          if (key === 'lower') {
+            return data.toLowerCase();
+          }
+        },
+        data => `_${data}_`,
+      ],
+      storage: memoryStorage,
+    },
+    {
+      upper: 'one',
+      lower: 'two',
+    },
+  );
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    upper: '_FOO_',
+    lower: '_bar_',
+  });
+});
+
+test('multiple stores', () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage();
+  const persistConfig = {
+    storage: memoryStorage,
+  };
+  const store1 = makeStore(persistConfig, undefined, { name: 'Store1' });
+  const store2 = makeStore(persistConfig, undefined, { name: 'Store2' });
+
+  // ACT
+  store1.getActions().change({
+    counter: 1,
+    msg: 'i am store 1',
+  });
+  store2.getActions().change({
+    counter: 99,
+    msg: 'i am store 2',
+  });
+
+  const rehydratedStore1 = makeStore(persistConfig, undefined, {
+    name: 'Store1',
+  });
+  const rehydratedStore2 = makeStore(persistConfig, undefined, {
+    name: 'Store2',
+  });
+
+  // ASSERT
+  expect(rehydratedStore1.getState()).toEqual({
+    counter: 1,
+    msg: 'i am store 1',
+  });
+  expect(rehydratedStore2.getState()).toEqual({
+    counter: 99,
+    msg: 'i am store 2',
   });
 });

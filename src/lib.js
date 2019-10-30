@@ -12,7 +12,7 @@ export const deepCloneObjectStructure = x => {
 };
 
 export const isPromise = x => {
-  return typeof x === 'object' && typeof x.then === 'function';
+  return x != null && typeof x === 'object' && typeof x.then === 'function';
 };
 
 export const isStateObject = x =>

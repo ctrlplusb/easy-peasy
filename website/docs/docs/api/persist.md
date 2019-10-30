@@ -116,7 +116,7 @@ model = persist(
     // default is localStorage
     storage: MemoryStorage,
     // specify a strategy to be used for rehydration
-    rehydrateStrategy: 'overwrite', // or 'merge' or 'mergeDeep'
+    mergeStrategy: 'overwrite', // or 'merge' or 'mergeDeep'
   }
 )
 
