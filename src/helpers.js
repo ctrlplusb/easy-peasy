@@ -46,9 +46,9 @@ export const computed = (fnOrStateResolvers, fn) => {
   return fnOrStateResolvers;
 };
 
-export const persist = (state, config) => {
+export const persist = (model, config) => {
   return {
-    ...state,
+    ...model,
     [persistSymbol]: config,
   };
 };

@@ -22,16 +22,46 @@ export const isPromise = x => {
   return x != null && typeof x === 'object' && typeof x.then === 'function';
 };
 
-export const isStateObject = x =>
-  x !== null &&
-  typeof x === 'object' &&
-  !Array.isArray(x) &&
-  x.constructor === Object;
-
-export const get = (path, target) =>
-  path.reduce((acc, cur) => {
-    return isStateObject(acc) ? acc[cur] : undefined;
+export function get(path, target) {
+  return path.reduce((acc, cur) => {
+    return isPlainObject(acc) ? acc[cur] : undefined;
   }, target);
+}
+
+export function newify(currentPath, currentState, finalValue) {
+  if (currentPath.length === 0) {
+    return finalValue;
+  }
+  const newState = { ...currentState };
+  const key = currentPath[0];
+  if (currentPath.length === 1) {
+    newState[key] = finalValue;
+  } else {
+    newState[key] = newify(currentPath.slice(1), newState[key], finalValue);
+  }
+  return newState;
+}
+
+export function resolvePersistTargets(target, whitelist, blacklist) {
+  let targets = Object.keys(target);
+  if (whitelist.length > 0) {
+    targets = targets.reduce((acc, cur) => {
+      if (whitelist.findIndex(x => x === cur) !== -1) {
+        return [...acc, cur];
+      }
+      return acc;
+    }, []);
+  }
+  if (blacklist.length > 0) {
+    targets = targets.reduce((acc, cur) => {
+      if (blacklist.findIndex(x => x === cur) !== -1) {
+        return acc;
+      }
+      return [...acc, cur];
+    }, []);
+  }
+  return targets;
+}
 
 export const set = (path, target, value) => {
   if (path.length === 0) {
