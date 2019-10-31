@@ -118,8 +118,7 @@ export default function createStoreInternals({
         const {
           blacklist = [],
           mergeStrategy = 'merge',
-          persistMiddleware = [],
-          rehydrateMiddleware = [],
+          transformers = [],
           whitelist = [],
         } = config;
         let storage;
@@ -141,10 +140,13 @@ export default function createStoreInternals({
         } else {
           storage = config.storage;
         }
+
+        const outTransformers = transformers.reverse();
+
         const serialize = (data, key) => {
           const simpleKey = key.substr(key.indexOf('@') + 1);
-          const transformed = persistMiddleware.reduce((acc, cur) => {
-            return cur(acc, simpleKey);
+          const transformed = transformers.reduce((acc, cur) => {
+            return cur.in(acc, simpleKey);
           }, data);
           return storage === localStorage || storage === sessionStorage
             ? JSON.stringify({ data: transformed })
@@ -156,8 +158,8 @@ export default function createStoreInternals({
             storage === localStorage || storage === sessionStorage
               ? JSON.parse(data).data
               : data;
-          return rehydrateMiddleware.reduce((acc, cur) => {
-            return cur(acc, simpleKey);
+          return outTransformers.reduce((acc, cur) => {
+            return cur.out(acc, simpleKey);
           }, result);
         };
         const storageWrapper = {
@@ -185,8 +187,6 @@ export default function createStoreInternals({
             blacklist,
             isAsyncStorage,
             mergeStrategy,
-            persistMiddleware,
-            rehydrateMiddleware,
             storage: storageWrapper,
             whitelist,
           },

@@ -2,12 +2,13 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render } from '@testing-library/react';
 import {
-  createStore,
   action,
+  computed,
+  createStore,
+  createTransform,
   persist,
   RehydrateBoundary,
   StoreProvider,
-  computed,
 } from '../';
 
 jest.mock('debounce', () => fn => fn);
@@ -353,78 +354,76 @@ test('clear', async () => {
   expect(memoryStorage.store).toEqual({});
 });
 
-test('persistMiddleware', () => {
+test('transformers', () => {
   // ARRANGE
-  const persistConfig = {
-    persistMiddleware: [
-      (data, key) => {
-        if (key === 'upper') {
-          return data.toUpperCase();
-        }
-        if (key === 'lower') {
-          return data.toLowerCase();
-        }
-      },
-      data => `_${data}_`,
-    ],
-  };
-  const model = {
-    upper: 'one',
-    lower: 'two',
-    change: action((_, payload) => {
-      return payload;
-    }),
-  };
-  const store = makeStore(persistConfig, model);
-
-  // ACT
-  store.getActions().change({
-    upper: 'foo',
-    lower: 'bar',
-  });
-
-  const rehydratedStore = makeStore(persistConfig, model);
-
-  // ASSERT
-  expect(rehydratedStore.getState()).toEqual({
-    upper: '_FOO_',
-    lower: '_bar_',
-  });
-});
-
-test('rehydrateMiddleware', () => {
-  // ARRANGE
-  const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]@upper': 'foo',
-    '[EasyPeasyStore]@lower': 'bar',
-  });
-
-  // ACT
-  const rehydratedStore = makeStore(
-    {
-      rehydrateMiddleware: [
-        (data, key) => {
-          if (key === 'upper') {
-            return data.toUpperCase();
-          }
-          if (key === 'lower') {
-            return data.toLowerCase();
-          }
-        },
-        data => `_${data}_`,
-      ],
-      storage: memoryStorage,
+  const upperCaseTransformer = createTransform(
+    (data, key) => {
+      expect(key).toBe('one');
+      return data.toUpperCase();
+    },
+    (data, key) => {
+      expect(key).toBe('one');
+      return data.toLowerCase();
     },
     {
-      upper: 'one',
-      lower: 'two',
+      whitelist: ['one'],
     },
   );
 
+  const padTransformer = createTransform(
+    (data, key) => {
+      expect(key).toBe('one');
+      return `_${data}_`;
+    },
+    (data, key) => {
+      expect(key).toBe('one');
+      return data.substr(1, data.length - 2);
+    },
+    {
+      blacklist: ['two'],
+    },
+  );
+
+  const memoryStorage = createMemoryStorage();
+
+  const makeStore = () =>
+    createStore(
+      persist(
+        {
+          one: null,
+          two: null,
+          change: action((_, payload) => {
+            return payload;
+          }),
+        },
+        {
+          storage: memoryStorage,
+          transformers: [upperCaseTransformer, padTransformer],
+        },
+      ),
+    );
+
+  const store = makeStore();
+
+  // ACT
+  store.getActions().change({
+    one: 'item one',
+    two: 'item two',
+  });
+
+  // ASSERT
+  expect(memoryStorage.store).toEqual({
+    '[EasyPeasyStore]@one': '_ITEM ONE_',
+    '[EasyPeasyStore]@two': 'item two',
+  });
+
+  // ACT
+  const rehydratedStore = makeStore();
+
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
-    upper: '_FOO_',
-    lower: '_bar_',
+    one: 'item one',
+    two: 'item two',
   });
 });
 

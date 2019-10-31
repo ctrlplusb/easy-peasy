@@ -9,6 +9,7 @@ import {
 import createStore from './create-store';
 import createContextStore from './create-context-store';
 import createComponentStore from './create-component-store';
+import createTransform from './create-transform';
 import StoreProvider from './provider';
 import RehydrateBoundary from './rehydrate-boundary';
 import {
@@ -36,6 +37,7 @@ export {
   createComponentStore,
   createContextStore,
   createStore,
+  createTransform,
   createTypedHooks,
   debug,
   memo,

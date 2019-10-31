@@ -48,47 +48,137 @@ const app = (
 
     - `mergeStrategy` (string, *optional*)
 
-      The strategy that should be employed when rehydrating your store. The following values are supported:
+      The strategy that should be employed when rehydrating the persisted state over your store's initial state. 
+      
+      The following values are supported:
 
       - `'merge'` (*default*)
 
-        The data from the persistence will be merged over the initial model data.
+        The data from the persistence will be _shallow_ merged with the initial state represented by your store's model.
+
+        i.e.
+
+        Given the following persisted state:
+
+        ```json
+        {
+          "fruit": "apple",
+          "address": {
+            "city": "cape town"
+          }
+        }
+        ```
+
+        And the following initial state represented by your store's model:
+
+        ```json
+        {
+          "address": {
+            "city": "london",
+            "post code": "e3 1pq"
+          },
+          "animal": "dolphin"
+        }
+        ```
+
+        The resulting state will be:
+
+        ```json
+        {
+          "fruit": "apple",
+          "address": {
+            "city": "cape town"
+          },
+          "animal": "dolphin"
+        }
+        ```
 
       - `'overwrite'`
 
-        The data from teh persistence will overwrite the model data completely.
+        The data from the persistence will _completely_ overwrite the initial state represented by your store's model.
+
+        i.e.
+
+        Given the following persisted state:
+
+        ```json
+        {
+          "fruit": "apple",
+          "city": "cape town"
+        }
+        ```
+
+        And the following initial state represented by your store's model:
+
+        ```json
+        {
+          "fruit": "pear",
+          "animal": "dolphin"
+        }
+        ```
+
+        The resulting state will be:
+
+        ```json
+        {
+          "fruit": "apple",
+          "city": "cape town"
+        }
+        ```
 
       - `'mergeDeep'` 
 
         The data from the persistence will be merged deeply, recursing through all _object_ structures and merging.
+
+        i.e.
+
+        Given the following persisted state:
+
+        ```json
+        {
+          "fruit": "apple",
+          "address": {
+            "city": "cape town"
+          }
+        }
+        ```
+
+        And the following initial state represented by your store's model:
+
+        ```json
+        {
+          "address": {
+            "city": "london",
+            "post code": "e3 1pq"
+          },
+          "animal": "dolphin"
+        }
+        ```
+
+        The resulting state will be:
+
+        ```json
+        {
+          "fruit": "apple",
+          "address": {
+            "city": "cape town",
+            "post code": "e3 1pq"
+          },
+          "animal": "dolphin"
+        }
+        ```
+
+        > **Note:** Only *plain objects* will be recursed and merged; no other types such as Arrays, Maps, Sets, Classes etc.
     
-    - `persistMiddleware` (Array<Function>, *optional*)
+    - `transformers` (Array<Transformer>, *optional*)
 
-      These are transformer functions that will be applied to each data item prior to it being persisted. They will be executed in a left to right fashion, with each transformation becoming the data input to the next transform function.
+      Transformers are use to apply operations to your data during prior it being persisted or hydrated.
 
-      The transform function receives the following arguments and should return the transformed data:
+      One use case for a transformer is to handle data that can't be parsed to a JSON string. For example a `Map` or `Set`. To handle these data types you could utilise a transformer that converts the `Map`/`Set` to/from an `Array` or `Object`.
 
-      - `data` (any)
+      Transformers are applied left to right during data persistence, and are applied right to left during data rehydration.
 
-        The data to be persisted.
-
-      - `key` (string)
-
-        The key against which the data originates on the model being persisted.
-
-    - `rehydrateMiddleware` (Array<Function>, *optional*)
-
-      These are transformer functions that will be applied to each data item prior to it being rehydrated from the persistence. They will be executed in a left to right fashion, with each transformation becoming the data input to the next transform function.
-
-      The transform function receives the following arguments and should return the transformed data:
-
-      - `data` (any)
-
-        The data being rehydrated.
-
-      - `key` (string)
-
-        The key against which the data will be applied on the model being rehydrated.
+      [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [transformer packages](https://github.com/rt2zz/redux-persist#transforms) that have been built for it. These can be used here.
 
     - `storage` (string | Object, *optional*)
 
@@ -104,19 +194,9 @@ const app = (
 
       - Custom engine
 
-        You can provide a custom storage engine. A storage engine is an object structure that needs to implement the following properties:
+        A custom storage engine. 
 
-        - `getItem(key) => any | Promise<any> | void`
-
-          This function will receive the key, i.e. the key of the model item being rehydrated, and should return the associated data from the persistence if it exists. It can alternatively return a `Promise` that resolves the data, or `undefined` if no persisted data was found.
-
-        - `setItem(key, data) => void | Promise<void>`
-
-          This function will receive the key, i.e. the key of the model data being persisted, as well as the associated data value. It should then store the respective data. It can alternatively return a `Promise` which indicates when the item has been successfully persisted.
-
-        - `removeItem(key) => void | Promise<void>`
-
-          This function will receive the key, i.e. the key of the model item that exists in the persistence, and should remove any data that is currently being stored within the persistence. It can alternatively return a `Promise` which indicates when the item has been successfully removed from the persistence.
+        [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines) that have been built for it. These can be used here.
 
     - `whitelist` (Array<string>, *optional*)
 
@@ -182,7 +262,82 @@ const model = {
 
 There is no restriction on how many `persist` instances you can have on your model. Provide as many configurations as you require and the respective models will have their state persisted and rehydrated accordingly.
 
-## Asynchronous Storage Engines
+## Working with asynchronous storage engines
 
-When utilising an asynchronous storage engine (i.e. they return `Promise`s) you may want to wait for their asynchronous operations to complete during the rehydration step.
+When utilising an asynchronous storage engine (i.e. their storage APIs return `Promise`s) you may want to wait for their asynchronous operations to complete prior to rendering your application. This would help to avoid a flash of content change, where your site would initially render with the default store state, and then suddenly rerender with the rehydrated state after it is resolved from the asynchronous storage engine.
 
+There are two strategies that you can employ to deal with this case.
+
+**Option 1: Wait for the rehydration to complete prior to rendering your application**
+
+The store instance contains an API allowing to access a `Promise` that represents the resolution of the asynchronous storage state being resolved during state rehydration.  You can wait on this `Promise` prior to rendering your application, which would ensure that your application is rendered with the expected rehydrated state.
+
+```javascript
+const store = createStore(persist(model, { storage: asyncStorageEngine });
+
+store.persist.resolveRehydration().then(() => {
+  ReactDOM.render(
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>,
+    document.getElementById('app')
+  );
+});
+```
+
+**Option 2: Eagerly render your application and utilise the `RehydrateBoundary` component**
+
+You can alternatively render your application immediately, i.e. not wait for the async rehydration to resolve. 
+
+To improve your user's experience you can utilise the [`RehydrateBoundary`](/docs/api/rehydrate-boundary.html) component. Any components surrounded by a `RehydrateBoundary` will not be rendered until the asynchronous state rehydration has completed. 
+
+```javascript
+import { RehydrateBoundary } from 'easy-peasy';
+
+const store = createStore(persist(model, { storage: asyncStorageEngine });
+
+ReactDOM.render(
+  <StoreProvider store={store}>
+    <div>
+      <Header />
+      <RehydrateBoundary>
+        <Main />
+      </RehydrateBoundary>
+      <Footer />
+    </div>
+  </StoreProvider>,
+  document.getElementById('app')
+);
+```
+
+In the example above, the `<Main />` content will not render until our store has been successfully updated with the rehydration state.
+
+## Creating a custom storage engine
+
+A storage engine is an object structure that needs to implement the following properties:
+
+  - `getItem(key) => any | Promise<any> | void`
+
+    This function will receive the key, i.e. the key of the model item being rehydrated, and should return the associated data from the persistence if it exists. It can alternatively return a `Promise` that resolves the data, or `undefined` if no persisted data was found.
+
+  - `setItem(key, data) => void | Promise<void>`
+
+    This function will receive the key, i.e. the key of the model data being persisted, as well as the associated data value. It should then store the respective data. It can alternatively return a `Promise` which indicates when the item has been successfully persisted.
+
+  - `removeItem(key) => void | Promise<void>`
+
+    This function will receive the key, i.e. the key of the model item that exists in the persistence, and should remove any data that is currently being stored within the persistence. It can alternatively return a `Promise` which indicates when the item has been successfully removed from the persistence.
+
+## Creating a custom transformer
+
+Easy Peasy outputs a `createTransformer` function, which has been directly copied from 
+
+The transform function receives the following arguments and should return the transformed data:
+
+- `data` (any)
+
+  The data to be persisted.
+
+- `key` (string)
+
+  The key of which the data originates from the model being persisted.
