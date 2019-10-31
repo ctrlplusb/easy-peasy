@@ -123,7 +123,7 @@ export default function createStoreInternals({
         } = config;
         let storage;
         if (config.storage == null) {
-          storage = localStorage;
+          storage = sessionStorage;
         } else if (typeof config.storage === 'string') {
           if (config.storage === 'localStorage') {
             storage = localStorage;

@@ -1,8 +1,8 @@
 # persist
 
-This helper allows you to persist your store state, allowing it to be rehydrated when your application is remounted (e.g. on page refresh or a new browser session).
+This helper allows you to persist your store state (by default to `sessionStorage`), allowing it to be rehydrated when your application is remounted (e.g. on page refresh).
 
-It is _heavily_ inspired by [`redux-persist`](https://github.com/rt2zz/redux-persist), with the intention of exposing APIs that are mostly compatible with that of [`redux-persist`](https://github.com/rt2zz/redux-persist). This will allow you to reuse packages such as the storage engines or transformers that currently exist for [`redux-persist`](https://github.com/rt2zz/redux-persist).
+> This API is _heavily_ inspired by [`redux-persist`](https://github.com/rt2zz/redux-persist), with the intention of providing a lot of compatibility with it so that we can leverage the packages that exist within it's ecosystem.
 
 To utilise this feature you simply need to wrap your model with the helper.
 
@@ -17,9 +17,9 @@ const store = createStore(
 );
 ```
 
-Every time state changes in your model, it will be persisted via the selected storage engine (the browser's localStorage by default). 
+Every time the state changes it will be saved to the configured storage engine (`sessionStorage` by default). 
 
-When your application is mounted again, e.g. on a page refresh, the data will be rehydrated from the storage into your store during the store's creation.
+When your application is freshly mounted, e.g. on a page refresh, any data that exists within the configured storage engine will be used to rehydrate your state accordingly.
 
 ```javascript
 const store = createStore(model); // state is automatically rehydrated
@@ -36,7 +36,9 @@ const app = (
 
   - `model` (Object, *required*)
 
-    The model that you wish to apply persistence to. You can surround your entire model, or a nested model. You can even have multiple `persist` configurations across your model.
+    The model that you wish to apply persistence to. 
+    
+    > You can surround your entire model, or a nested model. You can even have multiple `persist` configurations scattered throughout your store's model. Feel free to use the API on the parts of your state feel most appropriate for persistence/rehydration.
 
   - `config` (Object, *optional*)
 
@@ -45,6 +47,10 @@ const app = (
     - `blacklist` (Array<string>, *optional*)
 
       A list of keys, representing the parts of the model that should not be persisted. Any part of the model that is not represented in this list will be persisted.
+
+    - `whitelist` (Array<string>, *optional*)
+
+      A list of keys, representing the parts of the model that should be persisted. Any part of the model that is not represented in this list will not be persisted.
 
     - `mergeStrategy` (string, *optional*)
 
@@ -182,25 +188,25 @@ const app = (
 
     - `storage` (string | Object, *optional*)
 
-      The storage engine to be used. It defaults to localStorage. The following values are supported:
+      The storage engine to be used. It defaults to `sessionStorage`. The following values are supported:
+
+      - `'sessionStorage'`
+
+        Use the browser's sessionStorage as the persistence layer.
+
+        i.e. data is available for rehydration for a single browser session
 
       - `'localStorage'`
 
         Use the browser's localStorage as the persistence layer.
-      
-      - `'sessionStorage'`
 
-        Use the browser's sessionStorage as the persistence layer.
+        i.e. data is available across browser sessions
 
       - Custom engine
 
         A custom storage engine. 
 
         [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines) that have been built for it. These can be used here.
-
-    - `whitelist` (Array<string>, *optional*)
-
-      A list of keys, representing the parts of the model that should be persisted. Any part of the model that is not represented in this list will not be persisted.
 
 ## Example
 
