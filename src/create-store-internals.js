@@ -166,11 +166,11 @@ export default function createStoreInternals({
           getItem: key => {
             if (isAsyncStorage) {
               return storage.getItem(key).then(wrapped => {
-                return wrapped != null ? deserialize(wrapped, key) : wrapped;
+                return wrapped != null ? deserialize(wrapped, key) : undefined;
               });
             }
             const wrapped = storage.getItem(key);
-            return wrapped != null ? deserialize(wrapped, key) : wrapped;
+            return wrapped != null ? deserialize(wrapped, key) : undefined;
           },
           setItem: (key, data) => {
             return storage.setItem(key, serialize(data, key));

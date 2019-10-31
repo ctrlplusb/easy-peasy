@@ -1,4 +1,4 @@
-import React, { Children, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from './hooks';
 
 export default function RehydrateBoundary({ children, loading = null }) {
@@ -7,5 +7,5 @@ export default function RehydrateBoundary({ children, loading = null }) {
   useEffect(() => {
     store.persist.resolveRehydration().then(() => setReady(true));
   }, []);
-  return ready ? Children.only(children) : loading;
+  return ready ? children : loading;
 }
