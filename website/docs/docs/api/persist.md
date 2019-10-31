@@ -336,14 +336,4 @@ A storage engine is an object structure that needs to implement the following pr
 
 ## Creating a custom transformer
 
-Easy Peasy outputs a `createTransformer` function, which has been directly copied from 
-
-The transform function receives the following arguments and should return the transformed data:
-
-- `data` (any)
-
-  The data to be persisted.
-
-- `key` (string)
-
-  The key of which the data originates from the model being persisted.
+Easy Peasy outputs a [`createTransformer`](/docs/api/create-transformer.html) function, which has been directly copied from [`redux-persist`](https://github.com/rt2zz/redux-persist) in order to maximum compatiblity with it's ecosystem.
