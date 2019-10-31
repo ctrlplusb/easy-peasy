@@ -4,12 +4,12 @@ import {
   createStore as reduxCreateStore,
 } from 'redux';
 import reduxThunk from 'redux-thunk';
-import debounce from 'debounce';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
-import { deepCloneStateWithoutComputed, get } from './lib';
 import {
-  resolvePersistTargets,
+  createPersistor,
+  createPersistMiddleware,
+  createPersistenceClearer,
   rehydrateStateFromPersistIfNeeded,
 } from './storage';
 
@@ -51,60 +51,15 @@ export default function createStore(model, options = {}) {
 
   bindStoreInternals(initialState);
 
-  const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
-
   const replaceState = nextState =>
     references.internals.actionCreatorDict['@action.easyPeasyReplaceState'](
       nextState,
     );
 
-  const persist = debounce(() => {
-    references.internals.persistenceConfig.forEach(({ path, config }) => {
-      const { storage, whitelist, blacklist } = config;
-      const state = references.getState();
-      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
-      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
-      targets.forEach(key => {
-        const targetPath = [...path, key];
-        storage.setItem(persistKey(targetPath), get(targetPath, state));
-      });
-    });
-  }, 1000);
-
-  const clearPersistance = () =>
-    new Promise((resolve, reject) => {
-      references.internals.persistenceConfig.forEach(({ path, config }) => {
-        const { storage, whitelist, blacklist } = config;
-        const persistRoot = get(path, references.getState());
-        const targets = resolvePersistTargets(
-          persistRoot,
-          whitelist,
-          blacklist,
-        );
-        if (targets.length > 0) {
-          Promise.all(
-            targets.map(key => {
-              const targetPath = [...path, key];
-              return storage.removeItem(persistKey(targetPath));
-            }),
-          ).then(() => resolve(), reject);
-        } else {
-          resolve();
-        }
-      });
-    });
-
-  const persistMiddleware = () => next => action => {
-    const result = next(action);
-    if (
-      action &&
-      action.type !== '@action.easyPeasyReplaceState' &&
-      references.internals.persistenceConfig.length > 0
-    ) {
-      persist(result);
-    }
-    return result;
-  };
+  const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
+  const persist = createPersistor(persistKey, references);
+  const persistMiddleware = createPersistMiddleware(persist, references);
+  const clearPersistance = createPersistenceClearer(persistKey, references);
 
   const listenerActionsMiddleware = () => next => action => {
     const result = next(action);

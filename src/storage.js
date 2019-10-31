@@ -1,3 +1,4 @@
+import debounce from 'debounce';
 import { deepCloneStateWithoutComputed, get, isPromise, set } from './lib';
 
 export const noopStorage = {
@@ -79,7 +80,7 @@ export function createStorageWrapper(
   };
 }
 
-export function resolvePersistTargets(target, whitelist, blacklist) {
+function resolvePersistTargets(target, whitelist, blacklist) {
   let targets = Object.keys(target);
   if (whitelist.length > 0) {
     targets = targets.reduce((acc, cur) => {
@@ -98,6 +99,60 @@ export function resolvePersistTargets(target, whitelist, blacklist) {
     }, []);
   }
   return targets;
+}
+
+export function createPersistor(persistKey, references) {
+  return debounce(() => {
+    references.internals.persistenceConfig.forEach(({ path, config }) => {
+      const { storage, whitelist, blacklist } = config;
+      const state = references.getState();
+      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
+      targets.forEach(key => {
+        const targetPath = [...path, key];
+        storage.setItem(persistKey(targetPath), get(targetPath, state));
+      });
+    });
+  }, 1000);
+}
+
+export function createPersistMiddleware(persist, references) {
+  return () => next => action => {
+    const result = next(action);
+    if (
+      action &&
+      action.type !== '@action.easyPeasyReplaceState' &&
+      references.internals.persistenceConfig.length > 0
+    ) {
+      persist(result);
+    }
+    return result;
+  };
+}
+
+export function createPersistenceClearer(persistKey, references) {
+  return () =>
+    new Promise((resolve, reject) => {
+      references.internals.persistenceConfig.forEach(({ path, config }) => {
+        const { storage, whitelist, blacklist } = config;
+        const persistRoot = get(path, references.getState());
+        const targets = resolvePersistTargets(
+          persistRoot,
+          whitelist,
+          blacklist,
+        );
+        if (targets.length > 0) {
+          Promise.all(
+            targets.map(key => {
+              const targetPath = [...path, key];
+              return storage.removeItem(persistKey(targetPath));
+            }),
+          ).then(() => resolve(), reject);
+        } else {
+          resolve();
+        }
+      });
+    });
 }
 
 export function rehydrateStateFromPersistIfNeeded(
