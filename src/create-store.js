@@ -7,13 +7,11 @@ import reduxThunk from 'redux-thunk';
 import debounce from 'debounce';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
+import { deepCloneStateWithoutComputed, get } from './lib';
 import {
-  deepCloneStateWithoutComputed,
-  get,
-  isPromise,
   resolvePersistTargets,
-  set,
-} from './lib';
+  rehydrateStateFromPersistIfNeeded,
+} from './storage';
 
 export default function createStore(model, options = {}) {
   const {
@@ -200,85 +198,11 @@ export default function createStore(model, options = {}) {
     bindActionCreators();
   };
 
-  // If we have any persist configs we will attemp to perform a state rehydration
-  let resolveRehydration = Promise.resolve();
-  if (references.internals.persistenceConfig.length > 0) {
-    references.internals.persistenceConfig.forEach(persistInstance => {
-      const { path, config } = persistInstance;
-      const { blacklist, mergeStrategy, storage, whitelist } = config;
-
-      const state = references.internals.defaultState;
-      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
-      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
-
-      const applyRehydrationStrategy = (originalState, rehydratedState) => {
-        if (mergeStrategy === 'overwrite') {
-          set(path, originalState, rehydratedState);
-        } else if (mergeStrategy === 'merge') {
-          const target = get(path, originalState);
-          Object.keys(rehydratedState).forEach(key => {
-            target[key] = rehydratedState[key];
-          });
-        } else if (mergeStrategy === 'mergeDeep') {
-          const target = get(path, originalState);
-          const setAt = (currentTarget, currentNext) => {
-            Object.keys(currentNext).forEach(key => {
-              const data = currentNext[key];
-              if (typeof data === 'object') {
-                setAt(currentTarget[key], data);
-              } else {
-                currentTarget[key] = data;
-              }
-            });
-          };
-          setAt(target, rehydratedState);
-        }
-      };
-
-      if (storage.isAsync) {
-        const asyncStateResolvers = targets.reduce((acc, key) => {
-          const targetPath = [...path, key];
-          const dataPromise = storage.getItem(persistKey(targetPath));
-          if (isPromise(dataPromise)) {
-            acc.push({
-              key,
-              dataPromise,
-            });
-          }
-          return acc;
-        }, []);
-        if (asyncStateResolvers.length > 0) {
-          resolveRehydration = Promise.all(
-            asyncStateResolvers.map(x => x.dataPromise),
-          ).then(resolvedData => {
-            const next = resolvedData.reduce((acc, cur, idx) => {
-              const { key } = asyncStateResolvers[idx];
-              if (cur !== undefined) {
-                acc[key] = cur;
-              }
-              return acc;
-            }, {});
-            if (Object.keys(next).length === 0) {
-              return;
-            }
-            applyRehydrationStrategy(state, next);
-            replaceState(state);
-          });
-        }
-      } else {
-        const next = targets.reduce((acc, key) => {
-          const targetPath = [...path, key];
-          const data = storage.getItem(persistKey(targetPath));
-          if (data !== undefined) {
-            acc[key] = data;
-          }
-          return acc;
-        }, {});
-        applyRehydrationStrategy(state, next);
-        replaceState(state);
-      }
-    });
-  }
+  const resolveRehydration = rehydrateStateFromPersistIfNeeded(
+    persistKey,
+    replaceState,
+    references,
+  );
 
   return Object.assign(store, {
     addModel: (key, modelForKey) => {

@@ -43,27 +43,6 @@ export function newify(currentPath, currentState, finalValue) {
   return newState;
 }
 
-export function resolvePersistTargets(target, whitelist, blacklist) {
-  let targets = Object.keys(target);
-  if (whitelist.length > 0) {
-    targets = targets.reduce((acc, cur) => {
-      if (whitelist.findIndex(x => x === cur) !== -1) {
-        return [...acc, cur];
-      }
-      return acc;
-    }, []);
-  }
-  if (blacklist.length > 0) {
-    targets = targets.reduce((acc, cur) => {
-      if (blacklist.findIndex(x => x === cur) !== -1) {
-        return acc;
-      }
-      return [...acc, cur];
-    }, []);
-  }
-  return targets;
-}
-
 export const set = (path, target, value) => {
   if (path.length === 0) {
     if (typeof value === 'object') {
