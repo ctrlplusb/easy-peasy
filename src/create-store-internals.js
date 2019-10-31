@@ -1,5 +1,4 @@
 import memoizerific from 'memoizerific';
-import { createDraft, finishDraft, isDraft } from 'immer-peasy';
 import isPlainObject from 'is-plain-object';
 import {
   actionOnSymbol,
@@ -10,7 +9,7 @@ import {
   thunkOnSymbol,
   thunkSymbol,
 } from './constants';
-import { get, set, newify } from './lib';
+import { get, set, createSimpleProduce } from './lib';
 import { createStorageWrapper } from './storage';
 
 export default function createStoreInternals({
@@ -21,35 +20,7 @@ export default function createStoreInternals({
   reducerEnhancer,
   references,
 }) {
-  function simpleProduce(path, state, fn) {
-    if (disableImmer) {
-      const current = get(path, state);
-      const next = fn(current);
-      if (current !== next) {
-        return newify(path, state, next);
-      }
-      return state;
-    }
-    if (path.length === 0) {
-      const draft = createDraft(state);
-      const result = fn(draft);
-      if (result) {
-        return isDraft(result) ? finishDraft(result) : result;
-      }
-      return finishDraft(draft);
-    }
-    const parentPath = path.slice(0, path.length - 1);
-    const draft = createDraft(state);
-    const parent = get(parentPath, state);
-    const current = get(path, draft);
-    const result = fn(current);
-
-    if (result) {
-      parent[path[path.length - 1]] = result;
-    }
-    return finishDraft(draft);
-  }
-
+  const simpleProduce = createSimpleProduce(disableImmer);
   const defaultState = initialState;
   const actionCreatorDict = {};
   const actionCreators = {};

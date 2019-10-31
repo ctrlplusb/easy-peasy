@@ -1,4 +1,5 @@
 import isPlainObject from 'is-plain-object';
+import { createDraft, finishDraft, isDraft } from 'immer-peasy';
 
 export const deepCloneStateWithoutComputed = source => {
   const recursiveClone = current => {
@@ -84,3 +85,34 @@ export const set = (path, target, value) => {
     return acc[cur];
   }, target);
 };
+
+export function createSimpleProduce(disableImmer = false) {
+  return function simpleProduce(path, state, fn) {
+    if (disableImmer) {
+      const current = get(path, state);
+      const next = fn(current);
+      if (current !== next) {
+        return newify(path, state, next);
+      }
+      return state;
+    }
+    if (path.length === 0) {
+      const draft = createDraft(state);
+      const result = fn(draft);
+      if (result) {
+        return isDraft(result) ? finishDraft(result) : result;
+      }
+      return finishDraft(draft);
+    }
+    const parentPath = path.slice(0, path.length - 1);
+    const draft = createDraft(state);
+    const parent = get(parentPath, state);
+    const current = get(path, draft);
+    const result = fn(current);
+
+    if (result) {
+      parent[path[path.length - 1]] = result;
+    }
+    return finishDraft(draft);
+  };
+}
