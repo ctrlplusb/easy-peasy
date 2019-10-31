@@ -116,17 +116,17 @@ export function createPersistor(persistKey, references) {
   }, 1000);
 }
 
-export function createPersistMiddleware(persist, references) {
+export function createPersistMiddleware(persistor, references) {
   return () => next => action => {
-    const result = next(action);
+    const state = next(action);
     if (
       action &&
       action.type !== '@action.easyPeasyReplaceState' &&
       references.internals.persistenceConfig.length > 0
     ) {
-      persist(result);
+      persistor(state);
     }
-    return result;
+    return state;
   };
 }
 

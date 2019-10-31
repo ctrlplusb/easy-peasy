@@ -30,7 +30,7 @@ export default function createStore(model, options = {}) {
   const bindReplaceState = modelDef => {
     return {
       ...modelDef,
-      easyPeasyReplaceState: helpers.action((state, payload) => payload),
+      easyPeasyReplaceState: helpers.action((_, payload) => payload),
     };
   };
 
@@ -57,8 +57,8 @@ export default function createStore(model, options = {}) {
     );
 
   const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
-  const persist = createPersistor(persistKey, references);
-  const persistMiddleware = createPersistMiddleware(persist, references);
+  const persistor = createPersistor(persistKey, references);
+  const persistMiddleware = createPersistMiddleware(persistor, references);
   const clearPersistance = createPersistenceClearer(persistKey, references);
 
   const listenerActionsMiddleware = () => next => action => {
@@ -179,7 +179,7 @@ export default function createStore(model, options = {}) {
     getMockedActions: () => [...mockedActions],
     persist: {
       clear: clearPersistance,
-      flush: () => persist.flush(),
+      flush: () => persistor.flush(),
       resolveRehydration: () => resolveRehydration,
     },
     reconfigure: newModel => {
