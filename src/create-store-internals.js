@@ -9,10 +9,11 @@ import {
   thunkOnSymbol,
   thunkSymbol,
 } from './constants';
-import { get, set, createSimpleProduce } from './lib';
+import { get, set } from './lib';
 import { createStorageWrapper } from './storage';
 import { createActionCreator } from './actions';
 import { createThunkHandler, createThunkActionsCreator } from './thunks';
+import createReducer from './create-reducer';
 
 export default function createStoreInternals({
   disableImmer,
@@ -22,7 +23,6 @@ export default function createStoreInternals({
   reducerEnhancer,
   references,
 }) {
-  const simpleProduce = createSimpleProduce(disableImmer);
   const defaultState = initialState;
   const actionCreatorDict = {};
   const actionCreators = {};
@@ -196,53 +196,12 @@ export default function createStoreInternals({
     });
   });
 
-  const createReducer = () => {
-    const runActionReducerAtPath = (state, action, actionReducer, path) => {
-      return simpleProduce(path, state, draft =>
-        actionReducer(draft, action.payload),
-      );
-    };
-
-    const reducerForActions = (state, action) => {
-      const actionReducer = actionReducersDict[action.type];
-      if (actionReducer) {
-        const actionMeta =
-          actionReducer[actionSymbol] || actionReducer[actionOnSymbol];
-        return runActionReducerAtPath(
-          state,
-          action,
-          actionReducer,
-          actionMeta.parent,
-        );
-      }
-      return state;
-    };
-
-    const reducerForCustomReducers = (state, action) => {
-      return customReducers.reduce((acc, { parentPath, key, reducer: red }) => {
-        return simpleProduce(parentPath, acc, draft => {
-          draft[key] = red(draft[key], action);
-          return draft;
-        });
-      }, state);
-    };
-
-    const rootReducer = (state, action) => {
-      const stateAfterActions = reducerForActions(state, action);
-      const next =
-        customReducers.length > 0
-          ? reducerForCustomReducers(stateAfterActions, action)
-          : stateAfterActions;
-      if (state !== next) {
-        computedProperties.forEach(({ parentPath, createComputedProperty }) => {
-          createComputedProperty(get(parentPath, next));
-        });
-      }
-      return next;
-    };
-
-    return rootReducer;
-  };
+  const rootReducer = createReducer(
+    disableImmer,
+    actionReducersDict,
+    customReducers,
+    computedProperties,
+  );
 
   return {
     actionCreatorDict,
@@ -253,6 +212,6 @@ export default function createStoreInternals({
     listenerActionCreators,
     listenerActionMap,
     persistenceConfig,
-    reducer: reducerEnhancer(createReducer()),
+    reducer: reducerEnhancer(rootReducer),
   };
 }
