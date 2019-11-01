@@ -64,6 +64,7 @@ function TodoList() {
   - React hooks based API
   - Computed properties - i.e. derived data
   - Data fetching / side effects
+  - Persist state to session/local storage
   - Testing helpers
   - Extensive TypeScript support
   - Global, shared, or component level stores
