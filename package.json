@@ -54,7 +54,7 @@
     "redux-thunk": "^2.3.0",
     "shallowequal": "^1.1.0",
     "symbol-observable": "^1.2.0",
-    "ts-toolbelt": "^4.9.14"
+    "ts-toolbelt": "^4.9.29"
   },
   "devDependencies": {
     "@babel/cli": "^7.6.4",
@@ -68,7 +68,7 @@
     "@babel/preset-react": "^7.6.3",
     "@babel/preset-typescript": "^7.6.0",
     "@babel/register": "^7.6.2",
-    "@testing-library/jest-dom": "^4.2.0",
+    "@testing-library/jest-dom": "^4.2.3",
     "@testing-library/react": "^9.3.1",
     "@testing-library/react-hooks": "^3.1.1",
     "@types/react": "^16.9.11",
@@ -96,7 +96,7 @@
     "react-dom": "^16.11.0",
     "react-redux": "^7.1.1",
     "rimraf": "^3.0.0",
-    "rollup": "^1.26.0",
+    "rollup": "^1.26.2",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-filesize": "^6.2.1",
