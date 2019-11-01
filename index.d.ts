@@ -788,6 +788,7 @@ export function createContextStore<
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
   useStoreDispatch: () => Dispatch<StoreModel>;
+  useStoreRehydrated: () => boolean;
 };
 
 interface UseLocalStore<StoreModel extends object, InitialData> {
@@ -842,9 +843,6 @@ export function persist<Model extends object>(
   config?: PersistConfig<Model>,
 ): Model;
 
-export class RehydrateBoundary extends Component<{
-  children?: React.ReactNode;
-  loading?: React.ReactNode;
-}> {}
+export function useStoreRehydrated(): boolean;
 
 // #endregion

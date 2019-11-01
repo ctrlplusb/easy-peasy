@@ -1,4 +1,6 @@
-import { persist, createTransform, RehydrateBoundary } from 'easy-peasy';
+/* eslint-disable */
+
+import { persist, createTransform, useStoreRehydrated } from 'easy-peasy';
 
 persist({
   foo: 'bar',
@@ -60,6 +62,7 @@ if (transformer.out) {
   transformer.out('foo', 'bar');
 }
 
-const app1 = <RehydrateBoundary>foo</RehydrateBoundary>;
-
-const app2 = <RehydrateBoundary loading="Loading...">foo</RehydrateBoundary>;
+function App() {
+  const rehydrated = useStoreRehydrated();
+  return rehydrated ? <div>Loaded</div> : <div>Loading...</div>;
+}
