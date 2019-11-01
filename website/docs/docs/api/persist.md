@@ -291,26 +291,31 @@ store.persist.resolveRehydration().then(() => {
 });
 ```
 
-**Option 2: Eagerly render your application and utilise the `RehydrateBoundary` component**
+**Option 2: Eagerly render your application and utilise the `useStoreRehydrated` hook**
 
 You can alternatively render your application immediately, i.e. not wait for the async rehydration to resolve. 
 
-To improve your user's experience you can utilise the [`RehydrateBoundary`](/docs/api/rehydrate-boundary.html) component. Any components surrounded by a `RehydrateBoundary` will not be rendered until the asynchronous state rehydration has completed. 
+To improve your user's experience you can utilise the [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook. This hook returns a boolean flag indicating when the rehydration has completed.
 
 ```javascript
-import { RehydrateBoundary } from 'easy-peasy';
+import { useStoreRehydrated } from 'easy-peasy';
 
 const store = createStore(persist(model, { storage: asyncStorageEngine });
 
-ReactDOM.render(
-  <StoreProvider store={store}>
+function App() {
+  const rehydrated = useStoreRehydrated();
+  return (
     <div>
       <Header />
-      <RehydrateBoundary>
-        <Main />
-      </RehydrateBoundary>
+      {rehydrated ? <Main /> : <div>Loading...</div>}
       <Footer />
     </div>
+  )
+}
+
+ReactDOM.render(
+  <StoreProvider store={store}>
+    <App />
   </StoreProvider>,
   document.getElementById('app')
 );
@@ -318,9 +323,13 @@ ReactDOM.render(
 
 In the example above, the `<Main />` content will not render until our store has been successfully updated with the rehydration state.
 
+## Persisting multiple stores
+
+If you utilise multiple stores, each with their own persistence configuration, you will need to ensure that each store is configured to have a unique name. The store name for each instance of your stores will be used within the persistence layer cache keys.
+
 ## Creating a custom storage engine
 
-A storage engine is an object structure that needs to implement the following properties:
+A storage engine is an object structure that needs to implement the following interface:
 
   - `getItem(key) => any | Promise<any> | void`
 

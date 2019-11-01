@@ -7,9 +7,10 @@ import {
   createStore,
   createTransform,
   persist,
-  RehydrateBoundary,
   StoreProvider,
-} from '../';
+  useStoreRehydrated,
+  createContextStore,
+} from '../index';
 
 jest.mock('debounce', () => fn => fn);
 
@@ -464,24 +465,26 @@ test('multiple stores', () => {
   });
 });
 
-test('RehydrateBoundary with loading component', async () => {
+test('useStoreRehydrated', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
   const store = makeStore({
     storage: memoryStorage,
   });
-  const App = () => (
-    <StoreProvider store={store}>
+  const App = () => {
+    const rehydrated = useStoreRehydrated();
+    return (
       <div>
         <h1>App Title</h1>
-        <RehydrateBoundary loading={<p>Loading...</p>}>
-          <div>Loaded</div>
-        </RehydrateBoundary>
-        >
+        {rehydrated ? <div>Loaded</div> : <p>Loading...</p>}
       </div>
-    </StoreProvider>
+    );
+  };
+  const wrapper = render(
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>,
   );
-  const wrapper = render(<App />);
 
   // ASSERT
   expect(wrapper.queryByText('Loading...')).not.toBeNull();
@@ -497,26 +500,35 @@ test('RehydrateBoundary with loading component', async () => {
   expect(wrapper.queryByText('Loaded')).not.toBeNull();
 });
 
-test('RehydrateBoundary without loading component', async () => {
+test('useStoreRehydrated + createContextStore', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
   const store = makeStore({
     storage: memoryStorage,
   });
-  const App = () => (
-    <StoreProvider store={store}>
+
+  const MyContextStore = createContextStore({
+    foo: 'bar',
+  });
+
+  const App = () => {
+    const rehydrated = MyContextStore.useStoreRehydrated();
+    return (
       <div>
         <h1>App Title</h1>
-        <RehydrateBoundary>
-          <div>Loaded</div>
-        </RehydrateBoundary>
-        >
+        {rehydrated ? <div>Loaded</div> : <p>Loading...</p>}
       </div>
-    </StoreProvider>
+    );
+  };
+
+  const wrapper = render(
+    <MyContextStore.Provider>
+      <App />
+    </MyContextStore.Provider>,
   );
-  const wrapper = render(<App />);
 
   // ASSERT
+  expect(wrapper.queryByText('Loading...')).not.toBeNull();
   expect(wrapper.queryByText('Loaded')).toBeNull();
 
   // ACT
@@ -525,6 +537,7 @@ test('RehydrateBoundary without loading component', async () => {
   });
 
   // ASSERT
+  expect(wrapper.queryByText('Loading...')).toBeNull();
   expect(wrapper.queryByText('Loaded')).not.toBeNull();
 });
 

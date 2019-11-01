@@ -14,8 +14,10 @@ import {
 } from './persistence';
 import { createComputedPropertiesMiddleware } from './computed-properties';
 import { createListenerMiddleware } from './listeners';
+import { deepCloneStateWithoutComputed } from './lib';
 
 export default function createStore(model, options = {}) {
+  const modelClone = deepCloneStateWithoutComputed(model);
   const {
     compose,
     devTools = true,
@@ -38,7 +40,7 @@ export default function createStore(model, options = {}) {
 
   const references = {};
 
-  let modelDefinition = bindReplaceState(model);
+  let modelDefinition = bindReplaceState(modelClone);
   let mockedActions = [];
 
   const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
