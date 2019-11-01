@@ -6,8 +6,18 @@ import {
 import reduxThunk from 'redux-thunk';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
+import {
+  createPersistor,
+  createPersistMiddleware,
+  createPersistenceClearer,
+  rehydrateStateFromPersistIfNeeded,
+} from './persistence';
+import { createComputedPropertiesMiddleware } from './computed-properties';
+import { createListenerMiddleware } from './listeners';
+import { deepCloneStateWithoutComputed } from './lib';
 
 export default function createStore(model, options = {}) {
+  const modelClone = deepCloneStateWithoutComputed(model);
   const {
     compose,
     devTools = true,
@@ -24,13 +34,24 @@ export default function createStore(model, options = {}) {
   const bindReplaceState = modelDef => {
     return {
       ...modelDef,
-      easyPeasyReplaceState: helpers.action((state, payload) => payload),
+      easyPeasyReplaceState: helpers.action((_, payload) => payload),
     };
   };
 
-  let modelDefinition = bindReplaceState(model);
-  let mockedActions = [];
   const references = {};
+
+  let modelDefinition = bindReplaceState(modelClone);
+  let mockedActions = [];
+
+  const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
+  const persistor = createPersistor(persistKey, references);
+  const persistMiddleware = createPersistMiddleware(persistor, references);
+  const clearPersistance = createPersistenceClearer(persistKey, references);
+
+  const replaceState = nextState =>
+    references.internals.actionCreatorDict['@action.easyPeasyReplaceState'](
+      nextState,
+    );
 
   const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({
@@ -43,53 +64,12 @@ export default function createStore(model, options = {}) {
     });
   };
 
-  bindStoreInternals(initialState);
-
-  const listenerActionsMiddleware = () => next => action => {
-    const result = next(action);
-    if (
-      action &&
-      references.internals.listenerActionMap[action.type] &&
-      references.internals.listenerActionMap[action.type].length > 0
-    ) {
-      const sourceAction = references.internals.actionCreatorDict[action.type];
-      references.internals.listenerActionMap[action.type].forEach(
-        actionCreator => {
-          actionCreator({
-            type: sourceAction ? sourceAction.type : action.type,
-            payload: action.payload,
-            error: action.error,
-            result: action.result,
-          });
-        },
-      );
-    }
-    return result;
-  };
-
   const mockActionsMiddleware = () => () => action => {
     if (action != null) {
       mockedActions.push(action);
     }
     return undefined;
   };
-
-  const computedPropertiesMiddleware = store => next => action => {
-    references.internals.computedState.currentState = store.getState();
-    references.internals.computedState.isInReducer = true;
-    return next(action);
-  };
-
-  const easyPeasyMiddleware = [
-    computedPropertiesMiddleware,
-    reduxThunk,
-    ...middleware,
-    listenerActionsMiddleware,
-  ];
-
-  if (mockActions) {
-    easyPeasyMiddleware.push(mockActionsMiddleware);
-  }
 
   const composeEnhancers =
     compose ||
@@ -100,6 +80,20 @@ export default function createStore(model, options = {}) {
           name: storeName,
         })
       : reduxCompose);
+
+  bindStoreInternals(initialState);
+
+  const easyPeasyMiddleware = [
+    createComputedPropertiesMiddleware(references),
+    reduxThunk,
+    ...middleware,
+    createListenerMiddleware(references),
+    persistMiddleware,
+  ];
+
+  if (mockActions) {
+    easyPeasyMiddleware.push(mockActionsMiddleware);
+  }
 
   const store = reduxCreateStore(
     references.internals.reducer,
@@ -132,11 +126,15 @@ export default function createStore(model, options = {}) {
     }
     bindStoreInternals(currentState);
     store.replaceReducer(references.internals.reducer);
-    references.internals.actionCreatorDict['@action.easyPeasyReplaceState'](
-      references.internals.defaultState,
-    );
+    replaceState(references.internals.defaultState);
     bindActionCreators();
   };
+
+  const resolveRehydration = rehydrateStateFromPersistIfNeeded(
+    persistKey,
+    replaceState,
+    references,
+  );
 
   return Object.assign(store, {
     addModel: (key, modelForKey) => {
@@ -156,6 +154,11 @@ export default function createStore(model, options = {}) {
     getActions: () => references.internals.actionCreators,
     getListeners: () => references.internals.listenerActionCreators,
     getMockedActions: () => [...mockedActions],
+    persist: {
+      clear: clearPersistance,
+      flush: () => persistor.flush(),
+      resolveRehydration: () => resolveRehydration,
+    },
     reconfigure: newModel => {
       modelDefinition = bindReplaceState(newModel);
       rebindStore();

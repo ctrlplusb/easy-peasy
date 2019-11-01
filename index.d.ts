@@ -788,6 +788,7 @@ export function createContextStore<
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
   useStoreDispatch: () => Dispatch<StoreModel>;
+  useStoreRehydrated: () => boolean;
 };
 
 interface UseLocalStore<StoreModel extends object, InitialData> {
@@ -802,5 +803,46 @@ export function createComponentStore<
   model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
   config?: StoreConfig,
 ): UseLocalStore<StoreModel, InitialData>;
+
+// #endregion
+
+// #region Persist
+
+export interface PersistStorage {
+  getItem: (key: string) => any | Promise<any>;
+  setItem: (key: string, data: any) => void | Promise<void>;
+  removeItem: (key: string) => void | Promise<void>;
+}
+
+export interface Transformer {
+  in?: (data: any, key: string) => any;
+  out?: (data: any, key: string) => any;
+}
+
+export interface PersistConfig<Model extends object> {
+  blacklist?: Array<keyof Model>;
+  mergeStrategy?: 'merge' | 'mergeDeep' | 'overwrite';
+  storage?: 'localStorage' | 'sessionStorage' | PersistStorage;
+  transformers?: Array<Transformer>;
+  whitelist?: Array<keyof Model>;
+}
+
+export interface TransformConfig {
+  blacklist?: Array<string>;
+  whitelist?: Array<string>;
+}
+
+export function createTransform(
+  inbound?: (data: any, key: string) => any,
+  outbound?: (data: any, key: string) => any,
+  config?: TransformConfig,
+): Transformer;
+
+export function persist<Model extends object>(
+  model: Model,
+  config?: PersistConfig<Model>,
+): Model;
+
+export function useStoreRehydrated(): boolean;
 
 // #endregion

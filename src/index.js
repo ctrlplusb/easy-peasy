@@ -4,11 +4,13 @@ import {
   useStoreActions,
   useStoreDispatch,
   useStoreState,
+  useStoreRehydrated,
   useStore,
 } from './hooks';
 import createStore from './create-store';
 import createContextStore from './create-context-store';
 import createComponentStore from './create-component-store';
+import createTransform from './create-transform';
 import StoreProvider from './provider';
 import {
   action,
@@ -16,6 +18,7 @@ import {
   computed,
   debug,
   memo,
+  persist,
   reducer,
   thunk,
   thunkOn,
@@ -34,9 +37,11 @@ export {
   createComponentStore,
   createContextStore,
   createStore,
+  createTransform,
   createTypedHooks,
   debug,
   memo,
+  persist,
   reducer,
   StoreProvider,
   thunk,
@@ -44,5 +49,6 @@ export {
   useStoreActions,
   useStoreDispatch,
   useStoreState,
+  useStoreRehydrated,
   useStore,
 };

@@ -4,6 +4,7 @@ import {
   useLayoutEffect,
   useReducer,
   useRef,
+  useState,
 } from 'react';
 import EasyPeasyContext from './context';
 
@@ -104,11 +105,25 @@ export function useStore() {
   return useContext(EasyPeasyContext);
 }
 
+export function createStoreRehydratedHook(Context) {
+  return function useStoreRehydrated() {
+    const store = useContext(Context);
+    const [rehydrated, setRehydrated] = useState(false);
+    useEffect(() => {
+      store.persist.resolveRehydration().then(() => setRehydrated(true));
+    }, []);
+    return rehydrated;
+  };
+}
+
+export const useStoreRehydrated = createStoreRehydratedHook(EasyPeasyContext);
+
 export function createTypedHooks() {
   return {
     useStoreActions,
     useStoreDispatch,
     useStoreState,
+    useStoreRehydrated,
     useStore,
   };
 }

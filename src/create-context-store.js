@@ -5,6 +5,7 @@ import {
   createStoreActionsHook,
   createStoreDispatchHook,
   createStoreStateHook,
+  createStoreRehydratedHook,
 } from './hooks';
 import createStore from './create-store';
 
@@ -35,5 +36,6 @@ export default function createContextStore(model, config) {
     useStoreState: createStoreStateHook(StoreContext),
     useStoreActions: createStoreActionsHook(StoreContext),
     useStoreDispatch: createStoreDispatchHook(StoreContext),
+    useStoreRehydrated: createStoreRehydratedHook(StoreContext),
   };
 }

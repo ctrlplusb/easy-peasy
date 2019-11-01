@@ -66,7 +66,7 @@ When executed you will receive a store container that contains the following pro
    }
    ```
 
-   This hook shares all the same properties and features of the global [`useStoreState`](#usestorestate) hook.
+   This hook shares all the same properties and features of the global [`useStoreState`](/api/docs/use-store-state.html) hook.
 
  - `useStoreActions` (Function, required)
 
@@ -79,7 +79,7 @@ When executed you will receive a store container that contains the following pro
    }
    ```
 
-   This hook shares all the same properties and features of the global [`useStoreActions`](#usestoreactions) hook.
+   This hook shares all the same properties and features of the global [`useStoreActions`](/api/docs/use-store-actions.html) hook.
 
  - `useStoreDispatch` (Function, required)
 
@@ -92,7 +92,20 @@ When executed you will receive a store container that contains the following pro
    }
    ```
 
-   This hook shares all the same properties and features of the global [`useStoreDispatch`](#usestoredispatch) hook.
+   This hook shares all the same properties and features of the global [`useStoreDispatch`](/api/docs/use-store-dispatch.html) hook.
+
+ - `useStoreRehydrated` (Function, required)
+
+   A hook allowing you to access the rehydration status of the store. Only useful when utilising [`persist`](/docs/api/persist.html) within your model.
+
+   ```javascript
+   function App() {
+     const rehydrated = Counter.useStoreRehydrated();
+     return rehydrated ? <div>My App</div> : <div>Loading...</div>;
+   }
+   ```
+
+   This hook shares all the same properties and features of the global [`useStoreRehydrated`](/api/docs/use-store-rehydrated.html) hook.
 
  - `useStore` (Function, required)
 
@@ -105,6 +118,8 @@ When executed you will receive a store container that contains the following pro
      return null;
    }
    ```
+
+   This hook shares all the same properties and features of the global [`useStore`](/api/docs/use-store.html) hook.
 
 ## Example
 
