@@ -283,6 +283,7 @@ test('meta values are exposed', async () => {
 
   // assert
   expect(actualMeta).toEqual({
+    key: 'doSomething',
     parent: ['foo'],
     path: ['foo', 'doSomething'],
   });

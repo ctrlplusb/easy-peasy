@@ -69,18 +69,6 @@ export default function createStore(model, options = {}) {
     return undefined;
   };
 
-  const easyPeasyMiddleware = [
-    createComputedPropertiesMiddleware(references),
-    reduxThunk,
-    ...middleware,
-    createListenerMiddleware(references),
-    persistMiddleware,
-  ];
-
-  if (mockActions) {
-    easyPeasyMiddleware.push(mockActionsMiddleware);
-  }
-
   const composeEnhancers =
     compose ||
     (devTools &&
@@ -92,6 +80,18 @@ export default function createStore(model, options = {}) {
       : reduxCompose);
 
   bindStoreInternals(initialState);
+
+  const easyPeasyMiddleware = [
+    createComputedPropertiesMiddleware(references),
+    reduxThunk,
+    ...middleware,
+    createListenerMiddleware(references),
+    persistMiddleware,
+  ];
+
+  if (mockActions) {
+    easyPeasyMiddleware.push(mockActionsMiddleware);
+  }
 
   const store = reduxCreateStore(
     references.internals.reducer,

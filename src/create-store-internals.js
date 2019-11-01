@@ -11,6 +11,8 @@ import {
 } from './constants';
 import { get, set, createSimpleProduce } from './lib';
 import { createStorageWrapper } from './storage';
+import { createActionCreator } from './actions';
+import { createThunkHandler, createThunkActionsCreator } from './thunks';
 
 export default function createStoreInternals({
   disableImmer,
@@ -45,6 +47,7 @@ export default function createStoreInternals({
       const meta = {
         parent: parentPath,
         path,
+        key,
       };
       const handleValueAsState = () => {
         const initialParentRef = get(parentPath, initialState);
@@ -71,33 +74,11 @@ export default function createStoreInternals({
 
       if (typeof value === 'function') {
         if (value[actionSymbol] || value[actionOnSymbol]) {
-          const prefix = value[actionSymbol] ? '@action' : '@actionOn';
-          const type = `${prefix}.${path.join('.')}`;
-          const actionMeta = value[actionSymbol] || value[actionOnSymbol];
-          actionMeta.actionName = key;
-          actionMeta.type = type;
-          actionMeta.parent = meta.parent;
-          actionMeta.path = meta.path;
-
-          // Action Reducer
-          actionReducersDict[type] = value;
-
-          // Action Creator
-          const actionCreator = payload => {
-            const actionDefinition = {
-              type,
-              payload,
-            };
-            if (value[actionOnSymbol] && actionMeta.resolvedTargets) {
-              payload.resolvedTargets = [...actionMeta.resolvedTargets];
-            }
-            const result = references.dispatch(actionDefinition);
-            return result;
-          };
-          actionCreator.type = type;
-
-          actionCreatorDict[type] = actionCreator;
-          if (key !== 'easyPeasyReplaceState') {
+          const actionReducer = value;
+          const actionCreator = createActionCreator(value, meta, references);
+          actionCreatorDict[actionCreator.type] = actionCreator;
+          actionReducersDict[actionCreator.type] = actionReducer;
+          if (meta.key !== 'easyPeasyReplaceState') {
             if (value[actionOnSymbol]) {
               listenerDefinitions.push(value);
               set(path, listenerActionCreators, actionCreator);
@@ -106,96 +87,21 @@ export default function createStoreInternals({
             }
           }
         } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
-          const prefix = value[thunkSymbol] ? '@thunk' : '@thunkOn';
-          const type = `${prefix}.${path.join('.')}`;
-          const thunkMeta = value[thunkSymbol] || value[thunkOnSymbol];
-          thunkMeta.actionName = key;
-          thunkMeta.type = type;
-          thunkMeta.parent = meta.parent;
-          thunkMeta.path = meta.path;
-
-          // Thunk Action
-          const thunkHandler = payload => {
-            const helpers = {
-              dispatch: references.dispatch,
-              getState: () => get(parentPath, references.getState()),
-              getStoreActions: () => actionCreators,
-              getStoreState: references.getState,
-              injections,
-              meta,
-            };
-            if (value[thunkOnSymbol] && thunkMeta.resolvedTargets) {
-              payload.resolvedTargets = [...thunkMeta.resolvedTargets];
-            }
-            return value(get(parentPath, actionCreators), payload, helpers);
-          };
+          const thunkHandler = createThunkHandler(
+            value,
+            meta,
+            references,
+            injections,
+            actionCreators,
+          );
+          const actionCreator = createThunkActionsCreator(
+            value,
+            meta,
+            references,
+            thunkHandler,
+          );
           set(path, actionThunks, thunkHandler);
-
-          // Thunk Action Creator
-          const startType = `${type}(start)`;
-          const successType = `${type}(success)`;
-          const failType = `${type}(fail)`;
-          const actionCreator = payload => {
-            const dispatchError = err => {
-              references.dispatch({
-                type: failType,
-                payload,
-                error: err,
-              });
-              references.dispatch({
-                type,
-                payload,
-                error: err,
-              });
-            };
-            const dispatchSuccess = result => {
-              references.dispatch({
-                type: successType,
-                payload,
-                result,
-              });
-              references.dispatch({
-                type,
-                payload,
-                result,
-              });
-            };
-
-            references.dispatch({
-              type: startType,
-              payload,
-            });
-            try {
-              const result = references.dispatch(() => thunkHandler(payload));
-              if (
-                typeof result === 'object' &&
-                typeof result.then === 'function'
-              ) {
-                return result
-                  .then(resolved => {
-                    dispatchSuccess(resolved);
-                    return resolved;
-                  })
-                  .catch(err => {
-                    dispatchError(err);
-                    throw err;
-                  });
-              }
-              dispatchSuccess(result);
-              return result;
-            } catch (err) {
-              dispatchError(err);
-              throw err;
-            }
-          };
-
-          actionCreator.type = type;
-          actionCreator.startType = startType;
-          actionCreator.successType = successType;
-          actionCreator.failType = failType;
-
-          actionCreatorDict[type] = actionCreator;
-
+          actionCreatorDict[actionCreator.type] = actionCreator;
           if (value[thunkOnSymbol]) {
             listenerDefinitions.push(value);
             set(path, listenerActionCreators, actionCreator);
