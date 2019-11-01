@@ -46,8 +46,8 @@ export default function createReducer(
         ? reducerForCustomReducers(stateAfterActions, action)
         : stateAfterActions;
     if (state !== next) {
-      computedProperties.forEach(({ parentPath, createComputedProperty }) => {
-        createComputedProperty(get(parentPath, next));
+      computedProperties.forEach(({ parentPath, bindComputedProperty }) => {
+        bindComputedProperty(get(parentPath, next));
       });
     }
     return next;

@@ -1,26 +1,23 @@
 import debounce from 'debounce';
 import { deepCloneStateWithoutComputed, get, isPromise, set } from './lib';
 
-export const noopStorage = {
+const noopStorage = {
   getItem: () => undefined,
   setItem: () => undefined,
   removeItem: () => undefined,
 };
 
-export const localStorage =
+const localStorage =
   typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
     ? window.localStorage
     : noopStorage;
 
-export const sessionStorage =
+const sessionStorage =
   typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined'
     ? window.sessionStorage
     : noopStorage;
 
-export function createStorageWrapper(
-  storage = sessionStorage,
-  transformers = [],
-) {
+function createStorageWrapper(storage = sessionStorage, transformers = []) {
   if (typeof storage === 'string') {
     if (storage === 'localStorage') {
       storage = localStorage;
@@ -76,6 +73,21 @@ export function createStorageWrapper(
     },
     removeItem: key => {
       return storage.removeItem(key);
+    },
+  };
+}
+
+export function extractPersistConfig(path, persistDefinition = {}) {
+  return {
+    path,
+    config: {
+      blacklist: persistDefinition.blacklist || [],
+      mergeStrategy: persistDefinition.mergeStrategy || 'merge',
+      storage: createStorageWrapper(
+        persistDefinition.storage,
+        persistDefinition.transformers,
+      ),
+      whitelist: persistDefinition.whitelist || [],
     },
   };
 }

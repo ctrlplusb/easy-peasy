@@ -1,4 +1,3 @@
-import memoizerific from 'memoizerific';
 import isPlainObject from 'is-plain-object';
 import {
   actionOnSymbol,
@@ -10,9 +9,11 @@ import {
   thunkSymbol,
 } from './constants';
 import { get, set } from './lib';
-import { createStorageWrapper } from './storage';
+import { extractPersistConfig } from './persistence';
 import { createActionCreator } from './actions';
 import { createThunkHandler, createThunkActionsCreator } from './thunks';
+import { bindListenerDefinitions } from './listeners';
+import { createComputedPropertyBinder } from './computed';
 
 export default function extractDataFromModel(
   model,
@@ -36,7 +37,7 @@ export default function extractDataFromModel(
     currentState: defaultState,
   };
 
-  const recursiveExtractDefsFromModel = (current, parentPath) =>
+  const recursiveExtractFromModel = (current, parentPath) =>
     Object.keys(current).forEach(key => {
       const value = current[key];
       const path = [...parentPath, key];
@@ -55,16 +56,7 @@ export default function extractDataFromModel(
       };
 
       if (key === persistSymbol) {
-        const config = value || {};
-        persistenceConfig.push({
-          path: parentPath,
-          config: {
-            blacklist: config.blacklist || [],
-            mergeStrategy: config.mergeStrategy || 'merge',
-            storage: createStorageWrapper(config.storage, config.transformers),
-            whitelist: config.whitelist || [],
-          },
-        });
+        persistenceConfig.push(extractPersistConfig(parentPath, value));
         return;
       }
 
@@ -106,40 +98,15 @@ export default function extractDataFromModel(
           }
         } else if (value[computedSymbol]) {
           const parent = get(parentPath, defaultState);
-          const computedMeta = value[computedSymbol];
-          const memoisedResultFn = memoizerific(1)(value);
-          const createComputedProperty = o => {
-            Object.defineProperty(o, key, {
-              configurable: true,
-              enumerable: true,
-              get: () => {
-                let storeState;
-                if (computedState.isInReducer) {
-                  storeState = computedState.currentState;
-                } else if (references.getState == null) {
-                  return undefined;
-                } else {
-                  try {
-                    storeState = references.getState();
-                  } catch (err) {
-                    if (process.env.NODE_ENV !== 'production') {
-                      console.warn(
-                        'Invalid access attempt to a computed property',
-                      );
-                    }
-                    return undefined;
-                  }
-                }
-                const state = get(parentPath, storeState);
-                const inputs = computedMeta.stateResolvers.map(resolver =>
-                  resolver(state, storeState),
-                );
-                return memoisedResultFn(...inputs);
-              },
-            });
-          };
-          createComputedProperty(parent);
-          computedProperties.push({ key, parentPath, createComputedProperty });
+          const bindComputedProperty = createComputedPropertyBinder(
+            parentPath,
+            key,
+            value,
+            computedState,
+            references,
+          );
+          bindComputedProperty(parent);
+          computedProperties.push({ key, parentPath, bindComputedProperty });
         } else if (value[reducerSymbol]) {
           customReducers.push({ key, parentPath, reducer: value });
         } else {
@@ -150,47 +117,20 @@ export default function extractDataFromModel(
         if (existing == null) {
           set(path, defaultState, {});
         }
-        recursiveExtractDefsFromModel(value, path);
+        recursiveExtractFromModel(value, path);
       } else {
         handleValueAsState();
       }
     });
 
-  recursiveExtractDefsFromModel(model, []);
+  recursiveExtractFromModel(model, []);
 
-  listenerDefinitions.forEach(listenerActionOrThunk => {
-    const listenerMeta =
-      listenerActionOrThunk[actionOnSymbol] ||
-      listenerActionOrThunk[thunkOnSymbol];
-
-    const targets = listenerMeta.targetResolver(
-      get(listenerMeta.parent, actionCreators),
-      actionCreators,
-    );
-    const targetTypes = (Array.isArray(targets) ? targets : [targets]).reduce(
-      (acc, target) => {
-        if (
-          typeof target === 'function' &&
-          target.type &&
-          actionCreatorDict[target.type]
-        ) {
-          acc.push(target.type);
-        } else if (typeof target === 'string') {
-          acc.push(target);
-        }
-        return acc;
-      },
-      [],
-    );
-
-    listenerMeta.resolvedTargets = targetTypes;
-
-    targetTypes.forEach(targetType => {
-      const listenerReg = listenerActionMap[targetType] || [];
-      listenerReg.push(actionCreatorDict[listenerMeta.type]);
-      listenerActionMap[targetType] = listenerReg;
-    });
-  });
+  bindListenerDefinitions(
+    listenerDefinitions,
+    actionCreators,
+    actionCreatorDict,
+    listenerActionMap,
+  );
 
   return {
     actionCreatorDict,

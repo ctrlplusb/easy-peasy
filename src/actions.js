@@ -10,7 +10,6 @@ export function createActionCreator(actionDefinition, meta, references) {
   actionMeta.parent = meta.parent;
   actionMeta.path = meta.path;
 
-  // Action Creator
   const actionCreator = payload => {
     const action = {
       type,

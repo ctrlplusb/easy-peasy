@@ -11,7 +11,7 @@ import {
   createPersistMiddleware,
   createPersistenceClearer,
   rehydrateStateFromPersistIfNeeded,
-} from './storage';
+} from './persistence';
 import { createComputedPropertiesMiddleware } from './computed-properties';
 import { createListenerMiddleware } from './listeners';
 
