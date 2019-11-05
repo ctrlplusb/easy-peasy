@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { action, Action } from 'easy-peasy';
+import { action, Action, thunk, Thunk } from 'easy-peasy';
 
 /**
  * ARRANGE
@@ -89,3 +89,31 @@ const makeSimpleModelWorking = <T>(
     }),
   };
 };
+
+/**
+ * #345
+ */
+
+interface Base {
+  a: string;
+}
+
+interface Model<M extends Base> {
+  data: M[];
+  add: Action<Model<M>, M>;
+  doSomething: Thunk<Model<M>, M>;
+}
+
+function getModel<M extends Base>(): Model<M> {
+  return {
+    data: [],
+    add: action((state, payload) => {
+      payload.a + 'foo';
+      state.data.push(payload);
+    }),
+    doSomething: thunk((actions, payload) => {
+      payload.a;
+      actions.add(payload); // <-- Here actions.add expects parameter to be `void & string`
+    }),
+  };
+}

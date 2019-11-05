@@ -134,9 +134,7 @@ export type Listeners<Model extends object = {}> = RecursiveListeners<
 
 type ActionMapper<ActionsModel extends object, Depth extends string> = {
   [P in keyof ActionsModel]: ActionsModel[P] extends Action<any, any>
-    ? ActionsModel[P]['payload'] extends void
-      ? ActionCreator<void>
-      : ActionCreator<ActionsModel[P]['payload']>
+    ? ActionCreator<ActionsModel[P]['payload']>
     : ActionsModel[P] extends Thunk<any, any, any, any, any>
     ? ActionsModel[P]['payload'] extends void
       ? ThunkCreator<void, ActionsModel[P]['result']>
