@@ -189,7 +189,9 @@ export type Actions<Model extends object = {}> = RecursiveActions<Model, '1'>;
 // #region State
 
 type StateMapper<StateModel extends object, Depth extends string> = {
-  [P in keyof StateModel]: StateModel[P] extends Computed<any, any, any>
+  [P in keyof StateModel]: P extends IndexSignatureKeysOfType<StateModel>
+    ? StateModel[P]
+    : StateModel[P] extends Computed<any, any, any>
     ? StateModel[P]['result']
     : StateModel[P] extends Reducer<any, any>
     ? StateModel[P]['result']
@@ -211,18 +213,12 @@ type StateMapper<StateModel extends object, Depth extends string> = {
     : StateModel[P];
 };
 
-type IntermediateStateMapper<Model extends object, Depth extends string> = {
-  [K in keyof Model]: K extends IndexSignatureKeysOfType<Model>
-    ? Model[K]
-    : StateMapper<{ 0: Model[K] }, Depth>[0];
-};
-
 type RecursiveState<
   Model extends object,
   Depth extends string
 > = Depth extends '6'
   ? Model
-  : IntermediateStateMapper<O.Filter<Model, ActionTypes>, Depth>;
+  : StateMapper<O.Filter<Model, ActionTypes>, Depth>;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
