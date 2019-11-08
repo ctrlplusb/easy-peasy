@@ -1,4 +1,5 @@
 import { setAutoFreeze } from 'immer-peasy';
+import { shallowEqual } from './lib';
 import {
   createTypedHooks,
   useStoreActions,
@@ -51,4 +52,5 @@ export {
   useStoreState,
   useStoreRehydrated,
   useStore,
+  shallowEqual,
 };
