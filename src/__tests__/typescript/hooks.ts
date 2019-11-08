@@ -24,6 +24,7 @@ interface Model {
   stateUndefined: undefined;
   stateUnion: string | null;
   actionImp: Action<Model, number>;
+  actionNoPayload: Action<Model>;
   thunkImp: Thunk<Model, string>;
   reducerImp: Reducer<number>;
   nested: {
@@ -57,3 +58,8 @@ dispatch({
 });
 store = typedHooks.useStore();
 store.getState().stateString + 'world';
+
+let actionNoPayload = typedHooks.useStoreActions(
+  actions => actions.actionNoPayload,
+);
+actionNoPayload();

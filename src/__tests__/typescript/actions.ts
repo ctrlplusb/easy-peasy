@@ -22,6 +22,7 @@ type Model = {
   stateUndefined: undefined;
   stateUnion: string | null;
   actionImp: Action<Model, number>;
+  actionNoPayload: Action<Model>;
   thunkImp: Thunk<Model, string | undefined | null>;
   reducerImp: Reducer<number>;
   computedImp: Computed<Model, number>;
@@ -40,6 +41,7 @@ type Model = {
     stateUndefined: undefined;
     stateUnion: string | null;
     actionImp: Action<Model, number>;
+    actionNoPayload: Action<Model>;
     thunkImp: Thunk<Model, string>;
     reducerImp: Reducer<number>;
     computedImp: Computed<Model, number>;
@@ -83,6 +85,7 @@ assert.reducerImp;
 // typings:expect-error
 assert.computedImp;
 assert.actionImp(1);
+assert.actionNoPayload();
 assert.thunkImp('foo').then(() => 'zing');
 // typings:expect-error
 assert.onAction({
@@ -122,4 +125,5 @@ assert.nested.reducerImp;
 // typings:expect-error
 assert.nested.computedImp;
 assert.nested.actionImp(1);
+assert.nested.actionNoPayload();
 assert.nested.thunkImp('foo').then(() => 'zing');
