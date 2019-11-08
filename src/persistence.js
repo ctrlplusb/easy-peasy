@@ -197,6 +197,12 @@ export function rehydrateStateFromPersistIfNeeded(
             Object.keys(currentNext).forEach(key => {
               const data = currentNext[key];
               if (typeof data === 'object') {
+                if (
+                  currentTarget[key] == null ||
+                  typeof currentTarget[key] !== 'object'
+                ) {
+                  currentTarget[key] = {};
+                }
                 setAt(currentTarget[key], data);
               } else {
                 currentTarget[key] = data;

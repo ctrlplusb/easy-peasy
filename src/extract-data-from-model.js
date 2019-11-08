@@ -13,7 +13,7 @@ import { extractPersistConfig } from './persistence';
 import { createActionCreator } from './actions';
 import { createThunkHandler, createThunkActionsCreator } from './thunks';
 import { bindListenerDefinitions } from './listeners';
-import { createComputedPropertyBinder } from './computed';
+import { createComputedPropertyBinder } from './computed-properties';
 
 export default function extractDataFromModel(
   model,
