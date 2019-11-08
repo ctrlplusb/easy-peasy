@@ -1,4 +1,5 @@
 import debounce from 'debounce';
+import isPlainObject from 'is-plain-object';
 import { deepCloneStateWithoutComputed, get, isPromise, set } from './lib';
 
 const noopStorage = {
@@ -196,11 +197,8 @@ export function rehydrateStateFromPersistIfNeeded(
           const setAt = (currentTarget, currentNext) => {
             Object.keys(currentNext).forEach(key => {
               const data = currentNext[key];
-              if (typeof data === 'object') {
-                if (
-                  currentTarget[key] == null ||
-                  typeof currentTarget[key] !== 'object'
-                ) {
+              if (isPlainObject(data)) {
+                if (!isPlainObject(currentTarget[key])) {
                   currentTarget[key] = {};
                 }
                 setAt(currentTarget[key], data);
