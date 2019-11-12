@@ -54,16 +54,22 @@ const createModel = <Item extends ObjectWithId>(): GenericModel<Item> => {
  */
 
 interface SimpleModel<T> {
+  count: number;
   thevalue: T;
   theset: Action<SimpleModel<T>, T>;
 }
 
 const makeSimpleModel = <T>(initialValue: T): SimpleModel<T> => {
   return {
+    count: 1,
     thevalue: initialValue,
     theset: action((state, payload) => {
-      // @ts-ignore
+      // typings:expect-error
+      state.count = 1;
+      // typings:expect-error
       state.thevalue = payload;
+      // typings:expect-error
+      state.theset();
     }),
   };
 };
@@ -72,10 +78,9 @@ const makeSimpleModel = <T>(initialValue: T): SimpleModel<T> => {
  * WORKAROUND - #300
  */
 
-type Value<T> = [T];
-
 interface SimpleModelWorkaround<T> {
-  thevalue: Value<T>;
+  count: number;
+  thevalue: T;
   theset: Action<SimpleModelWorkaround<T>, T>;
 }
 
@@ -83,12 +88,19 @@ const makeSimpleModelWorking = <T>(
   initialValue: T,
 ): SimpleModelWorkaround<T> => {
   return {
-    thevalue: [initialValue],
+    count: 1,
+    thevalue: initialValue,
     theset: action((state, payload) => {
-      state.thevalue = [payload];
+      state.count += 1;
+      state.thevalue = payload;
+      // typings:expect-error
+      state.theset('foo');
     }),
-  };
+  } as SimpleModelWorkaround<any>;
 };
+
+const fooModel = makeSimpleModelWorking<string>('foo');
+fooModel.thevalue += 'bar';
 
 /**
  * #345
