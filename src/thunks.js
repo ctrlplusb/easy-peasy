@@ -89,7 +89,11 @@ export function createThunkActionsCreator(
             throw err;
           });
       }
-      dispatchSuccess(result);
+      if (typeof result === 'undefined') {
+        dispatchSuccess(result);
+      } else {
+        result ? dispatchSuccess(result) : dispatchError(result);
+      }
       return result;
     } catch (err) {
       dispatchError(err);

@@ -45,6 +45,106 @@ test('dispatches actions to represent a succeeded thunk', () => {
   expect(actualResult).toBe('did something');
 });
 
+test('returning falsey from thunk', () => {
+  // arrange
+  const model = {
+    foo: {
+      doSomething: thunk(() => {
+        return false;
+      }),
+    },
+  };
+  const trackActions = trackActionsMiddleware();
+  const store = createStore(model, { middleware: [trackActions] });
+  const payload = 'a payload';
+
+  // act
+  const res = store.getActions().foo.doSomething(payload);
+
+  // assert
+  expect(trackActions.actions).toEqual([
+    { type: '@thunk.foo.doSomething(start)', payload },
+    {
+      type: '@thunk.foo.doSomething(fail)',
+      payload,
+      error: false,
+    },
+    {
+      type: '@thunk.foo.doSomething',
+      payload,
+      error: false,
+    },
+  ]);
+
+  expect(res).toBe(false);
+});
+
+test('returning nothing or undefined from thunk', () => {
+  // arrange
+  const model = {
+    foo: {
+      doSomething: thunk(() => {}),
+    },
+  };
+  const trackActions = trackActionsMiddleware();
+  const store = createStore(model, { middleware: [trackActions] });
+  const payload = 'a payload';
+
+  // act
+  const res = store.getActions().foo.doSomething(payload);
+
+  // assert
+  expect(trackActions.actions).toEqual([
+    { type: '@thunk.foo.doSomething(start)', payload },
+    {
+      type: '@thunk.foo.doSomething(success)',
+      payload,
+      result: undefined,
+    },
+    {
+      type: '@thunk.foo.doSomething',
+      payload,
+      result: undefined,
+    },
+  ]);
+
+  expect(res).toBe(undefined);
+});
+
+test('returning truthy from thunk', () => {
+  // arrange
+  const model = {
+    foo: {
+      doSomething: thunk(() => {
+        return true;
+      }),
+    },
+  };
+  const trackActions = trackActionsMiddleware();
+  const store = createStore(model, { middleware: [trackActions] });
+  const payload = 'a payload';
+
+  // act
+  const res = store.getActions().foo.doSomething(payload);
+
+  // assert
+  expect(trackActions.actions).toEqual([
+    { type: '@thunk.foo.doSomething(start)', payload },
+    {
+      type: '@thunk.foo.doSomething(success)',
+      payload,
+      result: true,
+    },
+    {
+      type: '@thunk.foo.doSomething',
+      payload,
+      result: true,
+    },
+  ]);
+
+  expect(res).toBe(true);
+});
+
 describe('errors', () => {
   test('dispatches actions to represent a failed thunk', async () => {
     // arrange
