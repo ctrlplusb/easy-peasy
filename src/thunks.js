@@ -1,5 +1,5 @@
 import { thunkSymbol, thunkOnSymbol } from './constants';
-import { get } from './lib';
+import { get, isPromise } from './lib';
 
 export function createThunkHandler(
   thunkDefinition,
@@ -78,7 +78,7 @@ export function createThunkActionsCreator(
     });
     try {
       const result = references.dispatch(() => thunkHandler(payload));
-      if (typeof result === 'object' && typeof result.then === 'function') {
+      if (isPromise(result)) {
         return result
           .then(resolved => {
             dispatchSuccess(resolved);

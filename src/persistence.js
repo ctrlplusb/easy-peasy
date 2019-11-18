@@ -134,7 +134,7 @@ export function createPersistMiddleware(persistor, references) {
     const state = next(action);
     if (
       action &&
-      action.type !== '@action.easyPeasyReplaceState' &&
+      action.type !== '@action.ePRS' &&
       references.internals.persistenceConfig.length > 0
     ) {
       persistor(state);

@@ -25,7 +25,7 @@ export function createComputedPropertyBinder(
           try {
             storeState = references.getState();
           } catch (err) {
-            if (process.env.NODE_ENV !== 'production') {
+            if (process.env.NODE_ENV === 'development') {
               console.warn('Invalid access attempt to a computed property');
             }
             return undefined;

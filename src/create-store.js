@@ -34,7 +34,7 @@ export default function createStore(model, options = {}) {
   const bindReplaceState = modelDef => {
     return {
       ...modelDef,
-      easyPeasyReplaceState: helpers.action((_, payload) => payload),
+      ePRS: helpers.action((_, payload) => payload),
     };
   };
 
@@ -49,9 +49,7 @@ export default function createStore(model, options = {}) {
   const clearPersistance = createPersistenceClearer(persistKey, references);
 
   const replaceState = nextState =>
-    references.internals.actionCreatorDict['@action.easyPeasyReplaceState'](
-      nextState,
-    );
+    references.internals.actionCreatorDict['@action.ePRS'](nextState);
 
   const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({

@@ -1,7 +1,7 @@
-export const actionSymbol = '🙈action🙈';
-export const actionOnSymbol = '🙈actionOn🙈';
-export const computedSymbol = '🙈computedSymbol🙈';
-export const persistSymbol = '🙈persistSymbol🙈';
-export const reducerSymbol = '🙈reducer🙈';
-export const thunkOnSymbol = '🙈thunkOn🙈';
-export const thunkSymbol = '🙈thunk🙈';
+export const actionSymbol = 'a';
+export const actionOnSymbol = 'aO';
+export const computedSymbol = 'c';
+export const persistSymbol = 'p';
+export const reducerSymbol = 'r';
+export const thunkOnSymbol = 'tO';
+export const thunkSymbol = 't';

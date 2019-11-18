@@ -37,11 +37,14 @@ export function createStoreStateHook(Context) {
       try {
         stateRef.current = mapState(store.getState());
       } catch (err) {
-        let errorMessage = `An error occurred trying to map state in a useStoreState hook: ${err.message}.`;
-        if (subscriptionMapStateError.current) {
-          errorMessage += `\nThis error may be related to the following error:\n${subscriptionMapStateError.current.stack}\n\nOriginal stack trace:`;
+        if (process.env.NODE_ENV === 'development') {
+          let errorMessage = `An error occurred trying to map state in a useStoreState hook: ${err.message}.`;
+          if (subscriptionMapStateError.current) {
+            errorMessage += `\nThis error may be related to the following error:\n${subscriptionMapStateError.current.stack}\n\nOriginal stack trace:`;
+          }
+          throw new Error(errorMessage);
         }
-        throw new Error(errorMessage);
+        throw subscriptionMapStateError.current || err;
       }
     }
 

@@ -66,7 +66,7 @@ export default function extractDataFromModel(
           const actionCreator = createActionCreator(value, meta, references);
           actionCreatorDict[actionCreator.type] = actionCreator;
           actionReducersDict[actionCreator.type] = actionReducer;
-          if (meta.key !== 'easyPeasyReplaceState') {
+          if (meta.key !== 'ePRS') {
             if (value[actionOnSymbol]) {
               listenerDefinitions.push(value);
               set(path, listenerActionCreators, actionCreator);
