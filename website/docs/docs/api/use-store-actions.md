@@ -10,9 +10,9 @@ const addTodo = useStoreActions(actions => actions.todos.add);
 
   - `mapActions` (Function, required)
 
-    The function that is used to resolved the [action](/docs/api/action.html) that your component requires. It receives the following arguments:
+    The function that is used to resolve the [action](/docs/api/action.html) that your component requires. It receives the following arguments:
 
-    - `actions` (Object, required)
+    - `actions` (Object)
 
       The [actions](/docs/api/action.html) of your store.
 
