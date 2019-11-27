@@ -10,11 +10,11 @@ isLoggedIn: computed(state => state.user != null)
 
 ## Arguments
 
-- `stateSelectors` (Array\<Function\>, *optional*)
+- `stateResolvers` (Array\<Function\>, *optional*)
 
   > Note: this is an optional parameter, you can omit it and instead just provide a `computationFunc`.
 
-  State selectors allows you to isolate the specific parts of your state as inputs to your computation function. They also have the added benefit of being able to expose the entire store state to your computed property. Each state selector function receives the following arguments:
+  State resolvers allows you to isolate the specific parts of your state as inputs to your computation function. They also have the added benefit of being able to expose the entire store state to your computed property. Each state resolver function receives the following arguments:
 
   - `state` (Object)
 
@@ -24,9 +24,9 @@ isLoggedIn: computed(state => state.user != null)
 
     The entire store state
 
-  In general it is recommended that you only use state selectors if you need to resolve state from another part of your model. There are some performance benefits to be had by isolating local state, but in almost every case this would be insignificant.
+  In general it is recommended that you only use state resolvers if you need to resolve state from another part of your model. There are some performance benefits to be had by isolating local state, but in almost every case this would be insignificant.
 
-  It is also worth noting that the `state` and `storeState` that are provided to your state selectors will include [computed](/docs/api/computed.html) properties too. Computed properties are allowed to reference each other.
+  It is also worth noting that the `state` and `storeState` that are provided to your state resolvers will include [computed](/docs/api/computed.html) properties too. Computed properties are allowed to reference each other.
 
 - `computationFunc` (Function, *required*)
 
