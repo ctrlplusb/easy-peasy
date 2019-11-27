@@ -34,7 +34,7 @@ A store is created via the [createStore](/docs/api/create-store.html) API. A sto
 
     If the `mockActions` configuration value was passed to the `createStore` then calling this function will return the actions that have been dispatched (and mocked). This is useful in the context of testing - especially thunks and listeners.
 
-  - `getState` (Function, required)
+  - `getState` (Function)
 
     Returns the state of your store.
 
