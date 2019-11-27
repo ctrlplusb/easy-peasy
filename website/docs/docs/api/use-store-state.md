@@ -10,9 +10,9 @@ const todos = useStoreState(state => state.todos.items);
 
   - `mapState` (Function, required)
 
-    The function that is used to resolved the piece of state that your component requires. The function will receive the following arguments:
+    The function that is used to resolve the piece of state that your component requires. The function will receive the following arguments:
 
-    - `state` (Object, required)
+    - `state` (Object)
 
       The state of your store.
 
@@ -57,7 +57,7 @@ function AntiPattern() {
 
 Note how a new object is being returned within the state mapper. This breaks strict equality checking, forcing your component to re-render for _any_ state change on your [store](/docs/api/store.html).
 
-For this case we recommend that you map the required states in separate hooks.
+For this case we recommend that you map the required states in separate `useStoreState` hook calls.
 
 ```javascript
 function Fixed() {
