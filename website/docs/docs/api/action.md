@@ -64,9 +64,9 @@ function Add10Button() {
 
 Despite the Redux Dev Tools extension being available there may be cases in which you would like to perform a `console.log` within the body of your [actions](/docs/api/action.html) to aid debugging.
 
-If you try to do so you may not that a `Proxy` object is printed out instead of your expected state. This is due to us using `immer` under the hood, which allows us to track mutation updates to the state and then convert them to immutable updates.
+If you try to do so you may note that a `Proxy` object is printed out instead of your expected state. This is due to us using `immer` under the hood, which allows us to track mutation updates to the state and then convert them to immutable updates.
 
-To get around this you can use the [debug](/docs/api/debug.html) util.
+To get around this you can use the [debug](/docs/api/debug.html) utility.
 
 ```javascript
 import { debug } from 'easy-peasy';
