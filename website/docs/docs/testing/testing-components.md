@@ -30,6 +30,7 @@ As you can see it is making use of our hooks to gain access to state and actions
 We could adopt the following strategy to test it.
 
 ```typescript
+import { render } from '@testing-library/react'
 import { createStore, StoreProvider } from 'easy-peasy'
 import model from './model';
 
