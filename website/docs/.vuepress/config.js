@@ -122,7 +122,7 @@ module.exports = {
           ],
         },
         {
-          title: 'Typescript API',
+          title: 'TypeScript API',
           children: [
             'typescript-api/',
             'typescript-api/action',
