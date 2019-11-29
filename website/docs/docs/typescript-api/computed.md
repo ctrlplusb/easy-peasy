@@ -1,6 +1,6 @@
 # Computed
 
-Defines a [computed](/docs/api/computed.html) property against your model
+Defines a [computed](/docs/api/computed.html) property against your model.
 
 ## API
 

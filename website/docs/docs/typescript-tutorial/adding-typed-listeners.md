@@ -23,7 +23,7 @@ Note that we have provided both the `AuditModel` and the `StoreModel` to our `Ac
 
 ## Implementing the actionOn listener
 
-Now we will implement the [actionOn](/docs/api/action-on.html) listener, configuring to to listen to the `addTodo` [action](/docs/api/action.html).
+Now we will implement the [actionOn](/docs/api/action-on.html) listener, configuring to listen to the `addTodo` [action](/docs/api/action.html).
 
 ```typescript
 import { actionOn } from 'easy-peasy'; // 👈 import the helper
