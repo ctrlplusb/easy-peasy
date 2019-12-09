@@ -2,7 +2,7 @@
 
 React Native, hybrid, desktop and server side Redux apps can use Redux Dev Tools using the [Remote Redux DevTools](https://github.com/zalmoxisus/remote-redux-devtools) library.
 
-To use this library, you will need to pass the DevTools compose helper as part of the [config object](#createstore) to `createStore`
+To use this library, you will need to pass the DevTools compose helper as part of the [config object](/docs/api/store-config.html) to `createStore`
 
 ```javascript
 import { createStore } from 'easy-peasy';
