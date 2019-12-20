@@ -14,7 +14,7 @@ Imagine you had a Redux store being configured similarly to the following.
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import productsReducer from './reducers/products';
 import basketReducer from './reducers/basket';
-import loggerMiddleware from './middleware/logger;
+import loggerMiddleware from './middleware/logger';
 
 const rootReducer = combineReducers({
   products: productsReducer,
@@ -32,7 +32,7 @@ You could refactor this into an Easy Peasy store like so.
 import { createStore, reducer } from 'easy-peasy';  // 👈 import from easy peasy
 import productsReducer from './reducers/products';
 import basketReducer from './reducers/basket';
-import loggerMiddleware from './middleware/logger;
+import loggerMiddleware from './middleware/logger';
 
 const model = {
   // Instead of doing a combineReducers we just bind each reducer to a key
