@@ -9,6 +9,7 @@ yarn-error.log
 yarn.lock
 .github
 .vscode
-coverage/
-src/
-website/
+coverage
+node_modules
+src
+website
