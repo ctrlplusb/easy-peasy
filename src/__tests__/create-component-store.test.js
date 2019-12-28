@@ -1,6 +1,9 @@
+/* eslint-disable react/prop-types */
+/* eslint-disable no-shadow */
+
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { createComponentStore, action } from '../index';
+import { createComponentStore, action, thunk, actionOn } from '../index';
 
 const useCounter = createComponentStore({
   count: 0,
@@ -114,4 +117,51 @@ it('with initial data', () => {
 
   // assert
   expect(count.firstChild.textContent).toBe('2');
+});
+
+it('with runtime injection', () => {
+  // arrange
+  const useCounter = createComponentStore(data => ({
+    count: data.count || 0,
+    getNext: thunk((actions, payload, { getState, injections }) =>
+      injections.next(getState().count),
+    ),
+    onNext: actionOn(
+      actions => actions.getNext.successType,
+      (state, { result }) => {
+        state.count = result;
+      },
+    ),
+  }));
+
+  function CountDisplay({ next }) {
+    const [state, actions] = useCounter({ count: 4 }, { next });
+    return (
+      <>
+        <div data-testid="count">{state.count}</div>
+        <button data-testid="button" onClick={actions.getNext} type="button">
+          fetch next
+        </button>
+      </>
+    );
+  }
+
+  const multiplier = value => value * 2;
+
+  const app = <CountDisplay next={multiplier} />;
+
+  // act
+  const { getByTestId } = render(app);
+
+  const count = getByTestId('count');
+  const button = getByTestId('button');
+
+  // assert
+  expect(count.firstChild.textContent).toBe('4');
+
+  // act
+  fireEvent.click(button);
+
+  // assert
+  expect(count.firstChild.textContent).toBe('8');
 });
