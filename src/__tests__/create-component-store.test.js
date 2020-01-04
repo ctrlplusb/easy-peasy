@@ -165,3 +165,55 @@ it('with runtime injection', () => {
   // assert
   expect(count.firstChild.textContent).toBe('8');
 });
+
+it('with state preservation when updating runtime injection', () => {
+  // arrange
+  const useCounter = createComponentStore(data => ({
+    count: data.count || 0,
+    getNext: thunk((actions, payload, { getState, injections }) =>
+      injections.next(getState().count),
+    ),
+    onNext: actionOn(
+      actions => actions.getNext.successType,
+      (state, { result }) => {
+        state.count = result;
+      },
+    ),
+  }));
+
+  function CountDisplay({ next }) {
+    const [state, actions] = useCounter({ count: 4 }, { next });
+    return (
+      <>
+        <div data-testid="count">{state.count}</div>
+        <button data-testid="button" onClick={actions.getNext} type="button">
+          fetch next
+        </button>
+      </>
+    );
+  }
+
+  const getComponent = next => <CountDisplay next={next} />;
+
+  const multiplier = value => value * 2;
+
+  // act
+  const { getByTestId, rerender } = render(getComponent(multiplier));
+
+  const count = getByTestId('count');
+  const button = getByTestId('button');
+
+  expect(count.firstChild.textContent).toBe('4');
+
+  fireEvent.click(button);
+
+  expect(count.firstChild.textContent).toBe('8');
+
+  const plusOne = value => value + 1;
+
+  rerender(getComponent(plusOne));
+
+  fireEvent.click(button);
+
+  expect(count.firstChild.textContent).toBe('9');
+});

@@ -1,6 +1,12 @@
 /* eslint-disable react/prop-types */
 
-import React, { createContext, useContext, useMemo, useRef } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import produce from 'immer-peasy';
 import {
   createStoreActionsHook,
@@ -15,17 +21,27 @@ export default function createContextStore(model, config = {}) {
 
   function Provider({ children, initialData, ...injections }) {
     const initialDataRef = useRef(initialData);
+    const previousStateRef = useRef();
 
     const store = useMemo(
       () =>
         createStore(
-          typeof model === 'function' ? model(initialDataRef.current) : model,
+          typeof model === 'function'
+            ? model(previousStateRef.current || initialDataRef.current)
+            : model,
           produce(config, draft => {
             draft.injections = { ...draft.injections, ...injections };
           }),
         ),
-      [initialDataRef, ...Object.values(injections)],
+      Object.values(injections),
     );
+
+    useEffect(() => {
+      return store.subscribe(() => {
+        previousStateRef.current = store.getState();
+      });
+    }, [store]);
+
     return (
       <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
     );

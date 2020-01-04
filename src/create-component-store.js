@@ -10,19 +10,23 @@ import createStore from './create-store';
 export default function createComponentStore(model, config = {}) {
   return function useLocalStore(initialData, injections = {}) {
     const initialDataRef = useRef(initialData);
+    const previousStateRef = useRef();
 
     const store = useMemo(
       () =>
         createStore(
-          typeof model === 'function' ? model(initialDataRef.current) : model,
+          typeof model === 'function'
+            ? model(previousStateRef.current || initialDataRef.current)
+            : model,
           produce(config, draft => {
             draft.injections = { ...draft.injections, ...injections };
           }),
         ),
-      [initialDataRef, ...Object.values(injections)],
+      Object.values(injections),
     );
-    const previousStateRef = useRef(store.getState());
+
     const [currentState, setCurrentState] = useState(() => store.getState());
+
     useEffect(() => {
       return store.subscribe(() => {
         const nextState = store.getState();
@@ -32,6 +36,7 @@ export default function createComponentStore(model, config = {}) {
         }
       });
     }, [store]);
+
     return [currentState, store.getActions()];
   };
 }
