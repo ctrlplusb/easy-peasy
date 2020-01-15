@@ -1,5 +1,8 @@
 {
   "private": true,
+  "engines": {
+    "node": "12.x"
+  },
   "scripts": {
     "dev": "vuepress dev docs",
     "build": "vuepress build docs",
