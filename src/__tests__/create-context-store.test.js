@@ -175,7 +175,10 @@ it('with runtime injection', () => {
   const multiplier = value => value * 2;
 
   const app = (
-    <Counter.Provider initialData={{ count: 4 }} next={multiplier}>
+    <Counter.Provider
+      initialData={{ count: 4 }}
+      config={{ injections: { next: multiplier } }}
+    >
       <CountDisplay />
     </Counter.Provider>
   );
@@ -214,6 +217,7 @@ it('with state preservation when updating runtime injection', () => {
   function CountDisplay() {
     const count = Counter.useStoreState(state => state.count);
     const getNext = Counter.useStoreActions(actions => actions.getNext);
+
     return (
       <>
         <div data-testid="count">{count}</div>
@@ -225,7 +229,10 @@ it('with state preservation when updating runtime injection', () => {
   }
 
   const getComponent = next => (
-    <Counter.Provider initialData={{ count: 4 }} next={next}>
+    <Counter.Provider
+      initialData={{ count: 4 }}
+      config={{ injections: { next } }}
+    >
       <CountDisplay />
     </Counter.Provider>
   );
@@ -247,14 +254,7 @@ it('with state preservation when updating runtime injection', () => {
   const plusOne = value => value + 1;
 
   rerender(getComponent(plusOne));
-
   fireEvent.click(button);
-
-  /*
-   * Weird as it is, CountDisplay wasn't being re-rendered after the click...
-   * Might be a limitation of testing-library or an issue with react context api usage?
-   */
-  rerender(getComponent(plusOne));
 
   expect(count.firstChild.textContent).toBe('9');
 });

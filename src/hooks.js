@@ -24,7 +24,7 @@ export function createStoreStateHook(Context) {
     const store = useContext(Context);
     const mapStateRef = useRef(mapState);
     const stateRef = useRef();
-    const mountedRef = useRef(true);
+    const mountedRef = useRef();
     const subscriptionMapStateError = useRef();
 
     const [, forceRender] = useReducer(s => s + 1, 0);
@@ -73,12 +73,13 @@ export function createStoreStateHook(Context) {
         }
       };
       const unsubscribe = store.subscribe(checkMapState);
+      mountedRef.current = true;
       checkMapState();
       return () => {
         mountedRef.current = false;
         unsubscribe();
       };
-    }, []);
+    }, [store]);
 
     return stateRef.current;
   };
