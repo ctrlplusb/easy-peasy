@@ -3,6 +3,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, fireEvent } from '@testing-library/react';
+import shallowEqual from 'shallowequal';
 import { mockConsole } from './utils';
 import {
   action,
@@ -280,4 +281,68 @@ test('multiple hooks receive state update in same render cycle', () => {
   expect(renderSpy).toHaveBeenCalledTimes(2);
   expect(getByTestId('items').textContent).toBe('foo');
   expect(getByTestId('count').textContent).toBe('1');
+});
+
+test('equality function', () => {
+  // arrange
+  const store = createStore({
+    count: 1,
+    firstName: null,
+    lastName: null,
+    updateFirstName: action((state, payload) => {
+      state.firstName = payload;
+    }),
+    updateLastName: action((state, payload) => {
+      state.lastName = payload;
+    }),
+  });
+
+  const renderSpy = jest.fn();
+
+  function App() {
+    const { count, firstName } = useStoreState(
+      state => ({
+        count: state.count,
+        firstName: state.firstName,
+      }),
+      shallowEqual,
+    );
+    renderSpy();
+    return (
+      <>
+        <span data-testid="count">{count}</span>
+        <span data-testid="name">{firstName}</span>
+      </>
+    );
+  }
+
+  const { getByTestId } = render(
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>,
+  );
+
+  // assert
+  expect(renderSpy).toHaveBeenCalledTimes(1);
+  expect(getByTestId('count').textContent).toBe('1');
+  expect(getByTestId('name').textContent).toBe('');
+
+  // act
+  act(() => {
+    store.getActions().updateFirstName('joel');
+  });
+
+  // assert
+  expect(renderSpy).toHaveBeenCalledTimes(2);
+  expect(getByTestId('count').textContent).toBe('1');
+  expect(getByTestId('name').textContent).toBe('joel');
+
+  // act
+  act(() => {
+    store.getActions().updateLastName('moss');
+  });
+
+  // assert
+  expect(renderSpy).toHaveBeenCalledTimes(2);
+  expect(getByTestId('name').textContent).toBe('joel');
 });
