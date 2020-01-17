@@ -147,7 +147,7 @@ type StateMapper<StateModel extends object> = {
     : StateModel[P] extends Reducer<any, any>
     ? StateModel[P]['result']
     : StateModel[P] extends Model<any>
-    ? State<StateModel[P]>
+    ? RecursiveState<StateModel[P]>
     : StateModel[P];
 };
 
