@@ -100,8 +100,6 @@ export default function Product({ id }) {
 
 Once you have updated your application accordingly you will be able to browse to a product and click the "Add to Basket" button. When doing so you should note that the basket count in the top right increases.
 
-> Note: We have simulated a network delay for when you click the "Add to Basket" button.
-
 **Basket**
 
 Next up, let's update the `Basket` component so that we can dispatch the [action](/docs/api/action.html) to remove a product from our basket.

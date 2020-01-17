@@ -22,7 +22,6 @@ const baseConfig = {
     'react',
     'redux',
     'redux-thunk',
-    'shallowequal',
   ],
   input: 'src/index.js',
   output: {
@@ -58,7 +57,6 @@ const baseConfig = {
 
 const commonUMD = config =>
   produce(config, draft => {
-    draft.external.splice(draft.external.indexOf('shallowequal'), 1);
     draft.output.format = 'umd';
     draft.output.globals = {
       debounce: 'debounce',

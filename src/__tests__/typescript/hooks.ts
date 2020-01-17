@@ -63,3 +63,13 @@ let actionNoPayload = typedHooks.useStoreActions(
   actions => actions.actionNoPayload,
 );
 actionNoPayload();
+
+typedHooks.useStoreState(
+  state => ({ num: state.stateNumber, str: state.stateString }),
+  (prev, next) => {
+    prev.num += 1;
+    // typings:expect-error
+    prev.num += 'foo';
+    return prev.num === next.num;
+  },
+);

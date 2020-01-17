@@ -81,7 +81,7 @@ this strategy:
   2. Did the state get updated in the expected manner?
 
 ```javascript
-test('fetchById', () => {
+test('fetchById', async () => {
   // arrange
   const todo = { id: 1, text: 'Test my store' };
   const mockTodosService = {

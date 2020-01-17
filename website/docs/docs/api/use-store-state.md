@@ -8,13 +8,37 @@ const todos = useStoreState(state => state.todos.items);
 
 ## Arguments
 
-  - `mapState` (Function, required)
+  - `mapState` (Function, *required*)
 
     The function that is used to resolve the piece of state that your component requires. The function will receive the following arguments:
 
     - `state` (Object)
 
       The state of your store.
+
+  - `equalityFn` (Function, *optional*)
+
+    Allows you to provide custom logic for determining whether the mapped state has changed.
+
+    ```javascript
+    useStoreState(
+      state => state.user,
+      (prev, next) => prev.username === next.username
+    )
+    ```
+
+    It receives the following arguments:
+
+    - `prev` (any)
+
+      The state that was previously mapped by your selector.
+
+    - `next` (any)
+
+      The newly mapped state that has been mapped by your selector.
+
+    It should return `true` to indicate that there is no change between the prev/next mapped state, else `false`. If it returns `false` your component will be re-rendered with the most recently mapped state value.
+
 
 ## Example
 
@@ -131,5 +155,25 @@ function FixedOptionTwo() {
       {productNames.map(name => <li>{name}</li>)}
     </ul>
   );
+}
+```
+
+## Using the `shallowequal` package to support mapping multiple values
+
+You can utilise the [`shallowequal`](https://github.com/dashed/shallowequal) to support mapping multiple values out via an object. The `shallowequal` package will perform a shallow equality check of the prev/next mapped object.
+
+```javascript
+import { useStoreState } from 'easy-peasy';
+import shallowEqual from 'shallowequal';
+
+function MyComponent() {
+  const { item1, item2 } = useStoreState(
+    state => ({
+      item1: state.items.item1,
+      item2: state.items.item2,
+    }),
+    shallowEqual // 👈 we can just pass the reference as the function signature 
+                 //    is compatible with what the "equalityFn" argument expects
+  )
 }
 ```

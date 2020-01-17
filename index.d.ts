@@ -655,6 +655,7 @@ export function reducer<State>(state: ReduxReducer<State>): Reducer<State>;
  */
 export function useStoreState<StoreState extends State<any>, Result>(
   mapState: (state: StoreState) => Result,
+  equalityFn?: (prev: Result, next: Result) => boolean,
 ): Result;
 
 /**
@@ -725,7 +726,7 @@ export function createTypedHooks<StoreModel extends Object = {}>(): {
   useStoreDispatch: () => Dispatch<StoreModel>;
   useStoreState: <Result>(
     mapState: (state: State<StoreModel>) => Result,
-    dependencies?: Array<any>,
+    equalityFn?: (prev: Result, next: Result) => boolean,
   ) => Result;
   useStore: () => Store<StoreModel>;
 };
