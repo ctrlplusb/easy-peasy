@@ -15,7 +15,7 @@ Within either of these strategies your thunks may perform side effects such as m
 
 The `createStore` API contains a configuration property named `mockActions`, which if set to `true`, will ensure that any action that is dispatched will not be executed, and will instead be recorded - along with their payloads. You can then access the recorded actions via the `getMockedActions` function that is available on the store instance. 
 
-> We took inspiration for this strategy from the awesome [`redux-mock-store`](https://github.com/dmitry-zaets/redux-mock-store.html) package.
+> We took inspiration for this strategy from the awesome [`redux-mock-store`](https://github.com/dmitry-zaets/redux-mock-store) package.
 
 Given the following model under test:
 
@@ -81,7 +81,7 @@ this strategy:
   2. Did the state get updated in the expected manner?
 
 ```javascript
-test('fetchById', () => {
+test('fetchById', async () => {
   // arrange
   const todo = { id: 1, text: 'Test my store' };
   const mockTodosService = {

@@ -14,7 +14,7 @@ Imagine you had a Redux store being configured similarly to the following.
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import productsReducer from './reducers/products';
 import basketReducer from './reducers/basket';
-import loggerMiddleware from './middleware/logger;
+import loggerMiddleware from './middleware/logger';
 
 const rootReducer = combineReducers({
   products: productsReducer,
@@ -32,11 +32,11 @@ You could refactor this into an Easy Peasy store like so.
 import { createStore, reducer } from 'easy-peasy';  // 👈 import from easy peasy
 import productsReducer from './reducers/products';
 import basketReducer from './reducers/basket';
-import loggerMiddleware from './middleware/logger;
+import loggerMiddleware from './middleware/logger';
 
 const model = {
   // Instead of doing a combineReducers we just bind each reducer to a key
-  // of our model using the "reducer" API from Easy Peasy
+  // of our model using the "reducer" API from Easy Peasy. 
   products: reducer(productsReducer),
   basket: reducer(basketReducer),
 
@@ -56,9 +56,11 @@ const store = createStore(model, {
 export default store;
 ```
 
-> Note: Easy Peasy already includes the `redux-thunk` middleware under the hood, so there is no need for you to explicitly configure this library as a middleware.
+When migrating your reducers from your previous Redux store you only need to use the `reducer` API to bind the top level reducer for the slice of your Redux store which you are migrating. In doing so there is no need to make any changes to the nested reducers within the migrated slice. i.e. You can leave the nested reducers as they are, there is no need to replace any `combineReducers` calls with calls to our `reducer` API.
 
 Once you have done that your application should perform exactly the same way it did before.
+
+> Note: Easy Peasy already includes the `redux-thunk` middleware under the hood, so there is no need for you to explicitly configure this library as a middleware.
 
 ## Using Easy Peasy hooks and React Redux connect
 

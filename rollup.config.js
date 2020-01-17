@@ -2,7 +2,7 @@
 
 const { uglify } = require('rollup-plugin-uglify');
 const babel = require('rollup-plugin-babel');
-const changeCase = require('change-case');
+const { titleCase } = require('title-case');
 const produce = require('immer-peasy').default;
 const replace = require('rollup-plugin-replace');
 const fileSize = require('rollup-plugin-filesize');
@@ -69,9 +69,10 @@ const commonUMD = config =>
       react: 'React',
       redux: 'Redux',
     };
-    draft.output.name = changeCase
-      .titleCase(packageJson.name.replace(/-/g, ' '))
-      .replace(/ /g, '');
+    draft.output.name = titleCase(packageJson.name.replace(/-/g, ' ')).replace(
+      / /g,
+      '',
+    );
     draft.plugins.push(fileSize(), resolve(), commonjs());
   });
 

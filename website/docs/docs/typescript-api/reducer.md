@@ -1,6 +1,6 @@
 # Reducer
 
-Defines a [reducer](/docs/api/reducer.html) against your model
+Defines a [reducer](/docs/api/reducer.html) against your model.
 
 ## API
 

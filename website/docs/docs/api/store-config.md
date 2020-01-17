@@ -28,7 +28,7 @@ We have split the configuration parameters into two groupings, standard and adva
 
 - `mockActions` (boolean, *optional*, default=false)
 
-  Useful when testing your store, especially in the context of thunks. When set to `true` none of the actions dispatched will update the state, they will be instead recorded and can be accessed via the `getMockedActions` API that is added to the store.  Please see the ["Writing Tests"](#writing-tests) section for more information.
+  Useful when testing your store, especially in the context of thunks. When set to `true` none of the actions dispatched will update the state, they will be instead recorded and can be accessed via the `getMockedActions` API that is added to the store.  Please see the ["Testing"](/docs/testing/) section for more information.
 
 ## Advanced configuration
 

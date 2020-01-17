@@ -1,6 +1,6 @@
 # createStore
 
-Creates a global [store](#store) based on the provided model. It supports a [configuration](#storeconfig) parameter to customise your [store's](#store) behaviour.
+Creates a global [store](/docs/api/store.html) based on the provided model. It supports a [configuration](/docs/api/store-config.html) parameter to customise your [store's](/docs/api/store.html) behaviour.
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -26,9 +26,9 @@ The following arguments are accepted:
 
 ## Returns
 
-When executed, you will receive a [store](#store) instance back. Please refer to the [docs](#store) for details of the store's API.
+When executed, you will receive a [store](/docs/api/store.html) instance back. Please refer to the [docs](/docs/api/store.html) for details of the store's API.
 
-Once you have a store you provide it to the [StoreProvider](#storeprovider) in order to expose it to your application.
+Once you have a store you provide it to the [StoreProvider](/docs/api/store-provider.html) in order to expose it to your application.
 
 ## Example
 

@@ -85,7 +85,7 @@ interface BasketModel {
 
 ## Implementing the computed property
 
-We will not provide the implementation for the [computed](/docs/api/computed.html) property.
+We will now provide the implementation for the [computed](/docs/api/computed.html) property.
 
 ```typescript
 const basketModel: BasketModel = {

@@ -99,7 +99,7 @@ store.getListeners().onTodoAdded({
 })
 ```
 
-Once you take these rules into account, you could then follow a similar strategy to [testing actions](/docs/testing/testing-actions.html) for [actionOn](/docs/api/action-on.html) listeners. Equally, you can follow a similar strategy to [testing thunks](/docs/testing/testing-thunks.html) for [actionThunk](/docs/api/thunk-on.html) listeners.
+Once you take these rules into account, you could then follow a similar strategy to [testing actions](/docs/testing/testing-actions.html) for [actionOn](/docs/api/action-on.html) listeners. Equally, you can follow a similar strategy to [testing thunks](/docs/testing/testing-thunks.html) for [thunkOn](/docs/api/thunk-on.html) listeners.
 
 Below we will show an example of how you could test the `onTodoAdded` action that we described within the model above.
 

@@ -20,7 +20,7 @@ The type parameters can be described as follows.
 
 - `Model`
 
-  The model against which the [thunk](/docs/api/thunk.html) is being bound. This allows us to ensure the the `actions` argument that is provided to our [thunk](/docs/api/thunk.html) implementations are correctly typed.
+  The model against which the [thunk](/docs/api/thunk.html) is being bound. This allows us to ensure the `actions` argument that is provided to our [thunk](/docs/api/thunk.html) implementations are correctly typed.
 
 - `Payload`
 
@@ -28,7 +28,7 @@ The type parameters can be described as follows.
 
 - `Injections`
 
-  When [creating your store](/docs/api/create-store.html) you can specify `injections` via the [store configuration](/docs/api/store-config.html). The typical use case for the `injections` is to provide a mechanism by which to dependency injected services used to make HTTP calls. These `injections` are exposed to your your [thunks](/docs/api/thunk.html) via the `helpers` argument that they receive.
+  When [creating your store](/docs/api/create-store.html) you can specify `injections` via the [store configuration](/docs/api/store-config.html). The typical use case for the `injections` is to provide a mechanism by which to dependency inject services used to make HTTP calls. These `injections` are exposed to your your [thunks](/docs/api/thunk.html) via the `helpers` argument that they receive.
 
   Should you be using injections then it is useful to provide the typing information that describes them to this type parameter.
 
