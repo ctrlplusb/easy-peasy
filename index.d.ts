@@ -16,30 +16,6 @@ import {
 } from 'redux';
 import { O } from 'ts-toolbelt';
 
-/**
- * Picks only the keys of a certain type
- */
-type KeysOfType<A extends object, B> = {
-  [K in keyof A]-?: A[K] extends B ? K : never;
-}[keyof A];
-
-/**
- * This allows you to narrow keys of an object type that are index signature
- * based.
- *
- * Based on answer from here:
- * https://stackoverflow.com/questions/56422807/narrowing-a-type-to-its-properties-that-are-index-signatures/56423972#56423972
- */
-type IndexSignatureKeysOfType<A extends Object> = {
-  [K in keyof A]: A[K] extends { [key: string]: any } | { [key: number]: any }
-    ? string extends keyof A[K]
-      ? K
-      : number extends keyof A[K]
-      ? K
-      : never
-    : never;
-}[keyof A];
-
 type ActionTypes =
   | Action<any, any>
   | Thunk<any, any, any, any, any>
@@ -65,13 +41,27 @@ type ActionOrThunkCreator<Payload = void, Result = void> =
   | ActionCreator<Payload>
   | ThunkCreator<Payload, Result>;
 
-// #region Helpers
+// #region Utils
 
 export function debug<StateDraft extends any>(state: StateDraft): StateDraft;
 
 export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 // #endregion
+
+// #region Models
+
+type Model<ModelDefinition extends object> = {
+  [P in keyof ModelDefinition]: ModelDefinition[P];
+} & {
+  ezpz__model: true;
+};
+
+export function model<ModelDefinition extends object>(
+  definition: ModelDefinition,
+): Model<ModelDefinition>;
+
+// #endregion Models
 
 // #region Listeners
 
@@ -80,7 +70,7 @@ type ListenerMapper<ActionsModel extends object, Depth extends string> = {
     ? ActionCreator<TargetPayload<any>>
     : ActionsModel[P] extends ThunkOn<any, any, any>
     ? ThunkCreator<TargetPayload<any>, any>
-    : ActionsModel[P] extends object
+    : ActionsModel[P] extends Model<any>
     ? RecursiveListeners<
         ActionsModel[P],
         Depth extends '1'
@@ -97,21 +87,14 @@ type ListenerMapper<ActionsModel extends object, Depth extends string> = {
 };
 
 type RecursiveListeners<
-  Model extends object,
+  ModelDefinition extends object,
   Depth extends string
 > = Depth extends '6'
-  ? Model
+  ? ModelDefinition
   : ListenerMapper<
-      O.Filter<
-        O.Select<Model, object>,
-        | Array<any>
-        | RegExp
-        | Date
-        | string
-        | Reducer<any, any>
-        | Computed<any, any, any>
-        | Action<any, any>
-        | Thunk<any, any, any, any, any>
+      O.Select<
+        ModelDefinition,
+        Model<any> | ActionOn<any, any> | ThunkOn<any, any, any>
       >,
       Depth
     >;
@@ -139,7 +122,7 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
     ? ActionsModel[P]['payload'] extends void
       ? ThunkCreator<void, ActionsModel[P]['result']>
       : ThunkCreator<ActionsModel[P]['payload'], ActionsModel[P]['result']>
-    : ActionsModel[P] extends object
+    : ActionsModel[P] extends Model<any>
     ? RecursiveActions<
         ActionsModel[P],
         Depth extends '1'
@@ -156,21 +139,14 @@ type ActionMapper<ActionsModel extends object, Depth extends string> = {
 };
 
 type RecursiveActions<
-  Model extends object,
+  ModelDefinition extends object,
   Depth extends string
 > = Depth extends '6'
-  ? Model
+  ? ModelDefinition
   : ActionMapper<
-      O.Filter<
-        O.Select<Model, object>,
-        | Array<any>
-        | RegExp
-        | Date
-        | string
-        | Reducer<any, any>
-        | Computed<any, any, any>
-        | ActionOn<any, any>
-        | ThunkOn<any, any, any>
+      O.Select<
+        ModelDefinition,
+        Model<any> | Action<any, any> | Thunk<any, any, any, any, any>
       >,
       Depth
     >;
@@ -189,27 +165,23 @@ export type Actions<Model extends object = {}> = RecursiveActions<Model, '1'>;
 // #region State
 
 type StateMapper<StateModel extends object, Depth extends string> = {
-  [P in keyof StateModel]: P extends IndexSignatureKeysOfType<StateModel>
-    ? StateModel[P]
-    : StateModel[P] extends Computed<any, any, any>
+  [P in keyof StateModel]: StateModel[P] extends Computed<any, any, any>
     ? StateModel[P]['result']
     : StateModel[P] extends Reducer<any, any>
     ? StateModel[P]['result']
-    : StateModel[P] extends object
-    ? StateModel[P] extends string | Array<any> | RegExp | Date | Function
-      ? StateModel[P]
-      : RecursiveState<
-          StateModel[P],
-          Depth extends '1'
-            ? '2'
-            : Depth extends '2'
-            ? '3'
-            : Depth extends '3'
-            ? '4'
-            : Depth extends '4'
-            ? '5'
-            : '6'
-        >
+    : StateModel[P] extends Model<any>
+    ? RecursiveState<
+        StateModel[P],
+        Depth extends '1'
+          ? '2'
+          : Depth extends '2'
+          ? '3'
+          : Depth extends '3'
+          ? '4'
+          : Depth extends '4'
+          ? '5'
+          : '6'
+      >
     : StateModel[P];
 };
 
@@ -218,7 +190,7 @@ type RecursiveState<
   Depth extends string
 > = Depth extends '6'
   ? Model
-  : StateMapper<O.Filter<Model, ActionTypes>, Depth>;
+  : StateMapper<O.Filter<O.Omit<Model, 'ezpz__model'>, ActionTypes>, Depth>;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)

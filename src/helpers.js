@@ -4,6 +4,7 @@ import {
   actionOnSymbol,
   actionSymbol,
   computedSymbol,
+  modelSymbol,
   persistSymbol,
   reducerSymbol,
   thunkOnSymbol,
@@ -46,6 +47,12 @@ export const computed = (fnOrStateResolvers, fn) => {
   return fnOrStateResolvers;
 };
 
+export const model = modelDefinition => ({
+  ...modelDefinition,
+  [modelSymbol]: true,
+});
+
+/* eslint-disable-next-line no-shadow */
 export const persist = (model, config) => {
   return {
     ...model,
