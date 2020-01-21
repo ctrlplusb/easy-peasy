@@ -11,28 +11,28 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
 
 <p>&nbsp;</p>
 
+**Install**
+
 ```bash
 npm install easy-peasy
 ```
 
-<p>&nbsp;</p>
-
-**Step 1 - Create your store**
+**Create your model**
 
 ```javascript
-const store = createStore({
-  todos: {
-    items: ['Create store', 'Wrap application', 'Use store'],
-    add: action((state, payload) => {
-      state.items.push(payload)
-    })
-  }
+const storeModel = model({
+  todos: ['Create store', 'Wrap application', 'Use store'],
+  addTodo: action((state, payload) => {
+    state.add.push(payload)
+  })
 });
 ```
 
-**Step 2 - Wrap your application**
+**Create the store and wrap your application**
 
 ```javascript
+const store = createStore(storeModel);
+
 function App() {
   return (
     <StoreProvider store={store}>
@@ -42,18 +42,18 @@ function App() {
 }
 ```
 
-**Step 3 - Use the store**
+**Use the store**
 
 ```javascript
 function TodoList() {
-  const todos = useStoreState(state => state.todos.items)
-  const add = useStoreActions(actions => actions.todos.add)
+  const todos = useStoreState(state => state.todos);
+  const addTodo = useStoreActions(actions => actions.addTodo);
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
-      <AddTodo onAdd={add} />
+      <AddTodo onAdd={addTodo} />
     </div>
-  )
+  );
 }
 ```
 

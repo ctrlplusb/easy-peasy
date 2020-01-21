@@ -7,11 +7,12 @@ import shallowEqual from 'shallowequal';
 import { mockConsole } from './utils';
 import {
   action,
+  computed,
   createStore,
-  useStoreState,
+  model,
   StoreProvider,
   useStoreActions,
-  computed,
+  useStoreState,
 } from '../index';
 
 class ErrorBoundary extends React.Component {
@@ -47,16 +48,18 @@ afterEach(() => {
 
 test('zombie children case is handled', () => {
   // arrange
-  const store = createStore({
-    items: {
-      a: { name: 'A' },
-      b: { name: 'B' },
-      c: { name: 'C' },
-    },
-    deleteItem: action((state, payload) => {
-      delete state.items[payload];
+  const store = createStore(
+    model({
+      items: {
+        a: { name: 'A' },
+        b: { name: 'B' },
+        c: { name: 'C' },
+      },
+      deleteItem: action((state, payload) => {
+        delete state.items[payload];
+      }),
     }),
-  });
+  );
 
   const ListItem = ({ id }) => {
     const name = useStoreState(s => s.items[id].name);
@@ -104,12 +107,14 @@ test('zombie children case is handled', () => {
 
 test('throws an error if state mapping fails', () => {
   // arrange
-  const store = createStore({
-    todo: { text: 'foo' },
-    remove: action(state => {
-      delete state.todo;
+  const store = createStore(
+    model({
+      todo: { text: 'foo' },
+      remove: action(state => {
+        delete state.todo;
+      }),
     }),
-  });
+  );
 
   function Todo() {
     const text = useStoreState(state => state.todo.text);
@@ -151,12 +156,14 @@ test('throws an error if state mapping fails', () => {
 
 test('throws an error for an invalid subscription only update', () => {
   // arrange
-  const store = createStore({
-    todo: { text: 'foo' },
-    remove: action(state => {
-      delete state.todo;
+  const store = createStore(
+    model({
+      todo: { text: 'foo' },
+      remove: action(state => {
+        delete state.todo;
+      }),
     }),
-  });
+  );
 
   function App() {
     const text = useStoreState(state => state.todo.text);
@@ -184,20 +191,22 @@ test('throws an error for an invalid subscription only update', () => {
 
 test('does not throw if state is removed', () => {
   // arrange
-  const store = createStore({
-    todos: {
-      1: { text: 'write some tests' },
-      2: { text: 'ensure hooks work' },
-    },
-    activeTodo: 1,
-    completedActive: action(state => {
-      if (state.activeTodo) {
-        delete state.todos[state.activeTodo];
-        const outstanding = Object.keys(state.todos);
-        state.activeTodo = outstanding.length > 0 ? outstanding[0] : null;
-      }
+  const store = createStore(
+    model({
+      todos: {
+        1: { text: 'write some tests' },
+        2: { text: 'ensure hooks work' },
+      },
+      activeTodo: 1,
+      completedActive: action(state => {
+        if (state.activeTodo) {
+          delete state.todos[state.activeTodo];
+          const outstanding = Object.keys(state.todos);
+          state.activeTodo = outstanding.length > 0 ? outstanding[0] : null;
+        }
+      }),
     }),
-  });
+  );
 
   function Todo({ id }) {
     const text = useStoreState(state => state.todos[id].text);
@@ -239,13 +248,15 @@ test('does not throw if state is removed', () => {
 
 test('multiple hooks receive state update in same render cycle', () => {
   // arrange
-  const store = createStore({
-    items: [],
-    count: computed(state => state.items.length),
-    fetch: action(state => {
-      state.items = ['foo'];
+  const store = createStore(
+    model({
+      items: [],
+      count: computed(state => state.items.length),
+      fetch: action(state => {
+        state.items = ['foo'];
+      }),
     }),
-  });
+  );
 
   const renderSpy = jest.fn();
 
@@ -285,17 +296,19 @@ test('multiple hooks receive state update in same render cycle', () => {
 
 test('equality function', () => {
   // arrange
-  const store = createStore({
-    count: 1,
-    firstName: null,
-    lastName: null,
-    updateFirstName: action((state, payload) => {
-      state.firstName = payload;
+  const store = createStore(
+    model({
+      count: 1,
+      firstName: null,
+      lastName: null,
+      updateFirstName: action((state, payload) => {
+        state.firstName = payload;
+      }),
+      updateLastName: action((state, payload) => {
+        state.lastName = payload;
+      }),
     }),
-    updateLastName: action((state, payload) => {
-      state.lastName = payload;
-    }),
-  });
+  );
 
   const renderSpy = jest.fn();
 

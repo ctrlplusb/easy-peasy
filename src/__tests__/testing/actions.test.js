@@ -5,14 +5,14 @@
  * state of your store.
  */
 
-import { action, createStore } from '../../index';
+import { action, createStore, model } from '../../index';
 
-const todosModel = {
+const todosModel = model({
   items: {},
   add: action((state, payload) => {
     state.items[payload.id] = payload;
   }),
-};
+});
 
 it('state gets updated', () => {
   // arrange

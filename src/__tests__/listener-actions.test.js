@@ -1,14 +1,14 @@
-import { action, createStore, thunk, actionOn, thunkOn } from '../index';
+import { action, createStore, thunk, actionOn, thunkOn, model } from '../index';
 
 it('listening to an action, firing an action', () => {
   // arrange
-  const math = {
+  const math = model({
     sum: 0,
     add: action((state, payload) => {
       state.sum += payload;
     }),
-  };
-  const audit = {
+  });
+  const audit = model({
     logs: [],
     onMathAdd: actionOn(
       (_, storeActions) => storeActions.math.add,
@@ -21,11 +21,13 @@ it('listening to an action, firing an action', () => {
         state.logs.push(`Added ${target.payload}`);
       },
     ),
-  };
-  const store = createStore({
-    math,
-    audit,
   });
+  const store = createStore(
+    model({
+      math,
+      audit,
+    }),
+  );
 
   // act
   store.getActions().math.add(10);
@@ -36,13 +38,13 @@ it('listening to an action, firing an action', () => {
 
 it('listening to an action, firing a thunk', done => {
   // arrange
-  const math = {
+  const math = model({
     sum: 0,
     add: action((state, payload) => {
       state.sum += payload;
     }),
-  };
-  const audit = {
+  });
+  const audit = model({
     logs: [],
     add: action((state, payload) => {
       // assert
@@ -60,11 +62,13 @@ it('listening to an action, firing a thunk', done => {
         actions.add(`Added ${target.payload}`);
       },
     ),
-  };
-  const store = createStore({
-    math,
-    audit,
   });
+  const store = createStore(
+    model({
+      math,
+      audit,
+    }),
+  );
 
   // act
   store.getActions().math.add(10);
@@ -72,14 +76,14 @@ it('listening to an action, firing a thunk', done => {
 
 it('listening to a successful thunk, firing an action', async () => {
   // arrange
-  const math = {
+  const math = model({
     sum: 0,
     add: thunk(async () => {
       const result = await Promise.resolve('foo');
       return result;
     }),
-  };
-  const audit = {
+  });
+  const audit = model({
     logs: [],
     onMathAdd: actionOn(
       (_, storeActions) => storeActions.math.add,
@@ -92,7 +96,7 @@ it('listening to a successful thunk, firing an action', async () => {
         state.logs.push(`Added ${target.payload}`);
       },
     ),
-  };
+  });
   const store = createStore({
     math,
     audit,
@@ -108,13 +112,13 @@ it('listening to a successful thunk, firing an action', async () => {
 it('listening to a failed thunk', async () => {
   // arrange
   const err = new Error('💩');
-  const math = {
+  const math = model({
     sum: 0,
     add: thunk(() => {
       throw err;
     }),
-  };
-  const audit = {
+  });
+  const audit = model({
     logs: [],
     onMathAdd: actionOn(
       (_, storeActions) => storeActions.math.add,
@@ -127,11 +131,13 @@ it('listening to a failed thunk', async () => {
         state.logs.push(`Added ${target.payload}`);
       },
     ),
-  };
-  const store = createStore({
-    math,
-    audit,
   });
+  const store = createStore(
+    model({
+      math,
+      audit,
+    }),
+  );
 
   // act
   try {
@@ -146,13 +152,13 @@ it('listening to a failed thunk', async () => {
 
 it('listening to a thunk, firing a thunk', async done => {
   // arrange
-  const math = {
+  const math = model({
     sum: 0,
     add: thunk(() => {
       // do nothing
     }),
-  };
-  const audit = {
+  });
+  const audit = model({
     logs: [],
     add: action((state, payload) => {
       // assert
@@ -165,11 +171,13 @@ it('listening to a thunk, firing a thunk', async done => {
         actions.add(`Added ${target.payload}`);
       },
     ),
-  };
-  const store = createStore({
-    math,
-    audit,
   });
+  const store = createStore(
+    model({
+      math,
+      audit,
+    }),
+  );
 
   // act
   await store.getActions().math.add(10);
@@ -177,7 +185,7 @@ it('listening to a thunk, firing a thunk', async done => {
 
 it('listening to a string, firing an action', async () => {
   // arrange
-  const audit = {
+  const audit = model({
     logs: [],
     onMathAdd: actionOn(
       () => 'MATH_ADD',
@@ -185,10 +193,12 @@ it('listening to a string, firing an action', async () => {
         state.logs.push(`Added ${target.payload}`);
       },
     ),
-  };
-  const store = createStore({
-    audit,
   });
+  const store = createStore(
+    model({
+      audit,
+    }),
+  );
 
   // act
   await store.dispatch({ type: 'MATH_ADD', payload: 10 });
@@ -199,7 +209,7 @@ it('listening to a string, firing an action', async () => {
 
 it('listening to an string, firing a thunk', done => {
   // arrange
-  const audit = {
+  const audit = model({
     logs: [],
     add: action((state, payload) => {
       // assert
@@ -212,10 +222,12 @@ it('listening to an string, firing a thunk', done => {
         actions.add(`Added ${target.payload}`);
       },
     ),
-  };
-  const store = createStore({
-    audit,
   });
+  const store = createStore(
+    model({
+      audit,
+    }),
+  );
 
   // act
   store.dispatch({ type: 'MATH_ADD', payload: 10 });
@@ -223,7 +235,7 @@ it('listening to an string, firing a thunk', done => {
 
 it('action listening to multiple actions', async () => {
   // arrange
-  const model = {
+  const storeModel = model({
     logs: [],
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
@@ -237,8 +249,8 @@ it('action listening to multiple actions', async () => {
         state.logs.push(target.payload);
       },
     ),
-  };
-  const store = createStore(model);
+  });
+  const store = createStore(storeModel);
 
   // act
   store.getActions().actionTarget('action payload');
@@ -251,7 +263,7 @@ it('action listening to multiple actions', async () => {
 it('thunk listening to multiple actions', async () => {
   // arrange
   const thunkSpy = jest.fn();
-  const model = {
+  const storeModel = model({
     logs: [],
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
@@ -259,8 +271,8 @@ it('thunk listening to multiple actions', async () => {
       actions => [actions.actionTarget, actions.thunkTarget],
       thunkSpy,
     ),
-  };
-  const store = createStore(model);
+  });
+  const store = createStore(storeModel);
 
   // act
   store.getActions().actionTarget('action payload');

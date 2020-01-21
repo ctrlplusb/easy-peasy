@@ -2,14 +2,16 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { createContextStore, action } from '../index';
+import { createContextStore, action, model } from '../index';
 
-const Counter = createContextStore({
-  count: 0,
-  inc: action(state => {
-    state.count += 1;
+const Counter = createContextStore(
+  model({
+    count: 0,
+    inc: action(state => {
+      state.count += 1;
+    }),
   }),
-});
+);
 
 function CountDisplayUseStore() {
   const store = Counter.useStore();
@@ -102,12 +104,14 @@ it('useStore hook', () => {
 
 it('with initial data', () => {
   // arrange
-  const Counter = createContextStore(data => ({
-    count: data.count || 0,
-    inc: action(state => {
-      state.count += 1;
+  const Counter = createContextStore(data =>
+    model({
+      count: data.count || 0,
+      inc: action(state => {
+        state.count += 1;
+      }),
     }),
-  }));
+  );
 
   function CountDisplay() {
     const count = Counter.useStoreState(state => state.count);

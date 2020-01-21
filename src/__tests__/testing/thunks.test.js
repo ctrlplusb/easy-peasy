@@ -1,8 +1,8 @@
-import { action, createStore, thunk } from '../../index';
+import { action, createStore, model, thunk } from '../../index';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 1));
 
-const todosModel = {
+const todosModel = model({
   items: {},
   fetchedTodo: action((state, payload) => {
     state.items[payload.id] = payload;
@@ -12,7 +12,7 @@ const todosModel = {
     const todo = await todosService.fetchById(payload);
     actions.fetchedTodo(todo);
   }),
-};
+});
 
 describe('without mocking actions', () => {
   it('succeeds', async () => {
@@ -39,13 +39,13 @@ describe('without mocking actions', () => {
 
   it('an error occurs', async () => {
     // arrange
-    const model = {
+    const storeModel = model({
       throwing: thunk(async () => {
         await tick();
         throw new Error('poop');
       }),
-    };
-    const store = createStore(model);
+    });
+    const store = createStore(storeModel);
 
     // act
     try {
@@ -85,12 +85,12 @@ describe('with mocking actions', () => {
   it('an error occurs', async () => {
     // arrange
     const err = new Error('poop');
-    const model = {
+    const storeModel = model({
       throwing: thunk(() => {
         throw err;
       }),
-    };
-    const store = createStore(model, {
+    });
+    const store = createStore(storeModel, {
       mockActions: true,
     });
 
@@ -121,7 +121,7 @@ describe('with mocking actions', () => {
   it('string action fired within thunk', async () => {
     // arrange
     const store = createStore(
-      {
+      model({
         items: [],
         add: thunk((actions, payload, { dispatch }) => {
           dispatch({
@@ -129,7 +129,7 @@ describe('with mocking actions', () => {
             payload: 'the payload',
           });
         }),
-      },
+      }),
       {
         mockActions: true,
       },

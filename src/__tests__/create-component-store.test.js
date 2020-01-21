@@ -1,13 +1,15 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { createComponentStore, action } from '../index';
+import { createComponentStore, action, model } from '../index';
 
-const useCounter = createComponentStore({
-  count: 0,
-  inc: action(state => {
-    state.count += 1;
+const useCounter = createComponentStore(
+  model({
+    count: 0,
+    inc: action(state => {
+      state.count += 1;
+    }),
   }),
-});
+);
 
 function CountDisplay() {
   const [state, actions] = useCounter();
@@ -78,12 +80,14 @@ it('multiple instances', async () => {
 it('with initial data', () => {
   // arrange
   // eslint-disable-next-line no-shadow
-  const useCounter = createComponentStore(data => ({
-    count: data.count || 0,
-    inc: action(state => {
-      state.count += 1;
+  const useCounter = createComponentStore(data =>
+    model({
+      count: data.count || 0,
+      inc: action(state => {
+        state.count += 1;
+      }),
     }),
-  }));
+  );
 
   // eslint-disable-next-line no-shadow
   function CountDisplay() {

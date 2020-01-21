@@ -1,16 +1,16 @@
-import { action, computed, createStore, reducer, thunk } from '../index';
+import { action, computed, createStore, model, reducer, thunk } from '../index';
 
 test('empty object in state', () => {
   // arrange
-  const model = {
+  const storeModel = model({
     todos: {
       items: {},
       foo: [],
     },
     bar: null,
-  };
+  });
   // act
-  const store = createStore(model);
+  const store = createStore(storeModel);
   // assert
   expect(store.getState()).toEqual({
     todos: {
@@ -23,16 +23,17 @@ test('empty object in state', () => {
 
 test('basic features', () => {
   // arrange
-  const model = {
-    session: {
-      user: undefined,
-      login: action((state, user) => {
-        state.user = user;
-      }),
-    },
-  };
+  const sessionModel = model({
+    user: undefined,
+    login: action((state, user) => {
+      state.user = user;
+    }),
+  });
+  const storeModel = model({
+    session: sessionModel,
+  });
   // act
-  const store = createStore(model);
+  const store = createStore(storeModel);
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -55,20 +56,20 @@ test('basic features', () => {
 
 test('nested action', () => {
   // arrange
-  const model = {
-    session: {
+  const storeModel = model({
+    session: model({
       user: undefined,
-      settings: {
+      settings: model({
         favouriteColor: 'red',
         setFavouriteColor: action((state, color) => {
           state.favouriteColor = color;
         }),
-      },
+      }),
       login: action(() => undefined),
-    },
-  };
+    }),
+  });
   // act
-  const store = createStore(model);
+  const store = createStore(storeModel);
   // assert
   expect(store.getState()).toEqual({
     session: {
@@ -93,14 +94,16 @@ test('nested action', () => {
 
 test('root action', () => {
   // arrange
-  const store = createStore({
-    todos: {
-      items: { 1: { text: 'foo' } },
-    },
-    doSomething: action(state => {
-      state.todos.items[2] = { text: 'bar' };
+  const store = createStore(
+    model({
+      todos: {
+        items: { 1: { text: 'foo' } },
+      },
+      doSomething: action(state => {
+        state.todos.items[2] = { text: 'bar' };
+      }),
     }),
-  });
+  );
   // act
   store.getActions().doSomething();
   // assert
@@ -110,20 +113,19 @@ test('root action', () => {
 
 test('state with no actions', () => {
   // arrange
-  const model = {
-    session: {
+  const storeModel = model({
+    session: model({
       user: undefined,
       login: action((state, user) => {
         state.user = user;
       }),
-    },
-    // No associated actions here
+    }),
     todos: {
       foo: [],
     },
-  };
+  });
   // act
-  const store = createStore(model);
+  const store = createStore(storeModel);
   // act
   store.getActions().session.login({
     name: 'bob',
@@ -151,9 +153,9 @@ test('allows custom middleware', done => {
   };
   // act
   const store = createStore(
-    {
+    model({
       doFoo: action(() => {}),
-    },
+    }),
     { middleware: [customMiddleware] },
   );
   store.getActions().doFoo();
@@ -174,12 +176,12 @@ test('allows custom middleware with mockActions=true', () => {
     next(_action);
   };
   const store = createStore(
-    {
+    model({
       error: false,
       saved: action((state, { success }) => {
         state.error = !success;
       }),
-    },
+    }),
     { middleware: [customMiddleware], mockActions: true },
   );
 
@@ -200,27 +202,24 @@ test('allows custom enhancers', () => {
   const rootReducer = (state = defaultState) => state;
 
   // act
-  createStore(
-    {},
-    {
-      enhancers: [
-        storeCreator => {
-          // assert
-          expect(storeCreator).toBeInstanceOf(Function);
-          const store = storeCreator(rootReducer);
-          expect(store.getState()).toEqual({ foo: 'bar' });
-          return storeCreator;
-        },
-      ],
-    },
-  );
+  createStore(model({}), {
+    enhancers: [
+      storeCreator => {
+        // assert
+        expect(storeCreator).toBeInstanceOf(Function);
+        const store = storeCreator(rootReducer);
+        expect(store.getState()).toEqual({ foo: 'bar' });
+        return storeCreator;
+      },
+    ],
+  });
 
   // assert
 });
 
 test('supports initial state', () => {
   // arrange
-  const model = {
+  const storeModel = model({
     foo: {
       bar: {
         stuff: [1, 2],
@@ -228,7 +227,7 @@ test('supports initial state', () => {
       color: 'red',
     },
     baz: 'bob',
-  };
+  });
   const initialState = {
     foo: {
       bar: {
@@ -237,8 +236,10 @@ test('supports initial state', () => {
       },
     },
   };
+
   // act
-  const store = createStore(model, { initialState });
+  const store = createStore(storeModel, { initialState });
+
   // assert
   expect(store.getState()).toEqual({
     foo: {
@@ -246,7 +247,6 @@ test('supports initial state', () => {
         stuff: [3, 4],
         quxx: 'qux',
       },
-      color: 'red',
     },
     baz: 'bob',
   });
@@ -265,24 +265,26 @@ test('complex configuration', async () => {
       }
     });
 
-  const store = createStore({
-    error: {
-      message: undefined,
-      unexpectedError: action((state, payload) => {
-        state.message = payload.message;
+  const store = createStore(
+    model({
+      error: model({
+        message: undefined,
+        unexpectedError: action((state, payload) => {
+          state.message = payload.message;
+        }),
       }),
-    },
-    session: {
-      isInitialised: false,
-      initialised: action(state => {
-        state.isInitialised = true;
+      session: model({
+        isInitialised: false,
+        initialised: action(state => {
+          state.isInitialised = true;
+        }),
+        initialise: wrappedThunk(async actions => {
+          actions.initialised();
+          return 'done';
+        }),
       }),
-      initialise: wrappedThunk(async actions => {
-        actions.initialised();
-        return 'done';
-      }),
-    },
-  });
+    }),
+  );
 
   // act
   const result = await store.getActions().session.initialise();
@@ -294,8 +296,8 @@ test('complex configuration', async () => {
 
 test('redux thunk configured', async () => {
   // arrange
-  const model = { foo: 'bar' };
-  const store = createStore(model);
+  const storeModel = model({ foo: 'bar' });
+  const store = createStore(storeModel);
   const thunkAction = payload => () => Promise.resolve(payload);
   // act
   const result = await store.dispatch(thunkAction('foo'));
@@ -305,14 +307,11 @@ test('redux thunk configured', async () => {
 
 test('initialState is respected even if not in model', () => {
   // act
-  const store = createStore(
-    {},
-    {
-      initialState: {
-        foo: 'bar',
-      },
+  const store = createStore(model({}), {
+    initialState: {
+      foo: 'bar',
     },
-  );
+  });
 
   // assert
   expect(store.getState().foo).toEqual('bar');
@@ -320,13 +319,16 @@ test('initialState is respected even if not in model', () => {
 
 test('nested empty model', () => {
   // arrange
-  const store = createStore({
-    counters: {
-      add: action(state => {
-        state[Date.now()] = true;
+  const store = createStore(
+    model({
+      counters: model({
+        add: action(state => {
+          console.log(state);
+          state[Date.now()] = true;
+        }),
       }),
-    },
-  });
+    }),
+  );
 
   // act
   store.getActions().counters.add();
@@ -360,26 +362,30 @@ test('supports non literal objects as state - i.e. classes etc', () => {
 
 test('support model reconfiguration', () => {
   // arrange
-  const store = createStore({
-    todos: {
-      items: [],
-      addTodo: action((state, payload) => {
-        state.items.push(payload);
+  const store = createStore(
+    model({
+      todos: model({
+        items: [],
+        addTodo: action((state, payload) => {
+          state.items.push(payload);
+        }),
       }),
-    },
-  });
+    }),
+  );
   store.getActions().todos.addTodo('support hot reloading');
 
   // act
-  store.reconfigure({
-    todos: {
-      items: [],
-      addTodo: action((state, payload) => {
-        state.items.push(payload);
+  store.reconfigure(
+    model({
+      todos: model({
+        items: [],
+        addTodo: action((state, payload) => {
+          state.items.push(payload);
+        }),
+        bob: 1,
       }),
-      bob: 1,
-    },
-  });
+    }),
+  );
   store.getActions().todos.addTodo('zing');
 
   // assert
@@ -391,17 +397,19 @@ test('support model reconfiguration', () => {
   });
 
   // act
-  store.reconfigure({
-    todos: {
-      items: [],
-      addTodo: action((state, payload) => {
-        state.items.push(payload);
+  store.reconfigure(
+    model({
+      todos: model({
+        items: [],
+        addTodo: action((state, payload) => {
+          state.items.push(payload);
+        }),
+        removeTodo: action(state => {
+          state.items.pop();
+        }),
       }),
-      removeTodo: action(state => {
-        state.items.pop();
-      }),
-    },
-  });
+    }),
+  );
   store.getActions().todos.removeTodo();
 
   // assert
@@ -413,14 +421,16 @@ test('support model reconfiguration', () => {
   });
 
   // act
-  store.reconfigure({
-    todos: {
-      items: [],
-      removeTodo: action(state => {
-        state.items.pop();
+  store.reconfigure(
+    model({
+      todos: model({
+        items: [],
+        removeTodo: action(state => {
+          state.items.pop();
+        }),
       }),
-    },
-  });
+    }),
+  );
 
   // assert
   expect(store.getActions().todos.addTodo).toBeUndefined();
@@ -429,12 +439,12 @@ test('support model reconfiguration', () => {
 test('mocking actions', () => {
   // arrange
   const store = createStore(
-    {
+    model({
       counter: 0,
       inc: action(state => {
         state.counter += 1;
       }),
-    },
+    }),
     { mockActions: true },
   );
 
@@ -454,12 +464,12 @@ test('mocking actions', () => {
 
 test('disableImmer', () => {
   // arrange
-  const model = {
+  const storeModel = model({
     foo: 0,
     setFoo: action((state, foo) => ({ ...state, foo })),
     doubleFoo: computed(state => state.foo * 2),
-  };
-  const store = createStore(model, {
+  });
+  const store = createStore(storeModel, {
     disableImmer: true,
   });
 
@@ -472,13 +482,13 @@ test('disableImmer', () => {
 
 test('disableImmer - nested update', () => {
   // arrange
-  const model = {
-    nested: {
+  const storeModel = model({
+    nested: model({
       foo: 0,
       setFoo: action((state, foo) => ({ ...state, foo })),
-    },
-  };
-  const store = createStore(model, { disableImmer: true });
+    }),
+  });
+  const store = createStore(storeModel, { disableImmer: true });
 
   // act
   store.dispatch.nested.setFoo(5);
@@ -489,15 +499,15 @@ test('disableImmer - nested update', () => {
 
 test('disableImmer - deeply nested update', () => {
   // arrange
-  const model = {
-    deeply: {
-      nested: {
+  const storeModel = model({
+    deeply: model({
+      nested: model({
         foo: 0,
         setFoo: action((state, foo) => ({ ...state, foo })),
-      },
-    },
-  };
-  const store = createStore(model, { disableImmer: true });
+      }),
+    }),
+  });
+  const store = createStore(storeModel, { disableImmer: true });
 
   // act
   store.dispatch.deeply.nested.setFoo(5);
@@ -509,16 +519,16 @@ test('disableImmer - deeply nested update', () => {
 it('disableImmer - nested reducer', () => {
   // arrange
   const store = createStore(
-    {
-      stuff: {
+    model({
+      stuff: model({
         counter: reducer((state = 1, _action) => {
           if (_action.type === 'INCREMENT') {
             return state + 1;
           }
           return state;
         }),
-      },
-    },
+      }),
+    }),
     {
       disableImmer: true,
     },

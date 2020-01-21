@@ -3,7 +3,7 @@ import {
   actionOnSymbol,
   actionSymbol,
   computedSymbol,
-  persistSymbol,
+  modelSymbol,
   reducerSymbol,
   thunkOnSymbol,
   thunkSymbol,
@@ -21,7 +21,7 @@ export default function extractDataFromModel(
   injections,
   references,
 ) {
-  const defaultState = initialState;
+  // const defaultState = initialState;
   const actionCreatorDict = {};
   const actionCreators = {};
   const actionReducersDict = {};
@@ -34,11 +34,23 @@ export default function extractDataFromModel(
   const persistenceConfig = [];
   const computedState = {
     isInReducer: false,
-    currentState: defaultState,
+    currentState: initialState,
   };
 
-  const recursiveExtractFromModel = (current, parentPath) =>
+  function recursiveExtractFromModel(current, parentPath) {
+    if (current[modelSymbol]) {
+      const modelConfig = current[modelSymbol];
+      if (modelConfig.persist) {
+        persistenceConfig.push(
+          extractPersistConfig(parentPath, modelConfig.persist),
+        );
+      }
+    }
     Object.keys(current).forEach(key => {
+      if (key === modelSymbol) {
+        return;
+      }
+
       const value = current[key];
       const path = [...parentPath, key];
       const meta = {
@@ -49,16 +61,11 @@ export default function extractDataFromModel(
       const handleValueAsState = () => {
         const initialParentRef = get(parentPath, initialState);
         if (initialParentRef && key in initialParentRef) {
-          set(path, defaultState, initialParentRef[key]);
+          set(path, initialState, initialParentRef[key]);
         } else {
-          set(path, defaultState, value);
+          set(path, initialState, value);
         }
       };
-
-      if (key === persistSymbol) {
-        persistenceConfig.push(extractPersistConfig(parentPath, value));
-        return;
-      }
 
       if (typeof value === 'function') {
         if (value[actionSymbol] || value[actionOnSymbol]) {
@@ -97,7 +104,7 @@ export default function extractDataFromModel(
             set(path, actionCreators, actionCreator);
           }
         } else if (value[computedSymbol]) {
-          const parent = get(parentPath, defaultState);
+          const parent = get(parentPath, initialState);
           const bindComputedProperty = createComputedPropertyBinder(
             parentPath,
             key,
@@ -113,15 +120,20 @@ export default function extractDataFromModel(
           handleValueAsState();
         }
       } else if (isPlainObject(value)) {
-        const existing = get(path, defaultState);
-        if (existing == null) {
-          set(path, defaultState, {});
+        if (value[modelSymbol]) {
+          const existing = get(path, initialState);
+          if (existing == null) {
+            set(path, initialState, {});
+          }
+          recursiveExtractFromModel(value, path);
+        } else {
+          handleValueAsState();
         }
-        recursiveExtractFromModel(value, path);
       } else {
         handleValueAsState();
       }
     });
+  }
 
   recursiveExtractFromModel(model, []);
 
@@ -132,6 +144,12 @@ export default function extractDataFromModel(
     listenerActionMap,
   );
 
+  if (process.env.NODE_ENV !== 'production') {
+    // TODO: Perform an analysis to see if there are any thunks/actions declared
+    // on the state. This would mean that the nested models were not wrapped by
+    // the model helper and that we should warn the user appropriately
+  }
+
   return {
     actionCreatorDict,
     actionCreators,
@@ -139,7 +157,7 @@ export default function extractDataFromModel(
     computedProperties,
     customReducers,
     computedState,
-    defaultState,
+    defaultState: initialState,
     listenerActionCreators,
     listenerActionMap,
     persistenceConfig,

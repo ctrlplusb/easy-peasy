@@ -3,17 +3,18 @@ import { render, fireEvent } from '@testing-library/react';
 import {
   action,
   createStore,
+  model,
   StoreProvider,
   useStoreState,
   useStoreActions,
 } from '../../index';
 
-const model = {
+const storeModel = model({
   count: 0,
   increment: action(state => {
     state.count += 1;
   }),
-};
+});
 
 describe('react', () => {
   it('component integration test', () => {
@@ -31,7 +32,7 @@ describe('react', () => {
       );
     }
 
-    const store = createStore(model);
+    const store = createStore(storeModel);
 
     const app = (
       <StoreProvider store={store}>
