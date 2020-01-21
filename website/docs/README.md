@@ -11,6 +11,8 @@ Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickl
 
 <p>&nbsp;</p>
 
+**Install**
+
 ```bash
 npm install easy-peasy
 ```
@@ -33,6 +35,8 @@ const store = createStore(storeModel);
 **Step 2 - Wrap your app**
 
 ```javascript
+const store = createStore(storeModel);
+
 function App() {
   return (
     <StoreProvider store={store}>
@@ -42,7 +46,7 @@ function App() {
 }
 ```
 
-**Step 3 - Use the store**
+**Use the store**
 
 ```javascript
 function TodoList() {
