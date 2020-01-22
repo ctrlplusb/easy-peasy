@@ -9,6 +9,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "plugins",
     "index.d.ts"
   ],
   "repository": {

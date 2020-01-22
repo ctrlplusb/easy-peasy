@@ -6,15 +6,10 @@ import {
 import reduxThunk from 'redux-thunk';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
-import {
-  createPersistor,
-  createPersistMiddleware,
-  createPersistenceClearer,
-  rehydrateStateFromPersistIfNeeded,
-} from './persistence';
 import { createComputedPropertiesMiddleware } from './computed-properties';
 import { createListenerMiddleware } from './listeners';
 import { deepCloneStateWithoutComputed } from './lib';
+import { registeredPlugins } from './plugins';
 
 export default function createStore(model, options = {}) {
   const modelClone = deepCloneStateWithoutComputed(model);
@@ -40,16 +35,24 @@ export default function createStore(model, options = {}) {
 
   const references = {};
 
-  let modelDefinition = bindReplaceState(modelClone);
-  let mockedActions = [];
-
-  const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
-  const persistor = createPersistor(persistKey, references);
-  const persistMiddleware = createPersistMiddleware(persistor, references);
-  const clearPersistance = createPersistenceClearer(persistKey, references);
-
   const replaceState = nextState =>
     references.internals.actionCreatorDict['@action.ePRS'](nextState);
+
+  const pluginOptions = {
+    initialState,
+    injections,
+    storeName,
+  };
+
+  const plugins = registeredPlugins.map(pluginFactory => {
+    return pluginFactory(pluginOptions, references);
+  });
+
+  references.plugins = plugins;
+  references.replaceState = replaceState;
+
+  let modelDefinition = bindReplaceState(modelClone);
+  let mockedActions = [];
 
   const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({
@@ -81,13 +84,20 @@ export default function createStore(model, options = {}) {
 
   bindStoreInternals(initialState);
 
-  const easyPeasyMiddleware = [
-    createComputedPropertiesMiddleware(references),
-    reduxThunk,
-    ...middleware,
-    createListenerMiddleware(references),
-    persistMiddleware,
-  ];
+  const easyPeasyMiddleware = references.plugins.reduce(
+    (configuredMiddleware, plugin) => {
+      if (Array.isArray(plugin.middleware)) {
+        return [...configuredMiddleware, ...plugin.middleware];
+      }
+      return configuredMiddleware;
+    },
+    [
+      createComputedPropertiesMiddleware(references),
+      reduxThunk,
+      ...middleware,
+      createListenerMiddleware(references),
+    ],
+  );
 
   if (mockActions) {
     easyPeasyMiddleware.push(mockActionsMiddleware);
@@ -128,51 +138,56 @@ export default function createStore(model, options = {}) {
     bindActionCreators();
   };
 
-  const resolveRehydration = rehydrateStateFromPersistIfNeeded(
-    persistKey,
-    replaceState,
-    references,
-  );
-
-  return Object.assign(store, {
-    addModel: (key, modelForKey) => {
-      if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `easy-peasy: The store model already contains a model definition for "${key}"`,
-        );
-        store.removeModel(key);
+  const easyPeasyEnhancedStore = references.plugins.reduce(
+    (enhancedStore, { storeEnhancer }) => {
+      if (storeEnhancer) {
+        return storeEnhancer(enhancedStore);
       }
-      modelDefinition[key] = modelForKey;
-      rebindStore();
+      return enhancedStore;
     },
-    clearMockedActions: () => {
-      mockedActions = [];
-    },
-    getActions: () => references.internals.actionCreators,
-    getListeners: () => references.internals.listenerActionCreators,
-    getMockedActions: () => [...mockedActions],
-    persist: {
-      clear: clearPersistance,
-      flush: () => persistor.flush(),
-      resolveRehydration: () => resolveRehydration,
-    },
-    reconfigure: newModel => {
-      modelDefinition = bindReplaceState(newModel);
-      rebindStore();
-    },
-    removeModel: key => {
-      if (!modelDefinition[key]) {
-        if (process.env.NODE_ENV !== 'production') {
+    Object.assign(store, {
+      addModel: (key, modelForKey) => {
+        if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console
           console.warn(
-            `easy-peasy: The store model does not contain a model definition for "${key}"`,
+            `easy-peasy: The store model already contains a model definition for "${key}"`,
           );
+          store.removeModel(key);
         }
-        return;
-      }
-      delete modelDefinition[key];
-      rebindStore(key);
-    },
+        modelDefinition[key] = modelForKey;
+        rebindStore();
+      },
+      clearMockedActions: () => {
+        mockedActions = [];
+      },
+      getActions: () => references.internals.actionCreators,
+      getListeners: () => references.internals.listenerActionCreators,
+      getMockedActions: () => [...mockedActions],
+      reconfigure: newModel => {
+        modelDefinition = bindReplaceState(newModel);
+        rebindStore();
+      },
+      removeModel: key => {
+        if (!modelDefinition[key]) {
+          if (process.env.NODE_ENV !== 'production') {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `easy-peasy: The store model does not contain a model definition for "${key}"`,
+            );
+          }
+          return;
+        }
+        delete modelDefinition[key];
+        rebindStore(key);
+      },
+    }),
+  );
+
+  references.plugins.forEach(plugin => {
+    if (plugin.onStoreCreated != null) {
+      plugin.onStoreCreated(easyPeasyEnhancedStore);
+    }
   });
+
+  return easyPeasyEnhancedStore;
 }

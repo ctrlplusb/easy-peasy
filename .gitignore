@@ -12,14 +12,11 @@ node_modules
 npm-debug.log
 
 # Jest
-coverage
+/coverage
 
 # Build output
 dist
-
-# Flow
-flow-coverage
-flow-typed
+/plugins
 
 # Yarn
 yarn-error.log

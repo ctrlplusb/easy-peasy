@@ -75,6 +75,9 @@ const commonUMD = config =>
   });
 
 module.exports = [
+  // TODO: UMD development build with all plugins
+  // TODO: UMD production build with all plugins
+
   // Universal module definition (UMD) build, unminified, development
   produce(commonUMD(baseConfig), draft => {
     draft.output.file = `dist/${packageJson.name}.umd.development.js`;
@@ -101,5 +104,17 @@ module.exports = [
   produce(baseConfig, draft => {
     draft.output.format = 'cjs';
     draft.output.file = `dist/${packageJson.name}.cjs.js`;
+  }),
+
+  // ---------------------------------------------------------------------------
+  // PLUGINS
+  // ---------------------------------------------------------------------------
+
+  // ~~~ PERSIST PLUGIN ~~~~
+  produce(baseConfig, draft => {
+    draft.input = 'src/plugins/persist/index.js';
+    draft.output.format = 'cjs';
+    draft.output.file = `plugins/persist.js`;
+    draft.plugins.push(fileSize());
   }),
 ];

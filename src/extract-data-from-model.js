@@ -9,7 +9,6 @@ import {
   thunkSymbol,
 } from './constants';
 import { get, set } from './lib';
-import { extractPersistConfig } from './persistence';
 import { createActionCreator } from './actions';
 import { createThunkHandler, createThunkActionsCreator } from './thunks';
 import { bindListenerDefinitions } from './listeners';
@@ -21,7 +20,6 @@ export default function extractDataFromModel(
   injections,
   references,
 ) {
-  // const defaultState = initialState;
   const actionCreatorDict = {};
   const actionCreators = {};
   const actionReducersDict = {};
@@ -31,39 +29,45 @@ export default function extractDataFromModel(
   const listenerActionCreators = {};
   const listenerActionMap = {};
   const listenerDefinitions = [];
-  const persistenceConfig = [];
   const computedState = {
     isInReducer: false,
     currentState: initialState,
   };
 
-  function recursiveExtractFromModel(current, parentPath) {
-    if (current[modelSymbol]) {
-      const modelConfig = current[modelSymbol];
-      if (modelConfig.persist) {
-        persistenceConfig.push(
-          extractPersistConfig(parentPath, modelConfig.persist),
+  function recursiveExtractFromModel(current, path, key_) {
+    if (current[modelSymbol] == null) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(
+          'Model provided to store is not wrapped by the "model" helper. It is implicitly considered to be a model.',
         );
       }
+      current[modelSymbol] = {};
     }
+
+    references.plugins.forEach(plugin => {
+      plugin.modelVisitor(current, key_, {
+        path,
+      });
+    });
+
     Object.keys(current).forEach(key => {
       if (key === modelSymbol) {
         return;
       }
 
       const value = current[key];
-      const path = [...parentPath, key];
+      const propPath = [...path, key];
       const meta = {
-        parent: parentPath,
-        path,
+        parent: path,
+        path: propPath,
         key,
       };
       const handleValueAsState = () => {
-        const initialParentRef = get(parentPath, initialState);
+        const initialParentRef = get(path, initialState);
         if (initialParentRef && key in initialParentRef) {
-          set(path, initialState, initialParentRef[key]);
+          set(propPath, initialState, initialParentRef[key]);
         } else {
-          set(path, initialState, value);
+          set(propPath, initialState, value);
         }
       };
 
@@ -76,9 +80,9 @@ export default function extractDataFromModel(
           if (meta.key !== 'ePRS') {
             if (value[actionOnSymbol]) {
               listenerDefinitions.push(value);
-              set(path, listenerActionCreators, actionCreator);
+              set(propPath, listenerActionCreators, actionCreator);
             } else {
-              set(path, actionCreators, actionCreator);
+              set(propPath, actionCreators, actionCreator);
             }
           }
         } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
@@ -95,37 +99,41 @@ export default function extractDataFromModel(
             references,
             thunkHandler,
           );
-          set(path, actionThunks, thunkHandler);
+          set(propPath, actionThunks, thunkHandler);
           actionCreatorDict[actionCreator.type] = actionCreator;
           if (value[thunkOnSymbol]) {
             listenerDefinitions.push(value);
-            set(path, listenerActionCreators, actionCreator);
+            set(propPath, listenerActionCreators, actionCreator);
           } else {
-            set(path, actionCreators, actionCreator);
+            set(propPath, actionCreators, actionCreator);
           }
         } else if (value[computedSymbol]) {
-          const parent = get(parentPath, initialState);
+          const parent = get(path, initialState);
           const bindComputedProperty = createComputedPropertyBinder(
-            parentPath,
+            path,
             key,
             value,
             computedState,
             references,
           );
           bindComputedProperty(parent);
-          computedProperties.push({ key, parentPath, bindComputedProperty });
+          computedProperties.push({
+            key,
+            parentPath: path,
+            bindComputedProperty,
+          });
         } else if (value[reducerSymbol]) {
-          customReducers.push({ key, parentPath, reducer: value });
+          customReducers.push({ key, parentPath: path, reducer: value });
         } else {
           handleValueAsState();
         }
       } else if (isPlainObject(value)) {
         if (value[modelSymbol]) {
-          const existing = get(path, initialState);
+          const existing = get(propPath, initialState);
           if (existing == null) {
-            set(path, initialState, {});
+            set(propPath, initialState, {});
           }
-          recursiveExtractFromModel(value, path);
+          recursiveExtractFromModel(value, propPath);
         } else {
           handleValueAsState();
         }
@@ -160,6 +168,5 @@ export default function extractDataFromModel(
     defaultState: initialState,
     listenerActionCreators,
     listenerActionMap,
-    persistenceConfig,
   };
 }

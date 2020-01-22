@@ -23,6 +23,10 @@ import {
   thunk,
   thunkOn,
 } from './helpers';
+import { registerPlugins } from './plugins';
+import persistPlugin from './plugins/persist';
+
+registerPlugins([persistPlugin]);
 
 /**
  * The auto freeze feature of immer doesn't seem to work in our testing. We have
@@ -43,6 +47,7 @@ export {
   memo,
   model,
   reducer,
+  registerPlugins,
   StoreProvider,
   thunk,
   thunkOn,
