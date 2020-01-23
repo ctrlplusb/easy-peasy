@@ -1,10 +1,12 @@
 /* eslint-disable react/prop-types */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useMemo } from 'react';
 import {
   createStoreActionsHook,
   createStoreDispatchHook,
   createStoreStateHook,
+  createStoreHook,
+  createStoreModelHook,
   createStoreRehydratedHook,
 } from './hooks';
 import createStore from './create-store';
@@ -26,16 +28,13 @@ export default function createContextStore(model, config) {
     );
   }
 
-  function useStore() {
-    return useContext(StoreContext);
-  }
-
   return {
     Provider,
-    useStore,
+    useStore: createStoreHook(StoreContext),
     useStoreState: createStoreStateHook(StoreContext),
     useStoreActions: createStoreActionsHook(StoreContext),
     useStoreDispatch: createStoreDispatchHook(StoreContext),
     useStoreRehydrated: createStoreRehydratedHook(StoreContext),
+    useStoreModel: createStoreModelHook(StoreContext),
   };
 }
