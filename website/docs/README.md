@@ -7,17 +7,17 @@ pageClass: homepage
 </p>
 <h1 class="title" align="center">Vegetarian friendly state for React</h1>
 
-Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickly</strong> and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, performance optimisation, developer tools etc.
+Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickly</strong> and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, developer tools etc.
 
 <p>&nbsp;</p>
-
-**Install**
 
 ```bash
 npm install easy-peasy
 ```
 
-**Create your model**
+<p>&nbsp;</p>
+
+**Step 1 - Create the store**
 
 ```javascript
 const storeModel = model({
@@ -26,13 +26,13 @@ const storeModel = model({
     state.add.push(payload)
   })
 });
+
+const store = createStore(storeModel);
 ```
 
-**Create the store and wrap your application**
+**Step 2 - Wrap your app**
 
 ```javascript
-const store = createStore(storeModel);
-
 function App() {
   return (
     <StoreProvider store={store}>
@@ -42,7 +42,7 @@ function App() {
 }
 ```
 
-**Use the store**
+**Step 3 - Use the store**
 
 ```javascript
 function TodoList() {
@@ -59,7 +59,7 @@ function TodoList() {
 
 ## Features
 
-  - Zero configuration
+  - Zero config setup
   - No boilerplate
   - React hooks based API
   - Computed properties - i.e. derived data
