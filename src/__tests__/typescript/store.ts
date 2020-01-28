@@ -1,35 +1,44 @@
-import { createStore, Action, action, Thunk, thunk } from 'easy-peasy';
+import {
+  createStore,
+  Action,
+  action,
+  Thunk,
+  thunk,
+  Model,
+  model,
+  ReduxAction,
+} from 'easy-peasy';
 import { Reducer } from 'redux';
 
-interface Model {
+type StoreModel = Model<{
   count: number;
-  doActionVoid: Action<Model>;
-  doAction: Action<Model, boolean>;
-  doThunk: Thunk<Model, number>;
-}
+  doActionVoid: Action<StoreModel>;
+  doAction: Action<StoreModel, boolean>;
+  doThunk: Thunk<StoreModel, number>;
+}>;
 
-const model: Model = {
+const storeModel = model<StoreModel>({
   count: 0,
   doActionVoid: action(() => {}),
   doAction: action(() => {}),
   doThunk: thunk(() => {}),
-};
+});
 
 interface PersistPartial {
   persist: string;
 }
 
-function persistReducer<S, A extends Action>(
+function persistReducer<S, A extends ReduxAction>(
   baseReducer: Reducer<S, A>,
 ): Reducer<S & PersistPartial, A> {
   return (baseReducer as unknown) as Reducer<S & PersistPartial, A>;
 }
 
-const store = createStore(model, {
+const store = createStore(storeModel, {
   reducerEnhancer: reducer => persistReducer(reducer),
 });
 
-const configuredStore = createStore(model, {
+const configuredStore = createStore(storeModel, {
   disableImmer: false,
   devTools: false,
   initialState: { foo: 'bar' },

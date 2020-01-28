@@ -1,13 +1,15 @@
+import { createStore, StoreProvider, Model, model } from 'easy-peasy';
 import { Provider } from 'react-redux';
-import { createStore, StoreProvider } from 'easy-peasy';
 
-interface StoreModel {
+type StoreModel = Model<{
   foo: string;
-}
+}>;
 
-const store = createStore<StoreModel>({
+const storeModel = model<StoreModel>({
   foo: 'bar',
 });
+
+const store = createStore(storeModel);
 
 const app = (
   <StoreProvider store={store}>

@@ -1,29 +1,29 @@
-import { actionOn, ActionOn, Action, Thunk } from 'easy-peasy';
+import { actionOn, ActionOn, Action, Thunk, Model } from 'easy-peasy';
 
-interface ListeningModel {
+type ListeningModel = Model<{
   logs: string[];
   doActionString: Action<ListeningModel, string>;
   doThunkString: Thunk<ListeningModel, string>;
   doActionNumber: Action<ListeningModel, number>;
   doThunkNumber: Thunk<ListeningModel, number>;
-}
+}>;
 
-interface OtherModel {
+type OtherModel = Model<{
   otherAction: Action<OtherModel, string>;
   otherThunk: Thunk<OtherModel, string>;
-}
+}>;
 
-interface StoreModel {
+type StoreModel = Model<{
   listening: ListeningModel;
   other: OtherModel;
-}
+}>;
 
 const valid1: ActionOn<ListeningModel, StoreModel> = actionOn(
   actions => actions.doActionString,
   (state, target) => {
     const [foo] = target.resolvedTargets;
-    foo + 'bar';
-    target.type + 'foo';
+    `${foo}bar`;
+    `${target.type}foo`;
     if (target.error != null) {
       target.error.stack;
     }

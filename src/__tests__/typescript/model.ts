@@ -10,11 +10,11 @@ import {
   action,
 } from 'easy-peasy';
 
-interface AddressModel {
+type AddressModel = Model<{
   street: string;
   postCode: string;
   setAddress: Action<AddressModel, string>;
-}
+}>;
 
 const addressModel = model<AddressModel>({
   street: 'foo',
@@ -24,19 +24,19 @@ const addressModel = model<AddressModel>({
   }),
 });
 
-interface UserModel {
+type UserModel = Model<{
   firstName: string;
   lastName: string;
   dateOfBirth: Date;
   age: Computed<UserModel, number>;
-  address: Model<AddressModel>;
+  address: AddressModel;
   profile: {
     [key: string]: string;
   };
   archivedData: {
-    address: Model<AddressModel>;
+    address: AddressModel;
   };
-}
+}>;
 
 const userModel = model<UserModel>({
   firstName: '',
@@ -45,11 +45,14 @@ const userModel = model<UserModel>({
   lastName: '',
   address: addressModel,
   profile: {},
+  archivedData: {
+    address: addressModel,
+  },
 });
 
-interface StoreModel {
+type StoreModel = Model<{
   user: Model<UserModel>;
-}
+}>;
 
 const storeModel = model<StoreModel>({
   user: userModel,

@@ -1,14 +1,14 @@
-import { debug, action, Action } from 'easy-peasy';
+import { debug, action, Action, Model, model } from 'easy-peasy';
 
-interface Model {
+type StoreModel = Model<{
   logs: string[];
-  add: Action<Model, string>;
-}
+  add: Action<StoreModel, string>;
+}>;
 
-const model: Model = {
+const storeModel = model<StoreModel>({
   logs: [],
   add: action((state, payload) => {
     const foo = debug(state);
     console.log(foo);
   }),
-};
+});

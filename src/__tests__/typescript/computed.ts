@@ -1,4 +1,4 @@
-import { Computed, computed } from 'easy-peasy';
+import { Computed, computed, Model, model, createStore } from 'easy-peasy';
 
 interface Product {
   id: number;
@@ -6,24 +6,24 @@ interface Product {
   price: number;
 }
 
-interface ProductsModel {
+type ProductsModel = Model<{
   products: Product[];
   totalPrice: Computed<ProductsModel, number>;
   totalPriceVerbose: Computed<ProductsModel, number>;
-}
+}>;
 
-interface BasketModel {
+type BasketModel = Model<{
   productIds: number[];
   products: Computed<BasketModel, Product[], StoreModel>;
-}
+}>;
 
-interface StoreModel {
+type StoreModel = Model<{
   products: ProductsModel;
   baskets: BasketModel;
-}
+}>;
 
-const mode: StoreModel = {
-  products: {
+const storeModel = model<StoreModel>({
+  products: model({
     products: [{ id: 1, name: 'boots', price: 20 }],
     totalPrice: computed(state =>
       state.products.reduce((total, product) => total + product.price, 0),
@@ -31,8 +31,8 @@ const mode: StoreModel = {
     totalPriceVerbose: computed([state => state.products], products => {
       return products.reduce((total, product) => total + product.price, 0);
     }),
-  },
-  baskets: {
+  }),
+  baskets: model({
     productIds: [1],
     products: computed(
       [
@@ -48,5 +48,10 @@ const mode: StoreModel = {
           return acc;
         }, []),
     ),
-  },
-};
+  }),
+});
+
+const store = createStore(storeModel);
+
+store.getState().baskets.products[0].name;
+store.getState().products.totalPrice + 100;

@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {
@@ -8,18 +6,20 @@ import {
   State,
   StoreProvider,
   createTypedHooks,
+  Model,
+  model,
 } from 'easy-peasy';
 import { connect } from 'react-redux';
 
-interface StoreModel {
+type StoreModel = Model<{
   items: Array<string>;
   addTodo: Action<StoreModel, string>;
-}
+}>;
 
 // @ts-ignore
-const model: StoreModel = {};
+const storeModel = model<StoreModel>(({} as unknown) as StoreModel);
 
-const store = createStore(model);
+const store = createStore(storeModel);
 
 const { useStoreState, useStoreActions, useStoreDispatch } = createTypedHooks<
   StoreModel

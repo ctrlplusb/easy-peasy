@@ -1,6 +1,15 @@
 /* eslint-disable */
 
-import { action, Action, thunk, Thunk } from 'easy-peasy';
+import {
+  action,
+  Action,
+  thunk,
+  Thunk,
+  Model,
+  model,
+  Generic,
+  generic,
+} from 'easy-peasy';
 
 /**
  * ARRANGE
@@ -14,18 +23,18 @@ interface Person {
  * WORKING CASE - "NORMAL" MODEL INTERFACE
  */
 
-interface NormalModel {
+type NormalModel = Model<{
   data: Person[];
   fetch: Action<NormalModel>;
-}
+}>;
 
-const normalModel: NormalModel = {
+const normalModel = model<NormalModel>({
   data: [],
   fetch: action(state => {
     //      👍 works
     state.data[0].name;
   }),
-};
+});
 
 /**
  * WORKING CASE - "GENERIC" MODEL INTERFACE
@@ -35,72 +44,62 @@ interface ObjectWithId {
   id: string;
 }
 
-interface GenericModel<Item extends ObjectWithId> {
+type GenericModelTest<Item extends ObjectWithId> = Model<{
   data: Item[];
-  fetch: Action<GenericModel<Item>>;
-}
+  foo: number;
+  fetch: Action<GenericModelTest<Item>>;
+}>;
 
-const createModel = <Item extends ObjectWithId>(): GenericModel<Item> => {
-  return {
+const createModel = <Item extends ObjectWithId>(): GenericModelTest<Item> => {
+  return model({
     data: [],
+    foo: 1,
     fetch: action(state => {
       state.data.forEach(({ id }) => id);
     }),
-  };
+  });
 };
 
 /***
- * BROKEN CASE - #300
+ * #300
  */
 
-interface SimpleModel<T> {
-  count: number;
-  thevalue: T;
+type SimpleModel<T> = Model<{
+  name: string;
+  value: Generic<T>;
   theset: Action<SimpleModel<T>, T>;
-}
+  flag: boolean;
+  age: number;
+}>;
 
-const makeSimpleModel = <T>(initialValue: T): SimpleModel<T> => {
-  return {
-    count: 1,
-    thevalue: initialValue,
+model<SimpleModel<number>>({
+  age: 35,
+  flag: false,
+  name: 'Mary',
+  value: generic(123),
+  theset: action((state, payload) => {
+    state.age = 35;
+    state.flag = true;
+    state.name = 'bar';
+    state.value = payload;
+  }),
+});
+
+function makeSimpleModel<T>(initialValue: T): SimpleModel<T> {
+  return model({
+    age: 35,
+    flag: true,
+    name: 'bob',
     theset: action((state, payload) => {
-      // typings:expect-error
-      state.count = 1;
-      // typings:expect-error
-      state.thevalue = payload;
-      // typings:expect-error
-      state.theset();
+      state.name = 'bar';
+      state.value = initialValue;
+      state.value = payload;
+      state.age = 35;
+      state.flag = true;
     }),
-  };
-};
-
-/**
- * WORKAROUND - #300
- */
-
-interface SimpleModelWorkaround<T> {
-  count: number;
-  thevalue: T;
-  theset: Action<SimpleModelWorkaround<T>, T>;
+    value: generic(initialValue),
+  });
 }
-
-const makeSimpleModelWorking = <T>(
-  initialValue: T,
-): SimpleModelWorkaround<T> => {
-  return {
-    count: 1,
-    thevalue: initialValue,
-    theset: action((state, payload) => {
-      state.count += 1;
-      state.thevalue = payload;
-      // typings:expect-error
-      state.theset('foo');
-    }),
-  } as SimpleModelWorkaround<any>;
-};
-
-const fooModel = makeSimpleModelWorking<string>('foo');
-fooModel.thevalue += 'bar';
 
 /**
  * #345
@@ -110,14 +109,14 @@ interface Base {
   a: string;
 }
 
-interface Model<M extends Base> {
+type GenericModelFoo<M extends Base> = Model<{
   data: M[];
-  add: Action<Model<M>, M>;
-  doSomething: Thunk<Model<M>, M>;
-}
+  add: Action<GenericModelFoo<M>, M>;
+  doSomething: Thunk<GenericModelFoo<M>, M>;
+}>;
 
-function getModel<M extends Base>(): Model<M> {
-  return {
+function getModel<M extends Base>(): GenericModelFoo<M> {
+  return model({
     data: [],
     add: action((state, payload) => {
       payload.a + 'foo';
@@ -125,7 +124,8 @@ function getModel<M extends Base>(): Model<M> {
     }),
     doSomething: thunk((actions, payload) => {
       payload.a;
+      actions.doSomething(payload);
       actions.add(payload); // <-- Here actions.add expects parameter to be `void & string`
     }),
-  };
+  });
 }

@@ -1,20 +1,27 @@
 /* eslint-disable */
 
-import { action, createStore, EasyPeasyConfig, Action } from 'easy-peasy';
+import {
+  action,
+  createStore,
+  EasyPeasyConfig,
+  Action,
+  Model,
+  model,
+} from 'easy-peasy';
 
-interface StoreModel {
+type StoreModel = Model<{
   foo: string;
   update: Action<StoreModel, string>;
-}
+}>;
 
-const model: StoreModel = {
+const storeModel = model<StoreModel>({
   foo: 'bar',
   update: action((state, payload) => {
     state.foo = payload;
   }),
-};
+});
 
-const storeWithoutConfig = createStore(model);
+const storeWithoutConfig = createStore(storeModel);
 
 storeWithoutConfig.getMockedActions().length;
 storeWithoutConfig.clearMockedActions();
@@ -24,7 +31,7 @@ storeWithoutConfig.getActions().update('bar');
 const config: EasyPeasyConfig = {
   mockActions: true,
 };
-const storeWithConfig = createStore(model, config);
+const storeWithConfig = createStore(storeModel, config);
 
 storeWithConfig.getMockedActions().length;
 storeWithoutConfig.clearMockedActions();

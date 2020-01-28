@@ -1,24 +1,24 @@
 /* eslint-disable */
 
-import { action, Action, createStore } from 'easy-peasy';
+import { action, Action, createStore, Model, model } from 'easy-peasy';
 
 interface IAnimal {
   name: string;
   age?: number;
 }
 
-interface IModel {
+type StoreModel = Model<{
   animal: IAnimal;
-  setAnimal: Action<IModel, { animal: IAnimal }>;
-}
+  setAnimal: Action<StoreModel, { animal: IAnimal }>;
+}>;
 
-const model: IModel = {
+const storeModel = model<StoreModel>({
   animal: {
     name: 'robert',
   },
   setAnimal: action((state, payload) => {
     return { ...state, animal: payload.animal };
   }),
-};
+});
 
-const store = createStore(model);
+const store = createStore(storeModel);

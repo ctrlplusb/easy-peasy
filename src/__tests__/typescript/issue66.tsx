@@ -3,27 +3,27 @@
 // index.tsx
 import * as React from 'react';
 import { render } from 'react-dom';
-import { action, Action, createStore } from 'easy-peasy';
+import { action, Action, createStore, Model, model } from 'easy-peasy';
 
-interface CartModel {
+type CartModel = Model<{
   products?: string[] | null;
   setProducts: Action<CartModel, string[] | null>;
-}
+}>;
 
-interface Model {
+type StoreModel = Model<{
   cart: CartModel;
-}
+}>;
 
-const model: Model = {
-  cart: {
+const storeModel = model<StoreModel>({
+  cart: model({
     products: null,
     setProducts: action((state, payload) => {
       state.products = payload;
     }),
-  },
-};
+  }),
+});
 
-const store = createStore<Model>(model);
+const store = createStore(storeModel);
 
 const App = () => {
   return <h1>test</h1>;
