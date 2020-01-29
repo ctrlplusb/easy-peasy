@@ -76,7 +76,7 @@ export default function createStore(model, options = {}) {
 
   const easyPeasyMiddleware = references.plugins.reduce(
     (configuredMiddleware, plugin) => {
-      if (Array.isArray(plugin.middleware)) {
+      if (plugin.middleware != null) {
         return [...configuredMiddleware, ...plugin.middleware];
       }
       return configuredMiddleware;

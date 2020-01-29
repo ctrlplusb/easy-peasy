@@ -1,19 +1,12 @@
 import isPlainObject from 'is-plain-object';
-import {
-  actionOnSymbol,
-  actionSymbol,
-  modelSymbol,
-  modelVisitorResults,
-} from './constants';
+import { modelSymbol, modelVisitorResults } from './constants';
 import get from './lib/get';
 import set from './lib/set';
-import { createActionCreator } from './actions';
 import { bindListenerDefinitions } from './listeners';
 
 export default function extractDataFromModel(model, initialState, references) {
   const actionCreatorDict = {};
   const actionCreators = {};
-  const actionReducersDict = {};
   const listenerActionCreators = {};
   const listenerActionMap = {};
   const listenerDefinitions = [];
@@ -49,6 +42,8 @@ export default function extractDataFromModel(model, initialState, references) {
       const value = current[key];
       const propPath = [...path, key];
 
+      // Check if this property is a model definition, if so we will recurse
+      // into it
       if (isPlainObject(value) && value[modelSymbol]) {
         const existing = get(propPath, initialState);
         if (existing == null) {
@@ -58,19 +53,17 @@ export default function extractDataFromModel(model, initialState, references) {
         continue;
       }
 
-      const meta = {
-        key,
-        parent: get(path, initialState),
-        parentPath: path,
-        path: propPath,
-      };
-
       let handled = false;
       for (const plugin of references.plugins) {
         const visitResult = plugin.modelVisitor(
           value,
           key,
-          meta,
+          {
+            key,
+            parent: get(path, initialState),
+            parentPath: path,
+            path: propPath,
+          },
           // TODO: Replace this with a set of APIs instead.
           // e.g. registerActionCreator
           {
@@ -89,30 +82,12 @@ export default function extractDataFromModel(model, initialState, references) {
         continue;
       }
 
-      if (
-        typeof value === 'function' &&
-        (value[actionSymbol] || value[actionOnSymbol])
-      ) {
-        const actionReducer = value;
-        const actionCreator = createActionCreator(value, meta, references);
-        actionCreatorDict[actionCreator.type] = actionCreator;
-        actionReducersDict[actionCreator.type] = actionReducer;
-        if (meta.key !== 'ePRS') {
-          if (value[actionOnSymbol]) {
-            listenerDefinitions.push(value);
-            set(propPath, listenerActionCreators, actionCreator);
-          } else {
-            set(propPath, actionCreators, actionCreator);
-          }
-        }
+      // This value is considered as being "state"
+      const initialParentRef = get(path, initialState);
+      if (initialParentRef && key in initialParentRef) {
+        set(propPath, initialState, initialParentRef[key]);
       } else {
-        // This value will now be considered as "state"
-        const initialParentRef = get(path, initialState);
-        if (initialParentRef && key in initialParentRef) {
-          set(propPath, initialState, initialParentRef[key]);
-        } else {
-          set(propPath, initialState, value);
-        }
+        set(propPath, initialState, value);
       }
     }
   }
@@ -135,7 +110,6 @@ export default function extractDataFromModel(model, initialState, references) {
   return {
     actionCreatorDict,
     actionCreators,
-    actionReducersDict,
     defaultState: initialState,
     listenerActionCreators,
     listenerActionMap,

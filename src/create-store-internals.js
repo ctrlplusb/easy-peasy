@@ -17,18 +17,13 @@ export default function createStoreInternals({
   const {
     actionCreatorDict,
     actionCreators,
-    actionReducersDict,
     defaultState,
     listenerActionCreators,
     listenerActionMap,
     persistenceConfig,
   } = extractDataFromModel(model, initialState, references);
 
-  const rootReducer = createReducer(
-    disableImmer,
-    actionReducersDict,
-    references,
-  );
+  const rootReducer = createReducer(disableImmer, references);
 
   return {
     actionCreatorDict,
