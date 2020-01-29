@@ -1,6 +1,9 @@
 import debounce from 'debounce';
 import isPlainObject from 'is-plain-object';
-import { deepCloneState, get, isPromise, set } from '../../lib';
+import deepCloneState from '../../lib/deep-clone-state';
+import isPromise from '../../lib/is-promise';
+import get from '../../lib/get';
+import set from '../../lib/set';
 import { modelSymbol } from '../../constants';
 
 const noopStorage = {

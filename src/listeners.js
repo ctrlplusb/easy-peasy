@@ -1,5 +1,5 @@
 import { actionOnSymbol, thunkOnSymbol } from './constants';
-import { get } from './lib';
+import get from './lib/get';
 
 export function createListenerMiddleware(references) {
   return () => next => action => {

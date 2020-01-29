@@ -4,7 +4,9 @@ import {
   thunkSymbol,
   thunkOnSymbol,
 } from '../../constants';
-import { get, isPromise, set } from '../../lib';
+import isPromise from '../../lib/is-promise';
+import get from '../../lib/get';
+import set from '../../lib/set';
 
 function createThunkHandler(thunkDefinition, meta, references, injections) {
   const thunkMeta =

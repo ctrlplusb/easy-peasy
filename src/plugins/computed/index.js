@@ -1,5 +1,5 @@
 import memoizerific from 'memoizerific';
-import { get } from '../../lib';
+import get from '../../lib/get';
 import { computedSymbol, modelVisitorResults } from '../../constants';
 
 function createComputedPropertyBinder(

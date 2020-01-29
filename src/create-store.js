@@ -6,7 +6,7 @@ import {
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
 import { createListenerMiddleware } from './listeners';
-import { deepCloneState } from './lib';
+import deepCloneState from './lib/deep-clone-state';
 import { registeredPlugins } from './plugins';
 
 export default function createStore(model, options = {}) {

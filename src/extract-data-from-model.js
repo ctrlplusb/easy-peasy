@@ -5,7 +5,8 @@ import {
   modelSymbol,
   modelVisitorResults,
 } from './constants';
-import { get, set } from './lib';
+import get from './lib/get';
+import set from './lib/set';
 import { createActionCreator } from './actions';
 import { bindListenerDefinitions } from './listeners';
 

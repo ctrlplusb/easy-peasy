@@ -1,4 +1,4 @@
-import { createSimpleProduce } from './lib';
+import createSimpleProduce from './lib/create-simple-produce';
 import { actionSymbol, actionOnSymbol } from './constants';
 
 export default function createReducer(
