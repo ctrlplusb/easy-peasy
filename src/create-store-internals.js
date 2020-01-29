@@ -9,12 +9,16 @@ export default function createStoreInternals({
   reducerEnhancer,
   references,
 }) {
+  references.plugins.forEach(plugin => {
+    if (plugin.onBeforeCreateStore != null) {
+      plugin.onBeforeCreateStore({ initialState });
+    }
+  });
+
   const {
     actionCreatorDict,
     actionCreators,
     actionReducersDict,
-    computedState,
-    computedProperties,
     customReducers,
     defaultState,
     listenerActionCreators,
@@ -26,14 +30,12 @@ export default function createStoreInternals({
     disableImmer,
     actionReducersDict,
     customReducers,
-    computedProperties,
+    references,
   );
 
   return {
     actionCreatorDict,
     actionCreators,
-    computedProperties,
-    computedState,
     defaultState,
     listenerActionCreators,
     listenerActionMap,

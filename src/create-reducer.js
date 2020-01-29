@@ -5,7 +5,7 @@ export default function createReducer(
   disableImmer,
   actionReducersDict,
   customReducers,
-  computedProperties,
+  references,
 ) {
   const simpleProduce = createSimpleProduce(disableImmer);
 
@@ -46,8 +46,10 @@ export default function createReducer(
         ? reducerForCustomReducers(stateAfterActions, action)
         : stateAfterActions;
     if (state !== next) {
-      computedProperties.forEach(({ parentPath, bindComputedProperty }) => {
-        bindComputedProperty(get(parentPath, next));
+      references.plugins.forEach(plugin => {
+        if (plugin.onReducerStateChanged != null) {
+          plugin.onReducerStateChanged(state, next);
+        }
       });
     }
     return next;

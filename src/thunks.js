@@ -14,16 +14,24 @@ export function createThunkHandler(
   return payload => {
     const helpers = {
       dispatch: references.dispatch,
-      getState: () => get(meta.parent, references.getState()),
+      getState: () => get(meta.parentPath, references.getState()),
       getStoreActions: () => actionCreators,
       getStoreState: references.getState,
       injections,
-      meta,
+      meta: {
+        key: meta.key,
+        parent: meta.parentPath,
+        path: meta.path,
+      },
     };
     if (thunkDefinition[thunkOnSymbol] && thunkMeta.resolvedTargets) {
       payload.resolvedTargets = [...thunkMeta.resolvedTargets];
     }
-    return thunkDefinition(get(meta.parent, actionCreators), payload, helpers);
+    return thunkDefinition(
+      get(meta.parentPath, actionCreators),
+      payload,
+      helpers,
+    );
   };
 }
 
@@ -43,7 +51,7 @@ export function createThunkActionsCreator(
     thunkDefinition[thunkSymbol] || thunkDefinition[thunkOnSymbol];
   thunkMeta.type = type;
   thunkMeta.actionName = meta.key;
-  thunkMeta.parent = meta.parent;
+  thunkMeta.parent = meta.parentPath;
   thunkMeta.path = meta.path;
 
   const actionCreator = payload => {

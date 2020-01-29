@@ -6,13 +6,12 @@ import {
 import reduxThunk from 'redux-thunk';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
-import { createComputedPropertiesMiddleware } from './computed-properties';
 import { createListenerMiddleware } from './listeners';
-import { deepCloneStateWithoutComputed } from './lib';
+import { deepCloneState } from './lib';
 import { registeredPlugins } from './plugins';
 
 export default function createStore(model, options = {}) {
-  const modelClone = deepCloneStateWithoutComputed(model);
+  const modelClone = deepCloneState(model);
   const {
     compose,
     devTools = true,
@@ -65,13 +64,6 @@ export default function createStore(model, options = {}) {
     });
   };
 
-  const mockActionsMiddleware = () => () => action => {
-    if (action != null) {
-      mockedActions.push(action);
-    }
-    return undefined;
-  };
-
   const composeEnhancers =
     compose ||
     (devTools &&
@@ -91,15 +83,17 @@ export default function createStore(model, options = {}) {
       }
       return configuredMiddleware;
     },
-    [
-      createComputedPropertiesMiddleware(references),
-      reduxThunk,
-      ...middleware,
-      createListenerMiddleware(references),
-    ],
+    [...middleware, reduxThunk, createListenerMiddleware(references)],
   );
 
   if (mockActions) {
+    const mockActionsMiddleware = () => () => action => {
+      if (action != null && typeof action === 'object') {
+        mockedActions.push(action);
+      }
+      // i.e. dead end. we don't call "next" on the middleware
+      return undefined;
+    };
     easyPeasyMiddleware.push(mockActionsMiddleware);
   }
 
@@ -108,10 +102,6 @@ export default function createStore(model, options = {}) {
     references.internals.defaultState,
     composeEnhancers(applyMiddleware(...easyPeasyMiddleware), ...enhancers),
   );
-
-  store.subscribe(() => {
-    references.internals.computedState.isInReducer = false;
-  });
 
   references.dispatch = store.dispatch;
   references.getState = store.getState;

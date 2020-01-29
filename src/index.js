@@ -24,9 +24,10 @@ import {
   thunkOn,
 } from './helpers';
 import { registerPlugins } from './plugins';
-import persistPlugin from './plugins/persist';
+import persistPlugin from './plugins/persist/index';
+import computedPlugin from './plugins/computed/index';
 
-registerPlugins([persistPlugin]);
+registerPlugins([persistPlugin, computedPlugin]);
 
 /**
  * The auto freeze feature of immer doesn't seem to work in our testing. We have

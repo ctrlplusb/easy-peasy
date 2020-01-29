@@ -110,11 +110,11 @@ module.exports = [
   // PLUGINS
   // ---------------------------------------------------------------------------
 
-  // ~~~ PERSIST PLUGIN ~~~~
-  produce(baseConfig, draft => {
-    draft.input = 'src/plugins/persist/index.js';
-    draft.output.format = 'cjs';
-    draft.output.file = `plugins/persist.js`;
-    draft.plugins.push(fileSize());
-  }),
+  // // ~~~ PERSIST PLUGIN ~~~~
+  // produce(baseConfig, draft => {
+  //   draft.input = 'src/plugins/persist/index.js';
+  //   draft.output.format = 'cjs';
+  //   draft.output.file = `plugins/persist.js`;
+  //   draft.plugins.push(fileSize());
+  // }),
 ];

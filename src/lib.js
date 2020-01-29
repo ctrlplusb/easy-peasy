@@ -1,7 +1,7 @@
 import isPlainObject from 'is-plain-object';
 import { createDraft, finishDraft, isDraft } from 'immer';
 
-export const deepCloneStateWithoutComputed = source => {
+export const deepCloneState = source => {
   const recursiveClone = current => {
     const next = Object.keys(current).reduce((acc, key) => {
       if (Object.getOwnPropertyDescriptor(current, key).get == null) {

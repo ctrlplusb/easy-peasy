@@ -2,8 +2,8 @@ import isPlainObject from 'is-plain-object';
 import {
   actionOnSymbol,
   actionSymbol,
-  computedSymbol,
   modelSymbol,
+  modelVisitorResults,
   reducerSymbol,
   thunkOnSymbol,
   thunkSymbol,
@@ -12,7 +12,6 @@ import { get, set } from './lib';
 import { createActionCreator } from './actions';
 import { createThunkHandler, createThunkActionsCreator } from './thunks';
 import { bindListenerDefinitions } from './listeners';
-import { createComputedPropertyBinder } from './computed-properties';
 
 export default function extractDataFromModel(
   model,
@@ -24,15 +23,10 @@ export default function extractDataFromModel(
   const actionCreators = {};
   const actionReducersDict = {};
   const actionThunks = {};
-  const computedProperties = [];
   const customReducers = [];
   const listenerActionCreators = {};
   const listenerActionMap = {};
   const listenerDefinitions = [];
-  const computedState = {
-    isInReducer: false,
-    currentState: initialState,
-  };
 
   function recursiveExtractFromModel(current, path, key_) {
     if (current[modelSymbol] == null) {
@@ -45,23 +39,44 @@ export default function extractDataFromModel(
     }
 
     references.plugins.forEach(plugin => {
-      plugin.modelVisitor(current, key_, {
-        path,
-      });
+      if (plugin.modelVisitor != null) {
+        plugin.modelVisitor(current, key_, {
+          path,
+        });
+      }
     });
 
-    Object.keys(current).forEach(key => {
+    const modelProperties = Object.keys(current);
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const key of modelProperties) {
+      // This is the model marker key that we should strip/ignore
       if (key === modelSymbol) {
-        return;
+        continue;
       }
 
       const value = current[key];
       const propPath = [...path, key];
       const meta = {
-        parent: path,
-        path: propPath,
         key,
+        parent: get(path, initialState),
+        parentPath: path,
+        path: propPath,
       };
+
+      let handled = false;
+      // eslint-disable-next-line no-restricted-syntax
+      for (const plugin of references.plugins) {
+        const visitResult = plugin.modelVisitor(value, key, meta);
+        if (visitResult === modelVisitorResults.CONTINUE) {
+          handled = true;
+          continue;
+        }
+      }
+      if (handled) {
+        continue;
+      }
+
       const handleValueAsState = () => {
         const initialParentRef = get(path, initialState);
         if (initialParentRef && key in initialParentRef) {
@@ -107,21 +122,6 @@ export default function extractDataFromModel(
           } else {
             set(propPath, actionCreators, actionCreator);
           }
-        } else if (value[computedSymbol]) {
-          const parent = get(path, initialState);
-          const bindComputedProperty = createComputedPropertyBinder(
-            path,
-            key,
-            value,
-            computedState,
-            references,
-          );
-          bindComputedProperty(parent);
-          computedProperties.push({
-            key,
-            parentPath: path,
-            bindComputedProperty,
-          });
         } else if (value[reducerSymbol]) {
           customReducers.push({ key, parentPath: path, reducer: value });
         } else {
@@ -140,7 +140,7 @@ export default function extractDataFromModel(
       } else {
         handleValueAsState();
       }
-    });
+    }
   }
 
   recursiveExtractFromModel(model, []);
@@ -162,9 +162,7 @@ export default function extractDataFromModel(
     actionCreatorDict,
     actionCreators,
     actionReducersDict,
-    computedProperties,
     customReducers,
-    computedState,
     defaultState: initialState,
     listenerActionCreators,
     listenerActionMap,
