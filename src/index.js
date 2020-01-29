@@ -10,7 +10,7 @@ import {
 import createStore from './create-store';
 import createContextStore from './create-context-store';
 import createComponentStore from './create-component-store';
-import createTransform from './create-transform';
+import createTransform from './plugins/persist/create-transform';
 import StoreProvider from './provider';
 import {
   action,
