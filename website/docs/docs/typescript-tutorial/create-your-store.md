@@ -40,8 +40,8 @@ const auditModel: AuditModel = {
 };
 
 const storeModel: StoreModel = {
-  todos,
-  audit
+  todos: todosModel,
+  audit: auditModel
 }
 ```
 
