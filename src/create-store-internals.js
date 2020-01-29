@@ -24,7 +24,7 @@ export default function createStoreInternals({
     listenerActionCreators,
     listenerActionMap,
     persistenceConfig,
-  } = extractDataFromModel(model, initialState, injections, references);
+  } = extractDataFromModel(model, initialState, references);
 
   const rootReducer = createReducer(
     disableImmer,

@@ -5,24 +5,15 @@ import {
   modelSymbol,
   modelVisitorResults,
   reducerSymbol,
-  thunkOnSymbol,
-  thunkSymbol,
 } from './constants';
 import { get, set } from './lib';
 import { createActionCreator } from './actions';
-import { createThunkHandler, createThunkActionsCreator } from './thunks';
 import { bindListenerDefinitions } from './listeners';
 
-export default function extractDataFromModel(
-  model,
-  initialState,
-  injections,
-  references,
-) {
+export default function extractDataFromModel(model, initialState, references) {
   const actionCreatorDict = {};
   const actionCreators = {};
   const actionReducersDict = {};
-  const actionThunks = {};
   const customReducers = [];
   const listenerActionCreators = {};
   const listenerActionMap = {};
@@ -41,14 +32,15 @@ export default function extractDataFromModel(
     references.plugins.forEach(plugin => {
       if (plugin.modelVisitor != null) {
         plugin.modelVisitor(current, key_, {
+          key: key_,
           path,
+          // TODO: parent & parentPath
         });
       }
     });
 
     const modelProperties = Object.keys(current);
 
-    // eslint-disable-next-line no-restricted-syntax
     for (const key of modelProperties) {
       // This is the model marker key that we should strip/ignore
       if (key === modelSymbol) {
@@ -57,6 +49,16 @@ export default function extractDataFromModel(
 
       const value = current[key];
       const propPath = [...path, key];
+
+      if (isPlainObject(value) && value[modelSymbol]) {
+        const existing = get(propPath, initialState);
+        if (existing == null) {
+          set(propPath, initialState, {});
+        }
+        recursiveExtractFromModel(value, propPath);
+        continue;
+      }
+
       const meta = {
         key,
         parent: get(path, initialState),
@@ -65,80 +67,55 @@ export default function extractDataFromModel(
       };
 
       let handled = false;
-      // eslint-disable-next-line no-restricted-syntax
       for (const plugin of references.plugins) {
-        const visitResult = plugin.modelVisitor(value, key, meta);
+        const visitResult = plugin.modelVisitor(
+          value,
+          key,
+          meta,
+          // TODO: Replace this with a set of APIs instead.
+          // e.g. registerActionCreator
+          {
+            actionCreatorDict,
+            actionCreators,
+            listenerActionCreators,
+            listenerDefinitions,
+          },
+        );
         if (visitResult === modelVisitorResults.CONTINUE) {
           handled = true;
-          continue;
+          break;
         }
       }
       if (handled) {
         continue;
       }
 
-      const handleValueAsState = () => {
+      if (
+        typeof value === 'function' &&
+        (value[actionSymbol] || value[actionOnSymbol])
+      ) {
+        const actionReducer = value;
+        const actionCreator = createActionCreator(value, meta, references);
+        actionCreatorDict[actionCreator.type] = actionCreator;
+        actionReducersDict[actionCreator.type] = actionReducer;
+        if (meta.key !== 'ePRS') {
+          if (value[actionOnSymbol]) {
+            listenerDefinitions.push(value);
+            set(propPath, listenerActionCreators, actionCreator);
+          } else {
+            set(propPath, actionCreators, actionCreator);
+          }
+        }
+      } else if (typeof value === 'function' && value[reducerSymbol]) {
+        customReducers.push({ key, parentPath: path, reducer: value });
+      } else {
+        // This value will now be considered as "state"
         const initialParentRef = get(path, initialState);
         if (initialParentRef && key in initialParentRef) {
           set(propPath, initialState, initialParentRef[key]);
         } else {
           set(propPath, initialState, value);
         }
-      };
-
-      if (typeof value === 'function') {
-        if (value[actionSymbol] || value[actionOnSymbol]) {
-          const actionReducer = value;
-          const actionCreator = createActionCreator(value, meta, references);
-          actionCreatorDict[actionCreator.type] = actionCreator;
-          actionReducersDict[actionCreator.type] = actionReducer;
-          if (meta.key !== 'ePRS') {
-            if (value[actionOnSymbol]) {
-              listenerDefinitions.push(value);
-              set(propPath, listenerActionCreators, actionCreator);
-            } else {
-              set(propPath, actionCreators, actionCreator);
-            }
-          }
-        } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
-          const thunkHandler = createThunkHandler(
-            value,
-            meta,
-            references,
-            injections,
-            actionCreators,
-          );
-          const actionCreator = createThunkActionsCreator(
-            value,
-            meta,
-            references,
-            thunkHandler,
-          );
-          set(propPath, actionThunks, thunkHandler);
-          actionCreatorDict[actionCreator.type] = actionCreator;
-          if (value[thunkOnSymbol]) {
-            listenerDefinitions.push(value);
-            set(propPath, listenerActionCreators, actionCreator);
-          } else {
-            set(propPath, actionCreators, actionCreator);
-          }
-        } else if (value[reducerSymbol]) {
-          customReducers.push({ key, parentPath: path, reducer: value });
-        } else {
-          handleValueAsState();
-        }
-      } else if (isPlainObject(value)) {
-        if (value[modelSymbol]) {
-          const existing = get(propPath, initialState);
-          if (existing == null) {
-            set(propPath, initialState, {});
-          }
-          recursiveExtractFromModel(value, propPath);
-        } else {
-          handleValueAsState();
-        }
-      } else {
-        handleValueAsState();
       }
     }
   }

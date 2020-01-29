@@ -1,13 +1,12 @@
-import { thunkSymbol, thunkOnSymbol } from './constants';
-import { get, isPromise } from './lib';
+import reduxThunk from 'redux-thunk';
+import {
+  modelVisitorResults,
+  thunkSymbol,
+  thunkOnSymbol,
+} from '../../constants';
+import { get, isPromise, set } from '../../lib';
 
-export function createThunkHandler(
-  thunkDefinition,
-  meta,
-  references,
-  injections,
-  actionCreators,
-) {
+function createThunkHandler(thunkDefinition, meta, references, injections) {
   const thunkMeta =
     thunkDefinition[thunkSymbol] || thunkDefinition[thunkOnSymbol];
 
@@ -15,7 +14,7 @@ export function createThunkHandler(
     const helpers = {
       dispatch: references.dispatch,
       getState: () => get(meta.parentPath, references.getState()),
-      getStoreActions: () => actionCreators,
+      getStoreActions: () => references.internals.actionCreators,
       getStoreState: references.getState,
       injections,
       meta: {
@@ -28,14 +27,14 @@ export function createThunkHandler(
       payload.resolvedTargets = [...thunkMeta.resolvedTargets];
     }
     return thunkDefinition(
-      get(meta.parentPath, actionCreators),
+      get(meta.parentPath, references.internals.actionCreators),
       payload,
       helpers,
     );
   };
 }
 
-export function createThunkActionsCreator(
+function createThunkActionsCreator(
   thunkDefinition,
   meta,
   references,
@@ -112,3 +111,53 @@ export function createThunkActionsCreator(
 
   return actionCreator;
 }
+
+function thunkPlugin(config, references) {
+  const { injections } = config;
+
+  return {
+    middleware: [reduxThunk],
+    storeEnhancer: store => store,
+    modelVisitor: (value, key, meta, internals) => {
+      if (
+        value != null &&
+        typeof value === 'function' &&
+        (value[thunkSymbol] || value[thunkOnSymbol])
+      ) {
+        const { path } = meta;
+        const {
+          actionCreatorDict,
+          actionCreators,
+          listenerActionCreators,
+          listenerDefinitions,
+        } = internals;
+        const thunkHandler = createThunkHandler(
+          value,
+          meta,
+          references,
+          injections,
+        );
+        const actionCreator = createThunkActionsCreator(
+          value,
+          meta,
+          references,
+          thunkHandler,
+        );
+        actionCreatorDict[actionCreator.type] = actionCreator;
+        if (value[thunkOnSymbol]) {
+          listenerDefinitions.push(value);
+          set(path, listenerActionCreators, actionCreator);
+        } else {
+          set(path, actionCreators, actionCreator);
+        }
+        return modelVisitorResults.CONTINUE;
+      }
+      return undefined;
+    },
+    onStoreCreated: () => {},
+  };
+}
+
+thunkPlugin.pluginName = 'thunk';
+
+export default thunkPlugin;

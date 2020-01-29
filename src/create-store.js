@@ -3,7 +3,6 @@ import {
   compose as reduxCompose,
   createStore as reduxCreateStore,
 } from 'redux';
-import reduxThunk from 'redux-thunk';
 import * as helpers from './helpers';
 import createStoreInternals from './create-store-internals';
 import { createListenerMiddleware } from './listeners';
@@ -83,7 +82,7 @@ export default function createStore(model, options = {}) {
       }
       return configuredMiddleware;
     },
-    [...middleware, reduxThunk, createListenerMiddleware(references)],
+    [...middleware, createListenerMiddleware(references)],
   );
 
   if (mockActions) {
