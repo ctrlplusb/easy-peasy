@@ -4,7 +4,6 @@ import extractDataFromModel from './extract-data-from-model';
 export default function createStoreInternals({
   disableImmer,
   initialState,
-  injections,
   model,
   reducerEnhancer,
   references,
@@ -19,7 +18,6 @@ export default function createStoreInternals({
     actionCreatorDict,
     actionCreators,
     actionReducersDict,
-    customReducers,
     defaultState,
     listenerActionCreators,
     listenerActionMap,
@@ -29,7 +27,6 @@ export default function createStoreInternals({
   const rootReducer = createReducer(
     disableImmer,
     actionReducersDict,
-    customReducers,
     references,
   );
 

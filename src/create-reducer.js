@@ -4,7 +4,6 @@ import { actionSymbol, actionOnSymbol } from './constants';
 export default function createReducer(
   disableImmer,
   actionReducersDict,
-  customReducers,
   references,
 ) {
   const simpleProduce = createSimpleProduce(disableImmer);
@@ -30,21 +29,18 @@ export default function createReducer(
     return state;
   };
 
-  const reducerForCustomReducers = (state, action) => {
-    return customReducers.reduce((acc, { parentPath, key, reducer: red }) => {
-      return simpleProduce(parentPath, acc, draft => {
-        draft[key] = red(draft[key], action);
-        return draft;
-      });
+  const reducersForPlugins = (state, action) => {
+    return references.plugins.reduce((prevState, plugin) => {
+      if (plugin.reducer != null) {
+        return plugin.reducer(prevState, action, { simpleProduce });
+      }
+      return prevState;
     }, state);
   };
 
   const rootReducer = (state, action) => {
     const stateAfterActions = reducerForActions(state, action);
-    const next =
-      customReducers.length > 0
-        ? reducerForCustomReducers(stateAfterActions, action)
-        : stateAfterActions;
+    const next = reducersForPlugins(stateAfterActions, action);
     if (state !== next) {
       references.plugins.forEach(plugin => {
         if (plugin.onReducerStateChanged != null) {

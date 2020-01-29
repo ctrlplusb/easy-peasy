@@ -24,30 +24,30 @@ export default function createStore(model, options = {}) {
     reducerEnhancer = rootReducer => rootReducer,
   } = options;
 
+  // This is the "god" object. Our evil mutable point of all contact. 😈
+  const references = {};
+
+  references.plugins = registeredPlugins.map(pluginFactory => {
+    return pluginFactory(
+      {
+        initialState,
+        injections,
+        storeName,
+      },
+      references,
+    );
+  });
+
+  references.replaceState = function replaceStateActionCreator(nextState) {
+    references.internals.actionCreatorDict['@action.ePRS'](nextState);
+  };
+
   const bindReplaceState = modelDef => {
     return {
       ...modelDef,
       ePRS: helpers.action((_, payload) => payload),
     };
   };
-
-  const references = {};
-
-  const replaceState = nextState =>
-    references.internals.actionCreatorDict['@action.ePRS'](nextState);
-
-  const pluginOptions = {
-    initialState,
-    injections,
-    storeName,
-  };
-
-  const plugins = registeredPlugins.map(pluginFactory => {
-    return pluginFactory(pluginOptions, references);
-  });
-
-  references.plugins = plugins;
-  references.replaceState = replaceState;
 
   let modelDefinition = bindReplaceState(modelClone);
   let mockedActions = [];
@@ -56,7 +56,6 @@ export default function createStore(model, options = {}) {
     references.internals = createStoreInternals({
       disableImmer,
       initialState: state,
-      injections,
       model: modelDefinition,
       reducerEnhancer,
       references,
@@ -123,7 +122,7 @@ export default function createStore(model, options = {}) {
     }
     bindStoreInternals(currentState);
     store.replaceReducer(references.internals.reducer);
-    replaceState(references.internals.defaultState);
+    references.replaceState(references.internals.defaultState);
     bindActionCreators();
   };
 

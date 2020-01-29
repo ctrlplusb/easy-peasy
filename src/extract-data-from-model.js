@@ -4,7 +4,6 @@ import {
   actionSymbol,
   modelSymbol,
   modelVisitorResults,
-  reducerSymbol,
 } from './constants';
 import { get, set } from './lib';
 import { createActionCreator } from './actions';
@@ -14,7 +13,6 @@ export default function extractDataFromModel(model, initialState, references) {
   const actionCreatorDict = {};
   const actionCreators = {};
   const actionReducersDict = {};
-  const customReducers = [];
   const listenerActionCreators = {};
   const listenerActionMap = {};
   const listenerDefinitions = [];
@@ -106,8 +104,6 @@ export default function extractDataFromModel(model, initialState, references) {
             set(propPath, actionCreators, actionCreator);
           }
         }
-      } else if (typeof value === 'function' && value[reducerSymbol]) {
-        customReducers.push({ key, parentPath: path, reducer: value });
       } else {
         // This value will now be considered as "state"
         const initialParentRef = get(path, initialState);
@@ -139,7 +135,6 @@ export default function extractDataFromModel(model, initialState, references) {
     actionCreatorDict,
     actionCreators,
     actionReducersDict,
-    customReducers,
     defaultState: initialState,
     listenerActionCreators,
     listenerActionMap,
