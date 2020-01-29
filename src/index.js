@@ -6,12 +6,12 @@ import {
   useStoreState,
   useStoreRehydrated,
   useStore,
-} from './hooks';
+} from './react/hooks';
 import createStore from './create-store';
-import createContextStore from './create-context-store';
-import createComponentStore from './create-component-store';
+import createContextStore from './react/create-context-store';
+import createComponentStore from './react/create-component-store';
 import createTransform from './plugins/persist/create-transform';
-import StoreProvider from './provider';
+import StoreProvider from './react/provider';
 import {
   action,
   actionOn,
