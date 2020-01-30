@@ -107,11 +107,9 @@ function thunkPlugin(config, references) {
 
   return {
     middleware: [reduxThunk],
-    storeEnhancer: store => store,
-    modelVisitor: (value, key, meta, internals) => {
+    modelVisitor: (value, key, meta) => {
       if (value != null && typeof value === 'function' && value[thunkSymbol]) {
         const { path } = meta;
-        const { actionCreatorDict, actionCreators } = internals;
         const thunkHandler = createThunkHandler(
           value,
           meta,
@@ -124,8 +122,10 @@ function thunkPlugin(config, references) {
           references,
           thunkHandler,
         );
-        actionCreatorDict[actionCreator.type] = actionCreator;
-        set(path, actionCreators, actionCreator);
+        references.internals.actionCreatorDict[
+          actionCreator.type
+        ] = actionCreator;
+        set(path, references.internals.actionCreators, actionCreator);
         return modelVisitorResults.CONTINUE;
       }
       return undefined;

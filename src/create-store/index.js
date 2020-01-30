@@ -3,14 +3,12 @@ import {
   compose as reduxCompose,
   createStore as reduxCreateStore,
 } from 'redux';
-import * as helpers from './helpers';
-import createStoreInternals from './create-store-internals';
-import { createListenerMiddleware } from './listeners';
-import deepCloneState from './lib/deep-clone-state';
-import { registeredPlugins } from './plugins';
+import * as helpers from '../helpers';
+import bindStoreInternals from './bind-store-internals';
+import deepCloneState from '../lib/deep-clone-state';
+import { registeredPlugins } from '../plugins';
 
-export default function createStore(model, options = {}) {
-  const modelClone = deepCloneState(model);
+const applyDefaultsToOptions = options => {
   const {
     compose,
     devTools = true,
@@ -20,22 +18,42 @@ export default function createStore(model, options = {}) {
     injections,
     middleware = [],
     mockActions = false,
-    name: storeName = `EasyPeasyStore`,
+    name = `EasyPeasyStore`,
     reducerEnhancer = rootReducer => rootReducer,
   } = options;
+  return {
+    compose,
+    devTools,
+    disableImmer,
+    enhancers,
+    initialState,
+    injections,
+    middleware,
+    mockActions,
+    name,
+    reducerEnhancer,
+  };
+};
+
+export default function createStore(model, options = {}) {
+  const modelClone = deepCloneState(model);
+  const defaultedOptions = applyDefaultsToOptions(options);
+  const {
+    compose,
+    devTools,
+    enhancers,
+    initialState,
+    middleware,
+    mockActions,
+    name: storeName,
+  } = defaultedOptions;
 
   // This is the "god" object. Our evil mutable point of all contact. 😈
   const references = {};
+  references.pluginsState = {};
 
   references.plugins = registeredPlugins.map(pluginFactory => {
-    return pluginFactory(
-      {
-        initialState,
-        injections,
-        storeName,
-      },
-      references,
-    );
+    return pluginFactory(defaultedOptions, references);
   });
 
   references.replaceState = function replaceStateActionCreator(nextState) {
@@ -52,14 +70,8 @@ export default function createStore(model, options = {}) {
   let modelDefinition = bindReplaceState(modelClone);
   let mockedActions = [];
 
-  const bindStoreInternals = (state = {}) => {
-    references.internals = createStoreInternals({
-      disableImmer,
-      initialState: state,
-      model: modelDefinition,
-      reducerEnhancer,
-      references,
-    });
+  const performBindStoreInternals = (state = {}) => {
+    bindStoreInternals(modelDefinition, defaultedOptions, references, state);
   };
 
   const composeEnhancers =
@@ -72,7 +84,7 @@ export default function createStore(model, options = {}) {
         })
       : reduxCompose);
 
-  bindStoreInternals(initialState);
+  performBindStoreInternals(initialState);
 
   const easyPeasyMiddleware = references.plugins.reduce(
     (configuredMiddleware, plugin) => {
@@ -81,7 +93,7 @@ export default function createStore(model, options = {}) {
       }
       return configuredMiddleware;
     },
-    [...middleware, createListenerMiddleware(references)],
+    middleware,
   );
 
   if (mockActions) {
@@ -120,7 +132,7 @@ export default function createStore(model, options = {}) {
     if (removeKey) {
       delete currentState[removeKey];
     }
-    bindStoreInternals(currentState);
+    performBindStoreInternals(currentState);
     store.replaceReducer(references.internals.reducer);
     references.replaceState(references.internals.defaultState);
     bindActionCreators();
@@ -149,7 +161,6 @@ export default function createStore(model, options = {}) {
         mockedActions = [];
       },
       getActions: () => references.internals.actionCreators,
-      getListeners: () => references.internals.listenerActionCreators,
       getMockedActions: () => [...mockedActions],
       reconfigure: newModel => {
         modelDefinition = bindReplaceState(newModel);

@@ -271,8 +271,7 @@ function rehydrateStateFromPersistIfNeeded(
 }
 
 function persistPlugin(config, references) {
-  const persistKey = targetPath =>
-    `[${config.storeName}]@${targetPath.join('.')}`;
+  const persistKey = targetPath => `[${config.name}]@${targetPath.join('.')}`;
 
   // We will pass the persistence configuration around by reference. It will get
   // populated by the modelVisitor implementation.

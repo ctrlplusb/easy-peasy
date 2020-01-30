@@ -1,5 +1,6 @@
 import { modelVisitorResults, actionOnSymbol } from '../../constants';
 import set from '../../lib/set';
+import createSimpleProduce from '../../lib/create-simple-produce';
 
 function createActionCreator(actionDefinition, meta, references) {
   const type = `@actionOn.${meta.path.join('.')}`;
@@ -27,40 +28,43 @@ function createActionCreator(actionDefinition, meta, references) {
 function actionOnPlugin(config, references) {
   let actionOnReducersDict;
 
+  const simpleProduce = createSimpleProduce(config.disableImmer);
+
   return {
-    modelVisitor: (value, key, meta, internals) => {
+    modelVisitor: (value, key, meta) => {
       if (
         value != null &&
         typeof value === 'function' &&
         value[actionOnSymbol]
       ) {
         const { path } = meta;
-        const {
-          actionCreatorDict,
-          listenerActionCreators,
-          listenerDefinitions,
-        } = internals;
 
         const actionReducer = value;
         const actionCreator = createActionCreator(value, meta, references);
-        actionCreatorDict[actionCreator.type] = actionCreator;
+        references.internals.actionCreatorDict[
+          actionCreator.type
+        ] = actionCreator;
         actionOnReducersDict[actionCreator.type] = actionReducer;
         if (meta.key !== 'ePRS') {
-          listenerDefinitions.push(value);
-          set(path, listenerActionCreators, actionCreator);
+          references.pluginsState.listener.listenerDefinitions.push(value);
+          set(
+            path,
+            references.pluginsState.listener.listenerActionCreators,
+            actionCreator,
+          );
         }
         return modelVisitorResults.CONTINUE;
       }
       return undefined;
     },
-    onBeforeCreateStore: () => {
+    onBeforeParseModel: () => {
       actionOnReducersDict = {};
     },
-    reducer: (state, action, internals) => {
+    reducer: (state, action) => {
       const actionOnReducer = actionOnReducersDict[action.type];
       if (actionOnReducer) {
         const actionMeta = actionOnReducer[actionOnSymbol];
-        return internals.simpleProduce(actionMeta.parent, state, draft =>
+        return simpleProduce(actionMeta.parent, state, draft =>
           actionOnReducer(draft, action.payload),
         );
       }

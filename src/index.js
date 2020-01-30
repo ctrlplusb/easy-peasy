@@ -7,7 +7,7 @@ import {
   useStoreRehydrated,
   useStore,
 } from './react/hooks';
-import createStore from './create-store';
+import createStore from './create-store/index';
 import createContextStore from './react/create-context-store';
 import createComponentStore from './react/create-component-store';
 import createTransform from './plugins/persist/create-transform';
@@ -27,6 +27,7 @@ import { registerPlugins } from './plugins';
 import actionOnPlugin from './plugins/action-on/index';
 import actionPlugin from './plugins/action/index';
 import computedPlugin from './plugins/computed/index';
+import listenerPlugin from './plugins/listener/index';
 import persistPlugin from './plugins/persist/index';
 import reducerPlugin from './plugins/reducer/index';
 import thunkOnPlugin from './plugins/thunk-on/index';
@@ -36,6 +37,7 @@ registerPlugins([
   actionPlugin,
   computedPlugin,
   actionOnPlugin,
+  listenerPlugin,
   persistPlugin,
   reducerPlugin,
   thunkPlugin,

@@ -1,25 +1,11 @@
 import isPlainObject from 'is-plain-object';
-import { modelSymbol, modelVisitorResults } from './constants';
-import get from './lib/get';
-import set from './lib/set';
-import { bindListenerDefinitions } from './listeners';
+import { modelSymbol, modelVisitorResults } from '../constants';
+import get from '../lib/get';
+import set from '../lib/set';
 
-export default function extractDataFromModel(model, initialState, references) {
-  const actionCreatorDict = {};
-  const actionCreators = {};
-  const listenerActionCreators = {};
-  const listenerActionMap = {};
-  const listenerDefinitions = [];
-
-  function recursiveExtractFromModel(current, path, key_) {
-    if (current[modelSymbol] == null) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.warn(
-          'Model provided to store is not wrapped by the "model" helper. It is implicitly considered to be a model.',
-        );
-      }
-      current[modelSymbol] = {};
-    }
+export default function parseModel(model, initialState, references) {
+  function recursiveParseModel(current, path, key_) {
+    current[modelSymbol] = current[modelSymbol] || {};
 
     references.plugins.forEach(plugin => {
       if (plugin.modelVisitor != null) {
@@ -49,33 +35,23 @@ export default function extractDataFromModel(model, initialState, references) {
         if (existing == null) {
           set(propPath, initialState, {});
         }
-        recursiveExtractFromModel(value, propPath);
+        recursiveParseModel(value, propPath);
         continue;
       }
 
       let handled = false;
       for (const plugin of references.plugins) {
-        const visitResult = plugin.modelVisitor(
-          value,
-          key,
-          {
+        if (plugin.modelVisitor != null) {
+          const visitResult = plugin.modelVisitor(value, key, {
             key,
             parent: get(path, initialState),
             parentPath: path,
             path: propPath,
-          },
-          // TODO: Replace this with a set of APIs instead.
-          // e.g. registerActionCreator
-          {
-            actionCreatorDict,
-            actionCreators,
-            listenerActionCreators,
-            listenerDefinitions,
-          },
-        );
-        if (visitResult === modelVisitorResults.CONTINUE) {
-          handled = true;
-          break;
+          });
+          if (visitResult === modelVisitorResults.CONTINUE) {
+            handled = true;
+            break;
+          }
         }
       }
       if (handled) {
@@ -92,14 +68,7 @@ export default function extractDataFromModel(model, initialState, references) {
     }
   }
 
-  recursiveExtractFromModel(model, []);
-
-  bindListenerDefinitions(
-    listenerDefinitions,
-    actionCreators,
-    actionCreatorDict,
-    listenerActionMap,
-  );
+  recursiveParseModel(model, []);
 
   if (process.env.NODE_ENV !== 'production') {
     // TODO: Perform an analysis to see if there are any thunks/actions declared
@@ -107,11 +76,5 @@ export default function extractDataFromModel(model, initialState, references) {
     // the model helper and that we should warn the user appropriately
   }
 
-  return {
-    actionCreatorDict,
-    actionCreators,
-    defaultState: initialState,
-    listenerActionCreators,
-    listenerActionMap,
-  };
+  return initialState;
 }

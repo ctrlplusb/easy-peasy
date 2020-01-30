@@ -1,14 +1,15 @@
 import { modelVisitorResults, reducerSymbol } from '../../constants';
+import createSimpleProduce from '../../lib/create-simple-produce';
 
-function reducerPlugin() {
+function reducerPlugin(config) {
   let customReducers = [];
+  const simpleProduce = createSimpleProduce(config.disableImmer);
 
   return {
-    onBeforeCreateStore: () => {
+    onBeforeParseModel: () => {
       customReducers = [];
     },
-    reducer: (state, action, internals) => {
-      const { simpleProduce } = internals;
+    reducer: (state, action) => {
       return customReducers.reduce((acc, { parentPath, key, reducer: red }) => {
         return simpleProduce(parentPath, acc, draft => {
           draft[key] = red(draft[key], action);

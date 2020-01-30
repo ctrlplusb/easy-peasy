@@ -7,7 +7,7 @@ import {
   createStoreStateHook,
   createStoreRehydratedHook,
 } from './hooks';
-import createStore from '../create-store';
+import createStore from '../create-store/index';
 
 export default function createContextStore(model, config) {
   const StoreContext = createContext();

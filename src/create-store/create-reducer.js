@@ -1,4 +1,4 @@
-import createSimpleProduce from './lib/create-simple-produce';
+import createSimpleProduce from '../lib/create-simple-produce';
 
 export default function createReducer(disableImmer, references) {
   const simpleProduce = createSimpleProduce(disableImmer);

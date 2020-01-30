@@ -56,7 +56,7 @@ function computedPlugin(config, references) {
   let computedProperties = [];
 
   return {
-    onBeforeCreateStore: ({ initialState }) => {
+    onBeforeParseModel: ({ initialState }) => {
       computedProperties = [];
       computedState.currentState = initialState;
     },
