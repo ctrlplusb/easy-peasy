@@ -135,11 +135,11 @@ const Counter = createContextStore({
 
 function MyCounter() {
   const count = Counter.useStoreState(state => state.count);
-  const actions = Counter.useActions(actions => actions.inc);
+  const increment = Counter.useStoreActions(actions => actions.inc);
   return (
     <>
       <div>{count}</div>
-      <button onClick={() => actions.inc()} type="button"> + </button>
+      <button onClick={() => increment()} type="button"> + </button>
     </>
   )
 }
