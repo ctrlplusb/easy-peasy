@@ -6,7 +6,7 @@ import {
 import * as helpers from '../helpers';
 import bindStoreInternals from './bind-store-internals';
 import deepCloneState from '../lib/deep-clone-state';
-import { registeredPlugins } from '../plugins';
+import { getPlugins } from '../plugins';
 
 const applyDefaultsToOptions = options => {
   const {
@@ -50,9 +50,11 @@ export default function createStore(model, options = {}) {
 
   // This is the "god" object. Our evil mutable point of all contact. 😈
   const references = {};
+
+  // TODO: Improve this API
   references.pluginsState = {};
 
-  references.plugins = registeredPlugins.map(pluginFactory => {
+  references.plugins = getPlugins().map(pluginFactory => {
     return pluginFactory(defaultedOptions, references);
   });
 

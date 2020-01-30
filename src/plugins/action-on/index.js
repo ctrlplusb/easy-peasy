@@ -1,6 +1,7 @@
 import { modelVisitorResults, actionOnSymbol } from '../../constants';
 import set from '../../lib/set';
 import createSimpleProduce from '../../lib/create-simple-produce';
+import listenerPlugin from '../listener';
 
 function createActionCreator(actionDefinition, meta, references) {
   const type = `@actionOn.${meta.path.join('.')}`;
@@ -75,4 +76,4 @@ function actionOnPlugin(config, references) {
 
 actionOnPlugin.pluginName = 'action-on';
 
-export default actionOnPlugin;
+export default [listenerPlugin, actionOnPlugin];

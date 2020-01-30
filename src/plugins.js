@@ -1,11 +1,19 @@
-export const registeredPlugins = [];
+const registeredPlugins = {};
 
 function registerPlugin(plugin) {
-  if (!registeredPlugins.find(x => x.name === plugin.name)) {
-    registeredPlugins.push(plugin);
-  }
+  registeredPlugins[plugin.pluginName] = plugin;
 }
 
-export function registerPlugins(plugins) {
-  plugins.forEach(registerPlugin);
+export function getPlugins() {
+  return Object.values(registeredPlugins);
+}
+
+export function registerPlugins(pluginModules) {
+  pluginModules.forEach(pluginModule => {
+    if (Array.isArray(pluginModule)) {
+      pluginModule.forEach(registerPlugin);
+    } else {
+      registerPlugin(pluginModule);
+    }
+  });
 }

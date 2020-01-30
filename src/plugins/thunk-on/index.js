@@ -3,6 +3,7 @@ import { modelVisitorResults, thunkOnSymbol } from '../../constants';
 import isPromise from '../../lib/is-promise';
 import get from '../../lib/get';
 import set from '../../lib/set';
+import listenerPlugin from '../listener';
 
 function createThunkHandler(thunkDefinition, meta, references, injections) {
   const thunkMeta = thunkDefinition[thunkOnSymbol];
@@ -152,4 +153,4 @@ function thunkOnPlugin(config, references) {
 
 thunkOnPlugin.pluginName = 'thunk-on';
 
-export default thunkOnPlugin;
+export default [listenerPlugin, thunkOnPlugin];
