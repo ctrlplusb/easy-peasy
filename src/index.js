@@ -24,18 +24,22 @@ import {
   thunkOn,
 } from './helpers';
 import { registerPlugins } from './plugins';
+import actionOnPlugin from './plugins/action-on/index';
 import actionPlugin from './plugins/action/index';
 import computedPlugin from './plugins/computed/index';
 import persistPlugin from './plugins/persist/index';
 import reducerPlugin from './plugins/reducer/index';
+import thunkOnPlugin from './plugins/thunk-on/index';
 import thunkPlugin from './plugins/thunk/index';
 
 registerPlugins([
   actionPlugin,
   computedPlugin,
+  actionOnPlugin,
   persistPlugin,
   reducerPlugin,
   thunkPlugin,
+  thunkOnPlugin,
 ]);
 
 /**

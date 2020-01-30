@@ -1,10 +1,11 @@
 import reduxThunk from 'redux-thunk';
-import { modelVisitorResults, thunkSymbol } from '../../constants';
+import { modelVisitorResults, thunkOnSymbol } from '../../constants';
 import isPromise from '../../lib/is-promise';
 import get from '../../lib/get';
 import set from '../../lib/set';
 
 function createThunkHandler(thunkDefinition, meta, references, injections) {
+  const thunkMeta = thunkDefinition[thunkOnSymbol];
   const helpers = {
     getState: () => get(meta.parentPath, references.getState()),
     getStoreActions: () => references.internals.actionCreators,
@@ -18,6 +19,9 @@ function createThunkHandler(thunkDefinition, meta, references, injections) {
   return payload => {
     helpers.dispatch = references.dispatch;
     helpers.getStoreState = references.getState;
+    if (thunkMeta.resolvedTargets) {
+      payload.resolvedTargets = [...thunkMeta.resolvedTargets];
+    }
     return thunkDefinition(
       get(meta.parentPath, references.internals.actionCreators),
       payload,
@@ -32,12 +36,12 @@ function createThunkActionsCreator(
   references,
   thunkHandler,
 ) {
-  const type = `@thunk.${meta.path.join('.')}`;
+  const type = `@thunkOn.${meta.path.join('.')}`;
   const startType = `${type}(start)`;
   const successType = `${type}(success)`;
   const failType = `${type}(fail)`;
 
-  const thunkMeta = thunkDefinition[thunkSymbol];
+  const thunkMeta = thunkDefinition[thunkOnSymbol];
   thunkMeta.type = type;
   thunkMeta.actionName = meta.key;
   thunkMeta.parent = meta.parentPath;
@@ -102,16 +106,24 @@ function createThunkActionsCreator(
   return actionCreator;
 }
 
-function thunkPlugin(config, references) {
+function thunkOnPlugin(config, references) {
   const { injections } = config;
 
   return {
     middleware: [reduxThunk],
     storeEnhancer: store => store,
     modelVisitor: (value, key, meta, internals) => {
-      if (value != null && typeof value === 'function' && value[thunkSymbol]) {
+      if (
+        value != null &&
+        typeof value === 'function' &&
+        value[thunkOnSymbol]
+      ) {
         const { path } = meta;
-        const { actionCreatorDict, actionCreators } = internals;
+        const {
+          actionCreatorDict,
+          listenerActionCreators,
+          listenerDefinitions,
+        } = internals;
         const thunkHandler = createThunkHandler(
           value,
           meta,
@@ -125,7 +137,10 @@ function thunkPlugin(config, references) {
           thunkHandler,
         );
         actionCreatorDict[actionCreator.type] = actionCreator;
-        set(path, actionCreators, actionCreator);
+
+        listenerDefinitions.push(value);
+        set(path, listenerActionCreators, actionCreator);
+
         return modelVisitorResults.CONTINUE;
       }
       return undefined;
@@ -134,6 +149,6 @@ function thunkPlugin(config, references) {
   };
 }
 
-thunkPlugin.pluginName = 'thunk';
+thunkOnPlugin.pluginName = 'thunk-on';
 
-export default thunkPlugin;
+export default thunkOnPlugin;
