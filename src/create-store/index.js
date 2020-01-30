@@ -163,7 +163,7 @@ export default function createStore(model, options = {}) {
       getActions: () => references.internals.actionCreators,
       getMockedActions: () => [...mockedActions],
       reconfigure: newModel => {
-        modelDefinition = bindReplaceState(newModel);
+        modelDefinition = bindReplaceState(deepCloneState(newModel));
         rebindStore();
       },
       removeModel: key => {
