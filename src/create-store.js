@@ -21,6 +21,8 @@ export default function createStore(model, options = {}) {
   const {
     compose,
     devTools = true,
+    trace = false,
+    traceLimit = 25,
     disableImmer = false,
     enhancers = [],
     initialState = {},
@@ -76,6 +78,8 @@ export default function createStore(model, options = {}) {
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
           name: storeName,
+          trace,
+          traceLimit,
         })
       : reduxCompose);
 
