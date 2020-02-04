@@ -76,6 +76,8 @@ export function createStore(model, options = {}) {
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
           name: storeName,
+          trace,
+          traceLimit,
         })
       : reduxCompose);
 
