@@ -8,5 +8,5 @@ This section will guide you through integrating and using TypeScript with Easy P
 
 We will be building a fully functional application along the way, using [CodeSandbox](https://codesandbox.io) to host the demo. Each section will link to a specific [CodeSandbox](https://codesandbox.io) instance with the progress that we have made within each part of the tutorial.
 
-If you aren't familiar with Easy Peasy then I would recommend that you first familiarise yourself with it by reading the [tutorial](/docs/tutorial.html).
+If you aren't familiar with Easy Peasy then I would recommend that you first familiarise yourself with it by reading the [tutorial](/docs/tutorial/).
 

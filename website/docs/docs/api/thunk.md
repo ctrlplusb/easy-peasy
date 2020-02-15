@@ -59,7 +59,7 @@ thunk(async (actions, payload) => {
       - `injections` (Any, default=undefined)
 
         Any dependencies that were provided to the `createStore` configuration
-        will be exposed via this argument. See the [`StoreConfig`](#storeconfig)
+        will be exposed via this argument. See the [StoreConfig](/docs/api/store-config.html)
         documentation on how to provide them to your store.
 
       - `meta` (Object)
