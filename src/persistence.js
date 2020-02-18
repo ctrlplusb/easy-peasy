@@ -8,15 +8,22 @@ const noopStorage = {
   removeItem: () => undefined,
 };
 
-const localStorage =
-  typeof window !== 'undefined' && typeof window.localStorage !== 'undefined'
-    ? window.localStorage
-    : noopStorage;
+function getStorage(storageName) {
+  try {
+    if (
+      typeof window !== 'undefined' &&
+      typeof window[storageName] !== 'undefined'
+    ) {
+      return window[storageName];
+    }
+    return noopStorage;
+  } catch (_) {
+    return noopStorage;
+  }
+}
 
-const sessionStorage =
-  typeof window !== 'undefined' && typeof window.sessionStorage !== 'undefined'
-    ? window.sessionStorage
-    : noopStorage;
+const localStorage = getStorage('localStorage');
+const sessionStorage = getStorage('sessionStorage');
 
 function createStorageWrapper(storage = sessionStorage, transformers = []) {
   if (typeof storage === 'string') {
