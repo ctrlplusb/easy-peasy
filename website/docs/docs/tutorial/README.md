@@ -2,7 +2,7 @@
 
 Within this tutorial you will learn Easy Peasy by refactoring [an existing application](https://codesandbox.io/s/easy-peasy-tutorial-start-8qz5k). We will refactor [the application](https://codesandbox.io/s/easy-peasy-tutorial-start-8qz5k) in a step by step manner, introducing each of the core concepts and APIs of Easy Peasy as we progress.
 
-> If you are looking for a quick fire overview then we recommend you read the [quickstart tutorial](/docs/introduction/quickstart.html).
+> If you are looking for a quick fire overview then we recommend you read the [quickstart tutorial](/docs/quick-start.html).
 
 [The application](https://codesandbox.io/s/easy-peasy-tutorial-start-8qz5k) that we are going to refactor is a naive shopping cart. It lists some products and allows you to add a product to your basket. You can additionally view your basket and remove products from it.
 
