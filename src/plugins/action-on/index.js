@@ -1,7 +1,7 @@
 import { modelVisitorResults, actionOnSymbol } from '../../constants';
 import set from '../../lib/set';
 import createSimpleProduce from '../../lib/create-simple-produce';
-import listenerPlugin from '../listener';
+import listenerPlugin from '../listener/index';
 
 function createActionCreator(actionDefinition, meta, references) {
   const type = `@actionOn.${meta.path.join('.')}`;
