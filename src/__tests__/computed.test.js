@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import produce from 'immer-peasy';
+import { produce } from 'immer';
 import { render } from '@testing-library/react';
 import {
   createStore,
@@ -12,7 +12,7 @@ import {
   StoreProvider,
 } from '../index';
 
-test('immer-peasy works as expected', () => {
+test('immer works as expected', () => {
   const original = {
     firstName: 'Bob',
     lastName: 'Fruits',

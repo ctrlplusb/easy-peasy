@@ -1,0 +1,2277 @@
+diff --git a/node_modules/immer/dist/immer.cjs.development.js b/node_modules/immer/dist/immer.cjs.development.js
+index 3dfbdb2..7ede13a 100644
+--- a/node_modules/immer/dist/immer.cjs.development.js
++++ b/node_modules/immer/dist/immer.cjs.development.js
+@@ -1,7 +1,5 @@
+ 'use strict';
+ 
+-Object.defineProperty(exports, '__esModule', { value: true });
+-
+ var _ref;
+ 
+ // Should be no imports here!
+@@ -14,9 +12,7 @@ var hasProxies = typeof Proxy !== "undefined" && typeof Proxy.revocable !== "und
+  * The sentinel value returned by producers to replace the draft with undefined.
+  */
+ 
+-var NOTHING = hasSymbol ?
+-/*#__PURE__*/
+-Symbol("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
++var NOTHING = hasSymbol ? /*#__PURE__*/Symbol("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
+ /**
+  * To let Immer treat your class instances as plain immutable objects
+  * (albeit with a custom prototype), you must define either an instance property
+@@ -26,12 +22,8 @@ Symbol("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
+  * safe to mutate in a produce callback.
+  */
+ 
+-var DRAFTABLE = hasSymbol ?
+-/*#__PURE__*/
+-Symbol("immer-draftable") : "__$immer_draftable";
+-var DRAFT_STATE = hasSymbol ?
+-/*#__PURE__*/
+-Symbol("immer-state") : "__$immer_state";
++var DRAFTABLE = hasSymbol ? /*#__PURE__*/Symbol("immer-draftable") : "__$immer_draftable";
++var DRAFT_STATE = hasSymbol ? /*#__PURE__*/Symbol("immer-state") : "__$immer_state";
+ var iteratorSymbol = hasSymbol ? Symbol.iterator : "@@iterator";
+ 
+ var errors = {
+@@ -159,7 +151,7 @@ function get(thing, prop) {
+ function set(thing, propOrOldValue, value) {
+   var t = getArchtype(thing);
+   if (t === ArchtypeMap) thing.set(propOrOldValue, value);else if (t === ArchtypeSet) {
+-    thing.delete(propOrOldValue);
++    thing["delete"](propOrOldValue);
+     thing.add(value);
+   } else thing[propOrOldValue] = value;
+ }
+@@ -204,13 +196,14 @@ function shallowCopy(base, invokeGetters) {
+     var value = desc.value;
+ 
+     if (desc.get) {
+-      if (!invokeGetters) die(1);
+-      value = desc.get.call(base);
++      if (invokeGetters) {
++        value = desc.get.call(base);
++      }
+     }
+ 
+     if (desc.enumerable) {
+       clone[key] = value;
+-    } else {
++    } else if (invokeGetters) {
+       Object.defineProperty(clone, key, {
+         value: value,
+         writable: true,
+@@ -226,7 +219,7 @@ function freeze(obj, deep) {
+   if (getArchtype(obj) > 1
+   /* Map or Set */
+   ) {
+-      obj.set = obj.add = obj.clear = obj.delete = dontMutateFrozenCollections;
++      obj.set = obj.add = obj.clear = obj["delete"] = dontMutateFrozenCollections;
+     }
+ 
+   Object.freeze(obj);
+@@ -634,9 +627,7 @@ function prepareCopy(state) {
+   }
+ }
+ 
+-var Immer =
+-/*#__PURE__*/
+-function () {
++var Immer = /*#__PURE__*/function () {
+   function Immer(config) {
+     this.useProxies_ = hasProxies;
+     this.autoFreeze_ =  true
+@@ -1363,10 +1354,10 @@ function enablePatches() {
+               return base.splice(key, 1);
+ 
+             case ArchtypeMap:
+-              return base.delete(key);
++              return base["delete"](key);
+ 
+             case ArchtypeSet:
+-              return base.delete(patch.value);
++              return base["delete"](patch.value);
+ 
+             default:
+               return delete base[key];
+@@ -1482,7 +1473,7 @@ function enableMapSet() {
+       return this;
+     };
+ 
+-    p.delete = function (key) {
++    p["delete"] = function (key) {
+       if (!this.has(key)) {
+         return false;
+       }
+@@ -1492,7 +1483,7 @@ function enableMapSet() {
+       prepareMapCopy(state);
+       markChanged(state.scope_.immer_, state);
+       state.assigned_.set(key, false);
+-      state.copy_.delete(key);
++      state.copy_["delete"](key);
+       return true;
+     };
+ 
+@@ -1658,7 +1649,7 @@ function enableMapSet() {
+       return this;
+     };
+ 
+-    p.delete = function (value) {
++    p["delete"] = function (value) {
+       if (!this.has(value)) {
+         return false;
+       }
+@@ -1667,7 +1658,7 @@ function enableMapSet() {
+       assertUnrevoked(state);
+       prepareSetCopy(state);
+       markChanged(state.scope_.immer_, state);
+-      return state.copy_.delete(value) || (state.drafts_.has(value) ? state.copy_.delete(state.drafts_.get(value)) :
++      return state.copy_["delete"](value) || (state.drafts_.has(value) ? state.copy_["delete"](state.drafts_.get(value)) :
+       /* istanbul ignore next */
+       false);
+     };
+@@ -1754,9 +1745,7 @@ function enableAllPlugins() {
+   enablePatches();
+ }
+ 
+-var immer =
+-/*#__PURE__*/
+-new Immer();
++var immer = /*#__PURE__*/new Immer();
+ /**
+  * The `produce` function takes a value and a "recipe function" (whose
+  * return value often depends on the base state). The recipe function is
+@@ -1783,18 +1772,14 @@ var produce = immer.produce;
+  * [nextState, patches, inversePatches] (instead of just the next state)
+  */
+ 
+-var produceWithPatches =
+-/*#__PURE__*/
+-immer.produceWithPatches.bind(immer);
++var produceWithPatches = /*#__PURE__*/immer.produceWithPatches.bind(immer);
+ /**
+  * Pass true to automatically freeze all copies created by Immer.
+  *
+  * By default, auto-freezing is disabled in production.
+  */
+ 
+-var setAutoFreeze =
+-/*#__PURE__*/
+-immer.setAutoFreeze.bind(immer);
++var setAutoFreeze = /*#__PURE__*/immer.setAutoFreeze.bind(immer);
+ /**
+  * Pass true to use the ES2015 `Proxy` class when creating drafts, which is
+  * always faster than using ES5 proxies.
+@@ -1802,26 +1787,20 @@ immer.setAutoFreeze.bind(immer);
+  * By default, feature detection is used, so calling this is rarely necessary.
+  */
+ 
+-var setUseProxies =
+-/*#__PURE__*/
+-immer.setUseProxies.bind(immer);
++var setUseProxies = /*#__PURE__*/immer.setUseProxies.bind(immer);
+ /**
+  * Apply an array of Immer patches to the first argument.
+  *
+  * This function is a producer, which means copy-on-write is in effect.
+  */
+ 
+-var applyPatches =
+-/*#__PURE__*/
+-immer.applyPatches.bind(immer);
++var applyPatches = /*#__PURE__*/immer.applyPatches.bind(immer);
+ /**
+  * Create an Immer draft from the given base state, which may be a draft itself.
+  * The draft can be modified until you finalize it with the `finishDraft` function.
+  */
+ 
+-var createDraft =
+-/*#__PURE__*/
+-immer.createDraft.bind(immer);
++var createDraft = /*#__PURE__*/immer.createDraft.bind(immer);
+ /**
+  * Finalize an Immer draft from a `createDraft` call, returning the base state
+  * (if no changes were made) or a modified copy. The draft must *not* be
+@@ -1831,9 +1810,7 @@ immer.createDraft.bind(immer);
+  * changes that were made.
+  */
+ 
+-var finishDraft =
+-/*#__PURE__*/
+-immer.finishDraft.bind(immer);
++var finishDraft = /*#__PURE__*/immer.finishDraft.bind(immer);
+ /**
+  * This function is actually a no-op, but can be used to cast an immutable type
+  * to an draft type and make TypeScript happy
+diff --git a/node_modules/immer/dist/immer.cjs.production.min.js b/node_modules/immer/dist/immer.cjs.production.min.js
+index 57456d6..1f2d10d 100644
+--- a/node_modules/immer/dist/immer.cjs.production.min.js
++++ b/node_modules/immer/dist/immer.cjs.production.min.js
+@@ -1,2 +1,2 @@
+-function t(t){for(var n=arguments.length,r=Array(n>1?n-1:0),e=1;e<n;e++)r[e-1]=arguments[e];throw Error("[Immer] minified error nr: "+t+(r.length?" "+r.join(","):"")+". Find the full error at: https://bit.ly/38PiBHb")}function n(t){return!!t&&!!t[K]}function r(t){return!!t&&(function(t){if(!t||"object"!=typeof t)return!1;var n=Object.getPrototypeOf(t);return!n||n===Object.prototype}(t)||Array.isArray(t)||!!t[I]||!!t.constructor[I]||a(t)||c(t))}function e(t,n){0===i(t)?G(t).forEach((function(r){return n(r,t[r],t)})):t.forEach((function(r,e){return n(e,r,t)}))}function i(t){var n=t[K];return n?n.t>3?n.t-4:n.t:Array.isArray(t)?1:a(t)?2:c(t)?3:0}function u(t,n){return 2===i(t)?t.has(n):Object.prototype.hasOwnProperty.call(t,n)}function o(t,n){return 2===i(t)?t.get(n):t[n]}function f(t,n){return t===n?0!==t||1/t==1/n:t!=t&&n!=n}function a(t){return $&&t instanceof Map}function c(t){return B&&t instanceof Set}function s(t){return t.i||t.u}function v(n,r){if(void 0===r&&(r=!1),Array.isArray(n))return n.slice();var i=Object.create(Object.getPrototypeOf(n));return e(n,(function(e){if(e!==K){var u=Object.getOwnPropertyDescriptor(n,e),o=u.value;u.get&&(r||t(1),o=u.get.call(n)),u.enumerable?i[e]=o:Object.defineProperty(i,e,{value:o,writable:!0,configurable:!0})}})),i}function p(t,u){n(t)||Object.isFrozen(t)||!r(t)||(i(t)>1&&(t.set=t.add=t.clear=t.delete=h),Object.freeze(t),u&&e(t,(function(t,n){return p(n,!0)})))}function h(){t(2)}function l(n){var r=L[n];return r||t(19,n),r}function d(t,n){L[t]=n}function _(){return J}function y(t,n){n&&(l("Patches"),t.o=[],t.s=[],t.v=n)}function b(t){m(t),t.p.forEach(j),t.p=null}function m(t){t===J&&(J=t.h)}function O(t){return J={p:[],h:J,l:t,_:!0,m:0}}function j(t){var n=t[K];0===n.t||1===n.t?n.O():n.j=!0}function x(n,e){e.m=e.p.length;var i=e.p[0],u=void 0!==n&&n!==i;return e.l.S||l("ES5").P(e,n,u),u?(i[K].M&&(b(e),t(4)),r(n)&&(n=w(e,n),e.h||P(e,n)),e.o&&l("Patches").g(i[K],n,e.o,e.s)):n=w(e,i,[]),b(e),e.o&&e.v(e.o,e.s),n!==H?n:void 0}function w(t,n,r){if(Object.isFrozen(n))return n;var i=n[K];if(!i)return e(n,(function(e,u){return S(t,i,n,e,u,r)})),n;if(i.A!==t)return n;if(!i.M)return P(t,i.u,!0),i.u;if(!i.R){i.R=!0,i.A.m--;var u=4===i.t||5===i.t?i.i=v(i.k,!0):i.i;e(u,(function(n,e){return S(t,i,u,n,e,r)})),P(t,u,!1),r&&t.o&&l("Patches").F(i,r,t.o,t.s)}return i.i}function S(t,e,a,c,s,v){if(n(s)){var p=w(t,s,v&&e&&3!==e.t&&!u(e.D,c)?v.concat(c):void 0);if(l=c,d=p,2===(_=i(h=a))?h.set(l,d):3===_?(h.delete(l),h.add(d)):h[l]=d,!n(p))return;t._=!1}var h,l,d,_;if((!e||!f(s,o(e.u,c)))&&r(s)){if(!t.l.J&&t.m<1)return;w(t,s),e&&e.A.h||P(t,s)}}function P(t,n,r){void 0===r&&(r=!1),t.l.J&&t._&&p(n,r)}function M(t,n){var r=t[K],e=Reflect.getOwnPropertyDescriptor(r?s(r):t,n);return e&&e.value}function g(t){if(!t.M){if(t.M=!0,0===t.t||1===t.t){var n=t.i=v(t.u);e(t.p,(function(t,r){n[t]=r})),t.p=void 0}t.h&&g(t.h)}}function A(t){t.i||(t.i=v(t.u))}function z(t,n,r){var e=a(n)?l("MapSet").N(n,r):c(n)?l("MapSet").$(n,r):t.S?function(t,n){var r=Array.isArray(t),e={t:r?1:0,A:n?n.A:_(),M:!1,R:!1,D:{},h:n,u:t,k:null,p:{},i:null,O:null,B:!1},i=e,u=Q;r&&(i=[e],u=T);var o=Proxy.revocable(i,u),f=o.revoke,a=o.proxy;return e.k=a,e.O=f,a}(n,r):l("ES5").C(n,r);return(r?r.A:_()).p.push(e),e}function E(t,n){t.S?g(n):l("ES5").H(n)}function R(){function i(t,n){var r=t[K];if(r&&!r.I){r.I=!0;var e=t[n];return r.I=!1,e}return t[n]}function o(t){t.M||(t.M=!0,t.h&&o(t.h))}function a(t){t.i||(t.i=c(t.u))}function c(t){var n=t&&t[K];if(n){n.I=!0;var r=v(n.k,!0);return n.I=!1,r}return v(t)}function p(t){for(var n=t.length-1;n>=0;n--){var r=t[n][K];if(!r.M)switch(r.t){case 5:l(r)&&o(r);break;case 4:h(r)&&o(r)}}}function h(t){for(var n=t.u,r=t.k,e=Object.keys(r),i=e.length-1;i>=0;i--){var o=e[i],a=n[o];if(void 0===a&&!u(n,o))return!0;var c=r[o],s=c&&c[K];if(s?s.u!==a:!f(c,a))return!0}return e.length!==Object.keys(n).length}function l(t){var n=t.k;if(n.length!==t.u.length)return!0;var r=Object.getOwnPropertyDescriptor(n,n.length-1);return!(!r||r.get)}function y(n){n.j&&t(3,JSON.stringify(s(n)))}var b={};d("ES5",{C:function(t,n){var u=Array.isArray(t),v=c(t);e(v,(function(n){!function(t,n,e){var u=b[n];u?u.enumerable=e:b[n]=u={enumerable:e,get:function(){return function(t,n){y(t);var e=i(s(t),n);return t.I?e:e===i(t.u,n)&&r(e)?(a(t),t.i[n]=z(t.A.l,e,t)):e}(this[K],n)},set:function(t){!function(t,n,r){if(y(t),t.D[n]=!0,!t.M){if(f(r,i(s(t),n)))return;o(t),a(t)}t.i[n]=r}(this[K],n,t)}},Object.defineProperty(t,n,u)}(v,n,u||function(t,n){var r=Object.getOwnPropertyDescriptor(t,n);return!(!r||!r.enumerable)}(t,n))}));var p={t:u?5:4,A:n?n.A:_(),M:!1,I:!1,R:!1,D:{},h:n,u:t,k:v,i:null,j:!1,B:!1};return Object.defineProperty(v,K,{value:p,writable:!0}),v},H:o,P:function(t,r,i){t.p.forEach((function(t){t[K].I=!0})),i?n(r)&&r[K].A===t&&p(t.p):(t.o&&function t(n){if(n&&"object"==typeof n){var r=n[K];if(r){var i=r.u,f=r.k,a=r.D,c=r.t;if(4===c)e(f,(function(n){n!==K&&(void 0!==i[n]||u(i,n)?a[n]||t(f[n]):(a[n]=!0,o(r)))})),e(i,(function(t){void 0!==f[t]||u(f,t)||(a[t]=!1,o(r))}));else if(5===c){if(l(r)&&(o(r),a.length=!0),f.length<i.length)for(var s=f.length;s<i.length;s++)a[s]=!1;else for(var v=i.length;v<f.length;v++)a[v]=!0;for(var p=Math.min(f.length,i.length),h=0;h<p;h++)void 0===a[h]&&t(f[h])}}}}(t.p[0]),p(t.p))}})}function k(){function n(t){if(!t||"object"!=typeof t)return t;if(Array.isArray(t))return t.map(n);if(a(t))return new Map(Array.from(t.entries()).map((function(t){return[t[0],n(t[1])]})));if(c(t))return new Set(Array.from(t).map(n));var r=Object.create(Object.getPrototypeOf(t));for(var e in t)r[e]=n(t[e]);return r}var r="add";d("Patches",{K:function(e,u){return u.forEach((function(u){for(var f=u.path,a=u.op,c=e,s=0;s<f.length-1;s++)"object"!=typeof(c=o(c,f[s]))&&t(15,f.join("/"));var v=i(c),p=n(u.value),h=f[f.length-1];switch(a){case"replace":switch(v){case 2:return c.set(h,p);case 3:t(16);default:return c[h]=p}case r:switch(v){case 1:return c.splice(h,0,p);case 2:return c.set(h,p);case 3:return c.add(p);default:return c[h]=p}case"remove":switch(v){case 1:return c.splice(h,1);case 2:return c.delete(h);case 3:return c.delete(u.value);default:return delete c[h]}default:t(17,a)}})),e},F:function(t,n,i,f){switch(t.t){case 0:case 4:case 2:return function(t,n,i,f){var a=t.u,c=t.i;e(t.D,(function(t,e){var s=o(a,t),v=o(c,t),p=e?u(a,t)?"replace":r:"remove";if(s!==v||"replace"!==p){var h=n.concat(t);i.push("remove"===p?{op:p,path:h}:{op:p,path:h,value:v}),f.push(p===r?{op:"remove",path:h}:"remove"===p?{op:r,path:h,value:s}:{op:"replace",path:h,value:s})}}))}(t,n,i,f);case 5:case 1:return function(t,n,e,i){var u=t.u,o=t.D,f=t.i;if(f.length<u.length){var a=[f,u];u=a[0],f=a[1];var c=[i,e];e=c[0],i=c[1]}for(var s=f.length-u.length,v=0;u[v]===f[v]&&v<u.length;)++v;for(var p=u.length;p>v&&u[p-1]===f[p+s-1];)--p;for(var h=v;h<p;++h)if(o[h]&&f[h]!==u[h]){var l=n.concat([h]);e.push({op:"replace",path:l,value:f[h]}),i.push({op:"replace",path:l,value:u[h]})}for(var d=e.length,_=p+s-1;_>=p;--_){var y=n.concat([_]);e[d+_-p]={op:r,path:y,value:f[_]},i.push({op:"remove",path:y})}}(t,n,i,f);case 3:return function(t,n,e,i){var u=t.u,o=t.i,f=0;u.forEach((function(t){if(!o.has(t)){var u=n.concat([f]);e.push({op:"remove",path:u,value:t}),i.unshift({op:r,path:u,value:t})}f++})),f=0,o.forEach((function(t){if(!u.has(t)){var o=n.concat([f]);e.push({op:r,path:o,value:t}),i.unshift({op:"remove",path:o,value:t})}f++}))}(t,n,i,f)}},g:function(t,n,r,e){r.push({op:"replace",path:[],value:n}),e.push({op:"replace",path:[],value:t.u})}})}function F(){function n(t,n){function r(){this.constructor=t}o(t,n),t.prototype=(r.prototype=n.prototype,new r)}function e(t){t.i||(t.D=new Map,t.i=new Map(t.u))}function i(t){t.i||(t.i=new Set,t.u.forEach((function(n){if(r(n)){var e=z(t.A.l,n,t);t.p.set(n,e),t.i.add(e)}else t.i.add(n)})))}function u(n){n.j&&t(3,JSON.stringify(s(n)))}var o=function(t,n){return(o=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(t,n){t.__proto__=n}||function(t,n){for(var r in n)n.hasOwnProperty(r)&&(t[r]=n[r])})(t,n)},f=function(){function t(t,n){return this[K]={t:2,h:n,A:n?n.A:_(),M:!1,R:!1,i:void 0,D:void 0,u:t,k:this,B:!1,j:!1},this}n(t,Map);var i=t.prototype;return Object.defineProperty(i,"size",{get:function(){return s(this[K]).size}}),i.has=function(t){return s(this[K]).has(t)},i.set=function(t,n){var r=this[K];return u(r),s(r).get(t)!==n&&(e(r),E(r.A.l,r),r.D.set(t,!0),r.i.set(t,n),r.D.set(t,!0)),this},i.delete=function(t){if(!this.has(t))return!1;var n=this[K];return u(n),e(n),E(n.A.l,n),n.D.set(t,!1),n.i.delete(t),!0},i.clear=function(){var t=this[K];return u(t),e(t),E(t.A.l,t),t.D=new Map,t.i.clear()},i.forEach=function(t,n){var r=this;s(this[K]).forEach((function(e,i){t.call(n,r.get(i),i,r)}))},i.get=function(t){var n=this[K];u(n);var i=s(n).get(t);if(n.R||!r(i))return i;if(i!==n.u.get(t))return i;var o=z(n.A.l,i,n);return e(n),n.i.set(t,o),o},i.keys=function(){return s(this[K]).keys()},i.values=function(){var t,n=this,r=this.keys();return(t={})[q]=function(){return n.values()},t.next=function(){var t=r.next();return t.done?t:{done:!1,value:n.get(t.value)}},t},i.entries=function(){var t,n=this,r=this.keys();return(t={})[q]=function(){return n.entries()},t.next=function(){var t=r.next();if(t.done)return t;var e=n.get(t.value);return{done:!1,value:[t.value,e]}},t},i[q]=function(){return this.entries()},t}(),a=function(){function t(t,n){return this[K]={t:3,h:n,A:n?n.A:_(),M:!1,R:!1,i:void 0,u:t,k:this,p:new Map,j:!1,B:!1},this}n(t,Set);var r=t.prototype;return Object.defineProperty(r,"size",{get:function(){return s(this[K]).size}}),r.has=function(t){var n=this[K];return u(n),n.i?!!n.i.has(t)||!(!n.p.has(t)||!n.i.has(n.p.get(t))):n.u.has(t)},r.add=function(t){var n=this[K];return u(n),n.i?n.i.add(t):n.u.has(t)||(i(n),E(n.A.l,n),n.i.add(t)),this},r.delete=function(t){if(!this.has(t))return!1;var n=this[K];return u(n),i(n),E(n.A.l,n),n.i.delete(t)||!!n.p.has(t)&&n.i.delete(n.p.get(t))},r.clear=function(){var t=this[K];return u(t),i(t),E(t.A.l,t),t.i.clear()},r.values=function(){var t=this[K];return u(t),i(t),t.i.values()},r.entries=function(){var t=this[K];return u(t),i(t),t.i.entries()},r.keys=function(){return this.values()},r[q]=function(){return this.values()},r.forEach=function(t,n){for(var r=this.values(),e=r.next();!e.done;)t.call(n,e.value,e.value,this),e=r.next()},t}();d("MapSet",{N:function(t,n){return new f(t,n)},$:function(t,n){return new a(t,n)}})}var D;Object.defineProperty(exports,"__esModule",{value:!0});var J,N="undefined"!=typeof Symbol,$="undefined"!=typeof Map,B="undefined"!=typeof Set,C="undefined"!=typeof Proxy&&void 0!==Proxy.revocable&&"undefined"!=typeof Reflect,H=N?Symbol("immer-nothing"):((D={})["immer-nothing"]=!0,D),I=N?Symbol("immer-draftable"):"__$immer_draftable",K=N?Symbol("immer-state"):"__$immer_state",q=N?Symbol.iterator:"@@iterator",G="undefined"!=typeof Reflect&&Reflect.ownKeys?Reflect.ownKeys:void 0!==Object.getOwnPropertySymbols?function(t){return Object.getOwnPropertyNames(t).concat(Object.getOwnPropertySymbols(t))}:Object.getOwnPropertyNames,L={},Q={get:function(t,n){if(n===K)return t;var e=t.p;if(!t.M&&u(e,n))return e[n];var i=s(t)[n];if(t.R||!r(i))return i;if(t.M){if(i!==M(t.u,n))return i;e=t.i}return e[n]=z(t.A.l,i,t)},has:function(t,n){return n in s(t)},ownKeys:function(t){return Reflect.ownKeys(s(t))},set:function(t,n,r){if(!t.M){var e=M(t.u,n);if(r?f(e,r)||r===t.p[n]:f(e,r)&&n in t.u)return!0;A(t),g(t)}return t.D[n]=!0,t.i[n]=r,!0},deleteProperty:function(t,n){return void 0!==M(t.u,n)||n in t.u?(t.D[n]=!1,A(t),g(t)):t.D[n]&&delete t.D[n],t.i&&delete t.i[n],!0},getOwnPropertyDescriptor:function(t,n){var r=s(t),e=Reflect.getOwnPropertyDescriptor(r,n);return e&&(e.writable=!0,e.configurable=1!==t.t||"length"!==n),e},defineProperty:function(){t(11)},getPrototypeOf:function(t){return Object.getPrototypeOf(t.u)},setPrototypeOf:function(){t(12)}},T={};e(Q,(function(t,n){T[t]=function(){return arguments[0]=arguments[0][0],n.apply(this,arguments)}})),T.deleteProperty=function(t,n){return Q.deleteProperty.call(this,t[0],n)},T.set=function(t,n,r){return Q.set.call(this,t[0],n,r,t[0])};var U=function(){function e(t){this.S=C,this.J=!1,"boolean"==typeof(null==t?void 0:t.useProxies)&&this.setUseProxies(t.useProxies),"boolean"==typeof(null==t?void 0:t.autoFreeze)&&this.setAutoFreeze(t.autoFreeze),this.produce=this.produce.bind(this),this.produceWithPatches=this.produceWithPatches.bind(this)}var i=e.prototype;return i.produce=function(n,e,i){if("function"==typeof n&&"function"!=typeof e){var u=e;e=n;var o=this;return function(t){var n=this;void 0===t&&(t=u);for(var r=arguments.length,i=Array(r>1?r-1:0),f=1;f<r;f++)i[f-1]=arguments[f];return o.produce(t,(function(t){var r;return(r=e).call.apply(r,[n,t].concat(i))}))}}var f;if("function"!=typeof e&&t(6),void 0!==i&&"function"!=typeof i&&t(7),r(n)){var a=O(this),c=z(this,n,void 0),s=!0;try{f=e(c),s=!1}finally{s?b(a):m(a)}return"undefined"!=typeof Promise&&f instanceof Promise?f.then((function(t){return y(a,i),x(t,a)}),(function(t){throw b(a),t})):(y(a,i),x(f,a))}if((f=e(n))!==H)return void 0===f&&(f=n),this.J&&p(f,!0),f},i.produceWithPatches=function(t,n){var r,e,i=this;return"function"==typeof t?function(n){for(var r=arguments.length,e=Array(r>1?r-1:0),u=1;u<r;u++)e[u-1]=arguments[u];return i.produceWithPatches(n,(function(n){return t.apply(void 0,[n].concat(e))}))}:[this.produce(t,n,(function(t,n){r=t,e=n})),r,e]},i.createDraft=function(n){r(n)||t(8);var e=O(this),i=z(this,n,void 0);return i[K].B=!0,m(e),i},i.finishDraft=function(t,n){var r=(t&&t[K]).A;return y(r,n),x(void 0,r)},i.setAutoFreeze=function(t){this.J=t},i.setUseProxies=function(n){C||t(20),this.S=n},i.applyPatches=function(t,r){var e;for(e=r.length-1;e>=0;e--){var i=r[e];if(0===i.path.length&&"replace"===i.op){t=i.value;break}}var u=l("Patches").K;return n(t)?u(t,r):this.produce(t,(function(t){return u(t,r.slice(e+1))}))},e}(),V=new U,W=V.produce,X=V.produceWithPatches.bind(V),Y=V.setAutoFreeze.bind(V),Z=V.setUseProxies.bind(V),tt=V.applyPatches.bind(V),nt=V.createDraft.bind(V),rt=V.finishDraft.bind(V);exports.Immer=U,exports.applyPatches=tt,exports.castDraft=function(t){return t},exports.castImmutable=function(t){return t},exports.createDraft=nt,exports.default=W,exports.enableAllPlugins=function(){R(),F(),k()},exports.enableES5=R,exports.enableMapSet=F,exports.enablePatches=k,exports.finishDraft=rt,exports.immerable=I,exports.isDraft=n,exports.isDraftable=r,exports.nothing=H,exports.original=function(t){if(t&&t[K])return t[K].u},exports.produce=W,exports.produceWithPatches=X,exports.setAutoFreeze=Y,exports.setUseProxies=Z;
++"use strict";var e,t="undefined"!=typeof Symbol,r="undefined"!=typeof Map,n="undefined"!=typeof Set,i="undefined"!=typeof Proxy&&void 0!==Proxy.revocable&&"undefined"!=typeof Reflect,o="mini"!==function(){}.name,a=t?Symbol("immer-nothing"):((e={})["immer-nothing"]=!0,e),c=t?Symbol("immer-draftable"):"__$immer_draftable",s=t?Symbol("immer-state"):"__$immer_state",u=t?Symbol.iterator:"@@iterator";function f(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),n=1;n<t;n++)r[n-1]=arguments[n];throw new Error("[Immer] minified error nr: "+e+(r.length?" "+r.join(","):"")+". Find the full error at: https://bit.ly/38PiBHb")}function p(e){return!!e&&!!e[s]}function _(e){return!!e&&(function(e){if(!e||"object"!=typeof e)return!1;var t=Object.getPrototypeOf(e);return!t||t===Object.prototype}(e)||Array.isArray(e)||!!e[c]||!!e.constructor[c]||b(e)||m(e))}var l="undefined"!=typeof Reflect&&Reflect.ownKeys?Reflect.ownKeys:void 0!==Object.getOwnPropertySymbols?function(e){return Object.getOwnPropertyNames(e).concat(Object.getOwnPropertySymbols(e))}:Object.getOwnPropertyNames;function h(e,t){0===d(e)?l(e).forEach((function(r){return t(r,e[r],e)})):e.forEach((function(r,n){return t(n,r,e)}))}function d(e){var t=e[s];return t?t.type_>3?t.type_-4:t.type_:Array.isArray(e)?1:b(e)?2:m(e)?3:0}function v(e,t){return 2===d(e)?e.has(t):Object.prototype.hasOwnProperty.call(e,t)}function y(e,t){return 2===d(e)?e.get(t):e[t]}function g(e,t){return e===t?0!==e||1/e==1/t:e!=e&&t!=t}function b(e){return r&&e instanceof Map}function m(e){return n&&e instanceof Set}function P(e){return e.copy_||e.base_}function x(e,t){if(void 0===t&&(t=!1),Array.isArray(e))return e.slice();var r=Object.create(Object.getPrototypeOf(e));return h(e,(function(n){if(n!==s){var i=Object.getOwnPropertyDescriptor(e,n),o=i.value;i.get&&t&&(o=i.get.call(e)),i.enumerable?r[n]=o:t&&Object.defineProperty(r,n,{value:o,writable:!0,configurable:!0})}})),r}function O(e,t){p(e)||Object.isFrozen(e)||!_(e)||(d(e)>1&&(e.set=e.add=e.clear=e.delete=w),Object.freeze(e),t&&h(e,(function(e,t){return O(t,!0)})))}function w(){f(2)}var z,j={};function S(e){var t=j[e];return t||f(19,e),t}function A(e,t){j[e]=t}function E(){return z}function k(e,t){t&&(S("Patches"),e.patches_=[],e.inversePatches_=[],e.patchListener_=t)}function M(e){D(e),e.drafts_.forEach(R),e.drafts_=null}function D(e){e===z&&(z=e.parent_)}function F(e){return z={drafts_:[],parent_:z,immer_:e,canAutoFreeze_:!0,unfinalizedDrafts_:0}}function R(e){var t=e[s];0===t.type_||1===t.type_?t.revoke_():t.revoked_=!0}function W(e,t){t.unfinalizedDrafts_=t.drafts_.length;var r=t.drafts_[0],n=void 0!==e&&e!==r;return t.immer_.useProxies_||S("ES5").willFinalizeES5_(t,e,n),n?(r[s].modified_&&(M(t),f(4)),_(e)&&(e=K(t,e),t.parent_||U(t,e)),t.patches_&&S("Patches").generateReplacementPatches_(r[s],e,t.patches_,t.inversePatches_)):e=K(t,r,[]),M(t),t.patches_&&t.patchListener_(t.patches_,t.inversePatches_),e!==a?e:void 0}function K(e,t,r){if(Object.isFrozen(t))return t;var n=t[s];if(!n)return h(t,(function(i,o){return N(e,n,t,i,o,r)})),t;if(n.scope_!==e)return t;if(!n.modified_)return U(e,n.base_,!0),n.base_;if(!n.finalized_){n.finalized_=!0,n.scope_.unfinalizedDrafts_--;var i=4===n.type_||5===n.type_?n.copy_=x(n.draft_,!0):n.copy_;h(i,(function(t,o){return N(e,n,i,t,o,r)})),U(e,i,!1),r&&e.patches_&&S("Patches").generatePatches_(n,r,e.patches_,e.inversePatches_)}return n.copy_}function N(e,t,r,n,i,o){if(p(i)){var a=K(e,i,o&&t&&3!==t.type_&&!v(t.assigned_,n)?o.concat(n):void 0);if(s=n,u=a,2===(f=d(c=r))?c.set(s,u):3===f?(c.delete(s),c.add(u)):c[s]=u,!p(a))return;e.canAutoFreeze_=!1}var c,s,u,f;if((!t||!g(i,y(t.base_,n)))&&_(i)){if(!e.immer_.autoFreeze_&&e.unfinalizedDrafts_<1)return;K(e,i),t&&t.scope_.parent_||U(e,i)}}function U(e,t,r){void 0===r&&(r=!1),e.immer_.autoFreeze_&&e.canAutoFreeze_&&O(t,r)}var I={get:function(e,t){if(t===s)return e;var r=e.drafts_;if(!e.modified_&&v(r,t))return r[t];var n=P(e)[t];if(e.finalized_||!_(n))return n;if(e.modified_){if(n!==J(e.base_,t))return n;r=e.copy_}return r[t]=H(e.scope_.immer_,n,e)},has:function(e,t){return t in P(e)},ownKeys:function(e){return Reflect.ownKeys(P(e))},set:function(e,t,r){if(!e.modified_){var n=J(e.base_,t);if(r?g(n,r)||r===e.drafts_[t]:g(n,r)&&t in e.base_)return!0;$(e),L(e)}return e.assigned_[t]=!0,e.copy_[t]=r,!0},deleteProperty:function(e,t){return void 0!==J(e.base_,t)||t in e.base_?(e.assigned_[t]=!1,$(e),L(e)):e.assigned_[t]&&delete e.assigned_[t],e.copy_&&delete e.copy_[t],!0},getOwnPropertyDescriptor:function(e,t){var r=P(e),n=Reflect.getOwnPropertyDescriptor(r,t);return n&&(n.writable=!0,n.configurable=1!==e.type_||"length"!==t),n},defineProperty:function(){f(11)},getPrototypeOf:function(e){return Object.getPrototypeOf(e.base_)},setPrototypeOf:function(){f(12)}},C={};function J(e,t){var r=e[s],n=Reflect.getOwnPropertyDescriptor(r?P(r):e,t);return n&&n.value}function L(e){if(!e.modified_){if(e.modified_=!0,0===e.type_||1===e.type_){var t=e.copy_=x(e.base_);h(e.drafts_,(function(e,r){t[e]=r})),e.drafts_=void 0}e.parent_&&L(e.parent_)}}function $(e){e.copy_||(e.copy_=x(e.base_))}h(I,(function(e,t){C[e]=function(){return arguments[0]=arguments[0][0],t.apply(this,arguments)}})),C.deleteProperty=function(e,t){return I.deleteProperty.call(this,e[0],t)},C.set=function(e,t,r){return I.set.call(this,e[0],t,r,e[0])};var B=function(){function e(e){this.useProxies_=i,this.autoFreeze_=!o,"boolean"==typeof(null==e?void 0:e.useProxies)&&this.setUseProxies(e.useProxies),"boolean"==typeof(null==e?void 0:e.autoFreeze)&&this.setAutoFreeze(e.autoFreeze),this.produce=this.produce.bind(this),this.produceWithPatches=this.produceWithPatches.bind(this)}var t=e.prototype;return t.produce=function(e,t,r){if("function"==typeof e&&"function"!=typeof t){var n=t;t=e;var i=this;return function(e){var r=this;void 0===e&&(e=n);for(var o=arguments.length,a=new Array(o>1?o-1:0),c=1;c<o;c++)a[c-1]=arguments[c];return i.produce(e,(function(e){var n;return(n=t).call.apply(n,[r,e].concat(a))}))}}var o;if("function"!=typeof t&&f(6),void 0!==r&&"function"!=typeof r&&f(7),_(e)){var c=F(this),s=H(this,e,void 0),u=!0;try{o=t(s),u=!1}finally{u?M(c):D(c)}return"undefined"!=typeof Promise&&o instanceof Promise?o.then((function(e){return k(c,r),W(e,c)}),(function(e){throw M(c),e})):(k(c,r),W(o,c))}if((o=t(e))!==a)return void 0===o&&(o=e),this.autoFreeze_&&O(o,!0),o},t.produceWithPatches=function(e,t,r){var n,i,o=this;return"function"==typeof e?function(t){for(var r=arguments.length,n=new Array(r>1?r-1:0),i=1;i<r;i++)n[i-1]=arguments[i];return o.produceWithPatches(t,(function(t){return e.apply(void 0,[t].concat(n))}))}:[this.produce(e,t,(function(e,t){n=e,i=t})),n,i]},t.createDraft=function(e){_(e)||f(8);var t=F(this),r=H(this,e,void 0);return r[s].isManual_=!0,D(t),r},t.finishDraft=function(e,t){var r=(e&&e[s]).scope_;return k(r,t),W(void 0,r)},t.setAutoFreeze=function(e){this.autoFreeze_=e},t.setUseProxies=function(e){i||f(20),this.useProxies_=e},t.applyPatches=function(e,t){var r;for(r=t.length-1;r>=0;r--){var n=t[r];if(0===n.path.length&&"replace"===n.op){e=n.value;break}}var i=S("Patches").applyPatches_;return p(e)?i(e,t):this.produce(e,(function(e){return i(e,t.slice(r+1))}))},e}();function H(e,t,r){var n=b(t)?S("MapSet").proxyMap_(t,r):m(t)?S("MapSet").proxySet_(t,r):e.useProxies_?function(e,t){var r=Array.isArray(e),n={type_:r?1:0,scope_:t?t.scope_:E(),modified_:!1,finalized_:!1,assigned_:{},parent_:t,base_:e,draft_:null,drafts_:{},copy_:null,revoke_:null,isManual_:!1},i=n,o=I;r&&(i=[n],o=C);var a=Proxy.revocable(i,o),c=a.revoke,s=a.proxy;return n.draft_=s,n.revoke_=c,s}(t,r):S("ES5").createES5Proxy_(t,r);return(r?r.scope_:E()).drafts_.push(n),n}function q(e,t){e.useProxies_?L(t):S("ES5").markChangedES5_(t)}function G(){function e(e,t){var r=e[s];if(r&&!r.finalizing_){r.finalizing_=!0;var n=e[t];return r.finalizing_=!1,n}return e[t]}function t(e){e.modified_||(e.modified_=!0,e.parent_&&t(e.parent_))}function r(e){e.copy_||(e.copy_=n(e.base_))}function n(e){var t=e&&e[s];if(t){t.finalizing_=!0;var r=x(t.draft_,!0);return t.finalizing_=!1,r}return x(e)}var i={};function o(e){for(var r=e.length-1;r>=0;r--){var n=e[r][s];if(!n.modified_)switch(n.type_){case 5:c(n)&&t(n);break;case 4:a(n)&&t(n)}}}function a(e){for(var t=e.base_,r=e.draft_,n=Object.keys(r),i=n.length-1;i>=0;i--){var o=n[i],a=t[o];if(void 0===a&&!v(t,o))return!0;var c=r[o],u=c&&c[s];if(u?u.base_!==a:!g(c,a))return!0}return n.length!==Object.keys(t).length}function c(e){var t=e.draft_;if(t.length!==e.base_.length)return!0;var r=Object.getOwnPropertyDescriptor(t,t.length-1);return!(!r||r.get)}function u(e){e.revoked_&&f(3,JSON.stringify(P(e)))}A("ES5",{createES5Proxy_:function(o,a){var c=Array.isArray(o),f=n(o);h(f,(function(n){!function(n,o,a){var c=i[o];c?c.enumerable=a:i[o]=c={enumerable:a,get:function(){return function(t,n){u(t);var i=e(P(t),n);return t.finalizing_?i:i===e(t.base_,n)&&_(i)?(r(t),t.copy_[n]=H(t.scope_.immer_,i,t)):i}(this[s],o)},set:function(n){!function(n,i,o){if(u(n),n.assigned_[i]=!0,!n.modified_){if(g(o,e(P(n),i)))return;t(n),r(n)}n.copy_[i]=o}(this[s],o,n)}},Object.defineProperty(n,o,c)}(f,n,c||function(e,t){var r=Object.getOwnPropertyDescriptor(e,t);return!(!r||!r.enumerable)}(o,n))}));var p={type_:c?5:4,scope_:a?a.scope_:E(),modified_:!1,finalizing_:!1,finalized_:!1,assigned_:{},parent_:a,base_:o,draft_:f,copy_:null,revoked_:!1,isManual_:!1};return Object.defineProperty(f,s,{value:p,writable:!0}),f},markChangedES5_:t,willFinalizeES5_:function(e,r,n){e.drafts_.forEach((function(e){e[s].finalizing_=!0})),n?p(r)&&r[s].scope_===e&&o(e.drafts_):(e.patches_&&function e(r){if(r&&"object"==typeof r){var n=r[s];if(n){var i=n.base_,o=n.draft_,a=n.assigned_,u=n.type_;if(4===u)h(o,(function(r){r!==s&&(void 0!==i[r]||v(i,r)?a[r]||e(o[r]):(a[r]=!0,t(n)))})),h(i,(function(e){void 0!==o[e]||v(o,e)||(a[e]=!1,t(n))}));else if(5===u){if(c(n)&&(t(n),a.length=!0),o.length<i.length)for(var f=o.length;f<i.length;f++)a[f]=!1;else for(var p=i.length;p<o.length;p++)a[p]=!0;for(var _=Math.min(o.length,i.length),l=0;l<_;l++)void 0===a[l]&&e(o[l])}}}}(e.drafts_[0]),o(e.drafts_))}})}function Q(){var e="add";function t(e){if(!e||"object"!=typeof e)return e;if(Array.isArray(e))return e.map(t);if(b(e))return new Map(Array.from(e.entries()).map((function(e){return[e[0],t(e[1])]})));if(m(e))return new Set(Array.from(e).map(t));var r=Object.create(Object.getPrototypeOf(e));for(var n in e)r[n]=t(e[n]);return r}A("Patches",{applyPatches_:function(r,n){return n.forEach((function(n){for(var i=n.path,o=n.op,a=r,c=0;c<i.length-1;c++)"object"!=typeof(a=y(a,i[c]))&&f(15,i.join("/"));var s=d(a),u=t(n.value),p=i[i.length-1];switch(o){case"replace":switch(s){case 2:return a.set(p,u);case 3:f(16);default:return a[p]=u}case e:switch(s){case 1:return a.splice(p,0,u);case 2:return a.set(p,u);case 3:return a.add(u);default:return a[p]=u}case"remove":switch(s){case 1:return a.splice(p,1);case 2:return a.delete(p);case 3:return a.delete(n.value);default:return delete a[p]}default:f(17,o)}})),r},generatePatches_:function(t,r,n,i){switch(t.type_){case 0:case 4:case 2:return function(t,r,n,i){var o=t.base_,a=t.copy_;h(t.assigned_,(function(t,c){var s=y(o,t),u=y(a,t),f=c?v(o,t)?"replace":e:"remove";if(s!==u||"replace"!==f){var p=r.concat(t);n.push("remove"===f?{op:f,path:p}:{op:f,path:p,value:u}),i.push(f===e?{op:"remove",path:p}:"remove"===f?{op:e,path:p,value:s}:{op:"replace",path:p,value:s})}}))}(t,r,n,i);case 5:case 1:return function(t,r,n,i){var o=t.base_,a=t.assigned_,c=t.copy_;if(c.length<o.length){var s=[c,o];o=s[0],c=s[1];var u=[i,n];n=u[0],i=u[1]}for(var f=c.length-o.length,p=0;o[p]===c[p]&&p<o.length;)++p;for(var _=o.length;_>p&&o[_-1]===c[_+f-1];)--_;for(var l=p;l<_;++l)if(a[l]&&c[l]!==o[l]){var h=r.concat([l]);n.push({op:"replace",path:h,value:c[l]}),i.push({op:"replace",path:h,value:o[l]})}for(var d=n.length,v=_+f-1;v>=_;--v){var y=r.concat([v]);n[d+v-_]={op:e,path:y,value:c[v]},i.push({op:"remove",path:y})}}(t,r,n,i);case 3:return function(t,r,n,i){var o=t.base_,a=t.copy_,c=0;o.forEach((function(t){if(!a.has(t)){var o=r.concat([c]);n.push({op:"remove",path:o,value:t}),i.unshift({op:e,path:o,value:t})}c++})),c=0,a.forEach((function(t){if(!o.has(t)){var a=r.concat([c]);n.push({op:e,path:a,value:t}),i.unshift({op:"remove",path:a,value:t})}c++}))}(t,r,n,i)}},generateReplacementPatches_:function(e,t,r,n){r.push({op:"replace",path:[],value:t}),n.push({op:"replace",path:[],value:e.base_})}})}function T(){var e=function(t,r){return(e=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(e,t){e.__proto__=t}||function(e,t){for(var r in t)t.hasOwnProperty(r)&&(e[r]=t[r])})(t,r)};function t(t,r){function n(){this.constructor=t}e(t,r),t.prototype=(n.prototype=r.prototype,new n)}var r=function(e){function r(e,t){return this[s]={type_:2,parent_:t,scope_:t?t.scope_:E(),modified_:!1,finalized_:!1,copy_:void 0,assigned_:void 0,base_:e,draft_:this,isManual_:!1,revoked_:!1},this}t(r,Map);var i=r.prototype;return Object.defineProperty(i,"size",{get:function(){return P(this[s]).size}}),i.has=function(e){return P(this[s]).has(e)},i.set=function(e,t){var r=this[s];return a(r),P(r).get(e)!==t&&(n(r),q(r.scope_.immer_,r),r.assigned_.set(e,!0),r.copy_.set(e,t),r.assigned_.set(e,!0)),this},i.delete=function(e){if(!this.has(e))return!1;var t=this[s];return a(t),n(t),q(t.scope_.immer_,t),t.assigned_.set(e,!1),t.copy_.delete(e),!0},i.clear=function(){var e=this[s];return a(e),n(e),q(e.scope_.immer_,e),e.assigned_=new Map,e.copy_.clear()},i.forEach=function(e,t){var r=this;P(this[s]).forEach((function(n,i,o){e.call(t,r.get(i),i,r)}))},i.get=function(e){var t=this[s];a(t);var r=P(t).get(e);if(t.finalized_||!_(r))return r;if(r!==t.base_.get(e))return r;var i=H(t.scope_.immer_,r,t);return n(t),t.copy_.set(e,i),i},i.keys=function(){return P(this[s]).keys()},i.values=function(){var e,t=this,r=this.keys();return(e={})[u]=function(){return t.values()},e.next=function(){var e=r.next();return e.done?e:{done:!1,value:t.get(e.value)}},e},i.entries=function(){var e,t=this,r=this.keys();return(e={})[u]=function(){return t.entries()},e.next=function(){var e=r.next();if(e.done)return e;var n=t.get(e.value);return{done:!1,value:[e.value,n]}},e},i[u]=function(){return this.entries()},r}();function n(e){e.copy_||(e.assigned_=new Map,e.copy_=new Map(e.base_))}var i=function(e){function r(e,t){return this[s]={type_:3,parent_:t,scope_:t?t.scope_:E(),modified_:!1,finalized_:!1,copy_:void 0,base_:e,draft_:this,drafts_:new Map,revoked_:!1,isManual_:!1},this}t(r,Set);var n=r.prototype;return Object.defineProperty(n,"size",{get:function(){return P(this[s]).size}}),n.has=function(e){var t=this[s];return a(t),t.copy_?!!t.copy_.has(e)||!(!t.drafts_.has(e)||!t.copy_.has(t.drafts_.get(e))):t.base_.has(e)},n.add=function(e){var t=this[s];return a(t),t.copy_?t.copy_.add(e):t.base_.has(e)||(o(t),q(t.scope_.immer_,t),t.copy_.add(e)),this},n.delete=function(e){if(!this.has(e))return!1;var t=this[s];return a(t),o(t),q(t.scope_.immer_,t),t.copy_.delete(e)||!!t.drafts_.has(e)&&t.copy_.delete(t.drafts_.get(e))},n.clear=function(){var e=this[s];return a(e),o(e),q(e.scope_.immer_,e),e.copy_.clear()},n.values=function(){var e=this[s];return a(e),o(e),e.copy_.values()},n.entries=function(){var e=this[s];return a(e),o(e),e.copy_.entries()},n.keys=function(){return this.values()},n[u]=function(){return this.values()},n.forEach=function(e,t){for(var r=this.values(),n=r.next();!n.done;)e.call(t,n.value,n.value,this),n=r.next()},r}();function o(e){e.copy_||(e.copy_=new Set,e.base_.forEach((function(t){if(_(t)){var r=H(e.scope_.immer_,t,e);e.drafts_.set(t,r),e.copy_.add(r)}else e.copy_.add(t)})))}function a(e){e.revoked_&&f(3,JSON.stringify(P(e)))}A("MapSet",{proxyMap_:function(e,t){return new r(e,t)},proxySet_:function(e,t){return new i(e,t)}})}var V=new B,X=V.produce,Y=V.produceWithPatches.bind(V),Z=V.setAutoFreeze.bind(V),ee=V.setUseProxies.bind(V),te=V.applyPatches.bind(V),re=V.createDraft.bind(V),ne=V.finishDraft.bind(V);exports.Immer=B,exports.applyPatches=te,exports.castDraft=function(e){return e},exports.castImmutable=function(e){return e},exports.createDraft=re,exports.default=X,exports.enableAllPlugins=function(){G(),T(),Q()},exports.enableES5=G,exports.enableMapSet=T,exports.enablePatches=Q,exports.finishDraft=ne,exports.immerable=c,exports.isDraft=p,exports.isDraftable=_,exports.nothing=a,exports.original=function(e){if(e&&e[s])return e[s].base_},exports.produce=X,exports.produceWithPatches=Y,exports.setAutoFreeze=Z,exports.setUseProxies=ee;
+ //# sourceMappingURL=immer.cjs.production.min.js.map
+diff --git a/node_modules/immer/dist/immer.esm.js b/node_modules/immer/dist/immer.esm.js
+index 00e7521..5be5703 100644
+--- a/node_modules/immer/dist/immer.esm.js
++++ b/node_modules/immer/dist/immer.esm.js
+@@ -1,2 +1,1841 @@
+-function n(n){for(var t=arguments.length,r=Array(t>1?t-1:0),e=1;e<t;e++)r[e-1]=arguments[e];if("production"!==process.env.NODE_ENV){var i=Q[n],o=i?"function"==typeof i?i.apply(null,r):i:"unknown error nr: "+n;throw Error("[Immer] "+o)}throw Error("[Immer] minified error nr: "+n+(r.length?" "+r.join(","):"")+". Find the full error at: https://bit.ly/38PiBHb")}function t(n){return!!n&&!!n[G]}function r(n){return!!n&&(function(n){if(!n||"object"!=typeof n)return!1;var t=Object.getPrototypeOf(n);return!t||t===Object.prototype}(n)||Array.isArray(n)||!!n[q]||!!n.constructor[q]||c(n)||s(n))}function e(n){if(n&&n[G])return n[G].t}function i(n,t){0===o(n)?V(n).forEach((function(r){return t(r,n[r],n)})):n.forEach((function(r,e){return t(e,r,n)}))}function o(n){var t=n[G];return t?t.i>3?t.i-4:t.i:Array.isArray(n)?1:c(n)?2:s(n)?3:0}function u(n,t){return 2===o(n)?n.has(t):Object.prototype.hasOwnProperty.call(n,t)}function a(n,t){return 2===o(n)?n.get(t):n[t]}function f(n,t){return n===t?0!==n||1/n==1/t:n!=n&&t!=t}function c(n){return B&&n instanceof Map}function s(n){return H&&n instanceof Set}function v(n){return n.o||n.t}function p(t,r){if(void 0===r&&(r=!1),Array.isArray(t))return t.slice();var e=Object.create(Object.getPrototypeOf(t));return i(t,(function(i){if(i!==G){var o=Object.getOwnPropertyDescriptor(t,i),u=o.value;o.get&&(r||n(1),u=o.get.call(t)),o.enumerable?e[i]=u:Object.defineProperty(e,i,{value:u,writable:!0,configurable:!0})}})),e}function d(n,e){t(n)||Object.isFrozen(n)||!r(n)||(o(n)>1&&(n.set=n.add=n.clear=n.delete=l),Object.freeze(n),e&&i(n,(function(n,t){return d(t,!0)})))}function l(){n(2)}function h(t){var r=W[t];return r||n("production"!==process.env.NODE_ENV?18:19,t),r}function y(n,t){W[n]=t}function b(){return"production"===process.env.NODE_ENV||J||n(0),J}function m(n,t){t&&(h("Patches"),n.u=[],n.s=[],n.v=t)}function _(n){j(n),n.p.forEach(g),n.p=null}function j(n){n===J&&(J=n.l)}function O(n){return J={p:[],l:J,h:n,m:!0,_:0}}function g(n){var t=n[G];0===t.i||1===t.i?t.j():t.O=!0}function w(t,e){e._=e.p.length;var i=e.p[0],o=void 0!==t&&t!==i;return e.h.g||h("ES5").P(e,t,o),o?(i[G].S&&(_(e),n(4)),r(t)&&(t=P(e,t),e.l||M(e,t)),e.u&&h("Patches").M(i[G],t,e.u,e.s)):t=P(e,i,[]),_(e),e.u&&e.v(e.u,e.s),t!==U?t:void 0}function P(n,t,r){if(Object.isFrozen(t))return t;var e=t[G];if(!e)return i(t,(function(i,o){return S(n,e,t,i,o,r)})),t;if(e.A!==n)return t;if(!e.S)return M(n,e.t,!0),e.t;if(!e.I){e.I=!0,e.A._--;var o=4===e.i||5===e.i?e.o=p(e.k,!0):e.o;i(o,(function(t,i){return S(n,e,o,t,i,r)})),M(n,o,!1),r&&n.u&&h("Patches").R(e,r,n.u,n.s)}return e.o}function S(e,i,c,s,v,p){if("production"!==process.env.NODE_ENV&&v===c&&n(5),t(v)){var d=P(e,v,p&&i&&3!==i.i&&!u(i.D,s)?p.concat(s):void 0);if(h=s,y=d,2===(b=o(l=c))?l.set(h,y):3===b?(l.delete(h),l.add(y)):l[h]=y,!t(d))return;e.m=!1}var l,h,y,b;if((!i||!f(v,a(i.t,s)))&&r(v)){if(!e.h.N&&e._<1)return;P(e,v),i&&i.A.l||M(e,v)}}function M(n,t,r){void 0===r&&(r=!1),n.h.N&&n.m&&d(t,r)}function A(n,t){var r=n[G],e=Reflect.getOwnPropertyDescriptor(r?v(r):n,t);return e&&e.value}function z(n){if(!n.S){if(n.S=!0,0===n.i||1===n.i){var t=n.o=p(n.t);i(n.p,(function(n,r){t[n]=r})),n.p=void 0}n.l&&z(n.l)}}function x(n){n.o||(n.o=p(n.t))}function I(n,t,r){var e=c(t)?h("MapSet").T(t,r):s(t)?h("MapSet").F(t,r):n.g?function(n,t){var r=Array.isArray(n),e={i:r?1:0,A:t?t.A:b(),S:!1,I:!1,D:{},l:t,t:n,k:null,p:{},o:null,j:null,C:!1},i=e,o=X;r&&(i=[e],o=Y);var u=Proxy.revocable(i,o),a=u.revoke,f=u.proxy;return e.k=f,e.j=a,f}(t,r):h("ES5").J(t,r);return(r?r.A:b()).p.push(e),e}function E(n,t){n.g?z(t):h("ES5").$(t)}function k(){function e(n,t){var r=n[G];if(r&&!r.B){r.B=!0;var e=n[t];return r.B=!1,e}return n[t]}function o(n){n.S||(n.S=!0,n.l&&o(n.l))}function a(n){n.o||(n.o=c(n.t))}function c(n){var t=n&&n[G];if(t){t.B=!0;var r=p(t.k,!0);return t.B=!1,r}return p(n)}function s(n){for(var t=n.length-1;t>=0;t--){var r=n[t][G];if(!r.S)switch(r.i){case 5:l(r)&&o(r);break;case 4:d(r)&&o(r)}}}function d(n){for(var t=n.t,r=n.k,e=Object.keys(r),i=e.length-1;i>=0;i--){var o=e[i],a=t[o];if(void 0===a&&!u(t,o))return!0;var c=r[o],s=c&&c[G];if(s?s.t!==a:!f(c,a))return!0}return e.length!==Object.keys(t).length}function l(n){var t=n.k;if(t.length!==n.t.length)return!0;var r=Object.getOwnPropertyDescriptor(t,t.length-1);return!(!r||r.get)}function h(t){t.O&&n(3,JSON.stringify(v(t)))}var m={};y("ES5",{J:function(n,t){var u=Array.isArray(n),s=c(n);i(s,(function(t){!function(n,t,i){var u=m[t];u?u.enumerable=i:m[t]=u={enumerable:i,get:function(){return function(n,t){h(n);var i=e(v(n),t);return n.B?i:i===e(n.t,t)&&r(i)?(a(n),n.o[t]=I(n.A.h,i,n)):i}(this[G],t)},set:function(n){!function(n,t,r){if(h(n),n.D[t]=!0,!n.S){if(f(r,e(v(n),t)))return;o(n),a(n)}n.o[t]=r}(this[G],t,n)}},Object.defineProperty(n,t,u)}(s,t,u||function(n,t){var r=Object.getOwnPropertyDescriptor(n,t);return!(!r||!r.enumerable)}(n,t))}));var p={i:u?5:4,A:t?t.A:b(),S:!1,B:!1,I:!1,D:{},l:t,t:n,k:s,o:null,O:!1,C:!1};return Object.defineProperty(s,G,{value:p,writable:!0}),s},$:o,P:function(n,r,e){n.p.forEach((function(n){n[G].B=!0})),e?t(r)&&r[G].A===n&&s(n.p):(n.u&&function n(t){if(t&&"object"==typeof t){var r=t[G];if(r){var e=r.t,a=r.k,f=r.D,c=r.i;if(4===c)i(a,(function(t){t!==G&&(void 0!==e[t]||u(e,t)?f[t]||n(a[t]):(f[t]=!0,o(r)))})),i(e,(function(n){void 0!==a[n]||u(a,n)||(f[n]=!1,o(r))}));else if(5===c){if(l(r)&&(o(r),f.length=!0),a.length<e.length)for(var s=a.length;s<e.length;s++)f[s]=!1;else for(var v=e.length;v<a.length;v++)f[v]=!0;for(var p=Math.min(a.length,e.length),d=0;d<p;d++)void 0===f[d]&&n(a[d])}}}}(n.p[0]),s(n.p))}})}function R(){function t(n){if(!n||"object"!=typeof n)return n;if(Array.isArray(n))return n.map(t);if(c(n))return new Map(Array.from(n.entries()).map((function(n){return[n[0],t(n[1])]})));if(s(n))return new Set(Array.from(n).map(t));var r=Object.create(Object.getPrototypeOf(n));for(var e in n)r[e]=t(n[e]);return r}var r="add";y("Patches",{H:function(e,i){return i.forEach((function(i){for(var u=i.path,f=i.op,c=e,s=0;s<u.length-1;s++)"object"!=typeof(c=a(c,u[s]))&&n(15,u.join("/"));var v=o(c),p=t(i.value),d=u[u.length-1];switch(f){case"replace":switch(v){case 2:return c.set(d,p);case 3:n(16);default:return c[d]=p}case r:switch(v){case 1:return c.splice(d,0,p);case 2:return c.set(d,p);case 3:return c.add(p);default:return c[d]=p}case"remove":switch(v){case 1:return c.splice(d,1);case 2:return c.delete(d);case 3:return c.delete(i.value);default:return delete c[d]}default:n(17,f)}})),e},R:function(n,t,e,o){switch(n.i){case 0:case 4:case 2:return function(n,t,e,o){var f=n.t,c=n.o;i(n.D,(function(n,i){var s=a(f,n),v=a(c,n),p=i?u(f,n)?"replace":r:"remove";if(s!==v||"replace"!==p){var d=t.concat(n);e.push("remove"===p?{op:p,path:d}:{op:p,path:d,value:v}),o.push(p===r?{op:"remove",path:d}:"remove"===p?{op:r,path:d,value:s}:{op:"replace",path:d,value:s})}}))}(n,t,e,o);case 5:case 1:return function(n,t,e,i){var o=n.t,u=n.D,a=n.o;if(a.length<o.length){var f=[a,o];o=f[0],a=f[1];var c=[i,e];e=c[0],i=c[1]}for(var s=a.length-o.length,v=0;o[v]===a[v]&&v<o.length;)++v;for(var p=o.length;p>v&&o[p-1]===a[p+s-1];)--p;for(var d=v;d<p;++d)if(u[d]&&a[d]!==o[d]){var l=t.concat([d]);e.push({op:"replace",path:l,value:a[d]}),i.push({op:"replace",path:l,value:o[d]})}for(var h=e.length,y=p+s-1;y>=p;--y){var b=t.concat([y]);e[h+y-p]={op:r,path:b,value:a[y]},i.push({op:"remove",path:b})}}(n,t,e,o);case 3:return function(n,t,e,i){var o=n.t,u=n.o,a=0;o.forEach((function(n){if(!u.has(n)){var o=t.concat([a]);e.push({op:"remove",path:o,value:n}),i.unshift({op:r,path:o,value:n})}a++})),a=0,u.forEach((function(n){if(!o.has(n)){var u=t.concat([a]);e.push({op:r,path:u,value:n}),i.unshift({op:"remove",path:u,value:n})}a++}))}(n,t,e,o)}},M:function(n,t,r,e){r.push({op:"replace",path:[],value:t}),e.push({op:"replace",path:[],value:n.t})}})}function D(){function t(n,t){function r(){this.constructor=n}u(n,t),n.prototype=(r.prototype=t.prototype,new r)}function e(n){n.o||(n.D=new Map,n.o=new Map(n.t))}function i(n){n.o||(n.o=new Set,n.t.forEach((function(t){if(r(t)){var e=I(n.A.h,t,n);n.p.set(t,e),n.o.add(e)}else n.o.add(t)})))}function o(t){t.O&&n(3,JSON.stringify(v(t)))}var u=function(n,t){return(u=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(n,t){n.__proto__=t}||function(n,t){for(var r in t)t.hasOwnProperty(r)&&(n[r]=t[r])})(n,t)},a=function(){function n(n,t){return this[G]={i:2,l:t,A:t?t.A:b(),S:!1,I:!1,o:void 0,D:void 0,t:n,k:this,C:!1,O:!1},this}t(n,Map);var i=n.prototype;return Object.defineProperty(i,"size",{get:function(){return v(this[G]).size}}),i.has=function(n){return v(this[G]).has(n)},i.set=function(n,t){var r=this[G];return o(r),v(r).get(n)!==t&&(e(r),E(r.A.h,r),r.D.set(n,!0),r.o.set(n,t),r.D.set(n,!0)),this},i.delete=function(n){if(!this.has(n))return!1;var t=this[G];return o(t),e(t),E(t.A.h,t),t.D.set(n,!1),t.o.delete(n),!0},i.clear=function(){var n=this[G];return o(n),e(n),E(n.A.h,n),n.D=new Map,n.o.clear()},i.forEach=function(n,t){var r=this;v(this[G]).forEach((function(e,i){n.call(t,r.get(i),i,r)}))},i.get=function(n){var t=this[G];o(t);var i=v(t).get(n);if(t.I||!r(i))return i;if(i!==t.t.get(n))return i;var u=I(t.A.h,i,t);return e(t),t.o.set(n,u),u},i.keys=function(){return v(this[G]).keys()},i.values=function(){var n,t=this,r=this.keys();return(n={})[L]=function(){return t.values()},n.next=function(){var n=r.next();return n.done?n:{done:!1,value:t.get(n.value)}},n},i.entries=function(){var n,t=this,r=this.keys();return(n={})[L]=function(){return t.entries()},n.next=function(){var n=r.next();if(n.done)return n;var e=t.get(n.value);return{done:!1,value:[n.value,e]}},n},i[L]=function(){return this.entries()},n}(),f=function(){function n(n,t){return this[G]={i:3,l:t,A:t?t.A:b(),S:!1,I:!1,o:void 0,t:n,k:this,p:new Map,O:!1,C:!1},this}t(n,Set);var r=n.prototype;return Object.defineProperty(r,"size",{get:function(){return v(this[G]).size}}),r.has=function(n){var t=this[G];return o(t),t.o?!!t.o.has(n)||!(!t.p.has(n)||!t.o.has(t.p.get(n))):t.t.has(n)},r.add=function(n){var t=this[G];return o(t),t.o?t.o.add(n):t.t.has(n)||(i(t),E(t.A.h,t),t.o.add(n)),this},r.delete=function(n){if(!this.has(n))return!1;var t=this[G];return o(t),i(t),E(t.A.h,t),t.o.delete(n)||!!t.p.has(n)&&t.o.delete(t.p.get(n))},r.clear=function(){var n=this[G];return o(n),i(n),E(n.A.h,n),n.o.clear()},r.values=function(){var n=this[G];return o(n),i(n),n.o.values()},r.entries=function(){var n=this[G];return o(n),i(n),n.o.entries()},r.keys=function(){return this.values()},r[L]=function(){return this.values()},r.forEach=function(n,t){for(var r=this.values(),e=r.next();!e.done;)n.call(t,e.value,e.value,this),e=r.next()},n}();y("MapSet",{T:function(n,t){return new a(n,t)},F:function(n,t){return new f(n,t)}})}function N(){k(),D(),R()}function T(n){return n}function F(n){return n}var C,J,$="undefined"!=typeof Symbol,B="undefined"!=typeof Map,H="undefined"!=typeof Set,K="undefined"!=typeof Proxy&&void 0!==Proxy.revocable&&"undefined"!=typeof Reflect,U=$?Symbol("immer-nothing"):((C={})["immer-nothing"]=!0,C),q=$?Symbol("immer-draftable"):"__$immer_draftable",G=$?Symbol("immer-state"):"__$immer_state",L=$?Symbol.iterator:"@@iterator",Q={0:"Illegal state",1:"Immer drafts cannot have computed properties",2:"This object has been frozen and should not be mutated",3:function(n){return"Cannot use a proxy that has been revoked. Did you pass an object from inside an immer function to an async process? "+n},4:"An immer producer returned a new value *and* modified its draft. Either return a new value *or* modify the draft.",5:"Immer forbids circular references",6:"The first or second argument to `produce` must be a function",7:"The third argument to `produce` must be a function or undefined",8:"First argument to `createDraft` must be a plain object, an array, or an immerable object",9:"First argument to `finishDraft` must be a draft returned by `createDraft`",10:"The given draft is already finalized",11:"Object.defineProperty() cannot be used on an Immer draft",12:"Object.setPrototypeOf() cannot be used on an Immer draft",13:"Immer only supports deleting array indices",14:"Immer only supports setting array indices and the 'length' property",15:function(n){return"Cannot apply patch, path doesn't resolve: "+n},16:'Sets cannot have "replace" patches.',17:function(n){return"Unsupported patch operation: "+n},18:function(n){return"The plugin for '"+n+"' has not been loaded into Immer. To enable the plugin, import and call `enable"+n+"()` when initializing your application."},19:"plugin not loaded",20:"Cannot use proxies if Proxy, Proxy.revocable or Reflect are not available"},V="undefined"!=typeof Reflect&&Reflect.ownKeys?Reflect.ownKeys:void 0!==Object.getOwnPropertySymbols?function(n){return Object.getOwnPropertyNames(n).concat(Object.getOwnPropertySymbols(n))}:Object.getOwnPropertyNames,W={},X={get:function(n,t){if(t===G)return n;var e=n.p;if(!n.S&&u(e,t))return e[t];var i=v(n)[t];if(n.I||!r(i))return i;if(n.S){if(i!==A(n.t,t))return i;e=n.o}return e[t]=I(n.A.h,i,n)},has:function(n,t){return t in v(n)},ownKeys:function(n){return Reflect.ownKeys(v(n))},set:function(n,t,r){if(!n.S){var e=A(n.t,t);if(r?f(e,r)||r===n.p[t]:f(e,r)&&t in n.t)return!0;x(n),z(n)}return n.D[t]=!0,n.o[t]=r,!0},deleteProperty:function(n,t){return void 0!==A(n.t,t)||t in n.t?(n.D[t]=!1,x(n),z(n)):n.D[t]&&delete n.D[t],n.o&&delete n.o[t],!0},getOwnPropertyDescriptor:function(n,t){var r=v(n),e=Reflect.getOwnPropertyDescriptor(r,t);return e&&(e.writable=!0,e.configurable=1!==n.i||"length"!==t),e},defineProperty:function(){n(11)},getPrototypeOf:function(n){return Object.getPrototypeOf(n.t)},setPrototypeOf:function(){n(12)}},Y={};i(X,(function(n,t){Y[n]=function(){return arguments[0]=arguments[0][0],t.apply(this,arguments)}})),Y.deleteProperty=function(t,r){return"production"!==process.env.NODE_ENV&&isNaN(parseInt(r))&&n(13),X.deleteProperty.call(this,t[0],r)},Y.set=function(t,r,e){return"production"!==process.env.NODE_ENV&&"length"!==r&&isNaN(parseInt(r))&&n(14),X.set.call(this,t[0],r,e,t[0])};var Z=function(){function e(n){this.g=K,this.N="production"!==process.env.NODE_ENV,"boolean"==typeof(null==n?void 0:n.useProxies)&&this.setUseProxies(n.useProxies),"boolean"==typeof(null==n?void 0:n.autoFreeze)&&this.setAutoFreeze(n.autoFreeze),this.produce=this.produce.bind(this),this.produceWithPatches=this.produceWithPatches.bind(this)}var i=e.prototype;return i.produce=function(t,e,i){if("function"==typeof t&&"function"!=typeof e){var o=e;e=t;var u=this;return function(n){var t=this;void 0===n&&(n=o);for(var r=arguments.length,i=Array(r>1?r-1:0),a=1;a<r;a++)i[a-1]=arguments[a];return u.produce(n,(function(n){var r;return(r=e).call.apply(r,[t,n].concat(i))}))}}var a;if("function"!=typeof e&&n(6),void 0!==i&&"function"!=typeof i&&n(7),r(t)){var f=O(this),c=I(this,t,void 0),s=!0;try{a=e(c),s=!1}finally{s?_(f):j(f)}return"undefined"!=typeof Promise&&a instanceof Promise?a.then((function(n){return m(f,i),w(n,f)}),(function(n){throw _(f),n})):(m(f,i),w(a,f))}if((a=e(t))!==U)return void 0===a&&(a=t),this.N&&d(a,!0),a},i.produceWithPatches=function(n,t){var r,e,i=this;return"function"==typeof n?function(t){for(var r=arguments.length,e=Array(r>1?r-1:0),o=1;o<r;o++)e[o-1]=arguments[o];return i.produceWithPatches(t,(function(t){return n.apply(void 0,[t].concat(e))}))}:[this.produce(n,t,(function(n,t){r=n,e=t})),r,e]},i.createDraft=function(t){r(t)||n(8);var e=O(this),i=I(this,t,void 0);return i[G].C=!0,j(e),i},i.finishDraft=function(t,r){var e=t&&t[G];"production"!==process.env.NODE_ENV&&(e&&e.C||n(9),e.I&&n(10));var i=e.A;return m(i,r),w(void 0,i)},i.setAutoFreeze=function(n){this.N=n},i.setUseProxies=function(t){K||n(20),this.g=t},i.applyPatches=function(n,r){var e;for(e=r.length-1;e>=0;e--){var i=r[e];if(0===i.path.length&&"replace"===i.op){n=i.value;break}}var o=h("Patches").H;return t(n)?o(n,r):this.produce(n,(function(n){return o(n,r.slice(e+1))}))},e}(),nn=new Z,tn=nn.produce,rn=nn.produceWithPatches.bind(nn),en=nn.setAutoFreeze.bind(nn),on=nn.setUseProxies.bind(nn),un=nn.applyPatches.bind(nn),an=nn.createDraft.bind(nn),fn=nn.finishDraft.bind(nn);export default tn;export{Z as Immer,un as applyPatches,T as castDraft,F as castImmutable,an as createDraft,N as enableAllPlugins,k as enableES5,D as enableMapSet,R as enablePatches,fn as finishDraft,q as immerable,t as isDraft,r as isDraftable,U as nothing,e as original,tn as produce,rn as produceWithPatches,en as setAutoFreeze,on as setUseProxies};
++var _ref;
++
++// Should be no imports here!
++// SOme things that should be evaluated before all else...
++var hasSymbol = typeof Symbol !== "undefined";
++var hasMap = typeof Map !== "undefined";
++var hasSet = typeof Set !== "undefined";
++var hasProxies = typeof Proxy !== "undefined" && typeof Proxy.revocable !== "undefined" && typeof Reflect !== "undefined";
++/* istanbul ignore next */
++
++function mini() {}
++
++var isMinified = mini.name !== "mini";
++/**
++ * The sentinel value returned by producers to replace the draft with undefined.
++ */
++
++var NOTHING = hasSymbol ? /*#__PURE__*/Symbol("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
++/**
++ * To let Immer treat your class instances as plain immutable objects
++ * (albeit with a custom prototype), you must define either an instance property
++ * or a static property on each of your custom classes.
++ *
++ * Otherwise, your class instance will never be drafted, which means it won't be
++ * safe to mutate in a produce callback.
++ */
++
++var DRAFTABLE = hasSymbol ? /*#__PURE__*/Symbol("immer-draftable") : "__$immer_draftable";
++var DRAFT_STATE = hasSymbol ? /*#__PURE__*/Symbol("immer-state") : "__$immer_state";
++var iteratorSymbol = hasSymbol ? Symbol.iterator : "@@iterator";
++
++var errors = {
++  0: "Illegal state",
++  1: "Immer drafts cannot have computed properties",
++  2: "This object has been frozen and should not be mutated",
++  3: function _(data) {
++    return "Cannot use a proxy that has been revoked. Did you pass an object from inside an immer function to an async process? " + data;
++  },
++  4: "An immer producer returned a new value *and* modified its draft. Either return a new value *or* modify the draft.",
++  5: "Immer forbids circular references",
++  6: "The first or second argument to `produce` must be a function",
++  7: "The third argument to `produce` must be a function or undefined",
++  8: "First argument to `createDraft` must be a plain object, an array, or an immerable object",
++  9: "First argument to `finishDraft` must be a draft returned by `createDraft`",
++  10: "The given draft is already finalized",
++  11: "Object.defineProperty() cannot be used on an Immer draft",
++  12: "Object.setPrototypeOf() cannot be used on an Immer draft",
++  13: "Immer only supports deleting array indices",
++  14: "Immer only supports setting array indices and the 'length' property",
++  15: function _(path) {
++    return "Cannot apply patch, path doesn't resolve: " + path;
++  },
++  16: 'Sets cannot have "replace" patches.',
++  17: function _(op) {
++    return "Unsupported patch operation: " + op;
++  },
++  18: function _(plugin) {
++    return "The plugin for '" + plugin + "' has not been loaded into Immer. To enable the plugin, import and call `enable" + plugin + "()` when initializing your application.";
++  },
++  19: "plugin not loaded",
++  20: "Cannot use proxies if Proxy, Proxy.revocable or Reflect are not available"
++};
++function die(error) {
++  for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
++    args[_key - 1] = arguments[_key];
++  }
++
++  if (process.env.NODE_ENV !== "production") {
++    var e = errors[error];
++    var msg = !e ? "unknown error nr: " + error : typeof e === "function" ? e.apply(null, args) : e;
++    throw new Error("[Immer] " + msg);
++  }
++
++  throw new Error("[Immer] minified error nr: " + error + (args.length ? " " + args.join(",") : "") + ". Find the full error at: https://bit.ly/38PiBHb");
++}
++
++var ArchtypeObject = 0;
++var ArchtypeArray = 1;
++var ArchtypeMap = 2;
++var ArchtypeSet = 3;
++var ProxyTypeProxyObject = 0;
++var ProxyTypeProxyArray = 1;
++var ProxyTypeES5Object = 4;
++var ProxyTypeES5Array = 5;
++var ProxyTypeMap = 2;
++var ProxyTypeSet = 3;
++
++/** Returns true if the given value is an Immer draft */
++
++/*#__PURE__*/
++
++function isDraft(value) {
++  return !!value && !!value[DRAFT_STATE];
++}
++/** Returns true if the given value can be drafted by Immer */
++
++/*#__PURE__*/
++
++function isDraftable(value) {
++  if (!value) return false;
++  return isPlainObject(value) || Array.isArray(value) || !!value[DRAFTABLE] || !!value.constructor[DRAFTABLE] || isMap(value) || isSet(value);
++}
++/*#__PURE__*/
++
++function isPlainObject(value) {
++  if (!value || typeof value !== "object") return false;
++  var proto = Object.getPrototypeOf(value);
++  return !proto || proto === Object.prototype;
++}
++function original(value) {
++  if (value && value[DRAFT_STATE]) {
++    return value[DRAFT_STATE].base_;
++  } // otherwise return undefined
++
++}
++/*#__PURE__*/
++
++var ownKeys = typeof Reflect !== "undefined" && Reflect.ownKeys ? Reflect.ownKeys : typeof Object.getOwnPropertySymbols !== "undefined" ? function (obj) {
++  return Object.getOwnPropertyNames(obj).concat(Object.getOwnPropertySymbols(obj));
++} :
++/* istanbul ignore next */
++Object.getOwnPropertyNames;
++function each(obj, iter) {
++  if (getArchtype(obj) === ArchtypeObject) {
++    ownKeys(obj).forEach(function (key) {
++      return iter(key, obj[key], obj);
++    });
++  } else {
++    obj.forEach(function (entry, index) {
++      return iter(index, entry, obj);
++    });
++  }
++}
++/*#__PURE__*/
++
++function getArchtype(thing) {
++  /* istanbul ignore next */
++  var state = thing[DRAFT_STATE];
++  return state ? state.type_ > 3 ? state.type_ - 4 // cause Object and Array map back from 4 and 5
++  : state.type_ // others are the same
++  : Array.isArray(thing) ? ArchtypeArray : isMap(thing) ? ArchtypeMap : isSet(thing) ? ArchtypeSet : ArchtypeObject;
++}
++/*#__PURE__*/
++
++function has(thing, prop) {
++  return getArchtype(thing) === ArchtypeMap ? thing.has(prop) : Object.prototype.hasOwnProperty.call(thing, prop);
++}
++/*#__PURE__*/
++
++function get(thing, prop) {
++  // @ts-ignore
++  return getArchtype(thing) === ArchtypeMap ? thing.get(prop) : thing[prop];
++}
++/*#__PURE__*/
++
++function set(thing, propOrOldValue, value) {
++  var t = getArchtype(thing);
++  if (t === ArchtypeMap) thing.set(propOrOldValue, value);else if (t === ArchtypeSet) {
++    thing["delete"](propOrOldValue);
++    thing.add(value);
++  } else thing[propOrOldValue] = value;
++}
++/*#__PURE__*/
++
++function is(x, y) {
++  // From: https://github.com/facebook/fbjs/blob/c69904a511b900266935168223063dd8772dfc40/packages/fbjs/src/core/shallowEqual.js
++  if (x === y) {
++    return x !== 0 || 1 / x === 1 / y;
++  } else {
++    return x !== x && y !== y;
++  }
++}
++/*#__PURE__*/
++
++function isMap(target) {
++  return hasMap && target instanceof Map;
++}
++/*#__PURE__*/
++
++function isSet(target) {
++  return hasSet && target instanceof Set;
++}
++/*#__PURE__*/
++
++function latest(state) {
++  return state.copy_ || state.base_;
++}
++function shallowCopy(base, invokeGetters) {
++  if (invokeGetters === void 0) {
++    invokeGetters = false;
++  }
++
++  if (Array.isArray(base)) return base.slice();
++  var clone = Object.create(Object.getPrototypeOf(base));
++  each(base, function (key) {
++    if (key === DRAFT_STATE) {
++      return; // Never copy over draft state.
++    }
++
++    var desc = Object.getOwnPropertyDescriptor(base, key);
++    var value = desc.value;
++
++    if (desc.get) {
++      if (invokeGetters) {
++        value = desc.get.call(base);
++      }
++    }
++
++    if (desc.enumerable) {
++      clone[key] = value;
++    } else if (invokeGetters) {
++      Object.defineProperty(clone, key, {
++        value: value,
++        writable: true,
++        configurable: true
++      });
++    }
++  });
++  return clone;
++}
++function freeze(obj, deep) {
++  if (isDraft(obj) || Object.isFrozen(obj) || !isDraftable(obj)) return;
++
++  if (getArchtype(obj) > 1
++  /* Map or Set */
++  ) {
++      obj.set = obj.add = obj.clear = obj["delete"] = dontMutateFrozenCollections;
++    }
++
++  Object.freeze(obj);
++  if (deep) each(obj, function (_, value) {
++    return freeze(value, true);
++  });
++}
++
++function dontMutateFrozenCollections() {
++  die(2);
++}
++
++/** Plugin utilities */
++
++var plugins = {};
++function getPlugin(pluginKey) {
++  var plugin = plugins[pluginKey];
++
++  if (!plugin) {
++    die(process.env.NODE_ENV !== "production" ? 18 : 19, pluginKey);
++  } // @ts-ignore
++
++
++  return plugin;
++}
++function loadPlugin(pluginKey, implementation) {
++  plugins[pluginKey] = implementation;
++}
++
++var currentScope;
++function getCurrentScope() {
++  if (process.env.NODE_ENV !== "production" && !currentScope) die(0);
++  return currentScope;
++}
++
++function createScope(parent_, immer_) {
++  return {
++    drafts_: [],
++    parent_: parent_,
++    immer_: immer_,
++    // Whenever the modified draft contains a draft from another scope, we
++    // need to prevent auto-freezing so the unowned draft can be finalized.
++    canAutoFreeze_: true,
++    unfinalizedDrafts_: 0
++  };
++}
++
++function usePatchesInScope(scope, patchListener) {
++  if (patchListener) {
++    getPlugin("Patches"); // assert we have the plugin
++
++    scope.patches_ = [];
++    scope.inversePatches_ = [];
++    scope.patchListener_ = patchListener;
++  }
++}
++function revokeScope(scope) {
++  leaveScope(scope);
++  scope.drafts_.forEach(revokeDraft); // @ts-ignore
++
++  scope.drafts_ = null;
++}
++function leaveScope(scope) {
++  if (scope === currentScope) {
++    currentScope = scope.parent_;
++  }
++}
++function enterScope(immer) {
++  return currentScope = createScope(currentScope, immer);
++}
++
++function revokeDraft(draft) {
++  var state = draft[DRAFT_STATE];
++  if (state.type_ === ProxyTypeProxyObject || state.type_ === ProxyTypeProxyArray) state.revoke_();else state.revoked_ = true;
++}
++
++function processResult(result, scope) {
++  scope.unfinalizedDrafts_ = scope.drafts_.length;
++  var baseDraft = scope.drafts_[0];
++  var isReplaced = result !== undefined && result !== baseDraft;
++  if (!scope.immer_.useProxies_) getPlugin("ES5").willFinalizeES5_(scope, result, isReplaced);
++
++  if (isReplaced) {
++    if (baseDraft[DRAFT_STATE].modified_) {
++      revokeScope(scope);
++      die(4);
++    }
++
++    if (isDraftable(result)) {
++      // Finalize the result in case it contains (or is) a subset of the draft.
++      result = finalize(scope, result);
++      if (!scope.parent_) maybeFreeze(scope, result);
++    }
++
++    if (scope.patches_) {
++      getPlugin("Patches").generateReplacementPatches_(baseDraft[DRAFT_STATE], result, scope.patches_, scope.inversePatches_);
++    }
++  } else {
++    // Finalize the base draft.
++    result = finalize(scope, baseDraft, []);
++  }
++
++  revokeScope(scope);
++
++  if (scope.patches_) {
++    scope.patchListener_(scope.patches_, scope.inversePatches_);
++  }
++
++  return result !== NOTHING ? result : undefined;
++}
++
++function finalize(rootScope, value, path) {
++  // Don't recurse in tho recursive data structures
++  if (Object.isFrozen(value)) return value;
++  var state = value[DRAFT_STATE]; // A plain object, might need freezing, might contain drafts
++
++  if (!state) {
++    each(value, function (key, childValue) {
++      return finalizeProperty(rootScope, state, value, key, childValue, path);
++    });
++    return value;
++  } // Never finalize drafts owned by another scope.
++
++
++  if (state.scope_ !== rootScope) return value; // Unmodified draft, return the (frozen) original
++
++  if (!state.modified_) {
++    maybeFreeze(rootScope, state.base_, true);
++    return state.base_;
++  } // Not finalized yet, let's do that now
++
++
++  if (!state.finalized_) {
++    state.finalized_ = true;
++    state.scope_.unfinalizedDrafts_--;
++    var result = // For ES5, create a good copy from the draft first, with added keys and without deleted keys.
++    state.type_ === ProxyTypeES5Object || state.type_ === ProxyTypeES5Array ? state.copy_ = shallowCopy(state.draft_, true) : state.copy_; // finalize all children of the copy
++
++    each(result, function (key, childValue) {
++      return finalizeProperty(rootScope, state, result, key, childValue, path);
++    }); // everything inside is frozen, we can freeze here
++
++    maybeFreeze(rootScope, result, false); // first time finalizing, let's create those patches
++
++    if (path && rootScope.patches_) {
++      getPlugin("Patches").generatePatches_(state, path, rootScope.patches_, rootScope.inversePatches_);
++    }
++  }
++
++  return state.copy_;
++}
++
++function finalizeProperty(rootScope, parentState, targetObject, prop, childValue, rootPath) {
++  if (process.env.NODE_ENV !== "production" && childValue === targetObject) die(5);
++
++  if (isDraft(childValue)) {
++    var path = rootPath && parentState && parentState.type_ !== ProxyTypeSet && // Set objects are atomic since they have no keys.
++    !has(parentState.assigned_, prop) // Skip deep patches for assigned keys.
++    ? rootPath.concat(prop) : undefined; // Drafts owned by `scope` are finalized here.
++
++    var res = finalize(rootScope, childValue, path);
++    set(targetObject, prop, res); // Drafts from another scope must prevented to be frozen
++    // if we got a draft back from finalize, we're in a nested produce and shouldn't freeze
++
++    if (isDraft(res)) {
++      rootScope.canAutoFreeze_ = false;
++    } else return;
++  } // Unchanged draft properties are ignored.
++
++
++  if (parentState && is(childValue, get(parentState.base_, prop))) {
++    return;
++  } // Search new objects for unfinalized drafts. Frozen objects should never contain drafts.
++
++
++  if (isDraftable(childValue)) {
++    if (!rootScope.immer_.autoFreeze_ && rootScope.unfinalizedDrafts_ < 1) {
++      // optimization: if an object is not a draft, and we don't have to
++      // deepfreeze everything, and we are sure that no drafts are left in the remaining object
++      // cause we saw and finalized all drafts already; we can stop visiting the rest of the tree.
++      // This benefits especially adding large data tree's without further processing.
++      // See add-data.js perf test
++      return;
++    }
++
++    finalize(rootScope, childValue); // immer deep freezes plain objects, so if there is no parent state, we freeze as well
++
++    if (!parentState || !parentState.scope_.parent_) maybeFreeze(rootScope, childValue);
++  }
++}
++
++function maybeFreeze(scope, value, deep) {
++  if (deep === void 0) {
++    deep = false;
++  }
++
++  if (scope.immer_.autoFreeze_ && scope.canAutoFreeze_) {
++    freeze(value, deep);
++  }
++}
++
++/**
++ * Returns a new draft of the `base` object.
++ *
++ * The second argument is the parent draft-state (used internally).
++ */
++
++function createProxyProxy(base, parent) {
++  var isArray = Array.isArray(base);
++  var state = {
++    type_: isArray ? ProxyTypeProxyArray : ProxyTypeProxyObject,
++    // Track which produce call this is associated with.
++    scope_: parent ? parent.scope_ : getCurrentScope(),
++    // True for both shallow and deep changes.
++    modified_: false,
++    // Used during finalization.
++    finalized_: false,
++    // Track which properties have been assigned (true) or deleted (false).
++    assigned_: {},
++    // The parent draft state.
++    parent_: parent,
++    // The base state.
++    base_: base,
++    // The base proxy.
++    draft_: null,
++    // Any property proxies.
++    drafts_: {},
++    // The base copy with any updated values.
++    copy_: null,
++    // Called by the `produce` function.
++    revoke_: null,
++    isManual_: false
++  }; // the traps must target something, a bit like the 'real' base.
++  // but also, we need to be able to determine from the target what the relevant state is
++  // (to avoid creating traps per instance to capture the state in closure,
++  // and to avoid creating weird hidden properties as well)
++  // So the trick is to use 'state' as the actual 'target'! (and make sure we intercept everything)
++  // Note that in the case of an array, we put the state in an array to have better Reflect defaults ootb
++
++  var target = state;
++  var traps = objectTraps;
++
++  if (isArray) {
++    target = [state];
++    traps = arrayTraps;
++  }
++
++  var _Proxy$revocable = Proxy.revocable(target, traps),
++      revoke = _Proxy$revocable.revoke,
++      proxy = _Proxy$revocable.proxy;
++
++  state.draft_ = proxy;
++  state.revoke_ = revoke;
++  return proxy;
++}
++/**
++ * Object drafts
++ */
++
++var objectTraps = {
++  get: function get(state, prop) {
++    if (prop === DRAFT_STATE) return state;
++    var drafts = state.drafts_; // Check for existing draft in unmodified state.
++
++    if (!state.modified_ && has(drafts, prop)) {
++      return drafts[prop];
++    }
++
++    var value = latest(state)[prop];
++
++    if (state.finalized_ || !isDraftable(value)) {
++      return value;
++    } // Check for existing draft in modified state.
++
++
++    if (state.modified_) {
++      // Assigned values are never drafted. This catches any drafts we created, too.
++      if (value !== peek(state.base_, prop)) return value; // Store drafts on the copy (when one exists).
++      // @ts-ignore
++
++      drafts = state.copy_;
++    }
++
++    return drafts[prop] = createProxy(state.scope_.immer_, value, state);
++  },
++  has: function has(state, prop) {
++    return prop in latest(state);
++  },
++  ownKeys: function ownKeys(state) {
++    return Reflect.ownKeys(latest(state));
++  },
++  set: function set(state, prop
++  /* strictly not, but helps TS */
++  , value) {
++    if (!state.modified_) {
++      var baseValue = peek(state.base_, prop); // Optimize based on value's truthiness. Truthy values are guaranteed to
++      // never be undefined, so we can avoid the `in` operator. Lastly, truthy
++      // values may be drafts, but falsy values are never drafts.
++
++      var isUnchanged = value ? is(baseValue, value) || value === state.drafts_[prop] : is(baseValue, value) && prop in state.base_;
++      if (isUnchanged) return true;
++      prepareCopy(state);
++      markChangedProxy(state);
++    }
++
++    state.assigned_[prop] = true; // @ts-ignore
++
++    state.copy_[prop] = value;
++    return true;
++  },
++  deleteProperty: function deleteProperty(state, prop) {
++    // The `undefined` check is a fast path for pre-existing keys.
++    if (peek(state.base_, prop) !== undefined || prop in state.base_) {
++      state.assigned_[prop] = false;
++      prepareCopy(state);
++      markChangedProxy(state);
++    } else if (state.assigned_[prop]) {
++      // if an originally not assigned property was deleted
++      delete state.assigned_[prop];
++    } // @ts-ignore
++
++
++    if (state.copy_) delete state.copy_[prop];
++    return true;
++  },
++  // Note: We never coerce `desc.value` into an Immer draft, because we can't make
++  // the same guarantee in ES5 mode.
++  getOwnPropertyDescriptor: function getOwnPropertyDescriptor(state, prop) {
++    var owner = latest(state);
++    var desc = Reflect.getOwnPropertyDescriptor(owner, prop);
++
++    if (desc) {
++      desc.writable = true;
++      desc.configurable = state.type_ !== ProxyTypeProxyArray || prop !== "length";
++    }
++
++    return desc;
++  },
++  defineProperty: function defineProperty() {
++    die(11);
++  },
++  getPrototypeOf: function getPrototypeOf(state) {
++    return Object.getPrototypeOf(state.base_);
++  },
++  setPrototypeOf: function setPrototypeOf() {
++    die(12);
++  }
++};
++/**
++ * Array drafts
++ */
++
++var arrayTraps = {};
++each(objectTraps, function (key, fn) {
++  // @ts-ignore
++  arrayTraps[key] = function () {
++    arguments[0] = arguments[0][0];
++    return fn.apply(this, arguments);
++  };
++});
++
++arrayTraps.deleteProperty = function (state, prop) {
++  if (process.env.NODE_ENV !== "production" && isNaN(parseInt(prop))) die(13);
++  return objectTraps.deleteProperty.call(this, state[0], prop);
++};
++
++arrayTraps.set = function (state, prop, value) {
++  if (process.env.NODE_ENV !== "production" && prop !== "length" && isNaN(parseInt(prop))) die(14);
++  return objectTraps.set.call(this, state[0], prop, value, state[0]);
++};
++/**
++ * Map drafts
++ */
++// Access a property without creating an Immer draft.
++
++
++function peek(draft, prop) {
++  var state = draft[DRAFT_STATE];
++  var desc = Reflect.getOwnPropertyDescriptor(state ? latest(state) : draft, prop);
++  return desc && desc.value;
++}
++
++function markChangedProxy(state) {
++  if (!state.modified_) {
++    state.modified_ = true;
++
++    if (state.type_ === ProxyTypeProxyObject || state.type_ === ProxyTypeProxyArray) {
++      var copy = state.copy_ = shallowCopy(state.base_);
++      each(state.drafts_, function (key, value) {
++        // @ts-ignore
++        copy[key] = value;
++      });
++      state.drafts_ = undefined;
++    }
++
++    if (state.parent_) {
++      markChangedProxy(state.parent_);
++    }
++  }
++}
++
++function prepareCopy(state) {
++  if (!state.copy_) {
++    state.copy_ = shallowCopy(state.base_);
++  }
++}
++
++var Immer = /*#__PURE__*/function () {
++  function Immer(config) {
++    this.useProxies_ = hasProxies;
++    this.autoFreeze_ = process.env.NODE_ENV !== "production" ? true
++    /* istanbul ignore next */
++    : !isMinified;
++    if (typeof (config === null || config === void 0 ? void 0 : config.useProxies) === "boolean") this.setUseProxies(config.useProxies);
++    if (typeof (config === null || config === void 0 ? void 0 : config.autoFreeze) === "boolean") this.setAutoFreeze(config.autoFreeze);
++    this.produce = this.produce.bind(this);
++    this.produceWithPatches = this.produceWithPatches.bind(this);
++  }
++  /**
++   * The `produce` function takes a value and a "recipe function" (whose
++   * return value often depends on the base state). The recipe function is
++   * free to mutate its first argument however it wants. All mutations are
++   * only ever applied to a __copy__ of the base state.
++   *
++   * Pass only a function to create a "curried producer" which relieves you
++   * from passing the recipe function every time.
++   *
++   * Only plain objects and arrays are made mutable. All other objects are
++   * considered uncopyable.
++   *
++   * Note: This function is __bound__ to its `Immer` instance.
++   *
++   * @param {any} base - the initial state
++   * @param {Function} producer - function that receives a proxy of the base state as first argument and which can be freely modified
++   * @param {Function} patchListener - optional function that will be called with all the patches produced here
++   * @returns {any} a new state, or the initial state if nothing was modified
++   */
++
++
++  var _proto = Immer.prototype;
++
++  _proto.produce = function produce(base, recipe, patchListener) {
++    // curried invocation
++    if (typeof base === "function" && typeof recipe !== "function") {
++      var defaultBase = recipe;
++      recipe = base;
++      var self = this;
++      return function curriedProduce(base) {
++        var _this = this;
++
++        if (base === void 0) {
++          base = defaultBase;
++        }
++
++        for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
++          args[_key - 1] = arguments[_key];
++        }
++
++        return self.produce(base, function (draft) {
++          var _recipe;
++
++          return (_recipe = recipe).call.apply(_recipe, [_this, draft].concat(args));
++        }); // prettier-ignore
++      };
++    }
++
++    if (typeof recipe !== "function") die(6);
++    if (patchListener !== undefined && typeof patchListener !== "function") die(7);
++    var result; // Only plain objects, arrays, and "immerable classes" are drafted.
++
++    if (isDraftable(base)) {
++      var scope = enterScope(this);
++      var proxy = createProxy(this, base, undefined);
++      var hasError = true;
++
++      try {
++        result = recipe(proxy);
++        hasError = false;
++      } finally {
++        // finally instead of catch + rethrow better preserves original stack
++        if (hasError) revokeScope(scope);else leaveScope(scope);
++      }
++
++      if (typeof Promise !== "undefined" && result instanceof Promise) {
++        return result.then(function (result) {
++          usePatchesInScope(scope, patchListener);
++          return processResult(result, scope);
++        }, function (error) {
++          revokeScope(scope);
++          throw error;
++        });
++      }
++
++      usePatchesInScope(scope, patchListener);
++      return processResult(result, scope);
++    } else {
++      result = recipe(base);
++      if (result === NOTHING) return undefined;
++      if (result === undefined) result = base;
++      if (this.autoFreeze_) freeze(result, true);
++      return result;
++    }
++  };
++
++  _proto.produceWithPatches = function produceWithPatches(arg1, arg2, arg3) {
++    var _this2 = this;
++
++    if (typeof arg1 === "function") {
++      return function (state) {
++        for (var _len2 = arguments.length, args = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
++          args[_key2 - 1] = arguments[_key2];
++        }
++
++        return _this2.produceWithPatches(state, function (draft) {
++          return arg1.apply(void 0, [draft].concat(args));
++        });
++      };
++    }
++
++    var patches, inversePatches;
++    var nextState = this.produce(arg1, arg2, function (p, ip) {
++      patches = p;
++      inversePatches = ip;
++    });
++    return [nextState, patches, inversePatches];
++  };
++
++  _proto.createDraft = function createDraft(base) {
++    if (!isDraftable(base)) die(8);
++    var scope = enterScope(this);
++    var proxy = createProxy(this, base, undefined);
++    proxy[DRAFT_STATE].isManual_ = true;
++    leaveScope(scope);
++    return proxy;
++  };
++
++  _proto.finishDraft = function finishDraft(draft, patchListener) {
++    var state = draft && draft[DRAFT_STATE];
++
++    if (process.env.NODE_ENV !== "production") {
++      if (!state || !state.isManual_) die(9);
++      if (state.finalized_) die(10);
++    }
++
++    var scope = state.scope_;
++    usePatchesInScope(scope, patchListener);
++    return processResult(undefined, scope);
++  }
++  /**
++   * Pass true to automatically freeze all copies created by Immer.
++   *
++   * By default, auto-freezing is disabled in production.
++   */
++  ;
++
++  _proto.setAutoFreeze = function setAutoFreeze(value) {
++    this.autoFreeze_ = value;
++  }
++  /**
++   * Pass true to use the ES2015 `Proxy` class when creating drafts, which is
++   * always faster than using ES5 proxies.
++   *
++   * By default, feature detection is used, so calling this is rarely necessary.
++   */
++  ;
++
++  _proto.setUseProxies = function setUseProxies(value) {
++    if (!hasProxies) {
++      die(20);
++    }
++
++    this.useProxies_ = value;
++  };
++
++  _proto.applyPatches = function applyPatches(base, patches) {
++    // If a patch replaces the entire state, take that replacement as base
++    // before applying patches
++    var i;
++
++    for (i = patches.length - 1; i >= 0; i--) {
++      var patch = patches[i];
++
++      if (patch.path.length === 0 && patch.op === "replace") {
++        base = patch.value;
++        break;
++      }
++    }
++
++    var applyPatchesImpl = getPlugin("Patches").applyPatches_;
++
++    if (isDraft(base)) {
++      // N.B: never hits if some patch a replacement, patches are never drafts
++      return applyPatchesImpl(base, patches);
++    } // Otherwise, produce a copy of the base state.
++
++
++    return this.produce(base, function (draft) {
++      return applyPatchesImpl(draft, patches.slice(i + 1));
++    });
++  };
++
++  return Immer;
++}();
++function createProxy(immer, value, parent) {
++  // precondition: createProxy should be guarded by isDraftable, so we know we can safely draft
++  var draft = isMap(value) ? getPlugin("MapSet").proxyMap_(value, parent) : isSet(value) ? getPlugin("MapSet").proxySet_(value, parent) : immer.useProxies_ ? createProxyProxy(value, parent) : getPlugin("ES5").createES5Proxy_(value, parent);
++  var scope = parent ? parent.scope_ : getCurrentScope();
++  scope.drafts_.push(draft);
++  return draft;
++}
++function markChanged(immer, state) {
++  if (immer.useProxies_) {
++    markChangedProxy(state);
++  } else {
++    getPlugin("ES5").markChangedES5_(state);
++  }
++}
++
++function enableES5() {
++  function willFinalizeES5_(scope, result, isReplaced) {
++    scope.drafts_.forEach(function (draft) {
++      draft[DRAFT_STATE].finalizing_ = true;
++    });
++
++    if (!isReplaced) {
++      if (scope.patches_) {
++        markChangesRecursively(scope.drafts_[0]);
++      } // This is faster when we don't care about which attributes changed.
++
++
++      markChangesSweep(scope.drafts_);
++    } // When a child draft is returned, look for changes.
++    else if (isDraft(result) && result[DRAFT_STATE].scope_ === scope) {
++        markChangesSweep(scope.drafts_);
++      }
++  }
++
++  function createES5Proxy_(base, parent) {
++    var isArray = Array.isArray(base);
++    var draft = clonePotentialDraft(base);
++    each(draft, function (prop) {
++      proxyProperty(draft, prop, isArray || isEnumerable(base, prop));
++    });
++    var state = {
++      type_: isArray ? ProxyTypeES5Array : ProxyTypeES5Object,
++      scope_: parent ? parent.scope_ : getCurrentScope(),
++      modified_: false,
++      finalizing_: false,
++      finalized_: false,
++      assigned_: {},
++      parent_: parent,
++      base_: base,
++      draft_: draft,
++      copy_: null,
++      revoked_: false,
++      isManual_: false
++    };
++    Object.defineProperty(draft, DRAFT_STATE, {
++      value: state,
++      // enumerable: false <- the default
++      writable: true
++    });
++    return draft;
++  } // Access a property without creating an Immer draft.
++
++
++  function peek(draft, prop) {
++    var state = draft[DRAFT_STATE];
++
++    if (state && !state.finalizing_) {
++      state.finalizing_ = true;
++      var value = draft[prop];
++      state.finalizing_ = false;
++      return value;
++    }
++
++    return draft[prop];
++  }
++
++  function _get(state, prop) {
++    assertUnrevoked(state);
++    var value = peek(latest(state), prop);
++    if (state.finalizing_) return value; // Create a draft if the value is unmodified.
++
++    if (value === peek(state.base_, prop) && isDraftable(value)) {
++      prepareCopy(state); // @ts-ignore
++
++      return state.copy_[prop] = createProxy(state.scope_.immer_, value, state);
++    }
++
++    return value;
++  }
++
++  function _set(state, prop, value) {
++    assertUnrevoked(state);
++    state.assigned_[prop] = true;
++
++    if (!state.modified_) {
++      if (is(value, peek(latest(state), prop))) return;
++      markChangedES5_(state);
++      prepareCopy(state);
++    } // @ts-ignore
++
++
++    state.copy_[prop] = value;
++  }
++
++  function markChangedES5_(state) {
++    if (!state.modified_) {
++      state.modified_ = true;
++      if (state.parent_) markChangedES5_(state.parent_);
++    }
++  }
++
++  function prepareCopy(state) {
++    if (!state.copy_) state.copy_ = clonePotentialDraft(state.base_);
++  }
++
++  function clonePotentialDraft(base) {
++    var state = base && base[DRAFT_STATE];
++
++    if (state) {
++      state.finalizing_ = true;
++      var draft = shallowCopy(state.draft_, true);
++      state.finalizing_ = false;
++      return draft;
++    }
++
++    return shallowCopy(base);
++  } // property descriptors are recycled to make sure we don't create a get and set closure per property,
++  // but share them all instead
++
++
++  var descriptors = {};
++
++  function proxyProperty(draft, prop, enumerable) {
++    var desc = descriptors[prop];
++
++    if (desc) {
++      desc.enumerable = enumerable;
++    } else {
++      descriptors[prop] = desc = {
++        // configurable: true,
++        enumerable: enumerable,
++        get: function get() {
++          return _get(this[DRAFT_STATE], prop);
++        },
++        set: function set(value) {
++          _set(this[DRAFT_STATE], prop, value);
++        }
++      };
++    }
++
++    Object.defineProperty(draft, prop, desc);
++  } // This looks expensive, but only proxies are visited, and only objects without known changes are scanned.
++
++
++  function markChangesSweep(drafts) {
++    // The natural order of drafts in the `scope` array is based on when they
++    // were accessed. By processing drafts in reverse natural order, we have a
++    // better chance of processing leaf nodes first. When a leaf node is known to
++    // have changed, we can avoid any traversal of its ancestor nodes.
++    for (var i = drafts.length - 1; i >= 0; i--) {
++      var state = drafts[i][DRAFT_STATE];
++
++      if (!state.modified_) {
++        switch (state.type_) {
++          case ProxyTypeES5Array:
++            if (hasArrayChanges(state)) markChangedES5_(state);
++            break;
++
++          case ProxyTypeES5Object:
++            if (hasObjectChanges(state)) markChangedES5_(state);
++            break;
++        }
++      }
++    }
++  }
++
++  function markChangesRecursively(object) {
++    if (!object || typeof object !== "object") return;
++    var state = object[DRAFT_STATE];
++    if (!state) return;
++    var base_ = state.base_,
++        draft_ = state.draft_,
++        assigned_ = state.assigned_,
++        type_ = state.type_;
++
++    if (type_ === ProxyTypeES5Object) {
++      // Look for added keys.
++      // TODO: looks quite duplicate to hasObjectChanges,
++      // probably there is a faster way to detect changes, as sweep + recurse seems to do some
++      // unnecessary work.
++      // also: probably we can store the information we detect here, to speed up tree finalization!
++      each(draft_, function (key) {
++        if (key === DRAFT_STATE) return; // The `undefined` check is a fast path for pre-existing keys.
++
++        if (base_[key] === undefined && !has(base_, key)) {
++          assigned_[key] = true;
++          markChangedES5_(state);
++        } else if (!assigned_[key]) {
++          // Only untouched properties trigger recursion.
++          markChangesRecursively(draft_[key]);
++        }
++      }); // Look for removed keys.
++
++      each(base_, function (key) {
++        // The `undefined` check is a fast path for pre-existing keys.
++        if (draft_[key] === undefined && !has(draft_, key)) {
++          assigned_[key] = false;
++          markChangedES5_(state);
++        }
++      });
++    } else if (type_ === ProxyTypeES5Array) {
++      if (hasArrayChanges(state)) {
++        markChangedES5_(state);
++        assigned_.length = true;
++      }
++
++      if (draft_.length < base_.length) {
++        for (var i = draft_.length; i < base_.length; i++) {
++          assigned_[i] = false;
++        }
++      } else {
++        for (var _i = base_.length; _i < draft_.length; _i++) {
++          assigned_[_i] = true;
++        }
++      } // Minimum count is enough, the other parts has been processed.
++
++
++      var min = Math.min(draft_.length, base_.length);
++
++      for (var _i2 = 0; _i2 < min; _i2++) {
++        // Only untouched indices trigger recursion.
++        if (assigned_[_i2] === undefined) markChangesRecursively(draft_[_i2]);
++      }
++    }
++  }
++
++  function hasObjectChanges(state) {
++    var base_ = state.base_,
++        draft_ = state.draft_; // Search for added keys and changed keys. Start at the back, because
++    // non-numeric keys are ordered by time of definition on the object.
++
++    var keys = Object.keys(draft_);
++
++    for (var i = keys.length - 1; i >= 0; i--) {
++      var key = keys[i];
++      var baseValue = base_[key]; // The `undefined` check is a fast path for pre-existing keys.
++
++      if (baseValue === undefined && !has(base_, key)) {
++        return true;
++      } // Once a base key is deleted, future changes go undetected, because its
++      // descriptor is erased. This branch detects any missed changes.
++      else {
++          var value = draft_[key];
++
++          var _state = value && value[DRAFT_STATE];
++
++          if (_state ? _state.base_ !== baseValue : !is(value, baseValue)) {
++            return true;
++          }
++        }
++    } // At this point, no keys were added or changed.
++    // Compare key count to determine if keys were deleted.
++
++
++    return keys.length !== Object.keys(base_).length;
++  }
++
++  function hasArrayChanges(state) {
++    var draft_ = state.draft_;
++    if (draft_.length !== state.base_.length) return true; // See #116
++    // If we first shorten the length, our array interceptors will be removed.
++    // If after that new items are added, result in the same original length,
++    // those last items will have no intercepting property.
++    // So if there is no own descriptor on the last position, we know that items were removed and added
++    // N.B.: splice, unshift, etc only shift values around, but not prop descriptors, so we only have to check
++    // the last one
++
++    var descriptor = Object.getOwnPropertyDescriptor(draft_, draft_.length - 1); // descriptor can be null, but only for newly created sparse arrays, eg. new Array(10)
++
++    if (descriptor && !descriptor.get) return true; // For all other cases, we don't have to compare, as they would have been picked up by the index setters
++
++    return false;
++  }
++  /*#__PURE__*/
++
++
++  function isEnumerable(base, prop) {
++    var desc = Object.getOwnPropertyDescriptor(base, prop);
++    return desc && desc.enumerable ? true : false;
++  }
++
++  function assertUnrevoked(state
++  /*ES5State | MapState | SetState*/
++  ) {
++    if (state.revoked_) die(3, JSON.stringify(latest(state)));
++  }
++
++  loadPlugin("ES5", {
++    createES5Proxy_: createES5Proxy_,
++    markChangedES5_: markChangedES5_,
++    willFinalizeES5_: willFinalizeES5_
++  });
++}
++
++function enablePatches() {
++  var REPLACE = "replace";
++  var ADD = "add";
++  var REMOVE = "remove";
++
++  function generatePatches_(state, basePath, patches, inversePatches) {
++    switch (state.type_) {
++      case ProxyTypeProxyObject:
++      case ProxyTypeES5Object:
++      case ProxyTypeMap:
++        return generatePatchesFromAssigned(state, basePath, patches, inversePatches);
++
++      case ProxyTypeES5Array:
++      case ProxyTypeProxyArray:
++        return generateArrayPatches(state, basePath, patches, inversePatches);
++
++      case ProxyTypeSet:
++        return generateSetPatches(state, basePath, patches, inversePatches);
++    }
++  }
++
++  function generateArrayPatches(state, basePath, patches, inversePatches) {
++    var base_ = state.base_,
++        assigned_ = state.assigned_;
++    var copy_ = state.copy_; // Reduce complexity by ensuring `base` is never longer.
++
++    if (copy_.length < base_.length) {
++      var _ref = [copy_, base_];
++      base_ = _ref[0];
++      copy_ = _ref[1];
++      var _ref2 = [inversePatches, patches];
++      patches = _ref2[0];
++      inversePatches = _ref2[1];
++    }
++
++    var delta = copy_.length - base_.length; // Find the first replaced index.
++
++    var start = 0;
++
++    while (base_[start] === copy_[start] && start < base_.length) {
++      ++start;
++    } // Find the last replaced index. Search from the end to optimize splice patches.
++
++
++    var end = base_.length;
++
++    while (end > start && base_[end - 1] === copy_[end + delta - 1]) {
++      --end;
++    } // Process replaced indices.
++
++
++    for (var i = start; i < end; ++i) {
++      if (assigned_[i] && copy_[i] !== base_[i]) {
++        var path = basePath.concat([i]);
++        patches.push({
++          op: REPLACE,
++          path: path,
++          value: copy_[i]
++        });
++        inversePatches.push({
++          op: REPLACE,
++          path: path,
++          value: base_[i]
++        });
++      }
++    }
++
++    var replaceCount = patches.length; // Process added indices.
++
++    for (var _i = end + delta - 1; _i >= end; --_i) {
++      var _path = basePath.concat([_i]);
++
++      patches[replaceCount + _i - end] = {
++        op: ADD,
++        path: _path,
++        value: copy_[_i]
++      };
++      inversePatches.push({
++        op: REMOVE,
++        path: _path
++      });
++    }
++  } // This is used for both Map objects and normal objects.
++
++
++  function generatePatchesFromAssigned(state, basePath, patches, inversePatches) {
++    var base_ = state.base_,
++        copy_ = state.copy_;
++    each(state.assigned_, function (key, assignedValue) {
++      var origValue = get(base_, key);
++      var value = get(copy_, key);
++      var op = !assignedValue ? REMOVE : has(base_, key) ? REPLACE : ADD;
++      if (origValue === value && op === REPLACE) return;
++      var path = basePath.concat(key);
++      patches.push(op === REMOVE ? {
++        op: op,
++        path: path
++      } : {
++        op: op,
++        path: path,
++        value: value
++      });
++      inversePatches.push(op === ADD ? {
++        op: REMOVE,
++        path: path
++      } : op === REMOVE ? {
++        op: ADD,
++        path: path,
++        value: origValue
++      } : {
++        op: REPLACE,
++        path: path,
++        value: origValue
++      });
++    });
++  }
++
++  function generateSetPatches(state, basePath, patches, inversePatches) {
++    var base_ = state.base_,
++        copy_ = state.copy_;
++    var i = 0;
++    base_.forEach(function (value) {
++      if (!copy_.has(value)) {
++        var path = basePath.concat([i]);
++        patches.push({
++          op: REMOVE,
++          path: path,
++          value: value
++        });
++        inversePatches.unshift({
++          op: ADD,
++          path: path,
++          value: value
++        });
++      }
++
++      i++;
++    });
++    i = 0;
++    copy_.forEach(function (value) {
++      if (!base_.has(value)) {
++        var path = basePath.concat([i]);
++        patches.push({
++          op: ADD,
++          path: path,
++          value: value
++        });
++        inversePatches.unshift({
++          op: REMOVE,
++          path: path,
++          value: value
++        });
++      }
++
++      i++;
++    });
++  }
++
++  function generateReplacementPatches_(rootState, replacement, patches, inversePatches) {
++    patches.push({
++      op: REPLACE,
++      path: [],
++      value: replacement
++    });
++    inversePatches.push({
++      op: REPLACE,
++      path: [],
++      value: rootState.base_
++    });
++  }
++
++  function applyPatches_(draft, patches) {
++    patches.forEach(function (patch) {
++      var path = patch.path,
++          op = patch.op;
++      var base = draft;
++
++      for (var i = 0; i < path.length - 1; i++) {
++        base = get(base, path[i]);
++        if (typeof base !== "object") die(15, path.join("/"));
++      }
++
++      var type = getArchtype(base);
++      var value = deepClonePatchValue(patch.value); // used to clone patch to ensure original patch is not modified, see #411
++
++      var key = path[path.length - 1];
++
++      switch (op) {
++        case REPLACE:
++          switch (type) {
++            case ArchtypeMap:
++              return base.set(key, value);
++
++            /* istanbul ignore next */
++
++            case ArchtypeSet:
++              die(16);
++
++            default:
++              // if value is an object, then it's assigned by reference
++              // in the following add or remove ops, the value field inside the patch will also be modifyed
++              // so we use value from the cloned patch
++              // @ts-ignore
++              return base[key] = value;
++          }
++
++        case ADD:
++          switch (type) {
++            case ArchtypeArray:
++              return base.splice(key, 0, value);
++
++            case ArchtypeMap:
++              return base.set(key, value);
++
++            case ArchtypeSet:
++              return base.add(value);
++
++            default:
++              return base[key] = value;
++          }
++
++        case REMOVE:
++          switch (type) {
++            case ArchtypeArray:
++              return base.splice(key, 1);
++
++            case ArchtypeMap:
++              return base["delete"](key);
++
++            case ArchtypeSet:
++              return base["delete"](patch.value);
++
++            default:
++              return delete base[key];
++          }
++
++        default:
++          die(17, op);
++      }
++    });
++    return draft;
++  }
++
++  function deepClonePatchValue(obj) {
++    if (!obj || typeof obj !== "object") return obj;
++    if (Array.isArray(obj)) return obj.map(deepClonePatchValue);
++    if (isMap(obj)) return new Map(Array.from(obj.entries()).map(function (_ref3) {
++      var k = _ref3[0],
++          v = _ref3[1];
++      return [k, deepClonePatchValue(v)];
++    }));
++    if (isSet(obj)) return new Set(Array.from(obj).map(deepClonePatchValue));
++    var cloned = Object.create(Object.getPrototypeOf(obj));
++
++    for (var key in obj) {
++      cloned[key] = deepClonePatchValue(obj[key]);
++    }
++
++    return cloned;
++  }
++
++  loadPlugin("Patches", {
++    applyPatches_: applyPatches_,
++    generatePatches_: generatePatches_,
++    generateReplacementPatches_: generateReplacementPatches_
++  });
++}
++
++// types only!
++function enableMapSet() {
++  /* istanbul ignore next */
++  var _extendStatics = function extendStatics(d, b) {
++    _extendStatics = Object.setPrototypeOf || {
++      __proto__: []
++    } instanceof Array && function (d, b) {
++      d.__proto__ = b;
++    } || function (d, b) {
++      for (var p in b) {
++        if (b.hasOwnProperty(p)) d[p] = b[p];
++      }
++    };
++
++    return _extendStatics(d, b);
++  }; // Ugly hack to resolve #502 and inherit built in Map / Set
++
++
++  function __extends(d, b) {
++    _extendStatics(d, b);
++
++    function __() {
++      this.constructor = d;
++    }
++
++    d.prototype = ( // @ts-ignore
++    __.prototype = b.prototype, new __());
++  }
++
++  var DraftMap = function (_super) {
++    __extends(DraftMap, _super); // Create class manually, cause #502
++
++
++    function DraftMap(target, parent) {
++      this[DRAFT_STATE] = {
++        type_: ProxyTypeMap,
++        parent_: parent,
++        scope_: parent ? parent.scope_ : getCurrentScope(),
++        modified_: false,
++        finalized_: false,
++        copy_: undefined,
++        assigned_: undefined,
++        base_: target,
++        draft_: this,
++        isManual_: false,
++        revoked_: false
++      };
++      return this;
++    }
++
++    var p = DraftMap.prototype;
++    Object.defineProperty(p, "size", {
++      get: function get() {
++        return latest(this[DRAFT_STATE]).size;
++      } // enumerable: false,
++      // configurable: true
++
++    });
++
++    p.has = function (key) {
++      return latest(this[DRAFT_STATE]).has(key);
++    };
++
++    p.set = function (key, value) {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++
++      if (latest(state).get(key) !== value) {
++        prepareMapCopy(state);
++        markChanged(state.scope_.immer_, state);
++        state.assigned_.set(key, true);
++        state.copy_.set(key, value);
++        state.assigned_.set(key, true);
++      }
++
++      return this;
++    };
++
++    p["delete"] = function (key) {
++      if (!this.has(key)) {
++        return false;
++      }
++
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++      prepareMapCopy(state);
++      markChanged(state.scope_.immer_, state);
++      state.assigned_.set(key, false);
++      state.copy_["delete"](key);
++      return true;
++    };
++
++    p.clear = function () {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++      prepareMapCopy(state);
++      markChanged(state.scope_.immer_, state);
++      state.assigned_ = new Map();
++      return state.copy_.clear();
++    };
++
++    p.forEach = function (cb, thisArg) {
++      var _this = this;
++
++      var state = this[DRAFT_STATE];
++      latest(state).forEach(function (_value, key, _map) {
++        cb.call(thisArg, _this.get(key), key, _this);
++      });
++    };
++
++    p.get = function (key) {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++      var value = latest(state).get(key);
++
++      if (state.finalized_ || !isDraftable(value)) {
++        return value;
++      }
++
++      if (value !== state.base_.get(key)) {
++        return value; // either already drafted or reassigned
++      } // despite what it looks, this creates a draft only once, see above condition
++
++
++      var draft = createProxy(state.scope_.immer_, value, state);
++      prepareMapCopy(state);
++      state.copy_.set(key, draft);
++      return draft;
++    };
++
++    p.keys = function () {
++      return latest(this[DRAFT_STATE]).keys();
++    };
++
++    p.values = function () {
++      var _this2 = this,
++          _ref;
++
++      var iterator = this.keys();
++      return _ref = {}, _ref[iteratorSymbol] = function () {
++        return _this2.values();
++      }, _ref.next = function next() {
++        var r = iterator.next();
++        /* istanbul ignore next */
++
++        if (r.done) return r;
++
++        var value = _this2.get(r.value);
++
++        return {
++          done: false,
++          value: value
++        };
++      }, _ref;
++    };
++
++    p.entries = function () {
++      var _this3 = this,
++          _ref2;
++
++      var iterator = this.keys();
++      return _ref2 = {}, _ref2[iteratorSymbol] = function () {
++        return _this3.entries();
++      }, _ref2.next = function next() {
++        var r = iterator.next();
++        /* istanbul ignore next */
++
++        if (r.done) return r;
++
++        var value = _this3.get(r.value);
++
++        return {
++          done: false,
++          value: [r.value, value]
++        };
++      }, _ref2;
++    };
++
++    p[iteratorSymbol] = function () {
++      return this.entries();
++    };
++
++    return DraftMap;
++  }(Map);
++
++  function proxyMap_(target, parent) {
++    // @ts-ignore
++    return new DraftMap(target, parent);
++  }
++
++  function prepareMapCopy(state) {
++    if (!state.copy_) {
++      state.assigned_ = new Map();
++      state.copy_ = new Map(state.base_);
++    }
++  }
++
++  var DraftSet = function (_super) {
++    __extends(DraftSet, _super); // Create class manually, cause #502
++
++
++    function DraftSet(target, parent) {
++      this[DRAFT_STATE] = {
++        type_: ProxyTypeSet,
++        parent_: parent,
++        scope_: parent ? parent.scope_ : getCurrentScope(),
++        modified_: false,
++        finalized_: false,
++        copy_: undefined,
++        base_: target,
++        draft_: this,
++        drafts_: new Map(),
++        revoked_: false,
++        isManual_: false
++      };
++      return this;
++    }
++
++    var p = DraftSet.prototype;
++    Object.defineProperty(p, "size", {
++      get: function get() {
++        return latest(this[DRAFT_STATE]).size;
++      } // enumerable: true,
++
++    });
++
++    p.has = function (value) {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state); // bit of trickery here, to be able to recognize both the value, and the draft of its value
++
++      if (!state.copy_) {
++        return state.base_.has(value);
++      }
++
++      if (state.copy_.has(value)) return true;
++      if (state.drafts_.has(value) && state.copy_.has(state.drafts_.get(value))) return true;
++      return false;
++    };
++
++    p.add = function (value) {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++
++      if (state.copy_) {
++        state.copy_.add(value);
++      } else if (!state.base_.has(value)) {
++        prepareSetCopy(state);
++        markChanged(state.scope_.immer_, state);
++        state.copy_.add(value);
++      }
++
++      return this;
++    };
++
++    p["delete"] = function (value) {
++      if (!this.has(value)) {
++        return false;
++      }
++
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++      prepareSetCopy(state);
++      markChanged(state.scope_.immer_, state);
++      return state.copy_["delete"](value) || (state.drafts_.has(value) ? state.copy_["delete"](state.drafts_.get(value)) :
++      /* istanbul ignore next */
++      false);
++    };
++
++    p.clear = function () {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++      prepareSetCopy(state);
++      markChanged(state.scope_.immer_, state);
++      return state.copy_.clear();
++    };
++
++    p.values = function () {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++      prepareSetCopy(state);
++      return state.copy_.values();
++    };
++
++    p.entries = function entries() {
++      var state = this[DRAFT_STATE];
++      assertUnrevoked(state);
++      prepareSetCopy(state);
++      return state.copy_.entries();
++    };
++
++    p.keys = function () {
++      return this.values();
++    };
++
++    p[iteratorSymbol] = function () {
++      return this.values();
++    };
++
++    p.forEach = function forEach(cb, thisArg) {
++      var iterator = this.values();
++      var result = iterator.next();
++
++      while (!result.done) {
++        cb.call(thisArg, result.value, result.value, this);
++        result = iterator.next();
++      }
++    };
++
++    return DraftSet;
++  }(Set);
++
++  function proxySet_(target, parent) {
++    // @ts-ignore
++    return new DraftSet(target, parent);
++  }
++
++  function prepareSetCopy(state) {
++    if (!state.copy_) {
++      // create drafts for all entries to preserve insertion order
++      state.copy_ = new Set();
++      state.base_.forEach(function (value) {
++        if (isDraftable(value)) {
++          var draft = createProxy(state.scope_.immer_, value, state);
++          state.drafts_.set(value, draft);
++          state.copy_.add(draft);
++        } else {
++          state.copy_.add(value);
++        }
++      });
++    }
++  }
++
++  function assertUnrevoked(state
++  /*ES5State | MapState | SetState*/
++  ) {
++    if (state.revoked_) die(3, JSON.stringify(latest(state)));
++  }
++
++  loadPlugin("MapSet", {
++    proxyMap_: proxyMap_,
++    proxySet_: proxySet_
++  });
++}
++
++function enableAllPlugins() {
++  enableES5();
++  enableMapSet();
++  enablePatches();
++}
++
++var immer = /*#__PURE__*/new Immer();
++/**
++ * The `produce` function takes a value and a "recipe function" (whose
++ * return value often depends on the base state). The recipe function is
++ * free to mutate its first argument however it wants. All mutations are
++ * only ever applied to a __copy__ of the base state.
++ *
++ * Pass only a function to create a "curried producer" which relieves you
++ * from passing the recipe function every time.
++ *
++ * Only plain objects and arrays are made mutable. All other objects are
++ * considered uncopyable.
++ *
++ * Note: This function is __bound__ to its `Immer` instance.
++ *
++ * @param {any} base - the initial state
++ * @param {Function} producer - function that receives a proxy of the base state as first argument and which can be freely modified
++ * @param {Function} patchListener - optional function that will be called with all the patches produced here
++ * @returns {any} a new state, or the initial state if nothing was modified
++ */
++
++var produce = immer.produce;
++/**
++ * Like `produce`, but `produceWithPatches` always returns a tuple
++ * [nextState, patches, inversePatches] (instead of just the next state)
++ */
++
++var produceWithPatches = /*#__PURE__*/immer.produceWithPatches.bind(immer);
++/**
++ * Pass true to automatically freeze all copies created by Immer.
++ *
++ * By default, auto-freezing is disabled in production.
++ */
++
++var setAutoFreeze = /*#__PURE__*/immer.setAutoFreeze.bind(immer);
++/**
++ * Pass true to use the ES2015 `Proxy` class when creating drafts, which is
++ * always faster than using ES5 proxies.
++ *
++ * By default, feature detection is used, so calling this is rarely necessary.
++ */
++
++var setUseProxies = /*#__PURE__*/immer.setUseProxies.bind(immer);
++/**
++ * Apply an array of Immer patches to the first argument.
++ *
++ * This function is a producer, which means copy-on-write is in effect.
++ */
++
++var applyPatches = /*#__PURE__*/immer.applyPatches.bind(immer);
++/**
++ * Create an Immer draft from the given base state, which may be a draft itself.
++ * The draft can be modified until you finalize it with the `finishDraft` function.
++ */
++
++var createDraft = /*#__PURE__*/immer.createDraft.bind(immer);
++/**
++ * Finalize an Immer draft from a `createDraft` call, returning the base state
++ * (if no changes were made) or a modified copy. The draft must *not* be
++ * mutated afterwards.
++ *
++ * Pass a function as the 2nd argument to generate Immer patches based on the
++ * changes that were made.
++ */
++
++var finishDraft = /*#__PURE__*/immer.finishDraft.bind(immer);
++/**
++ * This function is actually a no-op, but can be used to cast an immutable type
++ * to an draft type and make TypeScript happy
++ *
++ * @param value
++ */
++
++function castDraft(value) {
++  return value;
++}
++/**
++ * This function is actually a no-op, but can be used to cast a mutable type
++ * to an immutable type and make TypeScript happy
++ * @param value
++ */
++
++function castImmutable(value) {
++  return value;
++}
++
++export default produce;
++export { Immer, applyPatches, castDraft, castImmutable, createDraft, enableAllPlugins, enableES5, enableMapSet, enablePatches, finishDraft, DRAFTABLE as immerable, isDraft, isDraftable, NOTHING as nothing, original, produce, produceWithPatches, setAutoFreeze, setUseProxies };
+ //# sourceMappingURL=immer.esm.js.map
+diff --git a/node_modules/immer/dist/immer.umd.development.js b/node_modules/immer/dist/immer.umd.development.js
+index b913610..a8a9035 100644
+--- a/node_modules/immer/dist/immer.umd.development.js
++++ b/node_modules/immer/dist/immer.umd.development.js
+@@ -16,9 +16,7 @@
+ 	 * The sentinel value returned by producers to replace the draft with undefined.
+ 	 */
+ 
+-	var NOTHING = hasSymbol ?
+-	/*#__PURE__*/
+-	Symbol("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
++	var NOTHING = hasSymbol ? /*#__PURE__*/Symbol("immer-nothing") : (_ref = {}, _ref["immer-nothing"] = true, _ref);
+ 	/**
+ 	 * To let Immer treat your class instances as plain immutable objects
+ 	 * (albeit with a custom prototype), you must define either an instance property
+@@ -28,12 +26,8 @@
+ 	 * safe to mutate in a produce callback.
+ 	 */
+ 
+-	var DRAFTABLE = hasSymbol ?
+-	/*#__PURE__*/
+-	Symbol("immer-draftable") : "__$immer_draftable";
+-	var DRAFT_STATE = hasSymbol ?
+-	/*#__PURE__*/
+-	Symbol("immer-state") : "__$immer_state";
++	var DRAFTABLE = hasSymbol ? /*#__PURE__*/Symbol("immer-draftable") : "__$immer_draftable";
++	var DRAFT_STATE = hasSymbol ? /*#__PURE__*/Symbol("immer-state") : "__$immer_state";
+ 	var iteratorSymbol = hasSymbol ? Symbol.iterator : "@@iterator";
+ 
+ 	var errors = {
+@@ -161,7 +155,7 @@
+ 	function set(thing, propOrOldValue, value) {
+ 	  var t = getArchtype(thing);
+ 	  if (t === ArchtypeMap) thing.set(propOrOldValue, value);else if (t === ArchtypeSet) {
+-	    thing.delete(propOrOldValue);
++	    thing["delete"](propOrOldValue);
+ 	    thing.add(value);
+ 	  } else thing[propOrOldValue] = value;
+ 	}
+@@ -206,13 +200,14 @@
+ 	    var value = desc.value;
+ 
+ 	    if (desc.get) {
+-	      if (!invokeGetters) die(1);
+-	      value = desc.get.call(base);
++	      if (invokeGetters) {
++	        value = desc.get.call(base);
++	      }
+ 	    }
+ 
+ 	    if (desc.enumerable) {
+ 	      clone[key] = value;
+-	    } else {
++	    } else if (invokeGetters) {
+ 	      Object.defineProperty(clone, key, {
+ 	        value: value,
+ 	        writable: true,
+@@ -228,7 +223,7 @@
+ 	  if (getArchtype(obj) > 1
+ 	  /* Map or Set */
+ 	  ) {
+-	      obj.set = obj.add = obj.clear = obj.delete = dontMutateFrozenCollections;
++	      obj.set = obj.add = obj.clear = obj["delete"] = dontMutateFrozenCollections;
+ 	    }
+ 
+ 	  Object.freeze(obj);
+@@ -636,9 +631,7 @@
+ 	  }
+ 	}
+ 
+-	var Immer =
+-	/*#__PURE__*/
+-	function () {
++	var Immer = /*#__PURE__*/function () {
+ 	  function Immer(config) {
+ 	    this.useProxies_ = hasProxies;
+ 	    this.autoFreeze_ =  true
+@@ -1365,10 +1358,10 @@
+ 	              return base.splice(key, 1);
+ 
+ 	            case ArchtypeMap:
+-	              return base.delete(key);
++	              return base["delete"](key);
+ 
+ 	            case ArchtypeSet:
+-	              return base.delete(patch.value);
++	              return base["delete"](patch.value);
+ 
+ 	            default:
+ 	              return delete base[key];
+@@ -1484,7 +1477,7 @@
+ 	      return this;
+ 	    };
+ 
+-	    p.delete = function (key) {
++	    p["delete"] = function (key) {
+ 	      if (!this.has(key)) {
+ 	        return false;
+ 	      }
+@@ -1494,7 +1487,7 @@
+ 	      prepareMapCopy(state);
+ 	      markChanged(state.scope_.immer_, state);
+ 	      state.assigned_.set(key, false);
+-	      state.copy_.delete(key);
++	      state.copy_["delete"](key);
+ 	      return true;
+ 	    };
+ 
+@@ -1660,7 +1653,7 @@
+ 	      return this;
+ 	    };
+ 
+-	    p.delete = function (value) {
++	    p["delete"] = function (value) {
+ 	      if (!this.has(value)) {
+ 	        return false;
+ 	      }
+@@ -1669,7 +1662,7 @@
+ 	      assertUnrevoked(state);
+ 	      prepareSetCopy(state);
+ 	      markChanged(state.scope_.immer_, state);
+-	      return state.copy_.delete(value) || (state.drafts_.has(value) ? state.copy_.delete(state.drafts_.get(value)) :
++	      return state.copy_["delete"](value) || (state.drafts_.has(value) ? state.copy_["delete"](state.drafts_.get(value)) :
+ 	      /* istanbul ignore next */
+ 	      false);
+ 	    };
+@@ -1756,9 +1749,7 @@
+ 	  enablePatches();
+ 	}
+ 
+-	var immer =
+-	/*#__PURE__*/
+-	new Immer();
++	var immer = /*#__PURE__*/new Immer();
+ 	/**
+ 	 * The `produce` function takes a value and a "recipe function" (whose
+ 	 * return value often depends on the base state). The recipe function is
+@@ -1785,18 +1776,14 @@
+ 	 * [nextState, patches, inversePatches] (instead of just the next state)
+ 	 */
+ 
+-	var produceWithPatches =
+-	/*#__PURE__*/
+-	immer.produceWithPatches.bind(immer);
++	var produceWithPatches = /*#__PURE__*/immer.produceWithPatches.bind(immer);
+ 	/**
+ 	 * Pass true to automatically freeze all copies created by Immer.
+ 	 *
+ 	 * By default, auto-freezing is disabled in production.
+ 	 */
+ 
+-	var setAutoFreeze =
+-	/*#__PURE__*/
+-	immer.setAutoFreeze.bind(immer);
++	var setAutoFreeze = /*#__PURE__*/immer.setAutoFreeze.bind(immer);
+ 	/**
+ 	 * Pass true to use the ES2015 `Proxy` class when creating drafts, which is
+ 	 * always faster than using ES5 proxies.
+@@ -1804,26 +1791,20 @@
+ 	 * By default, feature detection is used, so calling this is rarely necessary.
+ 	 */
+ 
+-	var setUseProxies =
+-	/*#__PURE__*/
+-	immer.setUseProxies.bind(immer);
++	var setUseProxies = /*#__PURE__*/immer.setUseProxies.bind(immer);
+ 	/**
+ 	 * Apply an array of Immer patches to the first argument.
+ 	 *
+ 	 * This function is a producer, which means copy-on-write is in effect.
+ 	 */
+ 
+-	var applyPatches =
+-	/*#__PURE__*/
+-	immer.applyPatches.bind(immer);
++	var applyPatches = /*#__PURE__*/immer.applyPatches.bind(immer);
+ 	/**
+ 	 * Create an Immer draft from the given base state, which may be a draft itself.
+ 	 * The draft can be modified until you finalize it with the `finishDraft` function.
+ 	 */
+ 
+-	var createDraft =
+-	/*#__PURE__*/
+-	immer.createDraft.bind(immer);
++	var createDraft = /*#__PURE__*/immer.createDraft.bind(immer);
+ 	/**
+ 	 * Finalize an Immer draft from a `createDraft` call, returning the base state
+ 	 * (if no changes were made) or a modified copy. The draft must *not* be
+@@ -1833,9 +1814,7 @@
+ 	 * changes that were made.
+ 	 */
+ 
+-	var finishDraft =
+-	/*#__PURE__*/
+-	immer.finishDraft.bind(immer);
++	var finishDraft = /*#__PURE__*/immer.finishDraft.bind(immer);
+ 	/**
+ 	 * This function is actually a no-op, but can be used to cast an immutable type
+ 	 * to an draft type and make TypeScript happy
+@@ -1877,7 +1856,5 @@
+ 	exports.setAutoFreeze = setAutoFreeze;
+ 	exports.setUseProxies = setUseProxies;
+ 
+-	Object.defineProperty(exports, '__esModule', { value: true });
+-
+ })));
+ //# sourceMappingURL=immer.umd.development.js.map
+diff --git a/node_modules/immer/dist/immer.umd.production.min.js b/node_modules/immer/dist/immer.umd.production.min.js
+index c5cbaf1..bde78f0 100644
+--- a/node_modules/immer/dist/immer.umd.production.min.js
++++ b/node_modules/immer/dist/immer.umd.production.min.js
+@@ -1,2 +1,2 @@
+-!function(n,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((n=n||self).immer={})}(this,(function(n){function t(n){for(var t=arguments.length,r=Array(t>1?t-1:0),e=1;e<t;e++)r[e-1]=arguments[e];throw Error("[Immer] minified error nr: "+n+(r.length?" "+r.join(","):"")+". Find the full error at: https://bit.ly/38PiBHb")}function r(n){return!!n&&!!n[q]}function e(n){return!!n&&(function(n){if(!n||"object"!=typeof n)return!1;var t=Object.getPrototypeOf(n);return!t||t===Object.prototype}(n)||Array.isArray(n)||!!n[K]||!!n.constructor[K]||c(n)||v(n))}function i(n,t){0===u(n)?L(n).forEach((function(r){return t(r,n[r],n)})):n.forEach((function(r,e){return t(e,r,n)}))}function u(n){var t=n[q];return t?t.t>3?t.t-4:t.t:Array.isArray(n)?1:c(n)?2:v(n)?3:0}function o(n,t){return 2===u(n)?n.has(t):Object.prototype.hasOwnProperty.call(n,t)}function f(n,t){return 2===u(n)?n.get(t):n[t]}function a(n,t){return n===t?0!==n||1/n==1/t:n!=n&&t!=t}function c(n){return B&&n instanceof Map}function v(n){return C&&n instanceof Set}function s(n){return n.i||n.u}function p(n,r){if(void 0===r&&(r=!1),Array.isArray(n))return n.slice();var e=Object.create(Object.getPrototypeOf(n));return i(n,(function(i){if(i!==q){var u=Object.getOwnPropertyDescriptor(n,i),o=u.value;u.get&&(r||t(1),o=u.get.call(n)),u.enumerable?e[i]=o:Object.defineProperty(e,i,{value:o,writable:!0,configurable:!0})}})),e}function h(n,t){r(n)||Object.isFrozen(n)||!e(n)||(u(n)>1&&(n.set=n.add=n.clear=n.delete=l),Object.freeze(n),t&&i(n,(function(n,t){return h(t,!0)})))}function l(){t(2)}function d(n){var r=Q[n];return r||t(19,n),r}function _(n,t){Q[n]=t}function y(){return N}function b(n,t){t&&(d("Patches"),n.o=[],n.v=[],n.s=t)}function m(n){j(n),n.p.forEach(w),n.p=null}function j(n){n===N&&(N=n.h)}function O(n){return N={p:[],h:N,l:n,_:!0,m:0}}function w(n){var t=n[q];0===t.t||1===t.t?t.j():t.O=!0}function S(n,r){r.m=r.p.length;var i=r.p[0],u=void 0!==n&&n!==i;return r.l.S||d("ES5").P(r,n,u),u?(i[q].M&&(m(r),t(4)),e(n)&&(n=P(r,n),r.h||g(r,n)),r.o&&d("Patches").g(i[q],n,r.o,r.v)):n=P(r,i,[]),m(r),r.o&&r.s(r.o,r.v),n!==I?n:void 0}function P(n,t,r){if(Object.isFrozen(t))return t;var e=t[q];if(!e)return i(t,(function(i,u){return M(n,e,t,i,u,r)})),t;if(e.A!==n)return t;if(!e.M)return g(n,e.u,!0),e.u;if(!e.R){e.R=!0,e.A.m--;var u=4===e.t||5===e.t?e.i=p(e.k,!0):e.i;i(u,(function(t,i){return M(n,e,u,t,i,r)})),g(n,u,!1),r&&n.o&&d("Patches").F(e,r,n.o,n.v)}return e.i}function M(n,t,i,c,v,s){if(r(v)){var p=P(n,v,s&&t&&3!==t.t&&!o(t.D,c)?s.concat(c):void 0);if(l=c,d=p,2===(_=u(h=i))?h.set(l,d):3===_?(h.delete(l),h.add(d)):h[l]=d,!r(p))return;n._=!1}var h,l,d,_;if((!t||!a(v,f(t.u,c)))&&e(v)){if(!n.l.J&&n.m<1)return;P(n,v),t&&t.A.h||g(n,v)}}function g(n,t,r){void 0===r&&(r=!1),n.l.J&&n._&&h(t,r)}function A(n,t){var r=n[q],e=Reflect.getOwnPropertyDescriptor(r?s(r):n,t);return e&&e.value}function z(n){if(!n.M){if(n.M=!0,0===n.t||1===n.t){var t=n.i=p(n.u);i(n.p,(function(n,r){t[n]=r})),n.p=void 0}n.h&&z(n.h)}}function x(n){n.i||(n.i=p(n.u))}function E(n,t,r){var e=c(t)?d("MapSet").N(t,r):v(t)?d("MapSet").$(t,r):n.S?function(n,t){var r=Array.isArray(n),e={t:r?1:0,A:t?t.A:y(),M:!1,R:!1,D:{},h:t,u:n,k:null,p:{},i:null,j:null,B:!1},i=e,u=T;r&&(i=[e],u=U);var o=Proxy.revocable(i,u),f=o.revoke,a=o.proxy;return e.k=a,e.j=f,a}(t,r):d("ES5").C(t,r);return(r?r.A:y()).p.push(e),e}function R(n,t){n.S?z(t):d("ES5").H(t)}function k(){function n(n,t){var r=n[q];if(r&&!r.I){r.I=!0;var e=n[t];return r.I=!1,e}return n[t]}function u(n){n.M||(n.M=!0,n.h&&u(n.h))}function f(n){n.i||(n.i=c(n.u))}function c(n){var t=n&&n[q];if(t){t.I=!0;var r=p(t.k,!0);return t.I=!1,r}return p(n)}function v(n){for(var t=n.length-1;t>=0;t--){var r=n[t][q];if(!r.M)switch(r.t){case 5:l(r)&&u(r);break;case 4:h(r)&&u(r)}}}function h(n){for(var t=n.u,r=n.k,e=Object.keys(r),i=e.length-1;i>=0;i--){var u=e[i],f=t[u];if(void 0===f&&!o(t,u))return!0;var c=r[u],v=c&&c[q];if(v?v.u!==f:!a(c,f))return!0}return e.length!==Object.keys(t).length}function l(n){var t=n.k;if(t.length!==n.u.length)return!0;var r=Object.getOwnPropertyDescriptor(t,t.length-1);return!(!r||r.get)}function d(n){n.O&&t(3,JSON.stringify(s(n)))}var b={};_("ES5",{C:function(t,r){var o=Array.isArray(t),v=c(t);i(v,(function(r){!function(t,r,i){var o=b[r];o?o.enumerable=i:b[r]=o={enumerable:i,get:function(){return function(t,r){d(t);var i=n(s(t),r);return t.I?i:i===n(t.u,r)&&e(i)?(f(t),t.i[r]=E(t.A.l,i,t)):i}(this[q],r)},set:function(t){!function(t,r,e){if(d(t),t.D[r]=!0,!t.M){if(a(e,n(s(t),r)))return;u(t),f(t)}t.i[r]=e}(this[q],r,t)}},Object.defineProperty(t,r,o)}(v,r,o||function(n,t){var r=Object.getOwnPropertyDescriptor(n,t);return!(!r||!r.enumerable)}(t,r))}));var p={t:o?5:4,A:r?r.A:y(),M:!1,I:!1,R:!1,D:{},h:r,u:t,k:v,i:null,O:!1,B:!1};return Object.defineProperty(v,q,{value:p,writable:!0}),v},H:u,P:function(n,t,e){n.p.forEach((function(n){n[q].I=!0})),e?r(t)&&t[q].A===n&&v(n.p):(n.o&&function n(t){if(t&&"object"==typeof t){var r=t[q];if(r){var e=r.u,f=r.k,a=r.D,c=r.t;if(4===c)i(f,(function(t){t!==q&&(void 0!==e[t]||o(e,t)?a[t]||n(f[t]):(a[t]=!0,u(r)))})),i(e,(function(n){void 0!==f[n]||o(f,n)||(a[n]=!1,u(r))}));else if(5===c){if(l(r)&&(u(r),a.length=!0),f.length<e.length)for(var v=f.length;v<e.length;v++)a[v]=!1;else for(var s=e.length;s<f.length;s++)a[s]=!0;for(var p=Math.min(f.length,e.length),h=0;h<p;h++)void 0===a[h]&&n(f[h])}}}}(n.p[0]),v(n.p))}})}function F(){function n(t){if(!t||"object"!=typeof t)return t;if(Array.isArray(t))return t.map(n);if(c(t))return new Map(Array.from(t.entries()).map((function(t){return[t[0],n(t[1])]})));if(v(t))return new Set(Array.from(t).map(n));var r=Object.create(Object.getPrototypeOf(t));for(var e in t)r[e]=n(t[e]);return r}var r="add";_("Patches",{K:function(e,i){return i.forEach((function(i){for(var o=i.path,a=i.op,c=e,v=0;v<o.length-1;v++)"object"!=typeof(c=f(c,o[v]))&&t(15,o.join("/"));var s=u(c),p=n(i.value),h=o[o.length-1];switch(a){case"replace":switch(s){case 2:return c.set(h,p);case 3:t(16);default:return c[h]=p}case r:switch(s){case 1:return c.splice(h,0,p);case 2:return c.set(h,p);case 3:return c.add(p);default:return c[h]=p}case"remove":switch(s){case 1:return c.splice(h,1);case 2:return c.delete(h);case 3:return c.delete(i.value);default:return delete c[h]}default:t(17,a)}})),e},F:function(n,t,e,u){switch(n.t){case 0:case 4:case 2:return function(n,t,e,u){var a=n.u,c=n.i;i(n.D,(function(n,i){var v=f(a,n),s=f(c,n),p=i?o(a,n)?"replace":r:"remove";if(v!==s||"replace"!==p){var h=t.concat(n);e.push("remove"===p?{op:p,path:h}:{op:p,path:h,value:s}),u.push(p===r?{op:"remove",path:h}:"remove"===p?{op:r,path:h,value:v}:{op:"replace",path:h,value:v})}}))}(n,t,e,u);case 5:case 1:return function(n,t,e,i){var u=n.u,o=n.D,f=n.i;if(f.length<u.length){var a=[f,u];u=a[0],f=a[1];var c=[i,e];e=c[0],i=c[1]}for(var v=f.length-u.length,s=0;u[s]===f[s]&&s<u.length;)++s;for(var p=u.length;p>s&&u[p-1]===f[p+v-1];)--p;for(var h=s;h<p;++h)if(o[h]&&f[h]!==u[h]){var l=t.concat([h]);e.push({op:"replace",path:l,value:f[h]}),i.push({op:"replace",path:l,value:u[h]})}for(var d=e.length,_=p+v-1;_>=p;--_){var y=t.concat([_]);e[d+_-p]={op:r,path:y,value:f[_]},i.push({op:"remove",path:y})}}(n,t,e,u);case 3:return function(n,t,e,i){var u=n.u,o=n.i,f=0;u.forEach((function(n){if(!o.has(n)){var u=t.concat([f]);e.push({op:"remove",path:u,value:n}),i.unshift({op:r,path:u,value:n})}f++})),f=0,o.forEach((function(n){if(!u.has(n)){var o=t.concat([f]);e.push({op:r,path:o,value:n}),i.unshift({op:"remove",path:o,value:n})}f++}))}(n,t,e,u)}},g:function(n,t,r,e){r.push({op:"replace",path:[],value:t}),e.push({op:"replace",path:[],value:n.u})}})}function D(){function n(n,t){function r(){this.constructor=n}o(n,t),n.prototype=(r.prototype=t.prototype,new r)}function r(n){n.i||(n.D=new Map,n.i=new Map(n.u))}function i(n){n.i||(n.i=new Set,n.u.forEach((function(t){if(e(t)){var r=E(n.A.l,t,n);n.p.set(t,r),n.i.add(r)}else n.i.add(t)})))}function u(n){n.O&&t(3,JSON.stringify(s(n)))}var o=function(n,t){return(o=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(n,t){n.__proto__=t}||function(n,t){for(var r in t)t.hasOwnProperty(r)&&(n[r]=t[r])})(n,t)},f=function(){function t(n,t){return this[q]={t:2,h:t,A:t?t.A:y(),M:!1,R:!1,i:void 0,D:void 0,u:n,k:this,B:!1,O:!1},this}n(t,Map);var i=t.prototype;return Object.defineProperty(i,"size",{get:function(){return s(this[q]).size}}),i.has=function(n){return s(this[q]).has(n)},i.set=function(n,t){var e=this[q];return u(e),s(e).get(n)!==t&&(r(e),R(e.A.l,e),e.D.set(n,!0),e.i.set(n,t),e.D.set(n,!0)),this},i.delete=function(n){if(!this.has(n))return!1;var t=this[q];return u(t),r(t),R(t.A.l,t),t.D.set(n,!1),t.i.delete(n),!0},i.clear=function(){var n=this[q];return u(n),r(n),R(n.A.l,n),n.D=new Map,n.i.clear()},i.forEach=function(n,t){var r=this;s(this[q]).forEach((function(e,i){n.call(t,r.get(i),i,r)}))},i.get=function(n){var t=this[q];u(t);var i=s(t).get(n);if(t.R||!e(i))return i;if(i!==t.u.get(n))return i;var o=E(t.A.l,i,t);return r(t),t.i.set(n,o),o},i.keys=function(){return s(this[q]).keys()},i.values=function(){var n,t=this,r=this.keys();return(n={})[G]=function(){return t.values()},n.next=function(){var n=r.next();return n.done?n:{done:!1,value:t.get(n.value)}},n},i.entries=function(){var n,t=this,r=this.keys();return(n={})[G]=function(){return t.entries()},n.next=function(){var n=r.next();if(n.done)return n;var e=t.get(n.value);return{done:!1,value:[n.value,e]}},n},i[G]=function(){return this.entries()},t}(),a=function(){function t(n,t){return this[q]={t:3,h:t,A:t?t.A:y(),M:!1,R:!1,i:void 0,u:n,k:this,p:new Map,O:!1,B:!1},this}n(t,Set);var r=t.prototype;return Object.defineProperty(r,"size",{get:function(){return s(this[q]).size}}),r.has=function(n){var t=this[q];return u(t),t.i?!!t.i.has(n)||!(!t.p.has(n)||!t.i.has(t.p.get(n))):t.u.has(n)},r.add=function(n){var t=this[q];return u(t),t.i?t.i.add(n):t.u.has(n)||(i(t),R(t.A.l,t),t.i.add(n)),this},r.delete=function(n){if(!this.has(n))return!1;var t=this[q];return u(t),i(t),R(t.A.l,t),t.i.delete(n)||!!t.p.has(n)&&t.i.delete(t.p.get(n))},r.clear=function(){var n=this[q];return u(n),i(n),R(n.A.l,n),n.i.clear()},r.values=function(){var n=this[q];return u(n),i(n),n.i.values()},r.entries=function(){var n=this[q];return u(n),i(n),n.i.entries()},r.keys=function(){return this.values()},r[G]=function(){return this.values()},r.forEach=function(n,t){for(var r=this.values(),e=r.next();!e.done;)n.call(t,e.value,e.value,this),e=r.next()},t}();_("MapSet",{N:function(n,t){return new f(n,t)},$:function(n,t){return new a(n,t)}})}var J,N,$="undefined"!=typeof Symbol,B="undefined"!=typeof Map,C="undefined"!=typeof Set,H="undefined"!=typeof Proxy&&void 0!==Proxy.revocable&&"undefined"!=typeof Reflect,I=$?Symbol("immer-nothing"):((J={})["immer-nothing"]=!0,J),K=$?Symbol("immer-draftable"):"__$immer_draftable",q=$?Symbol("immer-state"):"__$immer_state",G=$?Symbol.iterator:"@@iterator",L="undefined"!=typeof Reflect&&Reflect.ownKeys?Reflect.ownKeys:void 0!==Object.getOwnPropertySymbols?function(n){return Object.getOwnPropertyNames(n).concat(Object.getOwnPropertySymbols(n))}:Object.getOwnPropertyNames,Q={},T={get:function(n,t){if(t===q)return n;var r=n.p;if(!n.M&&o(r,t))return r[t];var i=s(n)[t];if(n.R||!e(i))return i;if(n.M){if(i!==A(n.u,t))return i;r=n.i}return r[t]=E(n.A.l,i,n)},has:function(n,t){return t in s(n)},ownKeys:function(n){return Reflect.ownKeys(s(n))},set:function(n,t,r){if(!n.M){var e=A(n.u,t);if(r?a(e,r)||r===n.p[t]:a(e,r)&&t in n.u)return!0;x(n),z(n)}return n.D[t]=!0,n.i[t]=r,!0},deleteProperty:function(n,t){return void 0!==A(n.u,t)||t in n.u?(n.D[t]=!1,x(n),z(n)):n.D[t]&&delete n.D[t],n.i&&delete n.i[t],!0},getOwnPropertyDescriptor:function(n,t){var r=s(n),e=Reflect.getOwnPropertyDescriptor(r,t);return e&&(e.writable=!0,e.configurable=1!==n.t||"length"!==t),e},defineProperty:function(){t(11)},getPrototypeOf:function(n){return Object.getPrototypeOf(n.u)},setPrototypeOf:function(){t(12)}},U={};i(T,(function(n,t){U[n]=function(){return arguments[0]=arguments[0][0],t.apply(this,arguments)}})),U.deleteProperty=function(n,t){return T.deleteProperty.call(this,n[0],t)},U.set=function(n,t,r){return T.set.call(this,n[0],t,r,n[0])};var V=function(){function n(n){this.S=H,this.J=!1,"boolean"==typeof(null==n?void 0:n.useProxies)&&this.setUseProxies(n.useProxies),"boolean"==typeof(null==n?void 0:n.autoFreeze)&&this.setAutoFreeze(n.autoFreeze),this.produce=this.produce.bind(this),this.produceWithPatches=this.produceWithPatches.bind(this)}var i=n.prototype;return i.produce=function(n,r,i){if("function"==typeof n&&"function"!=typeof r){var u=r;r=n;var o=this;return function(n){var t=this;void 0===n&&(n=u);for(var e=arguments.length,i=Array(e>1?e-1:0),f=1;f<e;f++)i[f-1]=arguments[f];return o.produce(n,(function(n){var e;return(e=r).call.apply(e,[t,n].concat(i))}))}}var f;if("function"!=typeof r&&t(6),void 0!==i&&"function"!=typeof i&&t(7),e(n)){var a=O(this),c=E(this,n,void 0),v=!0;try{f=r(c),v=!1}finally{v?m(a):j(a)}return"undefined"!=typeof Promise&&f instanceof Promise?f.then((function(n){return b(a,i),S(n,a)}),(function(n){throw m(a),n})):(b(a,i),S(f,a))}if((f=r(n))!==I)return void 0===f&&(f=n),this.J&&h(f,!0),f},i.produceWithPatches=function(n,t){var r,e,i=this;return"function"==typeof n?function(t){for(var r=arguments.length,e=Array(r>1?r-1:0),u=1;u<r;u++)e[u-1]=arguments[u];return i.produceWithPatches(t,(function(t){return n.apply(void 0,[t].concat(e))}))}:[this.produce(n,t,(function(n,t){r=n,e=t})),r,e]},i.createDraft=function(n){e(n)||t(8);var r=O(this),i=E(this,n,void 0);return i[q].B=!0,j(r),i},i.finishDraft=function(n,t){var r=(n&&n[q]).A;return b(r,t),S(void 0,r)},i.setAutoFreeze=function(n){this.J=n},i.setUseProxies=function(n){H||t(20),this.S=n},i.applyPatches=function(n,t){var e;for(e=t.length-1;e>=0;e--){var i=t[e];if(0===i.path.length&&"replace"===i.op){n=i.value;break}}var u=d("Patches").K;return r(n)?u(n,t):this.produce(n,(function(n){return u(n,t.slice(e+1))}))},n}(),W=new V,X=W.produce,Y=W.produceWithPatches.bind(W),Z=W.setAutoFreeze.bind(W),nn=W.setUseProxies.bind(W),tn=W.applyPatches.bind(W),rn=W.createDraft.bind(W),en=W.finishDraft.bind(W);n.Immer=V,n.applyPatches=tn,n.castDraft=function(n){return n},n.castImmutable=function(n){return n},n.createDraft=rn,n.default=X,n.enableAllPlugins=function(){k(),D(),F()},n.enableES5=k,n.enableMapSet=D,n.enablePatches=F,n.finishDraft=en,n.immerable=K,n.isDraft=r,n.isDraftable=e,n.nothing=I,n.original=function(n){if(n&&n[q])return n[q].u},n.produce=X,n.produceWithPatches=Y,n.setAutoFreeze=Z,n.setUseProxies=nn,Object.defineProperty(n,"__esModule",{value:!0})}));
++!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t((e=e||self).immer={})}(this,(function(e){"use strict";var t,r="undefined"!=typeof Symbol,n="undefined"!=typeof Map,i="undefined"!=typeof Set,a="undefined"!=typeof Proxy&&void 0!==Proxy.revocable&&"undefined"!=typeof Reflect,o="mini"!==function(){}.name,c=r?Symbol("immer-nothing"):((t={})["immer-nothing"]=!0,t),u=r?Symbol("immer-draftable"):"__$immer_draftable",s=r?Symbol("immer-state"):"__$immer_state",f=r?Symbol.iterator:"@@iterator";function _(e){for(var t=arguments.length,r=new Array(t>1?t-1:0),n=1;n<t;n++)r[n-1]=arguments[n];throw new Error("[Immer] minified error nr: "+e+(r.length?" "+r.join(","):"")+". Find the full error at: https://bit.ly/38PiBHb")}function p(e){return!!e&&!!e[s]}function l(e){return!!e&&(function(e){if(!e||"object"!=typeof e)return!1;var t=Object.getPrototypeOf(e);return!t||t===Object.prototype}(e)||Array.isArray(e)||!!e[u]||!!e.constructor[u]||m(e)||P(e))}var d="undefined"!=typeof Reflect&&Reflect.ownKeys?Reflect.ownKeys:void 0!==Object.getOwnPropertySymbols?function(e){return Object.getOwnPropertyNames(e).concat(Object.getOwnPropertySymbols(e))}:Object.getOwnPropertyNames;function h(e,t){0===v(e)?d(e).forEach((function(r){return t(r,e[r],e)})):e.forEach((function(r,n){return t(n,r,e)}))}function v(e){var t=e[s];return t?t.type_>3?t.type_-4:t.type_:Array.isArray(e)?1:m(e)?2:P(e)?3:0}function y(e,t){return 2===v(e)?e.has(t):Object.prototype.hasOwnProperty.call(e,t)}function g(e,t){return 2===v(e)?e.get(t):e[t]}function b(e,t){return e===t?0!==e||1/e==1/t:e!=e&&t!=t}function m(e){return n&&e instanceof Map}function P(e){return i&&e instanceof Set}function O(e){return e.copy_||e.base_}function w(e,t){if(void 0===t&&(t=!1),Array.isArray(e))return e.slice();var r=Object.create(Object.getPrototypeOf(e));return h(e,(function(n){if(n!==s){var i=Object.getOwnPropertyDescriptor(e,n),a=i.value;i.get&&t&&(a=i.get.call(e)),i.enumerable?r[n]=a:t&&Object.defineProperty(r,n,{value:a,writable:!0,configurable:!0})}})),r}function z(e,t){p(e)||Object.isFrozen(e)||!l(e)||(v(e)>1&&(e.set=e.add=e.clear=e.delete=j),Object.freeze(e),t&&h(e,(function(e,t){return z(t,!0)})))}function j(){_(2)}var S,x={};function A(e){var t=x[e];return t||_(19,e),t}function E(e,t){x[e]=t}function k(){return S}function M(e,t){t&&(A("Patches"),e.patches_=[],e.inversePatches_=[],e.patchListener_=t)}function D(e){F(e),e.drafts_.forEach(W),e.drafts_=null}function F(e){e===S&&(S=e.parent_)}function R(e){return S={drafts_:[],parent_:S,immer_:e,canAutoFreeze_:!0,unfinalizedDrafts_:0}}function W(e){var t=e[s];0===t.type_||1===t.type_?t.revoke_():t.revoked_=!0}function K(e,t){t.unfinalizedDrafts_=t.drafts_.length;var r=t.drafts_[0],n=void 0!==e&&e!==r;return t.immer_.useProxies_||A("ES5").willFinalizeES5_(t,e,n),n?(r[s].modified_&&(D(t),_(4)),l(e)&&(e=N(t,e),t.parent_||I(t,e)),t.patches_&&A("Patches").generateReplacementPatches_(r[s],e,t.patches_,t.inversePatches_)):e=N(t,r,[]),D(t),t.patches_&&t.patchListener_(t.patches_,t.inversePatches_),e!==c?e:void 0}function N(e,t,r){if(Object.isFrozen(t))return t;var n=t[s];if(!n)return h(t,(function(i,a){return U(e,n,t,i,a,r)})),t;if(n.scope_!==e)return t;if(!n.modified_)return I(e,n.base_,!0),n.base_;if(!n.finalized_){n.finalized_=!0,n.scope_.unfinalizedDrafts_--;var i=4===n.type_||5===n.type_?n.copy_=w(n.draft_,!0):n.copy_;h(i,(function(t,a){return U(e,n,i,t,a,r)})),I(e,i,!1),r&&e.patches_&&A("Patches").generatePatches_(n,r,e.patches_,e.inversePatches_)}return n.copy_}function U(e,t,r,n,i,a){if(p(i)){var o=N(e,i,a&&t&&3!==t.type_&&!y(t.assigned_,n)?a.concat(n):void 0);if(u=n,s=o,2===(f=v(c=r))?c.set(u,s):3===f?(c.delete(u),c.add(s)):c[u]=s,!p(o))return;e.canAutoFreeze_=!1}var c,u,s,f;if((!t||!b(i,g(t.base_,n)))&&l(i)){if(!e.immer_.autoFreeze_&&e.unfinalizedDrafts_<1)return;N(e,i),t&&t.scope_.parent_||I(e,i)}}function I(e,t,r){void 0===r&&(r=!1),e.immer_.autoFreeze_&&e.canAutoFreeze_&&z(t,r)}var C={get:function(e,t){if(t===s)return e;var r=e.drafts_;if(!e.modified_&&y(r,t))return r[t];var n=O(e)[t];if(e.finalized_||!l(n))return n;if(e.modified_){if(n!==L(e.base_,t))return n;r=e.copy_}return r[t]=q(e.scope_.immer_,n,e)},has:function(e,t){return t in O(e)},ownKeys:function(e){return Reflect.ownKeys(O(e))},set:function(e,t,r){if(!e.modified_){var n=L(e.base_,t);if(r?b(n,r)||r===e.drafts_[t]:b(n,r)&&t in e.base_)return!0;B(e),$(e)}return e.assigned_[t]=!0,e.copy_[t]=r,!0},deleteProperty:function(e,t){return void 0!==L(e.base_,t)||t in e.base_?(e.assigned_[t]=!1,B(e),$(e)):e.assigned_[t]&&delete e.assigned_[t],e.copy_&&delete e.copy_[t],!0},getOwnPropertyDescriptor:function(e,t){var r=O(e),n=Reflect.getOwnPropertyDescriptor(r,t);return n&&(n.writable=!0,n.configurable=1!==e.type_||"length"!==t),n},defineProperty:function(){_(11)},getPrototypeOf:function(e){return Object.getPrototypeOf(e.base_)},setPrototypeOf:function(){_(12)}},J={};function L(e,t){var r=e[s],n=Reflect.getOwnPropertyDescriptor(r?O(r):e,t);return n&&n.value}function $(e){if(!e.modified_){if(e.modified_=!0,0===e.type_||1===e.type_){var t=e.copy_=w(e.base_);h(e.drafts_,(function(e,r){t[e]=r})),e.drafts_=void 0}e.parent_&&$(e.parent_)}}function B(e){e.copy_||(e.copy_=w(e.base_))}h(C,(function(e,t){J[e]=function(){return arguments[0]=arguments[0][0],t.apply(this,arguments)}})),J.deleteProperty=function(e,t){return C.deleteProperty.call(this,e[0],t)},J.set=function(e,t,r){return C.set.call(this,e[0],t,r,e[0])};var H=function(){function e(e){this.useProxies_=a,this.autoFreeze_=!o,"boolean"==typeof(null==e?void 0:e.useProxies)&&this.setUseProxies(e.useProxies),"boolean"==typeof(null==e?void 0:e.autoFreeze)&&this.setAutoFreeze(e.autoFreeze),this.produce=this.produce.bind(this),this.produceWithPatches=this.produceWithPatches.bind(this)}var t=e.prototype;return t.produce=function(e,t,r){if("function"==typeof e&&"function"!=typeof t){var n=t;t=e;var i=this;return function(e){var r=this;void 0===e&&(e=n);for(var a=arguments.length,o=new Array(a>1?a-1:0),c=1;c<a;c++)o[c-1]=arguments[c];return i.produce(e,(function(e){var n;return(n=t).call.apply(n,[r,e].concat(o))}))}}var a;if("function"!=typeof t&&_(6),void 0!==r&&"function"!=typeof r&&_(7),l(e)){var o=R(this),u=q(this,e,void 0),s=!0;try{a=t(u),s=!1}finally{s?D(o):F(o)}return"undefined"!=typeof Promise&&a instanceof Promise?a.then((function(e){return M(o,r),K(e,o)}),(function(e){throw D(o),e})):(M(o,r),K(a,o))}if((a=t(e))!==c)return void 0===a&&(a=e),this.autoFreeze_&&z(a,!0),a},t.produceWithPatches=function(e,t,r){var n,i,a=this;return"function"==typeof e?function(t){for(var r=arguments.length,n=new Array(r>1?r-1:0),i=1;i<r;i++)n[i-1]=arguments[i];return a.produceWithPatches(t,(function(t){return e.apply(void 0,[t].concat(n))}))}:[this.produce(e,t,(function(e,t){n=e,i=t})),n,i]},t.createDraft=function(e){l(e)||_(8);var t=R(this),r=q(this,e,void 0);return r[s].isManual_=!0,F(t),r},t.finishDraft=function(e,t){var r=(e&&e[s]).scope_;return M(r,t),K(void 0,r)},t.setAutoFreeze=function(e){this.autoFreeze_=e},t.setUseProxies=function(e){a||_(20),this.useProxies_=e},t.applyPatches=function(e,t){var r;for(r=t.length-1;r>=0;r--){var n=t[r];if(0===n.path.length&&"replace"===n.op){e=n.value;break}}var i=A("Patches").applyPatches_;return p(e)?i(e,t):this.produce(e,(function(e){return i(e,t.slice(r+1))}))},e}();function q(e,t,r){var n=m(t)?A("MapSet").proxyMap_(t,r):P(t)?A("MapSet").proxySet_(t,r):e.useProxies_?function(e,t){var r=Array.isArray(e),n={type_:r?1:0,scope_:t?t.scope_:k(),modified_:!1,finalized_:!1,assigned_:{},parent_:t,base_:e,draft_:null,drafts_:{},copy_:null,revoke_:null,isManual_:!1},i=n,a=C;r&&(i=[n],a=J);var o=Proxy.revocable(i,a),c=o.revoke,u=o.proxy;return n.draft_=u,n.revoke_=c,u}(t,r):A("ES5").createES5Proxy_(t,r);return(r?r.scope_:k()).drafts_.push(n),n}function G(e,t){e.useProxies_?$(t):A("ES5").markChangedES5_(t)}function Q(){function e(e,t){var r=e[s];if(r&&!r.finalizing_){r.finalizing_=!0;var n=e[t];return r.finalizing_=!1,n}return e[t]}function t(e){e.modified_||(e.modified_=!0,e.parent_&&t(e.parent_))}function r(e){e.copy_||(e.copy_=n(e.base_))}function n(e){var t=e&&e[s];if(t){t.finalizing_=!0;var r=w(t.draft_,!0);return t.finalizing_=!1,r}return w(e)}var i={};function a(e){for(var r=e.length-1;r>=0;r--){var n=e[r][s];if(!n.modified_)switch(n.type_){case 5:c(n)&&t(n);break;case 4:o(n)&&t(n)}}}function o(e){for(var t=e.base_,r=e.draft_,n=Object.keys(r),i=n.length-1;i>=0;i--){var a=n[i],o=t[a];if(void 0===o&&!y(t,a))return!0;var c=r[a],u=c&&c[s];if(u?u.base_!==o:!b(c,o))return!0}return n.length!==Object.keys(t).length}function c(e){var t=e.draft_;if(t.length!==e.base_.length)return!0;var r=Object.getOwnPropertyDescriptor(t,t.length-1);return!(!r||r.get)}function u(e){e.revoked_&&_(3,JSON.stringify(O(e)))}E("ES5",{createES5Proxy_:function(a,o){var c=Array.isArray(a),f=n(a);h(f,(function(n){!function(n,a,o){var c=i[a];c?c.enumerable=o:i[a]=c={enumerable:o,get:function(){return function(t,n){u(t);var i=e(O(t),n);return t.finalizing_?i:i===e(t.base_,n)&&l(i)?(r(t),t.copy_[n]=q(t.scope_.immer_,i,t)):i}(this[s],a)},set:function(n){!function(n,i,a){if(u(n),n.assigned_[i]=!0,!n.modified_){if(b(a,e(O(n),i)))return;t(n),r(n)}n.copy_[i]=a}(this[s],a,n)}},Object.defineProperty(n,a,c)}(f,n,c||function(e,t){var r=Object.getOwnPropertyDescriptor(e,t);return!(!r||!r.enumerable)}(a,n))}));var _={type_:c?5:4,scope_:o?o.scope_:k(),modified_:!1,finalizing_:!1,finalized_:!1,assigned_:{},parent_:o,base_:a,draft_:f,copy_:null,revoked_:!1,isManual_:!1};return Object.defineProperty(f,s,{value:_,writable:!0}),f},markChangedES5_:t,willFinalizeES5_:function(e,r,n){e.drafts_.forEach((function(e){e[s].finalizing_=!0})),n?p(r)&&r[s].scope_===e&&a(e.drafts_):(e.patches_&&function e(r){if(r&&"object"==typeof r){var n=r[s];if(n){var i=n.base_,a=n.draft_,o=n.assigned_,u=n.type_;if(4===u)h(a,(function(r){r!==s&&(void 0!==i[r]||y(i,r)?o[r]||e(a[r]):(o[r]=!0,t(n)))})),h(i,(function(e){void 0!==a[e]||y(a,e)||(o[e]=!1,t(n))}));else if(5===u){if(c(n)&&(t(n),o.length=!0),a.length<i.length)for(var f=a.length;f<i.length;f++)o[f]=!1;else for(var _=i.length;_<a.length;_++)o[_]=!0;for(var p=Math.min(a.length,i.length),l=0;l<p;l++)void 0===o[l]&&e(a[l])}}}}(e.drafts_[0]),a(e.drafts_))}})}function T(){var e="add";function t(e){if(!e||"object"!=typeof e)return e;if(Array.isArray(e))return e.map(t);if(m(e))return new Map(Array.from(e.entries()).map((function(e){return[e[0],t(e[1])]})));if(P(e))return new Set(Array.from(e).map(t));var r=Object.create(Object.getPrototypeOf(e));for(var n in e)r[n]=t(e[n]);return r}E("Patches",{applyPatches_:function(r,n){return n.forEach((function(n){for(var i=n.path,a=n.op,o=r,c=0;c<i.length-1;c++)"object"!=typeof(o=g(o,i[c]))&&_(15,i.join("/"));var u=v(o),s=t(n.value),f=i[i.length-1];switch(a){case"replace":switch(u){case 2:return o.set(f,s);case 3:_(16);default:return o[f]=s}case e:switch(u){case 1:return o.splice(f,0,s);case 2:return o.set(f,s);case 3:return o.add(s);default:return o[f]=s}case"remove":switch(u){case 1:return o.splice(f,1);case 2:return o.delete(f);case 3:return o.delete(n.value);default:return delete o[f]}default:_(17,a)}})),r},generatePatches_:function(t,r,n,i){switch(t.type_){case 0:case 4:case 2:return function(t,r,n,i){var a=t.base_,o=t.copy_;h(t.assigned_,(function(t,c){var u=g(a,t),s=g(o,t),f=c?y(a,t)?"replace":e:"remove";if(u!==s||"replace"!==f){var _=r.concat(t);n.push("remove"===f?{op:f,path:_}:{op:f,path:_,value:s}),i.push(f===e?{op:"remove",path:_}:"remove"===f?{op:e,path:_,value:u}:{op:"replace",path:_,value:u})}}))}(t,r,n,i);case 5:case 1:return function(t,r,n,i){var a=t.base_,o=t.assigned_,c=t.copy_;if(c.length<a.length){var u=[c,a];a=u[0],c=u[1];var s=[i,n];n=s[0],i=s[1]}for(var f=c.length-a.length,_=0;a[_]===c[_]&&_<a.length;)++_;for(var p=a.length;p>_&&a[p-1]===c[p+f-1];)--p;for(var l=_;l<p;++l)if(o[l]&&c[l]!==a[l]){var d=r.concat([l]);n.push({op:"replace",path:d,value:c[l]}),i.push({op:"replace",path:d,value:a[l]})}for(var h=n.length,v=p+f-1;v>=p;--v){var y=r.concat([v]);n[h+v-p]={op:e,path:y,value:c[v]},i.push({op:"remove",path:y})}}(t,r,n,i);case 3:return function(t,r,n,i){var a=t.base_,o=t.copy_,c=0;a.forEach((function(t){if(!o.has(t)){var a=r.concat([c]);n.push({op:"remove",path:a,value:t}),i.unshift({op:e,path:a,value:t})}c++})),c=0,o.forEach((function(t){if(!a.has(t)){var o=r.concat([c]);n.push({op:e,path:o,value:t}),i.unshift({op:"remove",path:o,value:t})}c++}))}(t,r,n,i)}},generateReplacementPatches_:function(e,t,r,n){r.push({op:"replace",path:[],value:t}),n.push({op:"replace",path:[],value:e.base_})}})}function V(){var e=function(t,r){return(e=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(e,t){e.__proto__=t}||function(e,t){for(var r in t)t.hasOwnProperty(r)&&(e[r]=t[r])})(t,r)};function t(t,r){function n(){this.constructor=t}e(t,r),t.prototype=(n.prototype=r.prototype,new n)}var r=function(e){function r(e,t){return this[s]={type_:2,parent_:t,scope_:t?t.scope_:k(),modified_:!1,finalized_:!1,copy_:void 0,assigned_:void 0,base_:e,draft_:this,isManual_:!1,revoked_:!1},this}t(r,Map);var i=r.prototype;return Object.defineProperty(i,"size",{get:function(){return O(this[s]).size}}),i.has=function(e){return O(this[s]).has(e)},i.set=function(e,t){var r=this[s];return o(r),O(r).get(e)!==t&&(n(r),G(r.scope_.immer_,r),r.assigned_.set(e,!0),r.copy_.set(e,t),r.assigned_.set(e,!0)),this},i.delete=function(e){if(!this.has(e))return!1;var t=this[s];return o(t),n(t),G(t.scope_.immer_,t),t.assigned_.set(e,!1),t.copy_.delete(e),!0},i.clear=function(){var e=this[s];return o(e),n(e),G(e.scope_.immer_,e),e.assigned_=new Map,e.copy_.clear()},i.forEach=function(e,t){var r=this;O(this[s]).forEach((function(n,i,a){e.call(t,r.get(i),i,r)}))},i.get=function(e){var t=this[s];o(t);var r=O(t).get(e);if(t.finalized_||!l(r))return r;if(r!==t.base_.get(e))return r;var i=q(t.scope_.immer_,r,t);return n(t),t.copy_.set(e,i),i},i.keys=function(){return O(this[s]).keys()},i.values=function(){var e,t=this,r=this.keys();return(e={})[f]=function(){return t.values()},e.next=function(){var e=r.next();return e.done?e:{done:!1,value:t.get(e.value)}},e},i.entries=function(){var e,t=this,r=this.keys();return(e={})[f]=function(){return t.entries()},e.next=function(){var e=r.next();if(e.done)return e;var n=t.get(e.value);return{done:!1,value:[e.value,n]}},e},i[f]=function(){return this.entries()},r}();function n(e){e.copy_||(e.assigned_=new Map,e.copy_=new Map(e.base_))}var i=function(e){function r(e,t){return this[s]={type_:3,parent_:t,scope_:t?t.scope_:k(),modified_:!1,finalized_:!1,copy_:void 0,base_:e,draft_:this,drafts_:new Map,revoked_:!1,isManual_:!1},this}t(r,Set);var n=r.prototype;return Object.defineProperty(n,"size",{get:function(){return O(this[s]).size}}),n.has=function(e){var t=this[s];return o(t),t.copy_?!!t.copy_.has(e)||!(!t.drafts_.has(e)||!t.copy_.has(t.drafts_.get(e))):t.base_.has(e)},n.add=function(e){var t=this[s];return o(t),t.copy_?t.copy_.add(e):t.base_.has(e)||(a(t),G(t.scope_.immer_,t),t.copy_.add(e)),this},n.delete=function(e){if(!this.has(e))return!1;var t=this[s];return o(t),a(t),G(t.scope_.immer_,t),t.copy_.delete(e)||!!t.drafts_.has(e)&&t.copy_.delete(t.drafts_.get(e))},n.clear=function(){var e=this[s];return o(e),a(e),G(e.scope_.immer_,e),e.copy_.clear()},n.values=function(){var e=this[s];return o(e),a(e),e.copy_.values()},n.entries=function(){var e=this[s];return o(e),a(e),e.copy_.entries()},n.keys=function(){return this.values()},n[f]=function(){return this.values()},n.forEach=function(e,t){for(var r=this.values(),n=r.next();!n.done;)e.call(t,n.value,n.value,this),n=r.next()},r}();function a(e){e.copy_||(e.copy_=new Set,e.base_.forEach((function(t){if(l(t)){var r=q(e.scope_.immer_,t,e);e.drafts_.set(t,r),e.copy_.add(r)}else e.copy_.add(t)})))}function o(e){e.revoked_&&_(3,JSON.stringify(O(e)))}E("MapSet",{proxyMap_:function(e,t){return new r(e,t)},proxySet_:function(e,t){return new i(e,t)}})}var X=new H,Y=X.produce,Z=X.produceWithPatches.bind(X),ee=X.setAutoFreeze.bind(X),te=X.setUseProxies.bind(X),re=X.applyPatches.bind(X),ne=X.createDraft.bind(X),ie=X.finishDraft.bind(X);e.Immer=H,e.applyPatches=re,e.castDraft=function(e){return e},e.castImmutable=function(e){return e},e.createDraft=ne,e.default=Y,e.enableAllPlugins=function(){Q(),V(),T()},e.enableES5=Q,e.enableMapSet=V,e.enablePatches=T,e.finishDraft=ie,e.immerable=u,e.isDraft=p,e.isDraftable=l,e.nothing=c,e.original=function(e){if(e&&e[s])return e[s].base_},e.produce=Y,e.produceWithPatches=Z,e.setAutoFreeze=ee,e.setUseProxies=te}));
+ //# sourceMappingURL=immer.umd.production.min.js.map
