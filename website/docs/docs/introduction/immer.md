@@ -17,9 +17,9 @@ To workaround this restriction we previously resorted to maintaining a forked ve
 
 Therefore our most recent strategy is to depend on native `immer`, but patch it via the [`patch-package`](https://github.com/ds300/patch-package) library in order to support getter properties. The patching process occurs via the `postinstall` script that is defined within our `package.json`.
 
-This strategy allows you to import and use `immer` directly within your application should you desire.
+This strategy allows you to import and use `immer` directly within your application should you need to.
 
-There are some important notes on this;
+That being said, there are some points to take into consideration given that we have patched `immer`;
 
 1. `immer` should work exactly as you would expect as long as the object instances you operate against do not contain getter properties. The default `immer` behaviour would have caused an exception to be thrown in these cases. Our patched version would not cause an exception, instead any getter properties would become `undefined`.
 2. Given we are patching `immer` we have had to install a specific version of `immer` (specifically `immer@6.0.1`). If we didn't do so then our patch may not be applied correctly due to file changes that may have occurred between versions. We strongly suggest you add this same version of `immer` as a dependency to your application in order to avoid having multiple `immer` installations bundled within your application.
