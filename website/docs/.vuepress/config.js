@@ -43,21 +43,6 @@ module.exports = {
           ],
         },
         {
-          title: 'Tutorial',
-          children: [
-            'tutorial/',
-            'tutorial/create-your-store',
-            'tutorial/connecting-your-store',
-            'tutorial/consuming-state',
-            'tutorial/using-actions-to-update-state',
-            'tutorial/using-thunks-to-perform-side-effects',
-            'tutorial/using-computed-properties',
-            'tutorial/using-listeners',
-            'tutorial/redux-dev-tools',
-            'tutorial/final-notes',
-          ],
-        },
-        {
           title: 'API',
           children: [
             'api/',
@@ -77,6 +62,7 @@ module.exports = {
                 'api/action',
                 'api/computed',
                 'api/listeners',
+                'api/model',
                 'api/persist',
                 'api/reducer',
                 'api/thunk-on',
@@ -104,6 +90,21 @@ module.exports = {
               title: 'Utils',
               children: ['api/create-transform', 'api/debug', 'api/memo'],
             },
+          ],
+        },
+        {
+          title: 'Tutorial',
+          children: [
+            'tutorial/',
+            'tutorial/create-your-store',
+            'tutorial/connecting-your-store',
+            'tutorial/consuming-state',
+            'tutorial/using-actions-to-update-state',
+            'tutorial/using-thunks-to-perform-side-effects',
+            'tutorial/using-computed-properties',
+            'tutorial/using-listeners',
+            'tutorial/redux-dev-tools',
+            'tutorial/final-notes',
           ],
         },
         {

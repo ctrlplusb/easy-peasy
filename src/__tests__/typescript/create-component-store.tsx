@@ -1,31 +1,34 @@
 /* eslint-disable */
 
 import * as React from 'react';
-import { createComponentStore, Action, action } from 'easy-peasy';
+import { createComponentStore, Action, action, Model, model } from 'easy-peasy';
 
-interface StoreModel {
+type StoreModel = Model<{
   count: number;
   inc: Action<StoreModel>;
-}
+}>;
 
 interface InitialData {
   count: number;
 }
 
-const useCounter = createComponentStore<StoreModel>({
-  count: 0,
-  inc: action(state => {
-    state.count += 1;
-  }),
-});
-
-const useCounterWithInitializer = createComponentStore<StoreModel, InitialData>(
-  data => ({
-    count: data ? data.count + 1 : 0,
+const useCounter = createComponentStore(
+  model<StoreModel>({
+    count: 0,
     inc: action(state => {
       state.count += 1;
     }),
   }),
+);
+
+const useCounterWithInitializer = createComponentStore<StoreModel, InitialData>(
+  data =>
+    model({
+      count: data ? data.count + 1 : 0,
+      inc: action(state => {
+        state.count += 1;
+      }),
+    }),
 );
 
 function CountDisplay() {

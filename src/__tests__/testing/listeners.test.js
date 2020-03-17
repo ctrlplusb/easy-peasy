@@ -1,6 +1,6 @@
-import { action, createStore, actionOn } from '../../index';
+import { action, createStore, model, actionOn } from '../../index';
 
-const model = {
+const storeModel = model({
   todos: [],
   logs: [],
   addTodo: action((state, payload) => {
@@ -12,11 +12,11 @@ const model = {
       state.logs.push(`Added todo: ${target.payload}`);
     },
   ),
-};
+});
 
 test('listener gets dispatched when target fires', () => {
   // arrange
-  const store = createStore(model, {
+  const store = createStore(storeModel, {
     mockActions: true,
   });
 
@@ -38,7 +38,7 @@ test('listener gets dispatched when target fires', () => {
 
 test('listener acts as expected', () => {
   // arrange
-  const store = createStore(model);
+  const store = createStore(storeModel);
 
   // act
   store.getListeners().onTodoAdded({

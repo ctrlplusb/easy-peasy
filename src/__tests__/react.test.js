@@ -8,6 +8,7 @@ import { render, fireEvent } from '@testing-library/react';
 import {
   action,
   createStore,
+  model,
   StoreProvider,
   useStoreActions,
   useStoreDispatch,
@@ -24,7 +25,7 @@ afterEach(() => {
 
 test('exposes dispatch', () => {
   // arrange
-  const store = createStore({ foo: 'bar' });
+  const store = createStore(model({ foo: 'bar' }));
 
   function MyComponent() {
     const dispatch = useStoreDispatch();
@@ -43,12 +44,14 @@ test('exposes dispatch', () => {
 
 test('maps state when props change', async () => {
   // arrange
-  const store = createStore({
-    values: {
-      1: 'foo',
-      2: 'bar',
-    },
-  });
+  const store = createStore(
+    model({
+      values: {
+        1: 'foo',
+        2: 'bar',
+      },
+    }),
+  );
   function Values({ id }) {
     const value = useStoreState(state => state.values[id]);
     return <span data-testid="value">{value}</span>;
@@ -79,12 +82,14 @@ test('maps state when props change', async () => {
 
 test('store subscribe is only called once', () => {
   // arrange
-  const store = createStore({
-    count: 1,
-    inc: action(state => {
-      state.count += 1;
+  const store = createStore(
+    model({
+      count: 1,
+      inc: action(state => {
+        state.count += 1;
+      }),
     }),
-  });
+  );
   jest.spyOn(store, 'subscribe');
   const renderSpy = jest.fn();
   function Counter() {
@@ -117,12 +122,14 @@ test('store subscribe is only called once', () => {
 
 test('store is unsubscribed on unmount', () => {
   // arrange
-  const store = createStore({
-    count: 1,
-    inc: action(state => {
-      state.count += 1;
+  const store = createStore(
+    model({
+      count: 1,
+      inc: action(state => {
+        state.count += 1;
+      }),
     }),
-  });
+  );
   const unsubscribeSpy = jest.fn();
   store.subscribe = () => unsubscribeSpy;
   function Counter() {
@@ -157,12 +164,14 @@ test('store is unsubscribed on unmount', () => {
 describe('direct form', () => {
   test('component updates with state change', () => {
     // arrange
-    const store = createStore({
-      count: 1,
-      inc: action(state => {
-        state.count += 1;
+    const store = createStore(
+      model({
+        count: 1,
+        inc: action(state => {
+          state.count += 1;
+        }),
       }),
-    });
+    );
     const renderSpy = jest.fn();
     function Counter() {
       const count = useStoreState(state => state.count);
@@ -199,13 +208,15 @@ describe('direct form', () => {
 
   test('component only updates with state change', () => {
     // arrange
-    const store = createStore({
-      count: 1,
-      somethingElse: null,
-      updateSomethingElse: action((state, payload) => {
-        state.somethingElse = payload;
+    const store = createStore(
+      model({
+        count: 1,
+        somethingElse: null,
+        updateSomethingElse: action((state, payload) => {
+          state.somethingElse = payload;
+        }),
       }),
-    });
+    );
     const renderSpy = jest.fn();
     function Counter() {
       const count = useStoreState(state => state.count);

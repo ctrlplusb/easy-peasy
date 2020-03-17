@@ -1,13 +1,13 @@
-import { createStore } from '../index';
+import { createStore, model } from '../index';
 
 test('redux dev tools disabled', () => {
   // arrange
-  const model = { foo: 'bar' };
+  const storeModel = model({ foo: 'bar' });
   const composeStub = jest.fn();
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
 
   // act
-  createStore(model, {
+  createStore(storeModel, {
     devTools: false,
   });
 
@@ -17,12 +17,12 @@ test('redux dev tools disabled', () => {
 
 test('redux dev tools enabled by default', () => {
   // arrange
-  const model = { foo: 'bar' };
+  const storeModel = model({ foo: 'bar' });
   const composeStub = jest.fn();
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
 
   // act
-  createStore(model);
+  createStore(storeModel);
 
   // assert
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1);
@@ -34,12 +34,12 @@ test('redux dev tools enabled by default', () => {
 
 test('redux dev tools supports custom store name', () => {
   // arrange
-  const model = { foo: 'bar' };
+  const storeModel = model({ foo: 'bar' });
   const composeStub = jest.fn();
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
 
   // act
-  createStore(model, {
+  createStore(storeModel, {
     name: 'SwizzleSticks',
   });
 

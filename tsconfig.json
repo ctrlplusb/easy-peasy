@@ -3,7 +3,7 @@
     "lib": ["esnext", "dom"],
     "jsx": "preserve",
     "strict": true,
-    "baseUrl": "../../..",
+    "baseUrl": ".",
     "skipLibCheck": false,
     "noImplicitAny": true,
     "paths": {

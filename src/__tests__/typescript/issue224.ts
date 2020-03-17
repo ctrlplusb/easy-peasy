@@ -8,17 +8,19 @@ import {
   Action,
   thunk,
   Thunk,
+  Model,
+  model,
 } from 'easy-peasy';
 
 interface ObjectWithId {
   id: string;
 }
 
-interface Nested {
-  save: Thunk<Nested, number>;
-}
+type NestedModel = Model<{
+  save: Thunk<NestedModel, number>;
+}>;
 
-interface DataModel<DataItem extends ObjectWithId> {
+type DataModel<DataItem extends ObjectWithId> = Model<{
   data: { [key: number]: DataItem };
   // 🚨 THIS BREAKS TYPESCRIPT 😭 🚨
   // sortBy: 'none' | keyof DataItem;
@@ -31,14 +33,14 @@ interface DataModel<DataItem extends ObjectWithId> {
     DataModel<DataItem>,
     (id: string) => DataItem | undefined
   >;
-  nested: Nested;
-}
+  nested: NestedModel;
+}>;
 
 const dataModel = <Item extends ObjectWithId>(
   name: string,
   endpoint: () => Promise<Item[]>,
 ): DataModel<Item> => {
-  const result: DataModel<Item> = {
+  return model({
     data: {},
     sortBy: 'none',
     name,
@@ -57,13 +59,12 @@ const dataModel = <Item extends ObjectWithId>(
     getItemById: computed(state => (id: string) =>
       Object.values(state.data).find(item => item.id === id),
     ),
-    nested: {
+    nested: model({
       save: thunk((actions, payload) => {
         actions.save(payload + 1);
       }),
-    },
-  };
-  return result;
+    }),
+  });
 };
 
 interface Person extends ObjectWithId {
@@ -78,5 +79,7 @@ const personModel = dataModel<Person>('person', () =>
 const store = createStore(personModel);
 
 store.getActions().fetched([]);
-store.getActions().data;
 store.getActions().nested.save(1);
+
+store.getState().data[1].id + 'foo';
+store.getState().data[1].name;

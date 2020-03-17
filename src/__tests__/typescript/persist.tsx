@@ -1,37 +1,53 @@
 /* eslint-disable */
 
-import { persist, createTransform, useStoreRehydrated } from 'easy-peasy';
+import {
+  createStore,
+  model,
+  Model,
+  createTransform,
+  useStoreRehydrated,
+} from 'easy-peasy';
 
-persist({
-  foo: 'bar',
-});
+type StoreModel = Model<{
+  foo: string;
+  bar: string;
+}>;
 
-const model = persist(
+const customTransformer = createTransform(
+  (data, key) => key + 'foo',
+  (data, key) => key + 'foo',
   {
-    foo: 'bar',
-  },
-  {
-    blacklist: ['foo'],
     whitelist: ['foo'],
-    mergeStrategy: 'merge',
-    storage: 'sessionStorage',
-    transformers: [
-      {
-        in: (data, key) => key + 'foo',
-        out: (data, key) => key + 'foo',
-      },
-    ],
+    blacklist: ['foo'],
   },
 );
 
-model.foo + 'baz';
+const storeModel = model<StoreModel>(
+  {
+    foo: 'foo',
+    bar: 'bar',
+  },
+  {
+    persist: {
+      blacklist: ['foo'],
+      whitelist: ['bar'],
+      mergeStrategy: 'merge',
+      storage: 'sessionStorage',
+      transformers: [
+        {
+          in: (data, key) => key + 'foo',
+          out: (data, key) => key + 'foo',
+        },
+        customTransformer,
+      ],
+    },
+  },
+);
 
-createTransform((data, key) => key + 'foo', (data, key) => key + 'foo', {
-  whitelist: ['foo'],
-  blacklist: ['foo'],
-});
-
-createTransform((data, key) => key + 'foo', (data, key) => key + 'foo');
+createTransform(
+  (data, key) => key + 'foo',
+  (data, key) => key + 'foo',
+);
 
 createTransform((data, key) => key + 'foo');
 

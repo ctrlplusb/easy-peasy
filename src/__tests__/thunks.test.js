@@ -1,4 +1,4 @@
-import { action, createStore, thunk, reducer } from '../index';
+import { action, createStore, model, thunk, reducer } from '../index';
 
 const resolveAfter = (data, ms) =>
   new Promise(resolve => setTimeout(() => resolve(data), ms));
@@ -14,8 +14,8 @@ const trackActionsMiddleware = () => {
 
 test('dispatches actions to represent a succeeded thunk', () => {
   // arrange
-  const model = {
-    foo: {
+  const storeModel = model({
+    foo: model({
       counter: 0,
       increment: action(state => {
         state.counter += 1;
@@ -24,10 +24,10 @@ test('dispatches actions to represent a succeeded thunk', () => {
         actions.increment();
         return 'did something';
       }),
-    },
-  };
+    }),
+  });
   const trackActions = trackActionsMiddleware();
-  const store = createStore(model, { middleware: [trackActions] });
+  const store = createStore(storeModel, { middleware: [trackActions] });
   const payload = 'hello';
   // act
   const actualResult = store.getActions().foo.doSomething(payload);
@@ -49,15 +49,15 @@ describe('errors', () => {
   test('dispatches actions to represent a failed thunk', async () => {
     // arrange
     const err = new Error('error');
-    const model = {
-      foo: {
+    const storeModel = model({
+      foo: model({
         doSomething: thunk(async () => {
           throw err;
         }),
-      },
-    };
+      }),
+    });
     const trackActions = trackActionsMiddleware();
-    const store = createStore(model, { middleware: [trackActions] });
+    const store = createStore(storeModel, { middleware: [trackActions] });
     const payload = 'a payload';
 
     try {
@@ -86,18 +86,18 @@ describe('errors', () => {
   test('errors are thrown up through thunks', async () => {
     // arrange
     const err = new Error('error');
-    const model = {
-      foo: {
+    const storeModel = model({
+      foo: model({
         error: thunk(async () => {
           throw err;
         }),
         doSomething: thunk(async actions => {
           await actions.error();
         }),
-      },
-    };
+      }),
+    });
     const trackActions = trackActionsMiddleware();
-    const store = createStore(model, { middleware: [trackActions] });
+    const store = createStore(storeModel, { middleware: [trackActions] });
     const payload = 'a payload';
 
     try {
@@ -137,8 +137,8 @@ describe('errors', () => {
 
 test('async', async () => {
   // arrange
-  const model = {
-    session: {
+  const storeModel = model({
+    session: model({
       user: undefined,
       loginSucceeded: action((state, payload) => {
         state.user = payload;
@@ -157,10 +157,10 @@ test('async', async () => {
         });
         return 'resolved';
       }),
-    },
-  };
+    }),
+  });
   // act
-  const store = createStore(model);
+  const store = createStore(storeModel);
   // act
   const result = await store.getActions().session.login({
     username: 'bob',
@@ -179,13 +179,13 @@ test('async', async () => {
 
 test('dispatch an action via redux dispatch', async () => {
   // arrange
-  const model = {
-    session: {
+  const storeModel = model({
+    session: model({
       user: undefined,
       login: thunk((actions, payload, { dispatch }) => {
         dispatch({ type: 'INCREMENT' });
       }),
-    },
+    }),
     counter: reducer((state = 0, incomingAction) => {
       switch (incomingAction.type) {
         case 'INCREMENT':
@@ -194,8 +194,8 @@ test('dispatch an action via redux dispatch', async () => {
           return state;
       }
     }),
-  };
-  const store = createStore(model);
+  });
+  const store = createStore(storeModel);
 
   // act
   await store.getActions().session.login();
@@ -206,22 +206,22 @@ test('dispatch an action via redux dispatch', async () => {
 
 test('dispatch another branch action', async () => {
   // arrange
-  const model = {
-    session: {
+  const storeModel = model({
+    session: model({
       user: undefined,
       login: thunk((actions, payload, { getStoreActions }) => {
         getStoreActions().stats.incrementLoginAttempts();
       }),
-    },
-    stats: {
+    }),
+    stats: model({
       loginAttempts: 0,
       incrementLoginAttempts: action(state => {
         state.loginAttempts += 1;
       }),
-    },
-  };
+    }),
+  });
   // act
-  const store = createStore(model);
+  const store = createStore(storeModel);
   // act
   await store.getActions().session.login();
   // assert
@@ -237,15 +237,17 @@ test('dispatch another branch action', async () => {
 
 test('getState is exposed', async () => {
   // arrange
-  const store = createStore({
-    counter: {
-      count: 1,
-      doSomething: thunk((dispatch, payload, { getState }) => {
-        // assert
-        expect(getState()).toEqual({ count: 1 });
+  const store = createStore(
+    model({
+      counter: model({
+        count: 1,
+        doSomething: thunk((dispatch, payload, { getState }) => {
+          // assert
+          expect(getState()).toEqual({ count: 1 });
+        }),
       }),
-    },
-  });
+    }),
+  );
 
   // act
   await store.getActions().counter.doSomething();
@@ -253,15 +255,17 @@ test('getState is exposed', async () => {
 
 test('getStoreState is exposed', async () => {
   // arrange
-  const store = createStore({
-    counter: {
-      count: 1,
-      doSomething: thunk((dispatch, payload, { getStoreState }) => {
-        // assert
-        expect(getStoreState()).toEqual({ counter: { count: 1 } });
+  const store = createStore(
+    model({
+      counter: model({
+        count: 1,
+        doSomething: thunk((dispatch, payload, { getStoreState }) => {
+          // assert
+          expect(getStoreState()).toEqual({ counter: { count: 1 } });
+        }),
       }),
-    },
-  });
+    }),
+  );
 
   // act
   await store.getActions().counter.doSomething();
@@ -270,13 +274,15 @@ test('getStoreState is exposed', async () => {
 test('meta values are exposed', async () => {
   // arrange
   let actualMeta;
-  const store = createStore({
-    foo: {
-      doSomething: thunk((dispatch, payload, { meta }) => {
-        actualMeta = meta;
+  const store = createStore(
+    model({
+      foo: model({
+        doSomething: thunk((dispatch, payload, { meta }) => {
+          actualMeta = meta;
+        }),
       }),
-    },
-  });
+    }),
+  );
 
   // act
   await store.getActions().foo.doSomething();
@@ -294,13 +300,13 @@ test('injections are exposed', async () => {
   const injections = { foo: 'bar' };
   let actualInjections;
   const store = createStore(
-    {
-      foo: {
+    model({
+      foo: model({
         doSomething: thunk((dispatch, payload, helpers) => {
           actualInjections = helpers.injections;
         }),
-      },
-    },
+      }),
+    }),
     {
       injections,
     },

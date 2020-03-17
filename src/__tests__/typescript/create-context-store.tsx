@@ -1,31 +1,34 @@
 /* eslint-disable */
 
 import * as React from 'react';
-import { createContextStore, Action, action } from 'easy-peasy';
+import { createContextStore, Action, action, Model, model } from 'easy-peasy';
 
-interface StoreModel {
+type StoreModel = Model<{
   count: number;
   inc: Action<StoreModel>;
-}
+}>;
 
 interface InitialData {
   count: number;
 }
 
-const Counter = createContextStore<StoreModel>({
-  count: 0,
-  inc: action(state => {
-    state.count += 1;
-  }),
-});
-
-const CounterWithInitializer = createContextStore<StoreModel, InitialData>(
-  data => ({
-    count: data ? data.count + 1 : 0,
+const Counter = createContextStore(
+  model<StoreModel>({
+    count: 0,
     inc: action(state => {
       state.count += 1;
     }),
   }),
+);
+
+const CounterWithInitializer = createContextStore<StoreModel, InitialData>(
+  data =>
+    model({
+      count: data ? data.count + 1 : 0,
+      inc: action(state => {
+        state.count += 1;
+      }),
+    }),
 );
 
 function CountDisplay() {
@@ -61,6 +64,10 @@ function TestDispatch() {
   });
   return null;
 }
+
+<CounterWithInitializer.Provider>
+  <CountDisplay />
+</CounterWithInitializer.Provider>;
 
 <CounterWithInitializer.Provider initialData={{ count: 1 }}>
   <CountDisplay />

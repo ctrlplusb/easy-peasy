@@ -4,13 +4,15 @@
 
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { createStore, useStoreState, StoreProvider } from '../index';
+import { createStore, model, useStoreState, StoreProvider } from '../index';
 
 test('works', () => {
   // arrange
-  const store = createStore({
-    count: 0,
-  });
+  const store = createStore(
+    model({
+      count: 0,
+    }),
+  );
   const Count = () => {
     const count = useStoreState(state => state.count);
     return <span>{count}</span>;

@@ -6,7 +6,7 @@ import {
   computed,
   createStore,
   createTransform,
-  persist,
+  model,
   StoreProvider,
   useStoreRehydrated,
   createContextStore,
@@ -23,6 +23,7 @@ const createMemoryStorage = (initial = {}, config = { async: false }) => {
       if (async) {
         return Promise.resolve({});
       }
+      return undefined;
     },
     getItem: key => {
       const data = store[key];
@@ -36,17 +37,17 @@ const createMemoryStorage = (initial = {}, config = { async: false }) => {
   };
 };
 
-const makeStore = (config = {}, model, storeConfig) =>
+const makeStore = (config = {}, storeModel, storeConfig) =>
   createStore(
-    persist(
-      model || {
+    model(
+      storeModel || {
         counter: 0,
         msg: 'hello world',
         change: action((_, payload) => {
           return payload;
         }),
       },
-      config,
+      { persist: config },
     ),
     storeConfig,
   );
@@ -211,17 +212,17 @@ test('blacklist', () => {
 
 test('nested', () => {
   // ARRANGE
-  const makeStore = (config = {}) =>
+  const localMakeStore = (config = {}) =>
     createStore(
       {
         foo: 'bar',
-        nested: persist(
+        nested: model(
           {
             counter: 0,
             msg: 'hello world',
             change: action((_, payload) => payload),
           },
-          config,
+          { persist: config },
         ),
       },
       {
@@ -229,7 +230,7 @@ test('nested', () => {
       },
     );
   const memoryStorage = createMemoryStorage();
-  const store = makeStore({ storage: memoryStorage });
+  const store = localMakeStore({ storage: memoryStorage });
 
   // ACT
   store.getActions().nested.change({
@@ -237,7 +238,7 @@ test('nested', () => {
     msg: 'hello universe',
   });
 
-  const rehydratedStore = makeStore({ storage: memoryStorage });
+  const rehydratedStore = localMakeStore({ storage: memoryStorage });
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -284,7 +285,7 @@ test('mergeDeep', () => {
 
   // ACT
   const rehydratedStore = createStore(
-    persist(
+    model(
       {
         counter: 0,
         nested: {
@@ -293,8 +294,10 @@ test('mergeDeep', () => {
         },
       },
       {
-        storage: memoryStorage,
-        mergeStrategy: 'mergeDeep',
+        persist: {
+          storage: memoryStorage,
+          mergeStrategy: 'mergeDeep',
+        },
       },
     ),
   );
@@ -387,9 +390,9 @@ test('transformers', () => {
 
   const memoryStorage = createMemoryStorage();
 
-  const makeStore = () =>
+  const localMakeStore = () =>
     createStore(
-      persist(
+      model(
         {
           one: null,
           two: null,
@@ -398,13 +401,15 @@ test('transformers', () => {
           }),
         },
         {
-          storage: memoryStorage,
-          transformers: [upperCaseTransformer, padTransformer],
+          persist: {
+            storage: memoryStorage,
+            transformers: [upperCaseTransformer, padTransformer],
+          },
         },
       ),
     );
 
-  const store = makeStore();
+  const store = localMakeStore();
 
   // ACT
   store.getActions().change({
@@ -419,7 +424,7 @@ test('transformers', () => {
   });
 
   // ACT
-  const rehydratedStore = makeStore();
+  const rehydratedStore = localMakeStore();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -544,33 +549,33 @@ test('useStoreRehydrated + createContextStore', async () => {
 test('computed properties', () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
-  const makeStore = () =>
+  const localMakeStore = () =>
     createStore(
-      persist(
+      model(
         {
           todos: ['write tests'],
           todoCount: computed(state => state.todos.length),
           addTodo: action((state, payload) => {
             state.todos.push(payload);
           }),
-          nested: {
+          nested: model({
             todos: ['write tests'],
             todoCount: computed(state => state.todos.length),
             addTodo: action((state, payload) => {
               state.todos.push(payload);
             }),
-          },
+          }),
         },
-        { storage: memoryStorage },
+        { persist: { storage: memoryStorage } },
       ),
     );
-  const store = makeStore();
+  const store = localMakeStore();
 
   // ACT
   store.getActions().addTodo('write more tests');
   store.getActions().nested.addTodo('write more tests');
 
-  const rehydratedStore = makeStore();
+  const rehydratedStore = localMakeStore();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({

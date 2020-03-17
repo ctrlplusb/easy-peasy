@@ -1,4 +1,4 @@
-import { debug, action, createStore } from '../index';
+import { debug, action, createStore, model } from '../index';
 import { mockConsole } from './utils';
 
 let restore;
@@ -13,14 +13,16 @@ afterEach(() => {
 
 it('should return state with changes applied', () => {
   // arrange
-  const store = createStore({
-    logs: ['foo'],
-    add: action((state, payload) => {
-      expect(debug(state)).toEqual({ logs: ['foo'] });
-      state.logs.push(payload);
-      expect(debug(state)).toEqual({ logs: ['foo'] });
+  const store = createStore(
+    model({
+      logs: ['foo'],
+      add: action((state, payload) => {
+        expect(debug(state)).toEqual({ logs: ['foo'] });
+        state.logs.push(payload);
+        expect(debug(state)).toEqual({ logs: ['foo'] });
+      }),
     }),
-  });
+  );
 
   // act
   store.getActions().add('bar');

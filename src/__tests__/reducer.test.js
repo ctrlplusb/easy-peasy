@@ -1,21 +1,23 @@
-import { action, createStore, reducer } from '../index';
+import { action, createStore, model, reducer } from '../index';
 
 it('basic', () => {
   // arrange
-  const store = createStore({
-    counter: reducer((state = 1, _action) => {
-      if (_action.type === 'INCREMENT') {
-        return state + 1;
-      }
-      return state;
-    }),
-    foo: {
-      bar: 'baz',
-      update: action(state => {
-        state.bar = 'bob';
+  const store = createStore(
+    model({
+      counter: reducer((state = 1, _action) => {
+        if (_action.type === 'INCREMENT') {
+          return state + 1;
+        }
+        return state;
       }),
-    },
-  });
+      foo: model({
+        bar: 'baz',
+        update: action(state => {
+          state.bar = 'bob';
+        }),
+      }),
+    }),
+  );
 
   // assert
   expect(store.getState().counter).toEqual(1);
@@ -34,16 +36,18 @@ it('basic', () => {
 
 it('nested', () => {
   // arrange
-  const store = createStore({
-    stuff: {
-      counter: reducer((state = 1, _action) => {
-        if (_action.type === 'INCREMENT') {
-          return state + 1;
-        }
-        return state;
+  const store = createStore(
+    model({
+      stuff: model({
+        counter: reducer((state = 1, _action) => {
+          if (_action.type === 'INCREMENT') {
+            return state + 1;
+          }
+          return state;
+        }),
       }),
-    },
-  });
+    }),
+  );
 
   // act
   store.dispatch({ type: 'INCREMENT' });

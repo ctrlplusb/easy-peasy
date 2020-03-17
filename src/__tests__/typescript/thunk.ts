@@ -1,24 +1,22 @@
-/* eslint-disable */
-
-import { createStore, Thunk, thunk, Action } from 'easy-peasy';
+import { createStore, Thunk, thunk, Model, model } from 'easy-peasy';
 
 interface Injections {
   fetch: () => Promise<void>;
 }
 
-interface AuditModel {
+type AuditModel = Model<{
   logs: string[];
   log: Thunk<AuditModel, string, Injections, StoreModel, Promise<number>>;
   empty: Thunk<AuditModel>;
-  syncThunk: Thunk<AuditModel, undefined, undefined, StoreModel, string>;
-}
+  syncThunk: Thunk<AuditModel, void, void, StoreModel, string>;
+}>;
 
-interface StoreModel {
+type StoreModel = Model<{
   audit: AuditModel;
-}
+}>;
 
-const model: StoreModel = {
-  audit: {
+const storeModel = model<StoreModel>({
+  audit: model({
     logs: [],
     log: thunk(
       async (
@@ -48,10 +46,10 @@ const model: StoreModel = {
       return 'Woot!';
     }),
     empty: thunk(() => {}),
-  },
-};
+  }),
+});
 
-const store = createStore(model);
+const store = createStore(storeModel);
 
 store
   .getActions()

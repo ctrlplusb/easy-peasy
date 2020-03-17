@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import {
   State,
   Computed,
@@ -8,6 +6,8 @@ import {
   Reducer,
   ActionOn,
   ThunkOn,
+  Model,
+  model,
 } from 'easy-peasy';
 
 class Person {
@@ -20,7 +20,7 @@ class Person {
   fullName = () => `${this.name} ${this.surname}`;
 }
 
-type Model = {
+type NestedModel = Model<{
   statePerson: Person;
   stateMap: { [key: string]: Array<string> };
   stateAny: any;
@@ -37,35 +37,39 @@ type Model = {
   stateString: string;
   stateUndefined: undefined;
   stateUnion: string | null;
-  actionImp: Action<Model, number>;
-  thunkImp: Thunk<Model, string>;
+  actionImp: Action<NestedModel, number>;
+  thunkImp: Thunk<NestedModel, string>;
   reducerImp: Reducer<number>;
-  computedImp: Computed<Model, number>;
-  onAction: ActionOn<Model>;
-  onThunk: ThunkOn<Model>;
-  nested: {
-    stateMap: { [key: string]: Array<string> };
-    numberStateMap: { [key: number]: boolean };
-    optionalStateMap?: { [key: string]: Array<string> };
-    optionValueFieldsMap: { [key: string]: { name: string; age?: number } };
-    optionalVal?: string;
-    stateArray: Array<string>;
-    stateBoolean: boolean;
-    stateDate: Date;
-    stateNull: null;
-    stateNumber: number;
-    stateRegExp: RegExp;
-    stateString: string;
-    stateUndefined: undefined;
-    stateUnion: string | null;
-    actionImp: Action<Model, number>;
-    thunkImp: Thunk<Model, string>;
-    reducerImp: Reducer<number>;
-    computedImp: Computed<Model, number>;
-  };
-};
+  computedImp: Computed<NestedModel, number>;
+}>;
 
-const assert: State<Model> = {
+type StoreModel = Model<{
+  statePerson: Person;
+  stateMap: { [key: string]: Array<string> };
+  stateAny: any;
+  numberStateMap: { [key: number]: boolean };
+  optionalStateMap?: { [key: string]: Array<string> };
+  optionValueFieldsMap: { [key: string]: { name: string; age?: number } };
+  optionalVal?: string;
+  stateArray: Array<string>;
+  stateBoolean: boolean;
+  stateDate: Date;
+  stateNull: null;
+  stateNumber: number;
+  stateRegExp: RegExp;
+  stateString: string;
+  stateUndefined: undefined;
+  stateUnion: string | null;
+  actionImp: Action<StoreModel, number>;
+  thunkImp: Thunk<StoreModel, string>;
+  reducerImp: Reducer<number>;
+  computedImp: Computed<StoreModel, number>;
+  onAction: ActionOn<StoreModel>;
+  onThunk: ThunkOn<StoreModel>;
+  nested: NestedModel;
+}>;
+
+const assert: State<StoreModel> = {
   statePerson: new Person('bob', 'boberson'),
   stateAny: 'what',
   stateMap: {
@@ -94,6 +98,8 @@ const assert: State<Model> = {
   reducerImp: 1,
   computedImp: 1,
   nested: {
+    statePerson: new Person('mary', 'fairy'),
+    stateAny: 'foo',
     stateMap: {
       foo: ['bar'],
     },
@@ -126,6 +132,8 @@ const assert: State<Model> = {
  * State Types
  */
 
+assert.statePerson instanceof Person;
+assert.stateAny;
 assert.stateArray;
 assert.numberStateMap;
 assert.stateBoolean;
@@ -137,11 +145,14 @@ assert.stateString;
 assert.stateUndefined;
 assert.stateUnion;
 assert.reducerImp + 10;
+assert.computedImp + 'foo';
 
 /**
  * Nested State Types
  */
 
+assert.nested.statePerson instanceof Person;
+assert.nested.stateAny;
 assert.nested.stateArray;
 assert.nested.stateBoolean;
 assert.nested.stateDate;
@@ -150,8 +161,10 @@ assert.nested.stateNumber;
 assert.nested.stateRegExp;
 assert.nested.stateString;
 assert.nested.stateUndefined;
+
 assert.nested.stateUnion;
 assert.nested.reducerImp + 10;
+assert.nested.computedImp + 10;
 
 /**
  * Action Types

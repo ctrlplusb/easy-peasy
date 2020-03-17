@@ -11,25 +11,28 @@
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
 
+Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickly</strong> and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, developer tools etc.
+
 ```
 npm install easy-peasy
 ```
 
+<p>&nbsp;</p>
 
-**Step 1 - Create your store**
+**Step 1 - Create the store**
 
 ```javascript
-const store = createStore({
-  todos: {
-    items: ['Create store', 'Wrap application', 'Use store'],
-    add: action((state, payload) => {
-      state.items.push(payload)
-    })
-  }
+const storeModel = model({
+  todos: ['Create store', 'Wrap application', 'Use store'],
+  addTodo: action((state, payload) => {
+    state.add.push(payload)
+  })
 });
+
+const store = createStore(storeModel);
 ```
 
-**Step 2 - Wrap your application**
+**Step 2 - Wrap your app**
 
 ```javascript
 function App() {
@@ -45,20 +48,20 @@ function App() {
 
 ```javascript
 function TodoList() {
-  const todos = useStoreState(state => state.todos.items)
-  const add = useStoreActions(actions => actions.todos.add)
+  const todos = useStoreState(state => state.todos);
+  const addTodo = useStoreActions(actions => actions.addTodo);
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
-      <AddTodo onAdd={add} />
+      <AddTodo onAdd={addTodo} />
     </div>
-  )
+  );
 }
 ```
 
 ## Features
 
-  - Zero configuration
+  - Zero config setup
   - No boilerplate
   - React hooks based API
   - Computed properties - i.e. derived data
@@ -70,10 +73,6 @@ function TodoList() {
   - React Native supported
   - Redux Dev Tools supported
   - Hot Reloading supported
-
-## Introduction
-
-Easy Peasy provides you with an intuitive API to quickly and easily manage the state for your React application. Batteries are included - no configuration is required to support derived state, API calls, performance optimisation, developer tools etc.
 
 ## Documentation
 

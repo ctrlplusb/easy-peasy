@@ -9,9 +9,11 @@ import {
   Computed,
   ActionOn,
   ThunkOn,
+  Model,
+  model,
 } from 'easy-peasy';
 
-type Model = {
+type NestedModel = Model<{
   stateArray: Array<string>;
   stateBoolean: boolean;
   stateDate: Date;
@@ -21,34 +23,36 @@ type Model = {
   stateString: string;
   stateUndefined: undefined;
   stateUnion: string | null;
-  actionImp: Action<Model, number>;
-  thunkImp: Thunk<Model, string | undefined | null>;
+  actionImp: Action<StoreModel, number>;
+  thunkImp: Thunk<StoreModel, string>;
   reducerImp: Reducer<number>;
-  computedImp: Computed<Model, number>;
-  onAction: ActionOn<Model>;
-  onThunk: ThunkOn<Model>;
-  nested: {
-    stateArray: Array<string>;
-    stateBoolean: boolean;
-    stateDate: Date;
-    stateNull: null;
-    stateNumber: number;
-    stateRegExp: RegExp;
-    stateString: string;
-    stateUndefined: undefined;
-    stateUnion: string | null;
-    actionImp: Action<Model, number>;
-    thunkImp: Thunk<Model, string>;
-    reducerImp: Reducer<number>;
-    computedImp: Computed<Model, number>;
-    onAction: ActionOn<Model>;
-    onThunk: ThunkOn<Model>;
-  };
-};
+  computedImp: Computed<StoreModel, number>;
+  onAction: ActionOn<StoreModel>;
+  onThunk: ThunkOn<StoreModel>;
+}>;
 
-const model = ({} as unknown) as Model;
+type StoreModel = Model<{
+  stateArray: Array<string>;
+  stateBoolean: boolean;
+  stateDate: Date;
+  stateNull: null;
+  stateNumber: number;
+  stateRegExp: RegExp;
+  stateString: string;
+  stateUndefined: undefined;
+  stateUnion: string | null;
+  actionImp: Action<StoreModel, number>;
+  thunkImp: Thunk<StoreModel, string | undefined | null>;
+  reducerImp: Reducer<number>;
+  computedImp: Computed<StoreModel, number>;
+  onAction: ActionOn<StoreModel>;
+  onThunk: ThunkOn<StoreModel>;
+  nested: NestedModel;
+}>;
 
-const store = createStore<Model>(model);
+const storeModel = model<StoreModel>(({} as unknown) as StoreModel);
+
+const store = createStore(storeModel);
 
 store.getListeners().onAction({
   type: 'foo',
@@ -56,7 +60,7 @@ store.getListeners().onAction({
   resolvedTargets: [],
 });
 
-type ModelListeners = Listeners<Model>;
+type ModelListeners = Listeners<StoreModel>;
 const assert = {} as ModelListeners;
 
 // typings:expect-error

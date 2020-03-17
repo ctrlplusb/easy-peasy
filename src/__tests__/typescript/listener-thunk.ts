@@ -1,19 +1,27 @@
-import { action, Action, Thunk, ThunkOn, thunkOn } from 'easy-peasy';
+import {
+  action,
+  Action,
+  Thunk,
+  ThunkOn,
+  thunkOn,
+  Model,
+  model,
+} from 'easy-peasy';
 
-interface Model {
-  log: Action<Model, string>;
-  doActionString: Action<Model, string>;
-  doThunkString: Thunk<Model, string>;
-  doActionNumber: Action<Model, number>;
-  doThunkNumber: Thunk<Model, number>;
-}
+type StoreModel = Model<{
+  log: Action<StoreModel, string>;
+  doActionString: Action<StoreModel, string>;
+  doThunkString: Thunk<StoreModel, string>;
+  doActionNumber: Action<StoreModel, number>;
+  doThunkNumber: Thunk<StoreModel, number>;
+}>;
 
-const valid1: ThunkOn<Model> = thunkOn(
+const valid1: ThunkOn<StoreModel> = thunkOn(
   actions => actions.doActionString,
   (actions, target) => {
     const [foo] = target.resolvedTargets;
-    foo + 'bar';
-    target.type + 'foo';
+    `${foo  }bar`;
+    `${target.type  }foo`;
     if (target.error != null) {
       target.error.stack;
     }
@@ -21,7 +29,7 @@ const valid1: ThunkOn<Model> = thunkOn(
   },
 );
 
-const invalid1: ThunkOn<Model> = thunkOn(
+const invalid1: ThunkOn<StoreModel> = thunkOn(
   actions => actions.doActionNumber,
   (actions, target) => {
     // typings:expect-error
@@ -29,14 +37,14 @@ const invalid1: ThunkOn<Model> = thunkOn(
   },
 );
 
-const valid2: ThunkOn<Model> = thunkOn(
+const valid2: ThunkOn<StoreModel> = thunkOn(
   actions => actions.doThunkString,
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const invalid2: ThunkOn<Model> = thunkOn(
+const invalid2: ThunkOn<StoreModel> = thunkOn(
   actions => actions.doThunkNumber,
   (actions, target) => {
     // typings:expect-error
@@ -44,14 +52,14 @@ const invalid2: ThunkOn<Model> = thunkOn(
   },
 );
 
-const valid3: ThunkOn<Model> = thunkOn(
+const valid3: ThunkOn<StoreModel> = thunkOn(
   () => 'ADD_TODO',
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const invalid3: ThunkOn<Model> = thunkOn(
+const invalid3: ThunkOn<StoreModel> = thunkOn(
   // typings:expect-error
   () => 1,
   // typings:expect-error
@@ -60,7 +68,7 @@ const invalid3: ThunkOn<Model> = thunkOn(
   },
 );
 
-const invalid4: ThunkOn<Model> = thunkOn(
+const invalid4: ThunkOn<StoreModel> = thunkOn(
   // typings:expect-error
   () => undefined,
   // typings:expect-error
@@ -69,7 +77,7 @@ const invalid4: ThunkOn<Model> = thunkOn(
   },
 );
 
-const valid4: ThunkOn<Model> = thunkOn(
+const valid4: ThunkOn<StoreModel> = thunkOn(
   actions => [
     actions.doActionString.type,
     actions.doThunkString.type,
@@ -82,7 +90,7 @@ const valid4: ThunkOn<Model> = thunkOn(
   },
 );
 
-const invalid5: ThunkOn<Model> = thunkOn(
+const invalid5: ThunkOn<StoreModel> = thunkOn(
   actions => [actions.doActionString, actions.doThunkNumber],
   (actions, target) => {
     // typings:expect-error
@@ -90,7 +98,7 @@ const invalid5: ThunkOn<Model> = thunkOn(
   },
 );
 
-const valid5: ThunkOn<Model> = thunkOn(
+const valid5: ThunkOn<StoreModel> = thunkOn(
   actions => [actions.doActionString, actions.doThunkNumber],
   (actions, target) => {
     if (typeof target.payload === 'number') {
@@ -100,14 +108,14 @@ const valid5: ThunkOn<Model> = thunkOn(
   },
 );
 
-const valid6: ThunkOn<Model> = thunkOn(
+const valid6: ThunkOn<StoreModel> = thunkOn(
   () => ['foo', 'bar'],
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
-const valid7: ThunkOn<Model> = thunkOn(
+const valid7: ThunkOn<StoreModel> = thunkOn(
   () => 'foo',
   (actions, target) => {
     actions.log(target.payload);
@@ -121,14 +129,14 @@ interface User {
   lastName: string;
 }
 
-interface SessionModel {
+type SessionModel = Model<{
   user?: User;
   register: Action<SessionModel, User>;
   unregister: Action<SessionModel>;
   sessionListeners: ThunkOn<SessionModel, boolean>;
-}
+}>;
 
-const sessionModel: SessionModel = {
+const sessionModel = model<SessionModel>({
   user: undefined,
   register: action((state, payload) => {
     state.user = payload;
@@ -146,6 +154,6 @@ const sessionModel: SessionModel = {
       }
     },
   ),
-};
+});
 
 // #endregion

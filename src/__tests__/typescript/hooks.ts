@@ -11,9 +11,10 @@ import {
   useStoreDispatch,
   useStoreState,
   useStore,
+  Model,
 } from 'easy-peasy';
 
-interface Model {
+type StoreModel = Model<{
   stateArray: Array<string>;
   stateBoolean: boolean;
   stateDate: Date;
@@ -23,30 +24,32 @@ interface Model {
   stateString: string;
   stateUndefined: undefined;
   stateUnion: string | null;
-  actionImp: Action<Model, number>;
-  actionNoPayload: Action<Model>;
-  thunkImp: Thunk<Model, string>;
+  actionImp: Action<StoreModel, number>;
+  actionNoPayload: Action<StoreModel>;
+  thunkImp: Thunk<StoreModel, string>;
   reducerImp: Reducer<number>;
   nested: {
-    actionImp: Action<Model, number>;
-    thunkImp: Thunk<Model, string>;
+    actionImp: Action<StoreModel, number>;
+    thunkImp: Thunk<StoreModel, string>;
   };
-}
+}>;
 
 let dispatch = useStoreDispatch();
 dispatch({ type: 'FOO' });
 
-let useStoreResult = useStoreState((state: State<Model>) => state.stateNumber);
+let useStoreResult = useStoreState(
+  (state: State<StoreModel>) => state.stateNumber,
+);
 useStoreResult + 1;
 let useActionResult = useStoreActions(
-  (actions: Actions<Model>) => actions.actionImp,
+  (actions: Actions<StoreModel>) => actions.actionImp,
 );
 useActionResult(1);
 
-let store = useStore<Model>();
+let store = useStore<StoreModel>();
 store.getState().stateString + 'world';
 
-const typedHooks = createTypedHooks<Model>();
+const typedHooks = createTypedHooks<StoreModel>();
 
 useStoreResult = typedHooks.useStoreState(state => state.stateNumber);
 useStoreResult + 1;

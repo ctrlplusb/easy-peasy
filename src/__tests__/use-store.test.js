@@ -1,13 +1,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { createStore, StoreProvider, useStore } from '../index';
+import { createStore, model, StoreProvider, useStore } from '../index';
 
 test('returns the store instance', () => {
   // arrange
-  const store = createStore({
-    foo: 'bar',
-  });
+  const store = createStore(
+    model({
+      foo: 'bar',
+    }),
+  );
 
   const Consumer = () => {
     const actual = useStore();

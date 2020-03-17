@@ -4,36 +4,38 @@ import {
   actionOnSymbol,
   actionSymbol,
   computedSymbol,
-  persistSymbol,
+  modelSymbol,
   reducerSymbol,
   thunkOnSymbol,
   thunkSymbol,
 } from './constants';
 
-export const debug = state => {
+export function debug(state) {
   if (isDraft(state)) {
     return original(state);
   }
   return state;
-};
+}
 
-export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
+export function memo(fn, cacheSize) {
+  return memoizerific(cacheSize)(fn);
+}
 
-export const actionOn = (targetResolver, fn) => {
+export function actionOn(targetResolver, fn) {
   fn[actionOnSymbol] = {
     targetResolver,
   };
   return fn;
-};
+}
 
-export const action = fn => {
+export function action(fn) {
   fn[actionSymbol] = {};
   return fn;
-};
+}
 
 const defaultStateResolvers = [state => state];
 
-export const computed = (fnOrStateResolvers, fn) => {
+export function computed(fnOrStateResolvers, fn) {
   if (typeof fn === 'function') {
     fn[computedSymbol] = {
       stateResolvers: fnOrStateResolvers,
@@ -44,28 +46,36 @@ export const computed = (fnOrStateResolvers, fn) => {
     stateResolvers: defaultStateResolvers,
   };
   return fnOrStateResolvers;
-};
+}
 
-export const persist = (model, config) => {
+export function model(modelDefinition, config) {
   return {
-    ...model,
-    [persistSymbol]: config,
+    ...modelDefinition,
+    [modelSymbol]: config || {},
   };
-};
+}
 
-export const thunkOn = (targetResolver, fn) => {
+// /* eslint-disable-next-line no-shadow */
+// export function persist(model, config) {
+//   return {
+//     ...model,
+//     [persistSymbol]: config,
+//   };
+// };
+
+export function thunkOn(targetResolver, fn) {
   fn[thunkOnSymbol] = {
     targetResolver,
   };
   return fn;
-};
+}
 
-export const thunk = fn => {
+export function thunk(fn) {
   fn[thunkSymbol] = {};
   return fn;
-};
+}
 
-export const reducer = fn => {
+export function reducer(fn) {
   fn[reducerSymbol] = {};
   return fn;
-};
+}

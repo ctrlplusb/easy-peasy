@@ -1,4 +1,4 @@
-import { Action, action, createStore } from 'easy-peasy';
+import { Action, action, createStore, Model, model } from 'easy-peasy';
 
 interface Item {
   id: number;
@@ -16,35 +16,36 @@ interface CreatorModel extends BaseListModel<CreatorModel> {
 }
 
 // error at <T, ...> in setList
-interface BaseListModel<T extends object> {
+type BaseListModel<T extends object> = Model<{
   list: Item[];
-  setList: Action<T, Item[]>;
-}
+  setList: Action<BaseListModel<T>, Item[]>;
+}>;
 
-interface StoreModel {
+type StoreModel = Model<{
   beholder: BeholderModel;
   creator: CreatorModel;
-}
+}>;
 
-const model: StoreModel = {
-  beholder: {
+const storeModel: StoreModel = model<StoreModel>({
+  beholder: model({
     beholderName: 'foo',
     list: [],
     setList: action((state, payload) => {
       state.list = payload;
     }),
-  },
-  creator: {
+  }),
+  creator: model({
     creatorName: 'foo',
     list: [],
     setList: action((state, payload) => {
       state.list = payload;
     }),
-  },
-};
+  }),
+});
 
-const store = createStore(model);
+const store = createStore(storeModel);
 
-store.getState().beholder.beholderName;
+store.getState().beholder.beholderName + 'foo';
 store.getState().beholder.list;
+store.getState().creator.creatorName + 'bar';
 store.getActions().creator.setList([{ id: 1, name: 'foo' }]);

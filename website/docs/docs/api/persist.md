@@ -1,28 +1,31 @@
-# persist
+# Model Persist Config
 
-This helper allows you to persist your store state (by default to `sessionStorage`), allowing it to be rehydrated when your application is remounted (e.g. on page refresh).
+This page documents the [`persist`](/docs/api/model.html#arguments) configuration argument for the [`model`](/docs/api/model.html) API. This configuration option allows you to configure a persistence strategy for your model's state, which will subsequently be rehydrated when your store is recreated (e.g. after a browser page refresh).
 
 > This API is _heavily_ inspired by [`redux-persist`](https://github.com/rt2zz/redux-persist), with the intention of providing a lot of compatibility with it so that we can leverage the packages that exist within it's ecosystem.
 
-To utilise this feature you simply need to wrap your model with the helper.
+To utilise this feature you simply need to enable the persist configuration item on your [`model`](/docs/api/model.html) definition.
 
 ```javascript
-const store = createStore(
-  persist({
+const storeModel = model(
+  {
     count: 1,
     inc: action(state => {
       state.count += 1;
     })
-  })
+  },
+  {
+    persist: true
+  }
 );
 ```
 
-Every time the state changes it will be saved to the configured storage engine (`sessionStorage` by default). 
+Every time the state for your store changes it will be persisted to the configured storage engine ([`sessionStorage`](#todo-session-storage-link) by default). 
 
-When your application is freshly mounted, e.g. on a page refresh, any data that exists within the configured storage engine will be used to rehydrate your state accordingly.
+When your application is freshly mounted, e.g. on a page refresh, any data that exists within the storage engine will be rehydrated against your store.
 
 ```javascript
-const store = createStore(model); // state is automatically rehydrated
+const store = createStore(storeModel); // persisted state is automatically rehydrated
 
 // Application then renders with rehydrated state
 const app = (
@@ -32,181 +35,197 @@ const app = (
 );
 ``` 
 
-## API
+## Advanced Configuration
 
-  - `model` (Object, *required*)
+The `persist` configuration also supports a more advanced configuration. Instead of assigning a boolean value, you can instead define an object.
 
-    The model that you wish to apply persistence to. 
+```javascript
+const storeModel = model(
+  {
+    count: 1,
+    inc: action(state => {
+      state.count += 1;
+    })
+  },
+  {
+    persist: {
+      storage: 'localStorage'
+    }
+  }
+);
+```
+
+The configuration object can contain any of the following configuration options:
+
+  - `blacklist` (Array<string>, *optional*)
+
+    A list of keys, representing the state within the model that should not be persisted. Any state not identified within this list will be persisted.
+
+    ```javascript
+    {
+      blacklist: ['logs'],
+    }
+    ```
+
+  - `whitelist` (Array<string>, *optional*)
+
+    A list of keys, representing the parts of the model that should be persisted. Any part of the model that is not represented in this list will not be persisted.
+
+  - `mergeStrategy` (string, *optional*)
+
+    The strategy that should be employed when rehydrating the persisted state over your store's initial state. 
     
-    > You can surround your entire model, or a nested model. You can even have multiple `persist` configurations scattered throughout your store's model. Feel free to use the API on the parts of your state feel most appropriate for persistence/rehydration.
+    The following values are supported:
 
-  - `config` (Object, *optional*)
+    - `'merge'` (*default*)
 
-    The persistence configuration. It supports the following properties:
+      The data from the persistence will be _shallow_ merged with the initial state represented by your store's model.
 
-    - `blacklist` (Array<string>, *optional*)
+      i.e.
 
-      A list of keys, representing the parts of the model that should not be persisted. Any part of the model that is not represented in this list will be persisted.
+      Given the following persisted state:
 
-    - `whitelist` (Array<string>, *optional*)
-
-      A list of keys, representing the parts of the model that should be persisted. Any part of the model that is not represented in this list will not be persisted.
-
-    - `mergeStrategy` (string, *optional*)
-
-      The strategy that should be employed when rehydrating the persisted state over your store's initial state. 
-      
-      The following values are supported:
-
-      - `'merge'` (*default*)
-
-        The data from the persistence will be _shallow_ merged with the initial state represented by your store's model.
-
-        i.e.
-
-        Given the following persisted state:
-
-        ```json
-        {
-          "fruit": "apple",
-          "address": {
-            "city": "cape town"
-          }
-        }
-        ```
-
-        And the following initial state represented by your store's model:
-
-        ```json
-        {
-          "address": {
-            "city": "london",
-            "post code": "e3 1pq"
-          },
-          "animal": "dolphin"
-        }
-        ```
-
-        The resulting state will be:
-
-        ```json
-        {
-          "fruit": "apple",
-          "address": {
-            "city": "cape town"
-          },
-          "animal": "dolphin"
-        }
-        ```
-
-      - `'overwrite'`
-
-        The data from the persistence will _completely_ overwrite the initial state represented by your store's model.
-
-        i.e.
-
-        Given the following persisted state:
-
-        ```json
-        {
-          "fruit": "apple",
+      ```json
+      {
+        "fruit": "apple",
+        "address": {
           "city": "cape town"
         }
-        ```
+      }
+      ```
 
-        And the following initial state represented by your store's model:
+      And the following initial state represented by your store's model:
 
-        ```json
-        {
-          "fruit": "pear",
-          "animal": "dolphin"
-        }
-        ```
+      ```json
+      {
+        "address": {
+          "city": "london",
+          "post code": "e3 1pq"
+        },
+        "animal": "dolphin"
+      }
+      ```
 
-        The resulting state will be:
+      The resulting state will be:
 
-        ```json
-        {
-          "fruit": "apple",
+      ```json
+      {
+        "fruit": "apple",
+        "address": {
+          "city": "cape town"
+        },
+        "animal": "dolphin"
+      }
+      ```
+
+    - `'overwrite'`
+
+      The data from the persistence will _completely_ overwrite the initial state represented by your store's model.
+
+      i.e.
+
+      Given the following persisted state:
+
+      ```json
+      {
+        "fruit": "apple",
+        "city": "cape town"
+      }
+      ```
+
+      And the following initial state represented by your store's model:
+
+      ```json
+      {
+        "fruit": "pear",
+        "animal": "dolphin"
+      }
+      ```
+
+      The resulting state will be:
+
+      ```json
+      {
+        "fruit": "apple",
+        "city": "cape town"
+      }
+      ```
+
+    - `'mergeDeep'` 
+
+      The data from the persistence will be merged deeply, recursing through all _object_ structures and merging.
+
+      i.e.
+
+      Given the following persisted state:
+
+      ```json
+      {
+        "fruit": "apple",
+        "address": {
           "city": "cape town"
         }
-        ```
+      }
+      ```
 
-      - `'mergeDeep'` 
+      And the following initial state represented by your store's model:
 
-        The data from the persistence will be merged deeply, recursing through all _object_ structures and merging.
+      ```json
+      {
+        "address": {
+          "city": "london",
+          "post code": "e3 1pq"
+        },
+        "animal": "dolphin"
+      }
+      ```
 
-        i.e.
+      The resulting state will be:
 
-        Given the following persisted state:
+      ```json
+      {
+        "fruit": "apple",
+        "address": {
+          "city": "cape town",
+          "post code": "e3 1pq"
+        },
+        "animal": "dolphin"
+      }
+      ```
 
-        ```json
-        {
-          "fruit": "apple",
-          "address": {
-            "city": "cape town"
-          }
-        }
-        ```
+      > **Note:** Only *plain objects* will be recursed and merged; no other types such as Arrays, Maps, Sets, Classes etc.
+  
+  - `transformers` (Array<Transformer>, *optional*)
 
-        And the following initial state represented by your store's model:
+    Transformers are use to apply operations to your data during prior it being persisted or hydrated.
 
-        ```json
-        {
-          "address": {
-            "city": "london",
-            "post code": "e3 1pq"
-          },
-          "animal": "dolphin"
-        }
-        ```
+    One use case for a transformer is to handle data that can't be parsed to a JSON string. For example a `Map` or `Set`. To handle these data types you could utilise a transformer that converts the `Map`/`Set` to/from an `Array` or `Object`.
 
-        The resulting state will be:
+    Transformers are applied left to right during data persistence, and are applied right to left during data rehydration.
 
-        ```json
-        {
-          "fruit": "apple",
-          "address": {
-            "city": "cape town",
-            "post code": "e3 1pq"
-          },
-          "animal": "dolphin"
-        }
-        ```
+    [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [transformer packages](https://github.com/rt2zz/redux-persist#transforms) that have been built for it. These can be used here.
 
-        > **Note:** Only *plain objects* will be recursed and merged; no other types such as Arrays, Maps, Sets, Classes etc.
-    
-    - `transformers` (Array<Transformer>, *optional*)
+  - `storage` (string | Object, *optional*)
 
-      Transformers are use to apply operations to your data during prior it being persisted or hydrated.
+    The storage engine to be used. It defaults to `sessionStorage`. The following values are supported:
 
-      One use case for a transformer is to handle data that can't be parsed to a JSON string. For example a `Map` or `Set`. To handle these data types you could utilise a transformer that converts the `Map`/`Set` to/from an `Array` or `Object`.
+    - `'sessionStorage'`
 
-      Transformers are applied left to right during data persistence, and are applied right to left during data rehydration.
+      Use the browser's sessionStorage as the persistence layer.
 
-      [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [transformer packages](https://github.com/rt2zz/redux-persist#transforms) that have been built for it. These can be used here.
+      i.e. data is available for rehydration for a single browser session
 
-    - `storage` (string | Object, *optional*)
+    - `'localStorage'`
 
-      The storage engine to be used. It defaults to `sessionStorage`. The following values are supported:
+      Use the browser's localStorage as the persistence layer.
 
-      - `'sessionStorage'`
+      i.e. data is available across browser sessions
 
-        Use the browser's sessionStorage as the persistence layer.
+    - Custom engine
 
-        i.e. data is available for rehydration for a single browser session
+      A custom storage engine. 
 
-      - `'localStorage'`
-
-        Use the browser's localStorage as the persistence layer.
-
-        i.e. data is available across browser sessions
-
-      - Custom engine
-
-        A custom storage engine. 
-
-        [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines) that have been built for it. These can be used here.
+      [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines) that have been built for it. These can be used here.
 
 ## Example
 

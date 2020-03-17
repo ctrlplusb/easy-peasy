@@ -1,18 +1,16 @@
-/* eslint-disable */
+import { createStore, action, Action, Model, model } from 'easy-peasy';
 
-import { createStore, action, Action, Thunk, thunk } from 'easy-peasy';
-
-interface TodosModel {
+type TodosModel = Model<{
   items: string[];
   add: Action<TodosModel, string>;
   clear: Action<TodosModel>;
-}
+}>;
 
-interface Model {
+type StoreModel = Model<{
   todos: TodosModel;
-}
+}>;
 
-const todos: TodosModel = {
+const todos = model<TodosModel>({
   items: [],
   add: action((state, payload) => {
     state.items.push(payload);
@@ -20,17 +18,19 @@ const todos: TodosModel = {
   clear: action(state => {
     state.items = [];
   }),
-};
+});
 
-const model: Model = {
+const storeModel = model<StoreModel>({
   todos,
-};
+});
 
-const store = createStore(model);
+const store = createStore(storeModel);
 
 store.dispatch.todos.add('foo');
+
 // typings:expect-error
 store.dispatch.todos.add(1);
+
 // typings:expect-error
 store.dispatch.todos.add();
 
