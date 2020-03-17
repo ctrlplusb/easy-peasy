@@ -9,6 +9,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "plugins",
     "index.d.ts"
   ],
   "repository": {
@@ -143,8 +144,24 @@
       "camelcase": 0,
       "import/no-extraneous-dependencies": 0,
       "import/prefer-default-export": 0,
+      "no-continue": 0,
       "no-nested-ternary": 0,
       "no-param-reassign": 0,
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "ForInStatement",
+          "message": "for..in loops iterate over the entire prototype chain, which is virtually never what you want. Use Object.{keys,values,entries}, and iterate over the resulting array."
+        },
+        {
+          "selector": "LabeledStatement",
+          "message": "Labels are a form of GOTO; using them makes code confusing and hard to maintain and understand."
+        },
+        {
+          "selector": "WithStatement",
+          "message": "`with` is disallowed in strict mode because it makes code impossible to predict and optimize."
+        }
+      ],
       "no-underscore-dangle": 0,
       "react/forbid-prop-types": 0,
       "react/jsx-filename-extension": 0,

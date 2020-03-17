@@ -5,3 +5,7 @@ export const modelSymbol = 'ezpz__model';
 export const reducerSymbol = 'r';
 export const thunkOnSymbol = 'tO';
 export const thunkSymbol = 't';
+
+export const modelVisitorResults = {
+  CONTINUE: 'CONTINUE',
+};

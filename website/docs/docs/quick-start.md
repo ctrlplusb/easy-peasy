@@ -18,9 +18,9 @@ npm install easy-peasy
 
 <p>&nbsp;</p>
 
-## Define a model to represent your state
+## Define a model
 
-Use the [model](/docs/api/model.html) helper to define your state. 
+A [model](/docs/api/model.html) encapuslates your state and the actions against thems.
 
 ```javascript
 import { model } from 'easy-peasy';
@@ -30,7 +30,7 @@ const storeModel = model({
 });
 ```
 
-You can even nest models for more advanced state structures.
+You can nest models for more advanced store requirements.
 
 ```javascript
 import { model } from 'easy-peasy';
@@ -57,7 +57,7 @@ Feel free to split your models into separate files, importing them and composing
 
 ## Create the store
 
-Provide your root store model to [createStore](/docs/api/create-store.html) in order to get a [store](/docs/api/store.html) instance.
+Provide your model to [createStore](/docs/api/create-store.html) in order to create a [store](/docs/api/store.html) instance.
 
 ```javascript
 import { createStore } from 'easy-peasy';
@@ -66,13 +66,11 @@ import { storeModel } from './models';
 const store = createStore(storeModel);
 ```
 
-> The outputted store is actually a Redux store with a few enhancements. It is however API compatible with any library that expects to receive a Redux store (for example; the `react-redux` library).
-
 <p>&nbsp;</p>
 
-## Wrap your application
+## Expose the store
 
-Use the [StoreProvider](/docs/api/store-provider.html) component to connect the [store](/docs/api/store.html) to your application.
+Surround your application with the [StoreProvider](/docs/api/store-provider.html) component, providing it your [store](/docs/api/store.html) instance.
 
 ```javascript
 import { StoreProvider } from 'easy-peasy';

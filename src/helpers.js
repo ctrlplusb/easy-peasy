@@ -55,14 +55,6 @@ export function model(modelDefinition, config) {
   };
 }
 
-// /* eslint-disable-next-line no-shadow */
-// export function persist(model, config) {
-//   return {
-//     ...model,
-//     [persistSymbol]: config,
-//   };
-// };
-
 export function thunkOn(targetResolver, fn) {
   fn[thunkOnSymbol] = {
     targetResolver,

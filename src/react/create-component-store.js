@@ -1,5 +1,5 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import createStore from './create-store';
+import createStore from '../create-store/index';
 
 /**
  * Some good references on the topic of reinitialisation:

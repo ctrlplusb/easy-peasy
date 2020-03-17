@@ -1,6 +1,10 @@
 import debounce from 'debounce';
 import isPlainObject from 'is-plain-object';
-import { deepCloneStateWithoutComputed, get, isPromise, set } from './lib';
+import deepCloneState from '../../lib/deep-clone-state';
+import isPromise from '../../lib/is-promise';
+import get from '../../lib/get';
+import set from '../../lib/set';
+import { modelSymbol } from '../../constants';
 
 const noopStorage = {
   getItem: () => undefined,
@@ -85,7 +89,7 @@ function createStorageWrapper(storage = sessionStorage, transformers = []) {
   };
 }
 
-export function extractPersistConfig(path, persistDefinition = {}) {
+function extractPersistConfig(path, persistDefinition = {}) {
   return {
     path,
     config: {
@@ -121,12 +125,12 @@ function resolvePersistTargets(target, whitelist, blacklist) {
   return targets;
 }
 
-export function createPersistor(persistKey, references) {
+function createPersistor(persistenceConfig, persistKey, references) {
   return debounce(() => {
-    references.internals.persistenceConfig.forEach(({ path, config }) => {
+    persistenceConfig.forEach(({ path, config }) => {
       const { storage, whitelist, blacklist } = config;
       const state = references.getState();
-      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+      const persistRoot = deepCloneState(get(path, state));
       const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
       targets.forEach(key => {
         const targetPath = [...path, key];
@@ -136,13 +140,13 @@ export function createPersistor(persistKey, references) {
   }, 1000);
 }
 
-export function createPersistMiddleware(persistor, references) {
+function createPersistMiddleware(persistenceConfig, persistor) {
   return () => next => action => {
     const state = next(action);
     if (
       action &&
       action.type !== '@action.ePRS' &&
-      references.internals.persistenceConfig.length > 0
+      persistenceConfig.length > 0
     ) {
       persistor(state);
     }
@@ -150,10 +154,10 @@ export function createPersistMiddleware(persistor, references) {
   };
 }
 
-export function createPersistenceClearer(persistKey, references) {
+function createPersistenceClearer(persistenceConfig, persistKey, references) {
   return () =>
     new Promise((resolve, reject) => {
-      references.internals.persistenceConfig.forEach(({ path, config }) => {
+      persistenceConfig.forEach(({ path, config }) => {
         const { storage, whitelist, blacklist } = config;
         const persistRoot = get(path, references.getState());
         const targets = resolvePersistTargets(
@@ -175,20 +179,21 @@ export function createPersistenceClearer(persistKey, references) {
     });
 }
 
-export function rehydrateStateFromPersistIfNeeded(
+function rehydrateStateFromPersistIfNeeded(
+  persistenceConfig,
   persistKey,
   replaceState,
   references,
 ) {
   // If we have any persist configs we will attemp to perform a state rehydration
   let resolveRehydration = Promise.resolve();
-  if (references.internals.persistenceConfig.length > 0) {
-    references.internals.persistenceConfig.forEach(persistInstance => {
+  if (persistenceConfig.length > 0) {
+    persistenceConfig.forEach(persistInstance => {
       const { path, config } = persistInstance;
       const { blacklist, mergeStrategy, storage, whitelist } = config;
 
       const state = references.internals.defaultState;
-      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+      const persistRoot = deepCloneState(get(path, state));
       const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
 
       const applyRehydrationStrategy = (originalState, rehydratedState) => {
@@ -264,3 +269,66 @@ export function rehydrateStateFromPersistIfNeeded(
   }
   return resolveRehydration;
 }
+
+function persistPlugin(config, references) {
+  const persistKey = targetPath => `[${config.name}]@${targetPath.join('.')}`;
+
+  // We will pass the persistence configuration around by reference. It will get
+  // populated by the modelVisitor implementation.
+  const persistenceConfig = [];
+
+  const persistor = createPersistor(persistenceConfig, persistKey, references);
+
+  const persistMiddleware = createPersistMiddleware(
+    persistenceConfig,
+    persistor,
+  );
+
+  const clearPersistance = createPersistenceClearer(
+    persistenceConfig,
+    persistKey,
+    references,
+  );
+
+  const storeEnhancement = {
+    clear: clearPersistance,
+    flush: () => persistor.flush(),
+    // This should be replaced with the actual implementation by the
+    // onStoreCreated hook
+    resolveRehydration: () => {
+      throw new Error('resolveRehydration was not bound correctly');
+    },
+  };
+
+  return {
+    middleware: [persistMiddleware],
+    storeEnhancer: store => {
+      return Object.assign(store, {
+        persist: storeEnhancement,
+      });
+    },
+    modelVisitor: (value, key, meta) => {
+      if (value != null && typeof value === 'object' && value[modelSymbol]) {
+        const modelConfig = value[modelSymbol];
+        if (modelConfig.persist) {
+          persistenceConfig.push(
+            extractPersistConfig(meta.path, modelConfig.persist),
+          );
+        }
+      }
+    },
+    onStoreCreated: () => {
+      const rehydrationPromise = rehydrateStateFromPersistIfNeeded(
+        persistenceConfig,
+        persistKey,
+        references.replaceState,
+        references,
+      );
+      storeEnhancement.resolveRehydration = () => rehydrationPromise;
+    },
+  };
+}
+
+persistPlugin.pluginName = 'persist';
+
+export default persistPlugin;

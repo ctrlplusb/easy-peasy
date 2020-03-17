@@ -6,12 +6,12 @@ import {
   useStoreState,
   useStoreRehydrated,
   useStore,
-} from './hooks';
-import createStore from './create-store';
-import createContextStore from './create-context-store';
-import createComponentStore from './create-component-store';
-import createTransform from './create-transform';
-import StoreProvider from './provider';
+} from './react/hooks';
+import createStore from './create-store/index';
+import createContextStore from './react/create-context-store';
+import createComponentStore from './react/create-component-store';
+import createTransform from './plugins/persist/create-transform';
+import StoreProvider from './react/provider';
 import {
   action,
   actionOn,
@@ -23,6 +23,26 @@ import {
   thunk,
   thunkOn,
 } from './helpers';
+import { registerPlugins } from './plugins';
+import actionOnPlugin from './plugins/action-on/index';
+import actionPlugin from './plugins/action/index';
+import computedPlugin from './plugins/computed/index';
+import listenerPlugin from './plugins/listener/index';
+import persistPlugin from './plugins/persist/index';
+import reducerPlugin from './plugins/reducer/index';
+import thunkOnPlugin from './plugins/thunk-on/index';
+import thunkPlugin from './plugins/thunk/index';
+
+registerPlugins([
+  actionPlugin,
+  computedPlugin,
+  actionOnPlugin,
+  listenerPlugin,
+  persistPlugin,
+  reducerPlugin,
+  thunkPlugin,
+  thunkOnPlugin,
+]);
 
 /**
  * The auto freeze feature of immer doesn't seem to work in our testing. We have
@@ -43,6 +63,7 @@ export {
   memo,
   model,
   reducer,
+  registerPlugins,
   StoreProvider,
   thunk,
   thunkOn,
