@@ -1,6 +1,6 @@
 # model
 
-Allows you to define a model, which encapuslates state and actions.
+Allows you to define a model, which encapsulates state and actions.
 
 ```javascript
 const storeModel = model({
