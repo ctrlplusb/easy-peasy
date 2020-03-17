@@ -323,7 +323,6 @@ test('nested empty model', () => {
     model({
       counters: model({
         add: action(state => {
-          console.log(state);
           state[Date.now()] = true;
         }),
       }),
