@@ -23,7 +23,6 @@ test('dispatches actions to represent a succeeded thunk', () => {
         state.counter += 1;
       }),
       doSomething: thunk(actions => {
-        console.log(actions);
         actions.increment();
         return 'did something';
       }),

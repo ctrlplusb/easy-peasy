@@ -1,4 +1,4 @@
-import { createDraft, finishDraft, isDraft } from 'immer-peasy';
+import { createDraft, finishDraft, isDraft } from 'immer';
 import get from './get';
 
 function newify(currentPath, currentState, finalValue) {
