@@ -212,7 +212,7 @@ const auditModel = {
     (actions, storeActions) => storeActions.basket.addProduct,
     // action handler that executes when target is executed:
     (state, target) => {
-      state.logs(`Added product ${target.payload} to basket`);
+      state.logs.push(`Added product ${target.payload} to basket`);
     },
   )
 }
