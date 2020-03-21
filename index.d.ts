@@ -201,11 +201,14 @@ interface Pojo {
     | Set<any>
     | Array<any>
     | Function
-    | object;
+    | object
+    | Generic<any>;
 }
 
 type StateMapper<StateModel extends object, Depth extends string> = {
-  [P in keyof StateModel]: P extends IndexSignatureKeysOfType<StateModel>
+  [P in keyof StateModel]: StateModel[P] extends Generic<infer T>
+    ? T
+    : P extends IndexSignatureKeysOfType<StateModel>
     ? StateModel[P]
     : StateModel[P] extends Pojo
     ? StateModel[P] extends Computed<any, any, any>
@@ -654,6 +657,50 @@ export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
 export function reducer<State>(state: ReduxReducer<State>): Reducer<State>;
 
 // #endregion
+
+// #region Generics
+
+/**
+ * Used to declare generic state on a model.
+ *
+ * @example
+ *
+ * interface MyGenericModel<T> {
+ *   value: Generic<T>;
+ *   setValue: Action<MyGenericModel<T>, T>;
+ * }
+ *
+ * const numberModel: MyGenericModel<number> = {
+ *   value: generic(1337),
+ *   setValue: action((state, value) => {
+ *     state.value = value;
+ *   })
+ * };
+ */
+export class Generic<T> {
+  type: 'ezpz__generic';
+}
+
+/**
+ * Used to assign a generic state value against a model.
+ *
+ * @example
+ *
+ * interface MyGenericModel<T> {
+ *   value: Generic<T>;
+ *   setValue: Action<MyGenericModel<T>, T>;
+ * }
+ *
+ * const numberModel: MyGenericModel<number> = {
+ *   value: generic(1337),
+ *   setValue: action((state, value) => {
+ *     state.value = value;
+ *   })
+ * };
+ */
+export function generic<T>(value: T): Generic<T>;
+
+// #endregion Generics
 
 // #region Hooks
 

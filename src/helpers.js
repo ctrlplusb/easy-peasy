@@ -46,6 +46,10 @@ export const computed = (fnOrStateResolvers, fn) => {
   return fnOrStateResolvers;
 };
 
+export function generic(value) {
+  return value;
+}
+
 export const persist = (model, config) => {
   return {
     ...model,
