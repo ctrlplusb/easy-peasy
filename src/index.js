@@ -12,6 +12,7 @@ import createContextStore from './create-context-store';
 import createComponentStore from './create-component-store';
 import createTransform from './create-transform';
 import StoreProvider from './provider';
+import useLocalStore from './use-local-store';
 import {
   action,
   actionOn,
@@ -46,6 +47,7 @@ export {
   StoreProvider,
   thunk,
   thunkOn,
+  useLocalStore,
   useStoreActions,
   useStoreDispatch,
   useStoreState,

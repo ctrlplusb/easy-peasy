@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext } from 'react';
+import { useMemoOne } from 'use-memo-one';
 import {
   createStoreActionsHook,
   createStoreDispatchHook,
@@ -13,7 +14,7 @@ export default function createContextStore(model, config) {
   const StoreContext = createContext();
 
   function Provider({ children, initialData }) {
-    const store = useMemo(
+    const store = useMemoOne(
       () =>
         createStore(
           typeof model === 'function' ? model(initialData) : model,
