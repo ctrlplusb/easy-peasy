@@ -47,7 +47,8 @@ export default function createReducer(
         : stateAfterActions;
     if (state !== next) {
       computedProperties.forEach(({ parentPath, bindComputedProperty }) => {
-        bindComputedProperty(get(parentPath, next));
+        const prop = get(parentPath, next);
+        if (prop != null) bindComputedProperty(prop);
       });
     }
     return next;

@@ -1,4 +1,4 @@
-import { action, createStore } from '../index';
+import { action, createStore, computed } from '../index';
 
 test('addModel', () => {
   // arrange
@@ -17,10 +17,14 @@ test('addModel', () => {
     push: action((state, payload) => {
       state.path = payload;
     }),
+    url: computed(state => name => {
+      return `${state.path}${name}`;
+    }),
   });
 
   // assert
   expect(store.getState().router.path).toBe('/');
+  expect(store.getState().router.url('home')).toBe('/home');
 
   // act
   store.getActions().router.push('/foo');
