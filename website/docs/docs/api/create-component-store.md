@@ -1,5 +1,11 @@
 # createComponentStore
 
+> **DEPRECATED**
+>
+> This API will be removed in the next major release.
+>
+> Please use the [`useLocalStore`](/docs/api/use-local-store.html) hook instead.
+
 Allows you to create a store to represent the state for an individual React component. This is essentially an alternative to the official `useState` and `useReducer` hooks provided by React for component-level state.
 
 ```javascript
