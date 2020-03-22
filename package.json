@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "3.4.0-alpha.1",
+  "version": "3.4.0-alpha.2",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
