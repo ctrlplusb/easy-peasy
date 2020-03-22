@@ -1,6 +1,14 @@
 /* eslint-disable */
 
-import { action, Action, thunk, Thunk } from 'easy-peasy';
+import {
+  action,
+  Action,
+  Generic,
+  generic,
+  thunk,
+  Thunk,
+  createStore,
+} from 'easy-peasy';
 
 /**
  * ARRANGE
@@ -55,18 +63,16 @@ const createModel = <Item extends ObjectWithId>(): GenericModel<Item> => {
 
 interface SimpleModel<T> {
   count: number;
-  thevalue: T;
+  thevalue: Generic<T>;
   theset: Action<SimpleModel<T>, T>;
 }
 
 const makeSimpleModel = <T>(initialValue: T): SimpleModel<T> => {
   return {
     count: 1,
-    thevalue: initialValue,
+    thevalue: generic(initialValue),
     theset: action((state, payload) => {
-      // typings:expect-error
       state.count = 1;
-      // typings:expect-error
       state.thevalue = payload;
       // typings:expect-error
       state.theset();
@@ -74,33 +80,10 @@ const makeSimpleModel = <T>(initialValue: T): SimpleModel<T> => {
   };
 };
 
-/**
- * WORKAROUND - #300
- */
+const numberModel = makeSimpleModel<number>(1337);
 
-interface SimpleModelWorkaround<T> {
-  count: number;
-  thevalue: T;
-  theset: Action<SimpleModelWorkaround<T>, T>;
-}
-
-const makeSimpleModelWorking = <T>(
-  initialValue: T,
-): SimpleModelWorkaround<T> => {
-  return {
-    count: 1,
-    thevalue: initialValue,
-    theset: action((state, payload) => {
-      state.count += 1;
-      state.thevalue = payload;
-      // typings:expect-error
-      state.theset('foo');
-    }),
-  } as SimpleModelWorkaround<any>;
-};
-
-const fooModel = makeSimpleModelWorking<string>('foo');
-fooModel.thevalue += 'bar';
+const store = createStore(numberModel);
+store.getState().thevalue + 1;
 
 /**
  * #345
@@ -111,14 +94,14 @@ interface Base {
 }
 
 interface Model<M extends Base> {
-  data: M[];
+  data: Generic<M[]>;
   add: Action<Model<M>, M>;
   doSomething: Thunk<Model<M>, M>;
 }
 
 function getModel<M extends Base>(): Model<M> {
   return {
-    data: [],
+    data: generic([]),
     add: action((state, payload) => {
       payload.a + 'foo';
       state.data.push(payload);

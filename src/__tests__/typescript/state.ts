@@ -126,6 +126,7 @@ const assert: State<Model> = {
  * State Types
  */
 
+assert.statePerson;
 assert.stateArray;
 assert.numberStateMap;
 assert.stateBoolean;
