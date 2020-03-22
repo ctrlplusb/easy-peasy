@@ -19,6 +19,7 @@ const baseConfig = {
     'is-plain-object',
     'immer-peasy',
     'memoizerific',
+    'use-memo-one',
     'react',
     'redux',
     'redux-thunk',
@@ -64,6 +65,7 @@ const commonUMD = config =>
       memoizerific: 'memoizerific',
       'redux-thunk': 'ReduxThunk',
       'immer-peasy': 'produce',
+      'use-memo-one': 'useMemoOne',
       react: 'React',
       redux: 'Redux',
     };
