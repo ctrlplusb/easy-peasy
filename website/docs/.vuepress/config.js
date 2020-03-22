@@ -86,6 +86,7 @@ module.exports = {
             {
               title: 'Hooks',
               children: [
+                'api/use-local-store',
                 'api/use-store-actions',
                 'api/use-store-dispatch',
                 'api/use-store-rehydrated',
@@ -98,6 +99,7 @@ module.exports = {
               children: [
                 'api/create-component-store',
                 'api/create-context-store',
+                'api/use-local-store',
               ],
             },
             {
