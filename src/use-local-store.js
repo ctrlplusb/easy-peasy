@@ -18,5 +18,5 @@ export default function useLocalStore(modelCreator, dependencies = [], config) {
       }
     });
   }, [store]);
-  return [currentState, store.getActions()];
+  return [currentState, store.getActions(), store];
 }

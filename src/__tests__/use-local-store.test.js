@@ -159,3 +159,26 @@ test('with config', () => {
   // ASSERT
   expect(logs).toEqual(['@action.inc']);
 });
+
+test('returns the store', () => {
+  // ARRANGE
+  let actualStore;
+
+  // eslint-disable-next-line no-shadow
+  function CountDisplay() {
+    const [, , store] = useLocalStore(() => ({
+      count: 0,
+    }));
+    actualStore = store;
+    return null;
+  }
+
+  // ACT
+  const app = <CountDisplay count={1} />;
+
+  render(app);
+
+  // EXPECT
+  expect(actualStore).not.toBeUndefined();
+  expect(actualStore.getState()).toEqual({ count: 0 });
+});

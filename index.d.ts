@@ -799,6 +799,15 @@ export function createComponentStore<
   config?: StoreConfig,
 ): UseLocalStore<StoreModel, InitialData>;
 
+export function useLocalStore<
+  StoreModel extends object = {},
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<any, any>
+>(
+  modelCreator: () => StoreModel,
+  dependencies?: any[],
+  storeConfig?: StoreConfig,
+): [State<StoreModel>, Actions<StoreModel>, Store<StoreModel, StoreConfig>];
+
 // #endregion
 
 // #region Persist
