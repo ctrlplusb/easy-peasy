@@ -7,7 +7,7 @@ pageClass: homepage
 </p>
 <h1 class="title" align="center">Vegetarian friendly state for React</h1>
 
-Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickly</strong> and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, performance optimisation, developer tools etc.
+Easy Peasy provides you with an <strong>intuitive</strong> API to <strong>quickly</strong> and <strong>easily</strong> manage the state for your React application. Batteries are included - <strong>no configuration</strong> is required to support derived state, API calls, developer tools etc.
 
 <p>&nbsp;</p>
 
@@ -21,12 +21,10 @@ npm install easy-peasy
 
 ```javascript
 const store = createStore({
-  todos: {
-    items: ['Create store', 'Wrap application', 'Use store'],
-    add: action((state, payload) => {
-      state.items.push(payload)
-    })
-  }
+  todos: ['Create store', 'Wrap application', 'Use store'],
+  addTodo: action((state, payload) => {
+    state.add.push(payload)
+  })
 });
 ```
 
@@ -46,14 +44,14 @@ function App() {
 
 ```javascript
 function TodoList() {
-  const todos = useStoreState(state => state.todos.items)
-  const add = useStoreActions(actions => actions.todos.add)
+  const todos = useStoreState(state => state.todos);
+  const addTodo = useStoreActions(actions => actions.addTodo);
   return (
     <div>
       {todos.map((todo, idx) => <div key={idx}>{todo}</div>)}
-      <AddTodo onAdd={add} />
+      <AddTodo onAdd={addTodo} />
     </div>
-  )
+  );
 }
 ```
 
