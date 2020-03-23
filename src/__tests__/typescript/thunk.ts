@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import { createStore, Thunk, thunk, Action } from 'easy-peasy';
 
 interface Injections {

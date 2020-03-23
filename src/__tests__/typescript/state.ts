@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import {
   State,
   Computed,

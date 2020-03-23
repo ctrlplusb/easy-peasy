@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import { Action, action } from 'easy-peasy';
 
 interface Notification {

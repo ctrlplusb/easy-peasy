@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import {
   Actions,
   Thunk,
@@ -44,7 +42,7 @@ let useActionResult = useStoreActions(
 useActionResult(1);
 
 let store = useStore<Model>();
-store.getState().stateString + 'world';
+`${store.getState().stateString  }world`;
 
 const typedHooks = createTypedHooks<Model>();
 
@@ -57,9 +55,9 @@ dispatch({
   type: 'FOO',
 });
 store = typedHooks.useStore();
-store.getState().stateString + 'world';
+`${store.getState().stateString  }world`;
 
-let actionNoPayload = typedHooks.useStoreActions(
+const actionNoPayload = typedHooks.useStoreActions(
   actions => actions.actionNoPayload,
 );
 actionNoPayload();

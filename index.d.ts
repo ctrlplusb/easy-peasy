@@ -1,7 +1,5 @@
 /// <reference types="symbol-observable" />
 
-/* eslint-disable */
-
 import { Component } from 'react';
 import {
   compose,

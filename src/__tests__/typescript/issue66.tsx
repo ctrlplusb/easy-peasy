@@ -1,6 +1,3 @@
-/* eslint-disable */
-
-// index.tsx
 import * as React from 'react';
 import { render } from 'react-dom';
 import { action, Action, createStore } from 'easy-peasy';

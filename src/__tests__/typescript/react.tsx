@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import {
@@ -37,7 +35,7 @@ function MyComponent() {
   return (
     <div>
       {items.map(item => (
-        <div>{'Todo: ' + item}</div>
+        <div>{`Todo: ${  item}`}</div>
       ))}
     </div>
   );
