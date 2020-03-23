@@ -1,6 +1,3 @@
-/* eslint-disable */
-
-import * as React from 'react';
 import { useLocalStore, Action, action } from 'easy-peasy';
 
 interface StoreModel {

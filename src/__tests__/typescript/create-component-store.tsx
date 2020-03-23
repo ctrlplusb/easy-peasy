@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import * as React from 'react';
 import { createComponentStore, Action, action } from 'easy-peasy';
 

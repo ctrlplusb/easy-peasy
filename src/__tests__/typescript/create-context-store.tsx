@@ -1,5 +1,3 @@
-/* eslint-disable */
-
 import * as React from 'react';
 import { createContextStore, Action, action } from 'easy-peasy';
 
@@ -62,11 +60,11 @@ function TestDispatch() {
   return null;
 }
 
-<CounterWithInitializer.Provider initialData={{ count: 1 }}>
-  <CountDisplay />
-</CounterWithInitializer.Provider>;
+  <CounterWithInitializer.Provider initialData={{ count: 1 }}>
+    <CountDisplay />
+  </CounterWithInitializer.Provider>;
 
 // typings:expect-error
-<CounterWithInitializer.Provider initialData={{ count: 'foo' }}>
-  <CountDisplay />
-</CounterWithInitializer.Provider>;
+    <CounterWithInitializer.Provider initialData={{ count: 'foo' }}>
+      <CountDisplay />
+    </CounterWithInitializer.Provider>;
