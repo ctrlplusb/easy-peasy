@@ -866,9 +866,12 @@ export function useLocalStore<
   StoreModel extends object = {},
   StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<any, any>
 >(
-  modelCreator: () => StoreModel,
+  modelCreator: (prevState?: State<StoreModel>) => StoreModel,
   dependencies?: any[],
-  storeConfig?: StoreConfig,
+  storeConfig?: (
+    prevState?: State<StoreModel>,
+    prevConfig?: StoreConfig,
+  ) => StoreConfig,
 ): [State<StoreModel>, Actions<StoreModel>, Store<StoreModel, StoreConfig>];
 
 // #endregion
