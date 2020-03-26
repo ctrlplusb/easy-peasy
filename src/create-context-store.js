@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect, useRef } from 'react';
 import { useMemoOne } from 'use-memo-one';
 import {
   createStoreActionsHook,
@@ -10,18 +10,32 @@ import {
 } from './hooks';
 import createStore from './create-store';
 
-export default function createContextStore(model, config) {
+export default function createContextStore(model, config = {}) {
   const StoreContext = createContext();
 
-  function Provider({ children, initialData }) {
+  function Provider({ children, initialData, ...dependencies }) {
+    const previousStateRef = useRef(config.initialState);
+    const initialDataRef = useRef(initialData);
+
     const store = useMemoOne(
       () =>
         createStore(
-          typeof model === 'function' ? model(initialData) : model,
-          config,
+          typeof model === 'function' ? model(initialDataRef.current) : model,
+          {
+            ...config,
+            injections: { ...config.injections, ...dependencies },
+            initialState: previousStateRef.current,
+          },
         ),
-      [],
+      [...Object.values(dependencies)],
     );
+
+    useEffect(() => {
+      return store.subscribe(() => {
+        previousStateRef.current = store.getState();
+      });
+    }, [store]);
+
     return (
       <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
     );
