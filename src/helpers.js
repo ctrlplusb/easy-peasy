@@ -1,4 +1,4 @@
-import { isDraft, original } from 'immer-peasy';
+import { isDraft, original } from 'immer';
 import memoizerific from 'memoizerific';
 import {
   actionOnSymbol,
