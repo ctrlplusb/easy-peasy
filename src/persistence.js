@@ -191,23 +191,33 @@ export function rehydrateStateFromPersistIfNeeded(
       const persistRoot = deepCloneStateWithoutComputed(get(path, state));
       const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
 
+      const hasDataModelChanged = (dataModel, rehydratingModelData) =>
+        dataModel != null &&
+        rehydratingModelData != null &&
+        (typeof dataModel !== typeof rehydratingModelData ||
+          (Array.isArray(dataModel) && !Array.isArray(rehydratingModelData)));
+
       const applyRehydrationStrategy = (originalState, rehydratedState) => {
         if (mergeStrategy === 'overwrite') {
           set(path, originalState, rehydratedState);
         } else if (mergeStrategy === 'merge') {
           const target = get(path, originalState);
           Object.keys(rehydratedState).forEach(key => {
-            target[key] = rehydratedState[key];
+            if (hasDataModelChanged(target[key], rehydratedState[key])) {
+              // skip as the data model type has changed since the data was persisted
+            } else {
+              target[key] = rehydratedState[key];
+            }
           });
         } else if (mergeStrategy === 'mergeDeep') {
           const target = get(path, originalState);
           const setAt = (currentTarget, currentNext) => {
             Object.keys(currentNext).forEach(key => {
               const data = currentNext[key];
-              if (isPlainObject(data)) {
-                if (!isPlainObject(currentTarget[key])) {
-                  currentTarget[key] = {};
-                }
+              if (hasDataModelChanged(currentTarget[key], data)) {
+                // skip as the data model type has changed since the data was persisted
+              } else if (isPlainObject(data)) {
+                currentTarget[key] = currentTarget[key] || {};
                 setAt(currentTarget[key], data);
               } else {
                 currentTarget[key] = data;
