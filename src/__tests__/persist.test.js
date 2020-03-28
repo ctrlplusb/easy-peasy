@@ -309,6 +309,117 @@ test('mergeDeep', () => {
   });
 });
 
+test('mergeDeep with extended model structure', () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore]@counter': 1,
+    '[EasyPeasyStore]@nested': {
+      msg: 'hello universe',
+    },
+  });
+
+  // ACT
+  const rehydratedStore = createStore(
+    persist(
+      {
+        counter: 0,
+        nested: {
+          msg: 'hello world',
+          foo: 'bar',
+        },
+        extended: {
+          qux: 'quxx',
+        },
+      },
+      {
+        storage: memoryStorage,
+        mergeStrategy: 'mergeDeep',
+      },
+    ),
+  );
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    counter: 1,
+    nested: {
+      msg: 'hello universe',
+      foo: 'bar',
+    },
+    extended: {
+      qux: 'quxx',
+    },
+  });
+});
+
+test('merge with conflicting model structure', () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore]@counter': 1,
+    '[EasyPeasyStore]@conflicting': {
+      msg: 'hello universe',
+    },
+  });
+
+  // ACT
+  const rehydratedStore = createStore(
+    persist(
+      {
+        counter: 0,
+        conflicting: ['hello world', 'foo'],
+      },
+      {
+        storage: memoryStorage,
+        mergeStrategy: 'merge',
+      },
+    ),
+  );
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    counter: 1,
+    conflicting: ['hello world', 'foo'],
+  });
+});
+
+test('mergeDeep with conflicting model structure', () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore]@foo': {
+      conflicting: 'baz',
+      foo: 'bar',
+    },
+    '[EasyPeasyStore]@conflicting': {
+      msg: 'hello universe',
+    },
+  });
+
+  // ACT
+  const rehydratedStore = createStore(
+    persist(
+      {
+        foo: {
+          conflicting: 13,
+          foo: 'baz',
+        },
+        conflicting: ['hello world', 'foo'],
+      },
+      {
+        storage: memoryStorage,
+        mergeStrategy: 'mergeDeep',
+      },
+    ),
+  );
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    foo: {
+      conflicting: 13,
+      foo: 'bar',
+    },
+    conflicting: ['hello world', 'foo'],
+  });
+});
+
 test('asynchronous storage', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
