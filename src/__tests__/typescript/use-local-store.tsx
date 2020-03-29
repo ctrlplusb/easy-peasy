@@ -27,14 +27,27 @@ useLocalStore<StoreModel>(
 );
 
 useLocalStore<StoreModel>(
-  () => ({
-    count: 0,
-    inc: action(state => {
-      state.count += 1;
-    }),
-  }),
+  prevState => {
+    if (prevState != null) {
+      prevState.count + 1;
+    }
+    return {
+      count: 0,
+      inc: action(state => {
+        state.count += 1;
+      }),
+    };
+  },
   ['foo', 123],
-  {
-    name: 'MyLocalStore',
+  (prevState, prevConfig) => {
+    if (prevState != null) {
+      prevState.count + 1;
+    }
+    if (prevConfig != null) {
+      `${prevConfig.name}foo`;
+    }
+    return {
+      name: 'MyLocalStore',
+    };
   },
 );

@@ -39,6 +39,7 @@ module.exports = {
             'introduction/installation',
             'introduction/examples',
             'introduction/prior-art',
+            'introduction/immer',
           ],
         },
         {

@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import isPlainObject from 'is-plain-object';
-import { createDraft, finishDraft, isDraft } from 'immer-peasy';
+import { createDraft, finishDraft, isDraft } from 'immer';
 import shallowEqual from 'shallowequal';
 
 export const deepCloneStateWithoutComputed = source => {

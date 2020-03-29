@@ -116,7 +116,7 @@ test('with external data', () => {
 });
 
 test('with config', () => {
-  // ACT
+  // ARRANGE
   const logs = [];
 
   const customMiddleware = () => next => _action => {
@@ -124,6 +124,8 @@ test('with config', () => {
     logs.push(_action.type);
     next(_action);
   };
+
+  // ACT
 
   // eslint-disable-next-line no-shadow,react/prop-types
   function CountDisplay({ count }) {
@@ -135,8 +137,10 @@ test('with config', () => {
         }),
       }),
       [count],
-      {
-        middleware: [customMiddleware],
+      () => {
+        return {
+          middleware: [customMiddleware],
+        };
       },
     );
     return (
@@ -149,9 +153,7 @@ test('with config', () => {
     );
   }
 
-  const app = <CountDisplay count={1} />;
-
-  const { getByTestId } = render(app);
+  const { getByTestId } = render(<CountDisplay count={1} />);
 
   const button = getByTestId('button');
   fireEvent.click(button);
@@ -178,7 +180,90 @@ test('returns the store', () => {
 
   render(app);
 
-  // EXPECT
+  // ASSERT
   expect(actualStore).not.toBeUndefined();
   expect(actualStore.getState()).toEqual({ count: 0 });
+});
+
+test('provides the prevState and prevConfig every time the config is recreated', () => {
+  // ARRANGE
+  let prevState;
+  let prevConfig;
+
+  // eslint-disable-next-line no-shadow,react/prop-types
+  function CountDisplay({ count }) {
+    useLocalStore(
+      () => ({
+        count,
+      }),
+      [count],
+      (_prevState, _prevConfig) => {
+        prevState = _prevState;
+        prevConfig = _prevConfig;
+        return {
+          name: `CountStore${count}`,
+        };
+      },
+    );
+    return null;
+  }
+
+  // ACT
+  const { rerender } = render(<CountDisplay count={1} />);
+
+  // ASSERT
+  expect(prevState).toBeUndefined();
+  expect(prevConfig).toBeUndefined();
+
+  // ACT
+  rerender(<CountDisplay count={100} />);
+
+  // ASSERT
+  expect(prevState).toEqual({
+    count: 1,
+  });
+  expect(prevConfig).toEqual({
+    name: 'CountStore1',
+  });
+});
+
+test('provides the prevState every time the store is recreated', () => {
+  // ARRANGE
+  let prevState;
+
+  // eslint-disable-next-line no-shadow
+  function CountDisplay({ count }) {
+    useLocalStore(
+      _prevState => {
+        prevState = _prevState;
+        return {
+          count,
+        };
+      },
+      [count],
+    );
+    return null;
+  }
+
+  // ACT
+  const { rerender } = render(<CountDisplay count={1} />);
+
+  // ASSERT
+  expect(prevState).toBeUndefined();
+
+  // ACT
+  rerender(<CountDisplay count={100} />);
+
+  // ASSERT
+  expect(prevState).toEqual({
+    count: 1,
+  });
+
+  // ACT
+  rerender(<CountDisplay count={200} />);
+
+  // ASSERT
+  expect(prevState).toEqual({
+    count: 100,
+  });
 });

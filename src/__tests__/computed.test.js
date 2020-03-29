@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import produce from 'immer-peasy';
+import { produce } from 'immer';
 import { render } from '@testing-library/react';
 import {
   createStore,
@@ -12,25 +12,33 @@ import {
   StoreProvider,
 } from '../index';
 
-test('immer-peasy works as expected', () => {
+test('patched immer works as expected', () => {
   const original = {
     firstName: 'Bob',
     lastName: 'Fruits',
   };
 
+  let getterCallCount = 0;
+
   // act
   Object.defineProperty(original, 'fullName', {
-    get: () => `${original.firstName} ${original.lastName}`,
+    enumerable: true,
+    get: () => {
+      getterCallCount += 1;
+      return `${original.firstName} ${original.lastName}`;
+    },
   });
 
   // assert
   expect(original.fullName).toBe('Bob Fruits');
+  expect(getterCallCount).toBe(1);
 
   // act
   const immerNoUpdate = produce(original, draft => draft);
 
   // assert
   expect(immerNoUpdate).toBe(original);
+  expect(getterCallCount).toBe(1);
 
   const newState = {
     ...original,
@@ -38,9 +46,8 @@ test('immer-peasy works as expected', () => {
   };
 
   // assert
-  expect(newState.fullName).toBe(undefined);
-  // We expect the getter property to be undefined. In our internals we will
-  // always remap computed props
+  expect(newState.fullName).toBe('Bob Fruits');
+  expect(getterCallCount).toBe(2);
 
   // act
   const immerWithUpdate = produce(original, draft => {
@@ -51,6 +58,7 @@ test('immer-peasy works as expected', () => {
   expect(immerWithUpdate).not.toBe(original);
   expect(immerWithUpdate.firstName).toBe('Mary');
   expect(immerWithUpdate.fullName).toBe(undefined);
+  expect(getterCallCount).toBe(2);
 });
 
 test('defining and accessing a computed property', () => {

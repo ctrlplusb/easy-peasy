@@ -3,7 +3,7 @@
 const { uglify } = require('rollup-plugin-uglify');
 const babel = require('rollup-plugin-babel');
 const { titleCase } = require('title-case');
-const produce = require('immer-peasy').default;
+const produce = require('immer').default;
 const replace = require('rollup-plugin-replace');
 const fileSize = require('rollup-plugin-filesize');
 const resolve = require('rollup-plugin-node-resolve');
@@ -17,7 +17,7 @@ const baseConfig = {
   external: [
     'debounce',
     'is-plain-object',
-    'immer-peasy',
+    'immer',
     'memoizerific',
     'use-memo-one',
     'react',
@@ -64,7 +64,7 @@ const commonUMD = config =>
       'is-plain-object': 'isPlainObject',
       memoizerific: 'memoizerific',
       'redux-thunk': 'ReduxThunk',
-      'immer-peasy': 'produce',
+      immer: 'produce',
       'use-memo-one': 'useMemoOne',
       react: 'React',
       redux: 'Redux',

@@ -22,7 +22,7 @@ function MyCounter() {
 
 ## Arguments
 
-  - `modelCreater` (() => Object, required)
+  - `modelCreater` ((prevState?: Object) => Object, required)
 
     A function that should return the model representing your store.
 
@@ -35,19 +35,39 @@ function MyCounter() {
     });
     ```
 
+    The function receives the following arguments:
+
+    - `prevState` (Object, optional)
+
+      If the store is being recreated (i.e. due to a dependency change), then the previous state will be provided. This allows partial / full state rehydration.
+
   - `dependencies` (Array, optional, default=[])
 
     A list of dependencies, similar to the official React hooks. If any of the values change then the store will be recreated. Especially helpful if your store depends on an external value, such as a prop.
 
     By default an empty array will be used, meaning the store will not be recreated.
 
-  - `storeConfig` (Object, optional)
+  - `storeConfig` ((prevState?: Object, prevConfig?: Object) => Object, optional)
 
     Provides custom configuration options for your store. Please see the [StoreConfig](/docs/api/store-config.html) API documentation for a full list of configuration options.
 
     ```javascript
-    useLocalStore(() => model, [], { middleware: [loggerMiddleware] });
+    useLocalStore(
+      () => model,
+      [],
+      () => ({ middleware: [loggerMiddleware] })
+    );
     ```
+
+    The function receives the following arguments:
+
+    - `prevState` (Object, optional)
+
+      If the store is being recreated (i.e. due to a dependency change), then the previous state will be provided. This allows partial / full state rehydration.
+
+    - `prevConfig` (Object, optional)
+
+      If the store is being recreated (i.e. due to a dependency change), then the previous config will be provided.
 
 ## Returns
 

@@ -1,4 +1,4 @@
-import { setAutoFreeze } from 'immer-peasy';
+import { setAutoFreeze } from 'immer';
 import {
   createTypedHooks,
   useStoreActions,
