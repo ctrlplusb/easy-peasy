@@ -1,5 +1,7 @@
+import { useRef } from 'react';
 import isPlainObject from 'is-plain-object';
 import { createDraft, finishDraft, isDraft } from 'immer-peasy';
+import shallowEqual from 'shallowequal';
 
 export const deepCloneStateWithoutComputed = source => {
   const recursiveClone = current => {
@@ -95,3 +97,11 @@ export function createSimpleProduce(disableImmer = false) {
     return finishDraft(draft);
   };
 }
+
+export const useShallowEqualMemo = value => {
+  const valueRef = useRef(value);
+  if (!shallowEqual(value, valueRef.current)) {
+    valueRef.current = value;
+  }
+  return valueRef.current;
+};

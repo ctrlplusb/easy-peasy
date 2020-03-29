@@ -175,7 +175,10 @@ it('with runtime injection', () => {
   const multiplier = value => value * 2;
 
   const app = (
-    <Counter.Provider initialData={{ count: 4 }} next={multiplier}>
+    <Counter.Provider
+      initialData={{ count: 4 }}
+      injections={{ next: multiplier }}
+    >
       <CountDisplay />
     </Counter.Provider>
   );
@@ -227,7 +230,7 @@ it('with state preservation when updating runtime injection', () => {
 
   // eslint-disable-next-line react/prop-types
   const Container = ({ next }) => (
-    <Counter.Provider initialData={{ count: 4 }} next={next}>
+    <Counter.Provider initialData={{ count: 4 }} injections={{ next }}>
       <CountDisplay />
     </Counter.Provider>
   );

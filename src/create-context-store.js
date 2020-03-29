@@ -9,13 +9,15 @@ import {
   createStoreRehydratedHook,
 } from './hooks';
 import createStore from './create-store';
+import { useShallowEqualMemo } from './lib';
 
 export default function createContextStore(model, config = {}) {
   const StoreContext = createContext();
 
-  function Provider({ children, initialData, ...dependencies }) {
+  function Provider({ children, initialData, injections }) {
     const previousStateRef = useRef(config.initialState);
     const initialDataRef = useRef(initialData);
+    const injectionsMemo = useShallowEqualMemo(injections);
 
     const store = useMemoOne(
       () =>
@@ -23,11 +25,11 @@ export default function createContextStore(model, config = {}) {
           typeof model === 'function' ? model(initialDataRef.current) : model,
           {
             ...config,
-            injections: { ...config.injections, ...dependencies },
+            injections: { ...config.injections, ...injectionsMemo },
             initialState: previousStateRef.current,
           },
         ),
-      [...Object.values(dependencies)],
+      [injectionsMemo],
     );
 
     useEffect(() => {
