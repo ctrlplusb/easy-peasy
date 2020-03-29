@@ -201,7 +201,7 @@ test('provides the prevState and prevConfig every time the config is recreated',
         prevState = _prevState;
         prevConfig = _prevConfig;
         return {
-          name: `CountStore${  count}`,
+          name: `CountStore${count}`,
         };
       },
     );
