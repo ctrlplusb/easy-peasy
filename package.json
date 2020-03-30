@@ -9,6 +9,7 @@
   "sideEffects": false,
   "files": [
     "dist",
+    "patches",
     "index.d.ts"
   ],
   "repository": {
