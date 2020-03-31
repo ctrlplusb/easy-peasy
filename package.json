@@ -10,6 +10,7 @@
   "files": [
     "dist",
     "patches",
+    "scripts",
     "index.d.ts"
   ],
   "repository": {
@@ -28,7 +29,7 @@
     "build": "rollup -c",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "lint": "eslint src",
-    "postinstall": "patch-package",
+    "postinstall": "node ./scripts/run-patches",
     "prepublish": "yarn run build",
     "test": "jest",
     "test:coverage": "yarn run test -- --coverage",
