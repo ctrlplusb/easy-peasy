@@ -147,23 +147,41 @@ function createPersistenceClearer(persistKey, references) {
 }
 
 export function createPersistor(persistKey, references) {
+  let persistPromise = Promise.resolve();
+
   const persist = debounce(() => {
-    references.internals.persistenceConfig.forEach(({ path, config }) => {
-      const { storage, whitelist, blacklist } = config;
-      const state = references.getState();
-      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
-      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
-      targets.forEach(key => {
-        const targetPath = [...path, key];
-        storage.setItem(persistKey(targetPath), get(targetPath, state));
-      });
-    });
+    if (references.internals.persistenceConfig.length === 0) {
+      return;
+    }
+    persistPromise = Promise.all(
+      references.internals.persistenceConfig.reduce((acc, { path, config }) => {
+        const { storage, whitelist, blacklist } = config;
+        const state = references.getState();
+        const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+        const targets = resolvePersistTargets(
+          persistRoot,
+          whitelist,
+          blacklist,
+        );
+        return acc.concat(
+          targets.map(key => {
+            const targetPath = [...path, key];
+            return Promise.resolve(
+              storage.setItem(persistKey(targetPath), get(targetPath, state)),
+            );
+          }),
+        );
+      }, []),
+    );
   }, 1000);
 
   return {
     persist,
     clear: createPersistenceClearer(persistKey, references),
-    flush: () => persist.flush(),
+    flush: async () => {
+      persist.flush();
+      await persistPromise;
+    },
   };
 }
 
