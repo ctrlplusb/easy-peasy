@@ -198,36 +198,91 @@ interface Pojo {
     | Map<any, any>
     | Set<any>
     | Array<any>
+    | any[]
     | Function
     | object
-    | Generic<any>;
+    // | Generic<any>
+    | Computed<any, any, any>
+    | Reducer<any, any>;
 }
+
+type StateTypes = Computed<any, any, any> | Reducer<any, any> | ActionTypes;
+
+type InvalidObjectTypes = string | Array<any> | RegExp | Date | Function;
+
+type IncludesDeep3<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? O.Includes<Obj, M>
+          : 0;
+      },
+      1
+    >;
+
+type IncludesDeep2<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? IncludesDeep3<Obj[P], M>
+          : 0;
+      },
+      1
+    >;
+
+type IncludesDeep<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? IncludesDeep2<Obj[P], M>
+          : 0;
+      },
+      1
+    >;
 
 type StateMapper<StateModel extends object, Depth extends string> = {
   [P in keyof StateModel]: StateModel[P] extends Generic<infer T>
     ? T
     : P extends IndexSignatureKeysOfType<StateModel>
     ? StateModel[P]
-    : StateModel[P] extends Pojo
-    ? StateModel[P] extends Computed<any, any, any>
-      ? StateModel[P]['result']
-      : StateModel[P] extends Reducer<any, any>
-      ? StateModel[P]['result']
-      : StateModel[P] extends object
-      ? StateModel[P] extends string | Array<any> | RegExp | Date | Function
-        ? StateModel[P]
-        : RecursiveState<
-            StateModel[P],
-            Depth extends '1'
-              ? '2'
-              : Depth extends '2'
-              ? '3'
-              : Depth extends '3'
-              ? '4'
-              : Depth extends '4'
-              ? '5'
-              : '6'
-          >
+    : StateModel[P] extends Computed<any, any, any>
+    ? StateModel[P]['result']
+    : StateModel[P] extends Reducer<any, any>
+    ? StateModel[P]['result']
+    : StateModel[P] extends object
+    ? StateModel[P] extends InvalidObjectTypes
+      ? StateModel[P]
+      : IncludesDeep<StateModel[P], StateTypes> extends 1
+      ? RecursiveState<
+          StateModel[P],
+          Depth extends '1'
+            ? '2'
+            : Depth extends '2'
+            ? '3'
+            : Depth extends '3'
+            ? '4'
+            : Depth extends '4'
+            ? '5'
+            : '6'
+        >
       : StateModel[P]
     : StateModel[P];
 };
