@@ -50,7 +50,6 @@ const baseConfig = {
         '@babel/plugin-syntax-import-meta',
         ['@babel/plugin-proposal-class-properties', { loose: false }],
         '@babel/plugin-proposal-json-strings',
-        ['transform-react-remove-prop-types', { removeImport: true }],
       ],
     }),
   ],
