@@ -121,36 +121,7 @@ function resolvePersistTargets(target, whitelist, blacklist) {
   return targets;
 }
 
-export function createPersistor(persistKey, references) {
-  return debounce(() => {
-    references.internals.persistenceConfig.forEach(({ path, config }) => {
-      const { storage, whitelist, blacklist } = config;
-      const state = references.getState();
-      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
-      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
-      targets.forEach(key => {
-        const targetPath = [...path, key];
-        storage.setItem(persistKey(targetPath), get(targetPath, state));
-      });
-    });
-  }, 1000);
-}
-
-export function createPersistMiddleware(persistor, references) {
-  return () => next => action => {
-    const state = next(action);
-    if (
-      action &&
-      action.type !== '@action.ePRS' &&
-      references.internals.persistenceConfig.length > 0
-    ) {
-      persistor(state);
-    }
-    return state;
-  };
-}
-
-export function createPersistenceClearer(persistKey, references) {
+function createPersistenceClearer(persistKey, references) {
   return () =>
     new Promise((resolve, reject) => {
       references.internals.persistenceConfig.forEach(({ path, config }) => {
@@ -173,6 +144,41 @@ export function createPersistenceClearer(persistKey, references) {
         }
       });
     });
+}
+
+export function createPersistor(persistKey, references) {
+  const persist = debounce(() => {
+    references.internals.persistenceConfig.forEach(({ path, config }) => {
+      const { storage, whitelist, blacklist } = config;
+      const state = references.getState();
+      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
+      targets.forEach(key => {
+        const targetPath = [...path, key];
+        storage.setItem(persistKey(targetPath), get(targetPath, state));
+      });
+    });
+  }, 1000);
+
+  return {
+    persist,
+    clear: createPersistenceClearer(persistKey, references),
+    flush: () => persist.flush(),
+  };
+}
+
+export function createPersistMiddleware(persistor, references) {
+  return () => next => action => {
+    const state = next(action);
+    if (
+      action &&
+      action.type !== '@action.ePRS' &&
+      references.internals.persistenceConfig.length > 0
+    ) {
+      persistor.persist(state);
+    }
+    return state;
+  };
 }
 
 export function rehydrateStateFromPersistIfNeeded(

@@ -9,7 +9,6 @@ import createStoreInternals from './create-store-internals';
 import {
   createPersistor,
   createPersistMiddleware,
-  createPersistenceClearer,
   rehydrateStateFromPersistIfNeeded,
 } from './persistence';
 import { createComputedPropertiesMiddleware } from './computed-properties';
@@ -46,7 +45,6 @@ export default function createStore(model, options = {}) {
   const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
   const persistor = createPersistor(persistKey, references);
   const persistMiddleware = createPersistMiddleware(persistor, references);
-  const clearPersistance = createPersistenceClearer(persistKey, references);
 
   const replaceState = nextState =>
     references.internals.actionCreatorDict['@action.ePRS'](nextState);
@@ -153,8 +151,8 @@ export default function createStore(model, options = {}) {
     getListeners: () => references.internals.listenerActionCreators,
     getMockedActions: () => [...mockedActions],
     persist: {
-      clear: clearPersistance,
-      flush: () => persistor.flush(),
+      clear: persistor.clear,
+      flush: persistor.flush,
       resolveRehydration: () => resolveRehydration,
     },
     reconfigure: newModel => {
