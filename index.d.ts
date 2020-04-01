@@ -347,6 +347,11 @@ export interface Store<
   getActions: () => Actions<StoreModel>;
   getListeners: () => Listeners<StoreModel>;
   getMockedActions: () => MockedAction[];
+  persist: {
+    clear: () => Promise<void>;
+    flush: () => Promise<void>;
+    resolveRehydration: () => Promise<void>;
+  };
   reconfigure: <NewStoreModel extends object>(model: NewStoreModel) => void;
   removeModel: (key: string) => void;
 

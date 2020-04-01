@@ -60,3 +60,7 @@ store.dispatch.doThunk(true);
 store.getMockedActions()[0].type;
 
 store.clearMockedActions();
+
+store.persist.clear().then(() => undefined);
+store.persist.flush().then(() => undefined);
+store.persist.resolveRehydration().then(() => undefined);
