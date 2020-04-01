@@ -186,26 +186,6 @@ export type Actions<Model extends object = {}> = RecursiveActions<Model, '1'>;
 
 // #region State
 
-interface Pojo {
-  [key: string]:
-    | bigint
-    | boolean
-    | null
-    | number
-    | string
-    | symbol
-    | undefined
-    | Map<any, any>
-    | Set<any>
-    | Array<any>
-    | any[]
-    | Function
-    | object
-    // | Generic<any>
-    | Computed<any, any, any>
-    | Reducer<any, any>;
-}
-
 type StateTypes = Computed<any, any, any> | Reducer<any, any> | ActionTypes;
 
 type InvalidObjectTypes = string | Array<any> | RegExp | Date | Function;
@@ -258,7 +238,7 @@ type IncludesDeep<Obj extends object, M extends any> = O.Includes<
       1
     >;
 
-type StateMapper<StateModel extends object, Depth extends string> = {
+type StateMapper<StateModel extends object> = {
   [P in keyof StateModel]: StateModel[P] extends Generic<infer T>
     ? T
     : P extends IndexSignatureKeysOfType<StateModel>
@@ -271,28 +251,14 @@ type StateMapper<StateModel extends object, Depth extends string> = {
     ? StateModel[P] extends InvalidObjectTypes
       ? StateModel[P]
       : IncludesDeep<StateModel[P], StateTypes> extends 1
-      ? RecursiveState<
-          StateModel[P],
-          Depth extends '1'
-            ? '2'
-            : Depth extends '2'
-            ? '3'
-            : Depth extends '3'
-            ? '4'
-            : Depth extends '4'
-            ? '5'
-            : '6'
-        >
+      ? RecursiveState<StateModel[P]>
       : StateModel[P]
     : StateModel[P];
 };
 
-type RecursiveState<
-  Model extends object,
-  Depth extends string
-> = Depth extends '6'
-  ? Model
-  : StateMapper<O.Filter<Model, ActionTypes>, Depth>;
+type RecursiveState<Model extends object> = StateMapper<
+  O.Filter<Model, ActionTypes>
+>;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -301,7 +267,7 @@ type RecursiveState<
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends object = {}> = RecursiveState<Model, '1'>;
+export type State<Model extends object = {}> = RecursiveState<Model>;
 
 // #endregion
 
