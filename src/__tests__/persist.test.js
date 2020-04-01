@@ -12,25 +12,44 @@ import {
   createContextStore,
 } from '../index';
 
-jest.mock('debounce', () => fn => fn);
+// jest.mock('debounce', () => fn => {
+//   const wrappedFn = (...args) => fn(...args);
+//   wrappedFn.flush = () =>
+//   return wrappedFn;
+// });
+
+// jest.useFakeTimers();
+
+const wait = () =>
+  new Promise(resolve => {
+    setTimeout(() => resolve(), 20);
+  });
 
 const createMemoryStorage = (initial = {}, config = { async: false }) => {
   const store = initial;
   const { async } = config;
   return {
     setItem: (key, data) => {
-      store[key] = data;
       if (async) {
-        return Promise.resolve({});
+        return wait().then(() => {
+          store[key] = data;
+        });
       }
+      store[key] = data;
+      return undefined;
     },
     getItem: key => {
       const data = store[key];
-      return async ? Promise.resolve(data) : data;
+      return async ? wait().then(() => data) : data;
     },
     removeItem: key => {
+      if (async) {
+        return wait().then(() => {
+          delete store[key];
+        });
+      }
       delete store[key];
-      return Promise.resolve();
+      return undefined;
     },
     store,
   };
@@ -60,7 +79,7 @@ afterEach(() => {
   process.env.NODE_ENV = 'test';
 });
 
-test('default storage', () => {
+test('default storage', async () => {
   // ARRANGE
   const store = makeStore();
 
@@ -70,7 +89,9 @@ test('default storage', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore();
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -79,7 +100,7 @@ test('default storage', () => {
   });
 });
 
-test('local storage', () => {
+test('local storage', async () => {
   // ARRANGE
   const persistConfig = {
     storage: 'localStorage',
@@ -92,7 +113,9 @@ test('local storage', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore(persistConfig);
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -101,7 +124,7 @@ test('local storage', () => {
   });
 });
 
-test('session storage', () => {
+test('session storage', async () => {
   // ARRANGE
   const persistConfig = {
     storage: 'sessionStorage',
@@ -114,7 +137,9 @@ test('session storage', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore(persistConfig);
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -123,7 +148,7 @@ test('session storage', () => {
   });
 });
 
-test('invalid storage', () => {
+test('invalid storage', async () => {
   // ARRANGE
   process.env.NODE_ENV = 'development';
   const persistConfig = {
@@ -137,7 +162,9 @@ test('invalid storage', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore(persistConfig);
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -146,7 +173,7 @@ test('invalid storage', () => {
   });
 });
 
-test('custom sync storage', () => {
+test('custom sync storage', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = { storage: memoryStorage };
@@ -158,7 +185,9 @@ test('custom sync storage', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore(persistConfig);
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -167,7 +196,7 @@ test('custom sync storage', () => {
   });
 });
 
-test('whitelist', () => {
+test('whitelist', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = { storage: memoryStorage, whitelist: ['msg'] };
@@ -179,7 +208,9 @@ test('whitelist', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore(persistConfig);
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -188,7 +219,7 @@ test('whitelist', () => {
   });
 });
 
-test('blacklist', () => {
+test('blacklist', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = { storage: memoryStorage, blacklist: ['counter'] };
@@ -200,7 +231,9 @@ test('blacklist', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore(persistConfig);
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -209,7 +242,7 @@ test('blacklist', () => {
   });
 });
 
-test('nested', () => {
+test('nested', async () => {
   // ARRANGE
   const makeStore = (config = {}) =>
     createStore(
@@ -237,7 +270,9 @@ test('nested', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore({ storage: memoryStorage });
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -249,7 +284,7 @@ test('nested', () => {
   });
 });
 
-test('overwrite', () => {
+test('overwrite', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = {
@@ -265,7 +300,9 @@ test('overwrite', () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore(persistConfig);
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -273,7 +310,7 @@ test('overwrite', () => {
   });
 });
 
-test('mergeDeep', () => {
+test('mergeDeep', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
     '[EasyPeasyStore]@counter': 1,
@@ -298,6 +335,7 @@ test('mergeDeep', () => {
       },
     ),
   );
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -309,7 +347,7 @@ test('mergeDeep', () => {
   });
 });
 
-test('mergeDeep with extended model structure', () => {
+test('mergeDeep with extended model structure', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
     '[EasyPeasyStore]@counter': 1,
@@ -337,6 +375,7 @@ test('mergeDeep with extended model structure', () => {
       },
     ),
   );
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -431,8 +470,8 @@ test('asynchronous storage', async () => {
     msg: 'hello universe',
   });
 
+  await store.persist.flush();
   const rehydratedStore = makeStore({ storage: memoryStorage });
-
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -452,6 +491,7 @@ test('clear', async () => {
     counter: 1,
     msg: 'hello universe',
   });
+  await store.persist.flush();
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
@@ -466,7 +506,7 @@ test('clear', async () => {
   expect(memoryStorage.store).toEqual({});
 });
 
-test('transformers', () => {
+test('transformers', async () => {
   // ARRANGE
   const upperCaseTransformer = createTransform(
     (data, key) => {
@@ -522,6 +562,7 @@ test('transformers', () => {
     one: 'item one',
     two: 'item two',
   });
+  await store.persist.flush();
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
@@ -531,6 +572,7 @@ test('transformers', () => {
 
   // ACT
   const rehydratedStore = makeStore();
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -539,7 +581,7 @@ test('transformers', () => {
   });
 });
 
-test('multiple stores', () => {
+test('multiple stores', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = {
@@ -553,17 +595,21 @@ test('multiple stores', () => {
     counter: 1,
     msg: 'i am store 1',
   });
+  await store1.persist.flush();
   store2.getActions().change({
     counter: 99,
     msg: 'i am store 2',
   });
+  await store2.persist.flush();
 
   const rehydratedStore1 = makeStore(persistConfig, undefined, {
     name: 'Store1',
   });
+  await rehydratedStore1.persist.resolveRehydration();
   const rehydratedStore2 = makeStore(persistConfig, undefined, {
     name: 'Store2',
   });
+  await rehydratedStore2.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore1.getState()).toEqual({
@@ -652,7 +698,7 @@ test('useStoreRehydrated + createContextStore', async () => {
   expect(wrapper.queryByText('Loaded')).not.toBeNull();
 });
 
-test('computed properties', () => {
+test('computed properties', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const makeStore = () =>
@@ -681,7 +727,9 @@ test('computed properties', () => {
   store.getActions().addTodo('write more tests');
   store.getActions().nested.addTodo('write more tests');
 
+  await store.persist.flush();
   const rehydratedStore = makeStore();
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -691,5 +739,25 @@ test('computed properties', () => {
       todos: ['write tests', 'write more tests'],
       todoCount: 2,
     },
+  });
+});
+
+test('flush', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage(undefined, { async: true });
+  const store = makeStore({ storage: memoryStorage });
+
+  // ACT
+  store.getActions().change({
+    counter: 1,
+    msg: 'hello universe',
+  });
+
+  await store.persist.flush();
+
+  // ASSERT
+  expect(memoryStorage.store).toEqual({
+    '[EasyPeasyStore]@counter': 1,
+    '[EasyPeasyStore]@msg': 'hello universe',
   });
 });
