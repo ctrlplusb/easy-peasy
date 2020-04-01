@@ -17,7 +17,7 @@ const store = createStore(
 );
 ```
 
-Every time the state changes it will be saved to the configured storage engine (`sessionStorage` by default). 
+Every time the state changes it will be saved to the configured storage engine (`sessionStorage` by default).
 
 When your application is freshly mounted, e.g. on a page refresh, any data that exists within the configured storage engine will be used to rehydrate your state accordingly.
 
@@ -30,14 +30,16 @@ const app = (
     <MyApp />
   </StoreProvider>
 );
-``` 
+```
 
 ## API
 
+Below is the API of the `persist` helper, however, you should be aware that [Store](/docs/api/store.html) instances contain additional APIs relating to persistence. Such as being able to flush persistence prior to navigating away from your application, or awaiting for persisted data to be rehydrated prior to rendering your application. We highly recommend you read the respective [Store](/docs/api/store.html) API docs.
+
   - `model` (Object, *required*)
 
-    The model that you wish to apply persistence to. 
-    
+    The model that you wish to apply persistence to.
+
     > You can surround your entire model, or a nested model. You can even have multiple `persist` configurations scattered throughout your store's model. Feel free to use the API on the parts of your state feel most appropriate for persistence/rehydration.
 
   - `config` (Object, *optional*)
@@ -54,8 +56,8 @@ const app = (
 
     - `mergeStrategy` (string, *optional*)
 
-      The strategy that should be employed when rehydrating the persisted state over your store's initial state. 
-      
+      The strategy that should be employed when rehydrating the persisted state over your store's initial state.
+
       The following values are supported:
 
       - `'merge'` (*default*)
@@ -132,7 +134,7 @@ const app = (
         }
         ```
 
-      - `'mergeDeep'` 
+      - `'mergeDeep'`
 
         The data from the persistence will be merged deeply, recursing through all _object_ structures and merging.
 
@@ -175,7 +177,7 @@ const app = (
         ```
 
         > **Note:** Only *plain objects* will be recursed and merged; no other types such as Arrays, Maps, Sets, Classes etc.
-    
+
     - `transformers` (Array<Transformer>, *optional*)
 
       Transformers are use to apply operations to your data during prior it being persisted or hydrated.
@@ -204,7 +206,7 @@ const app = (
 
       - Custom engine
 
-        A custom storage engine. 
+        A custom storage engine.
 
         [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines) that have been built for it. These can be used here.
 
@@ -239,7 +241,7 @@ const model = persist(
     increment: (state) => {
       state.counter += 1;
     }
-  }, 
+  },
   // 👇 configuration
   {
     whitelist: ['counter'],
@@ -293,7 +295,7 @@ store.persist.resolveRehydration().then(() => {
 
 **Option 2: Eagerly render your application and utilise the `useStoreRehydrated` hook**
 
-You can alternatively render your application immediately, i.e. not wait for the async rehydration to resolve. 
+You can alternatively render your application immediately, i.e. not wait for the async rehydration to resolve.
 
 To improve your user's experience you can utilise the [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook. This hook returns a boolean flag indicating when the rehydration has completed.
 

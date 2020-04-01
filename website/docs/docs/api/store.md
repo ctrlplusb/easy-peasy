@@ -38,6 +38,22 @@ A store is created via the [createStore](/docs/api/create-store.html) API. A sto
 
     Returns the state of your store.
 
+  - `persist` (Object)
+
+    This API is useful if you have are making use of [`persist`](/docs/api/persist.html) configurations within your model. It contains the following properties:
+
+    - `clear` (() => Promise)
+
+      When executed it will clear all data from all the configured persistence storage locations.
+
+    - `flush` (() => Promise)
+
+      When executed it will ensure an outstanding persistence operations are completed. When they have done so then the Promise will resolve. This is particularly helpful in scenarios such as ensuring the persistence has completed prior to the user navigating away from your application.
+
+    - `resolveRehydration` (() => Promise)
+
+      When executed returns a Promise that resolves when the store has completed the rehydration on state from the persisted storage locations. This is useful during the initial rendering of your application. You could await on this resolution prior to rendering your application in order to ensure all the persisted data has been rehydrated.
+
   - `reconfigure` (Function)
 
     Allows you to reconfigure the store by providing a new/updated model. The existing state of the store will be maintained. This is especially useful in supporting hot reloading.
@@ -56,4 +72,4 @@ A store is created via the [createStore](/docs/api/create-store.html) API. A sto
     store.removeModel('todos');
     store.getState().todos; // undefined
     ```
-    
+
