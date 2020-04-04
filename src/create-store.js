@@ -47,7 +47,7 @@ export default function createStore(model, options = {}) {
   const persistMiddleware = createPersistMiddleware(persistor, references);
 
   const replaceState = nextState =>
-    references.internals.actionCreatorDict['@action.ePRS'](nextState);
+    references.internals._actionCreatorDict['@action.ePRS'](nextState);
 
   const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({
@@ -93,12 +93,12 @@ export default function createStore(model, options = {}) {
 
   const store = reduxCreateStore(
     references.internals.reducer,
-    references.internals.defaultState,
+    references.internals._defaultState,
     composeEnhancers(applyMiddleware(...easyPeasyMiddleware), ...enhancers),
   );
 
   store.subscribe(() => {
-    references.internals.computedState.isInReducer = false;
+    references.internals._computedState.isInReducer = false;
   });
 
   references.dispatch = store.dispatch;
@@ -108,8 +108,8 @@ export default function createStore(model, options = {}) {
     Object.keys(store.dispatch).forEach(actionsKey => {
       delete store.dispatch[actionsKey];
     });
-    Object.keys(references.internals.actionCreators).forEach(key => {
-      store.dispatch[key] = references.internals.actionCreators[key];
+    Object.keys(references.internals._actionCreators).forEach(key => {
+      store.dispatch[key] = references.internals._actionCreators[key];
     });
   };
 
@@ -122,7 +122,7 @@ export default function createStore(model, options = {}) {
     }
     bindStoreInternals(currentState);
     store.replaceReducer(references.internals.reducer);
-    replaceState(references.internals.defaultState);
+    replaceState(references.internals._defaultState);
     bindActionCreators();
   };
 
@@ -147,8 +147,8 @@ export default function createStore(model, options = {}) {
     clearMockedActions: () => {
       mockedActions = [];
     },
-    getActions: () => references.internals.actionCreators,
-    getListeners: () => references.internals.listenerActionCreators,
+    getActions: () => references.internals._actionCreators,
+    getListeners: () => references.internals._listenerActionCreators,
     getMockedActions: () => [...mockedActions],
     persist: {
       clear: persistor.clear,

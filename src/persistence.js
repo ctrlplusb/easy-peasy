@@ -124,7 +124,7 @@ function resolvePersistTargets(target, whitelist, blacklist) {
 function createPersistenceClearer(persistKey, references) {
   return () =>
     new Promise((resolve, reject) => {
-      references.internals.persistenceConfig.forEach(({ path, config }) => {
+      references.internals._persistenceConfig.forEach(({ path, config }) => {
         const { storage, whitelist, blacklist } = config;
         const persistRoot = get(path, references.getState());
         const targets = resolvePersistTargets(
@@ -150,28 +150,31 @@ export function createPersistor(persistKey, references) {
   let persistPromise = Promise.resolve();
 
   const persist = debounce(() => {
-    if (references.internals.persistenceConfig.length === 0) {
+    if (references.internals._persistenceConfig.length === 0) {
       return;
     }
     persistPromise = Promise.all(
-      references.internals.persistenceConfig.reduce((acc, { path, config }) => {
-        const { storage, whitelist, blacklist } = config;
-        const state = references.getState();
-        const persistRoot = deepCloneStateWithoutComputed(get(path, state));
-        const targets = resolvePersistTargets(
-          persistRoot,
-          whitelist,
-          blacklist,
-        );
-        return acc.concat(
-          targets.map(key => {
-            const targetPath = [...path, key];
-            return Promise.resolve(
-              storage.setItem(persistKey(targetPath), get(targetPath, state)),
-            );
-          }),
-        );
-      }, []),
+      references.internals._persistenceConfig.reduce(
+        (acc, { path, config }) => {
+          const { storage, whitelist, blacklist } = config;
+          const state = references.getState();
+          const persistRoot = deepCloneStateWithoutComputed(get(path, state));
+          const targets = resolvePersistTargets(
+            persistRoot,
+            whitelist,
+            blacklist,
+          );
+          return acc.concat(
+            targets.map(key => {
+              const targetPath = [...path, key];
+              return Promise.resolve(
+                storage.setItem(persistKey(targetPath), get(targetPath, state)),
+              );
+            }),
+          );
+        },
+        [],
+      ),
     );
   }, 1000);
 
@@ -191,7 +194,7 @@ export function createPersistMiddleware(persistor, references) {
     if (
       action &&
       action.type !== '@action.ePRS' &&
-      references.internals.persistenceConfig.length > 0
+      references.internals._persistenceConfig.length > 0
     ) {
       persistor.persist(state);
     }
@@ -206,12 +209,12 @@ export function rehydrateStateFromPersistIfNeeded(
 ) {
   // If we have any persist configs we will attemp to perform a state rehydration
   let resolveRehydration = Promise.resolve();
-  if (references.internals.persistenceConfig.length > 0) {
-    references.internals.persistenceConfig.forEach(persistInstance => {
+  if (references.internals._persistenceConfig.length > 0) {
+    references.internals._persistenceConfig.forEach(persistInstance => {
       const { path, config } = persistInstance;
       const { blacklist, mergeStrategy, storage, whitelist } = config;
 
-      const state = references.internals.defaultState;
+      const state = references.internals._defaultState;
       const persistRoot = deepCloneStateWithoutComputed(get(path, state));
       const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
 

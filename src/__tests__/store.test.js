@@ -196,8 +196,8 @@ test('allows custom middleware with mockActions=true', () => {
 
 test('allows custom enhancers', () => {
   // arrange
-  const defaultState = { foo: 'bar' };
-  const rootReducer = (state = defaultState) => state;
+  const _defaultState = { foo: 'bar' };
+  const rootReducer = (state = _defaultState) => state;
 
   // act
   createStore(

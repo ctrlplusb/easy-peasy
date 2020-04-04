@@ -6,7 +6,7 @@ export function createThunkHandler(
   meta,
   references,
   injections,
-  actionCreators,
+  _actionCreators,
 ) {
   const thunkMeta =
     thunkDefinition[thunkSymbol] || thunkDefinition[thunkOnSymbol];
@@ -15,7 +15,7 @@ export function createThunkHandler(
     const helpers = {
       dispatch: references.dispatch,
       getState: () => get(meta.parent, references.getState()),
-      getStoreActions: () => actionCreators,
+      getStoreActions: () => _actionCreators,
       getStoreState: references.getState,
       injections,
       meta,
@@ -23,7 +23,7 @@ export function createThunkHandler(
     if (thunkDefinition[thunkOnSymbol] && thunkMeta.resolvedTargets) {
       payload.resolvedTargets = [...thunkMeta.resolvedTargets];
     }
-    return thunkDefinition(get(meta.parent, actionCreators), payload, helpers);
+    return thunkDefinition(get(meta.parent, _actionCreators), payload, helpers);
   };
 }
 
