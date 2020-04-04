@@ -3,9 +3,9 @@ import { actionSymbol, actionOnSymbol } from './constants';
 
 export default function createReducer(
   disableImmer,
-  actionReducersDict,
-  customReducers,
-  computedProperties,
+  _actionReducersDict,
+  _customReducers,
+  _computedProperties,
 ) {
   const simpleProduce = createSimpleProduce(disableImmer);
 
@@ -16,7 +16,7 @@ export default function createReducer(
   };
 
   const reducerForActions = (state, action) => {
-    const actionReducer = actionReducersDict[action.type];
+    const actionReducer = _actionReducersDict[action.type];
     if (actionReducer) {
       const actionMeta =
         actionReducer[actionSymbol] || actionReducer[actionOnSymbol];
@@ -31,7 +31,7 @@ export default function createReducer(
   };
 
   const reducerForCustomReducers = (state, action) => {
-    return customReducers.reduce((acc, { parentPath, key, reducer: red }) => {
+    return _customReducers.reduce((acc, { parentPath, key, reducer: red }) => {
       return simpleProduce(parentPath, acc, draft => {
         draft[key] = red(draft[key], action);
         return draft;
@@ -42,11 +42,11 @@ export default function createReducer(
   const rootReducer = (state, action) => {
     const stateAfterActions = reducerForActions(state, action);
     const next =
-      customReducers.length > 0
+      _customReducers.length > 0
         ? reducerForCustomReducers(stateAfterActions, action)
         : stateAfterActions;
     if (state !== next) {
-      computedProperties.forEach(({ parentPath, bindComputedProperty }) => {
+      _computedProperties.forEach(({ parentPath, bindComputedProperty }) => {
         const prop = get(parentPath, next);
         if (prop != null) bindComputedProperty(prop);
       });

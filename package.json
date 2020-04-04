@@ -1,10 +1,12 @@
 {
   "name": "easy-peasy",
-  "version": "3.4.0-alpha.13",
+  "version": "3.4.0-alpha.16",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
-  "main": "dist/easy-peasy.cjs.js",
+  "main": "dist/easy-peasy.js",
+  "umd:main": "dist/easy-peasy.umd.js",
   "module": "dist/easy-peasy.esm.js",
+  "source": "src/index.js",
   "types": "./index.d.ts",
   "sideEffects": false,
   "files": [
@@ -27,7 +29,7 @@
     "typescript"
   ],
   "scripts": {
-    "build": "microbundle src/index.js --format cjs,es,umd",
+    "build": "microbundle src/index.js --format cjs,es,umd --jsx React.createElement",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "lint": "eslint src",
     "postinstall": "node ./scripts/run-patches",
@@ -35,6 +37,9 @@
     "test": "jest",
     "test:coverage": "yarn run test -- --coverage",
     "test:coverage:deploy": "yarn run test:coverage && codecov"
+  },
+  "mangle": {
+    "regex": "^_"
   },
   "husky": {
     "hooks": {
