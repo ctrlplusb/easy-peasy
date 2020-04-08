@@ -327,6 +327,10 @@ export interface MockedAction {
   [key: string]: any;
 }
 
+export interface AddModelResult {
+  resolveRehydration: () => Promise<void>;
+}
+
 /**
  * Represents a Redux store, enhanced by easy peasy.
  *
@@ -341,7 +345,7 @@ export interface Store<
   addModel: <ModelSlice extends object>(
     key: string,
     modelSlice: ModelSlice,
-  ) => void;
+  ) => AddModelResult;
   clearMockedActions: () => void;
   dispatch: Dispatch<StoreModel>;
   getActions: () => Actions<StoreModel>;

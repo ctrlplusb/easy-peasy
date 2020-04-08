@@ -761,3 +761,119 @@ test('flush', async () => {
     '[EasyPeasyStore]@msg': 'hello universe',
   });
 });
+
+test('dynamic model with sync storage', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage();
+  // eslint-disable-next-line no-shadow
+  const makeStore = () =>
+    createStore({
+      todos: persist(
+        {
+          items: ['foo', 'bar'],
+        },
+        { storage: memoryStorage },
+      ),
+    });
+  const addDynamicModel = store => {
+    store.addModel(
+      'foo',
+      persist(
+        {
+          msg: 'baz',
+          changeMessage: action((state, payload) => {
+            state.msg = payload;
+          }),
+        },
+        { storage: memoryStorage },
+      ),
+    );
+  };
+  const store = makeStore();
+
+  // ACT
+  addDynamicModel(store);
+  store.getActions().foo.changeMessage('bob');
+
+  await store.persist.flush();
+  const rehydratedStore = makeStore();
+  await rehydratedStore.persist.resolveRehydration();
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    todos: {
+      items: ['foo', 'bar'],
+    },
+  });
+
+  // ACT
+  addDynamicModel(rehydratedStore);
+  expect(rehydratedStore.getState()).toEqual({
+    todos: {
+      items: ['foo', 'bar'],
+    },
+    foo: {
+      msg: 'bob',
+    },
+  });
+});
+
+test('dynamic model with async storage', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage(undefined, { async: true });
+  // eslint-disable-next-line no-shadow
+  const makeStore = () =>
+    createStore({
+      todos: persist(
+        {
+          items: ['foo', 'bar'],
+        },
+        { storage: memoryStorage },
+      ),
+    });
+  const addDynamicModel = store =>
+    store.addModel(
+      'foo',
+      persist(
+        {
+          msg: 'baz',
+          changeMessage: action((state, payload) => {
+            state.msg = payload;
+          }),
+        },
+        { storage: memoryStorage },
+      ),
+    );
+  const store = makeStore();
+
+  // ACT
+  addDynamicModel(store);
+
+  store.getActions().foo.changeMessage('bob');
+
+  await store.persist.flush();
+  const rehydratedStore = makeStore();
+  await rehydratedStore.persist.resolveRehydration();
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    todos: {
+      items: ['foo', 'bar'],
+    },
+  });
+
+  // ACT
+  const { resolveRehydration } = addDynamicModel(rehydratedStore);
+  await resolveRehydration();
+  // 👆 note how we await the returned promise
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    todos: {
+      items: ['foo', 'bar'],
+    },
+    foo: {
+      msg: 'bob',
+    },
+  });
+});

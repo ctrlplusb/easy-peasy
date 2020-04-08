@@ -14,6 +14,12 @@ A store is created via the [createStore](/docs/api/create-store.html) API. A sto
     store.getState().todos.items; // ["Buy shoes"]
     ```
 
+    When executed you will be returned an object containing the following properties:
+
+    - `resolveRehydration` (() => Promise)
+
+      If you are utilising [`persist`](/docs/api/persist.html) within your dynamically added model, and the configured storage engine is asynchronous then you can execute this helper function to get a handle on a `Promise` that resolves when the data for your dynamically added model has rehydrated.
+
   - `clearMockedActions` (Function)
 
     If the `mockActions` configuration value was passed to the `createStore` then calling this function clears the list of mocked actions that have been tracked by the store. This is useful in the context of testing - especially thunks and listeners.
