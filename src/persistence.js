@@ -206,6 +206,7 @@ export function rehydrateStateFromPersistIfNeeded(
   persistKey,
   replaceState,
   references,
+  root,
 ) {
   // If we have any persist configs we will attemp to perform a state rehydration
   let resolveRehydration = Promise.resolve();
@@ -213,6 +214,10 @@ export function rehydrateStateFromPersistIfNeeded(
     references.internals._persistenceConfig.forEach(persistInstance => {
       const { path, config } = persistInstance;
       const { blacklist, mergeStrategy, storage, whitelist } = config;
+
+      if (root && (path.length < 1 || path[0] !== root)) {
+        return;
+      }
 
       const state = references.internals._defaultState;
       const persistRoot = deepCloneStateWithoutComputed(get(path, state));

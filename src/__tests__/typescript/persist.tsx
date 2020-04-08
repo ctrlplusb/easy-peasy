@@ -15,18 +15,18 @@ const model = persist(
     storage: 'sessionStorage',
     transformers: [
       {
-        in: (data, key) => `${key  }foo`,
-        out: (data, key) => `${key  }foo`,
+        in: (data, key) => `${key}foo`,
+        out: (data, key) => `${key}foo`,
       },
     ],
   },
 );
 
-`${model.foo  }baz`;
+`${model.foo}baz`;
 
 createTransform(
-  (data, key) => `${key  }foo`,
-  (data, key) => `${key  }foo`,
+  (data, key) => `${key}foo`,
+  (data, key) => `${key}foo`,
   {
     whitelist: ['foo'],
     blacklist: ['foo'],
@@ -34,13 +34,13 @@ createTransform(
 );
 
 createTransform(
-  (data, key) => `${key  }foo`,
-  (data, key) => `${key  }foo`,
+  (data, key) => `${key}foo`,
+  (data, key) => `${key}foo`,
 );
 
-createTransform((data, key) => `${key  }foo`);
+createTransform((data, key) => `${key}foo`);
 
-createTransform(undefined, (data, key) => `${key  }foo`, {
+createTransform(undefined, (data, key) => `${key}foo`, {
   whitelist: ['foo'],
   blacklist: ['foo'],
 });
@@ -51,8 +51,8 @@ createTransform(undefined, undefined, {
 });
 
 const transformer = createTransform(
-  (data, key) => `${key  }foo`,
-  (data, key) => `${key  }foo`,
+  (data, key) => `${key}foo`,
+  (data, key) => `${key}foo`,
   {
     whitelist: ['foo'],
     blacklist: ['foo'],

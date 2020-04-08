@@ -143,6 +143,17 @@ export default function createStore(model, options = {}) {
       }
       modelDefinition[key] = modelForKey;
       rebindStore();
+      // There may have been persisted state for a dynamic model. We should try
+      // and rehydrate the specifc node
+      const addModelRehydration = rehydrateStateFromPersistIfNeeded(
+        persistKey,
+        replaceState,
+        references,
+        key,
+      );
+      return {
+        resolveRehydration: () => addModelRehydration,
+      };
     },
     clearMockedActions: () => {
       mockedActions = [];

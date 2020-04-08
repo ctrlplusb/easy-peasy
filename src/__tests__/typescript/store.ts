@@ -64,3 +64,13 @@ store.clearMockedActions();
 store.persist.clear().then(() => undefined);
 store.persist.flush().then(() => undefined);
 store.persist.resolveRehydration().then(() => undefined);
+
+// typings:expect-error
+store.addModel();
+// typings:expect-error
+store.addModel('bar');
+// typings:expect-error
+store.addModel('bar', true);
+
+const addModelResult = store.addModel('foo', {});
+addModelResult.resolveRehydration().then(() => undefined);
