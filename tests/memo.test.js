@@ -1,4 +1,4 @@
-import { memo } from '../index';
+import { memo } from '../src';
 
 it('should memoize according to the cache size limit', () => {
   // arrange

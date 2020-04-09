@@ -1,4 +1,4 @@
-import { createStore, thunk } from '../index';
+import { createStore, thunk } from '../src';
 
 test('exposes dependencies to effect actions', async () => {
   // arrange

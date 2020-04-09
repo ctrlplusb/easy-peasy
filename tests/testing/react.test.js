@@ -6,7 +6,7 @@ import {
   StoreProvider,
   useStoreState,
   useStoreActions,
-} from '../../index';
+} from '../../src';
 
 const model = {
   count: 0,

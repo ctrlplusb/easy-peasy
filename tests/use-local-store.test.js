@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { useLocalStore, action } from '../index';
+import { useLocalStore, action } from '../src';
 
 function CountDisplay() {
   const [state, actions] = useLocalStore(() => ({

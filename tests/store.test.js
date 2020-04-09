@@ -1,4 +1,4 @@
-import { action, computed, createStore, reducer, thunk } from '../index';
+import { action, computed, createStore, reducer, thunk } from '../src';
 
 test('empty object in state', () => {
   // arrange

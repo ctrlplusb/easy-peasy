@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { renderToString } from 'react-dom/server';
-import { createStore, useStoreState, StoreProvider } from '../index';
+import { createStore, useStoreState, StoreProvider } from '../src';
 
 test('works', () => {
   // arrange

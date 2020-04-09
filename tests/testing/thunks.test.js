@@ -1,4 +1,4 @@
-import { action, createStore, thunk } from '../../index';
+import { action, createStore, thunk } from '../../src';
 
 const tick = () => new Promise(resolve => setTimeout(resolve, 1));
 

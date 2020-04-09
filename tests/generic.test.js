@@ -1,4 +1,4 @@
-import { createStore, generic } from '../index';
+import { createStore, generic } from '../src';
 
 test('generic values are passed through as state', () => {
   // ACT

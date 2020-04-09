@@ -1,4 +1,4 @@
-import { action, createStore, thunk, actionOn, thunkOn } from '../index';
+import { action, createStore, thunk, actionOn, thunkOn } from '../src';
 
 it('listening to an action, firing an action', () => {
   // arrange

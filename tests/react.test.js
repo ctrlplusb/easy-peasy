@@ -12,7 +12,7 @@ import {
   useStoreActions,
   useStoreDispatch,
   useStoreState,
-} from '../index';
+} from '../src';
 
 beforeEach(() => {
   jest.useFakeTimers();

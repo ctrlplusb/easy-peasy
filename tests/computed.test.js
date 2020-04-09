@@ -10,7 +10,7 @@ import {
   action,
   useStoreState,
   StoreProvider,
-} from '../index';
+} from '../src';
 
 test('patched immer works as expected', () => {
   const original = {

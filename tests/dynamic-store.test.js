@@ -1,4 +1,4 @@
-import { action, createStore, computed } from '../index';
+import { action, createStore, computed } from '../src';
 
 test('addModel', () => {
   // arrange

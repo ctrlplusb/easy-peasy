@@ -4,7 +4,7 @@ import {
   useStoreDispatch,
   useStoreState,
   useStore,
-} from '../index';
+} from '../src';
 
 test('exports all hooks', () => {
   // act

@@ -1,4 +1,4 @@
-import { action, createStore } from '../index';
+import { action, createStore } from '../src';
 
 test('deprecated action API does nothing', () => {
   // act

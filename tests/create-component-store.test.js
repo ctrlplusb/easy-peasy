@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { createComponentStore, action } from '../index';
+import { createComponentStore, action } from '../src';
 
 const useCounter = createComponentStore({
   count: 0,

@@ -1,4 +1,4 @@
-import { action, createStore, thunk, reducer } from '../index';
+import { action, createStore, thunk, reducer } from '../src';
 
 const resolveAfter = (data, ms) =>
   new Promise(resolve => setTimeout(() => resolve(data), ms));
