@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { createContextStore, action } from '../index';
+import { createContextStore, action } from '../src';
 
 const Counter = createContextStore({
   count: 0,

@@ -1,4 +1,4 @@
-import { action, createStore, actionOn } from '../../index';
+import { action, createStore, actionOn } from '../../src';
 
 const model = {
   todos: [],

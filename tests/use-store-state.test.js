@@ -12,7 +12,7 @@ import {
   StoreProvider,
   useStoreActions,
   computed,
-} from '../index';
+} from '../src';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {

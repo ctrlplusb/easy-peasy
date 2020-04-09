@@ -10,7 +10,7 @@ import {
   StoreProvider,
   useStoreRehydrated,
   createContextStore,
-} from '../index';
+} from '../src';
 
 // jest.mock('debounce', () => fn => {
 //   const wrappedFn = (...args) => fn(...args);

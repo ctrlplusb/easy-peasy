@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { createStore, StoreProvider, useStore } from '../index';
+import { createStore, StoreProvider, useStore } from '../src';
 
 test('returns the store instance', () => {
   // arrange

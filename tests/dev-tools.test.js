@@ -1,4 +1,4 @@
-import { createStore } from '../index';
+import { createStore } from '../src';
 
 test('redux dev tools disabled', () => {
   // arrange

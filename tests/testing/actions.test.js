@@ -5,7 +5,7 @@
  * state of your store.
  */
 
-import { action, createStore } from '../../index';
+import { action, createStore } from '../../src';
 
 const todosModel = {
   items: {},

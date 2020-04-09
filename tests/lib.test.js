@@ -1,4 +1,4 @@
-import { get } from '../lib';
+import { get } from '../src/lib';
 
 describe('get', () => {
   test('invalid target', () => {

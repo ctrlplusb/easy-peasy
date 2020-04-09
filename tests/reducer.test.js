@@ -1,4 +1,4 @@
-import { action, createStore, reducer } from '../index';
+import { action, createStore, reducer } from '../src';
 
 it('basic', () => {
   // arrange

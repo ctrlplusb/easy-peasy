@@ -1,4 +1,4 @@
-import { debug, action, createStore } from '../index';
+import { debug, action, createStore } from '../src';
 import { mockConsole } from './utils';
 
 let restore;

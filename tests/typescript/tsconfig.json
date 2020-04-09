@@ -3,7 +3,7 @@
     "lib": ["esnext", "dom"],
     "jsx": "preserve",
     "strict": true,
-    "baseUrl": "../../..",
+    "baseUrl": "../..",
     "skipLibCheck": false,
     "paths": {
       "easy-peasy": ["index.d.ts"]
