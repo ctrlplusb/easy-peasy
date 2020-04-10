@@ -19,6 +19,8 @@ type Model = {
   stateString: string;
   stateUndefined: undefined;
   stateUnion: string | null;
+  stateObject: object;
+  stateMap: Map<string, string>;
   actionImp: Action<Model, number>;
   actionNoPayload: Action<Model>;
   thunkImp: Thunk<Model, string | undefined | null>;
@@ -44,6 +46,10 @@ type Model = {
     reducerImp: Reducer<number>;
     computedImp: Computed<Model, number>;
   };
+  nestedNoActions: {
+    stateObject: object;
+    stateString: string;
+  };
 };
 
 type ModelActions = Actions<Model>;
@@ -58,6 +64,12 @@ store.getActions().thunkImp(null);
 
 const assert = {} as ModelActions;
 
+// typings:expect-error
+assert.stateObject;
+// typings:expect-error
+assert.stateMap;
+// typings:expect-error
+assert.nestedNoActions;
 // typings:expect-error
 assert.stateArray;
 // typings:expect-error
