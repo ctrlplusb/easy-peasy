@@ -90,10 +90,9 @@ type IncludesDeep<Obj extends object, M extends any> = O.Includes<
 
 type ActionEmitterTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
-type ActionTypes =
-  | ActionEmitterTypes
-  | ActionOn<any, any>
-  | ThunkOn<any, any, any>;
+type ActionListenerTypes = ActionOn<any, any> | ThunkOn<any, any, any>;
+
+type ActionTypes = ActionEmitterTypes | ActionListenerTypes;
 
 interface ActionCreator<Payload> {
   (payload: Payload): void;
@@ -124,58 +123,44 @@ export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 // #region Listeners
 
-type ListenerMapper<ActionsModel extends object, Depth extends string> = {
-  [P in keyof ActionsModel]: ActionsModel[P] extends ActionOn<any, any>
+type ValidListenerProperties<ActionsModel extends object> = {
+  [P in keyof ActionsModel]: P extends IndexSignatureKeysOfType<ActionsModel>
+    ? never
+    : ActionsModel[P] extends ActionListenerTypes
+    ? P
+    : ActionsModel[P] extends object
+    ? IncludesDeep<ActionsModel[P], ActionListenerTypes> extends 1
+      ? P
+      : never
+    : never;
+}[keyof ActionsModel];
+
+type ListenerMapper<
+  ActionsModel extends object,
+  K extends keyof ActionsModel
+> = {
+  [P in K]: ActionsModel[P] extends ActionOn<any, any>
     ? ActionCreator<TargetPayload<any>>
     : ActionsModel[P] extends ThunkOn<any, any, any>
     ? ThunkCreator<TargetPayload<any>, any>
     : ActionsModel[P] extends object
-    ? RecursiveListeners<
-        ActionsModel[P],
-        Depth extends '1'
-          ? '2'
-          : Depth extends '2'
-          ? '3'
-          : Depth extends '3'
-          ? '4'
-          : Depth extends '4'
-          ? '5'
-          : '6'
-      >
-    : unknown;
+    ? RecursiveListeners<ActionsModel[P]>
+    : ActionsModel[P];
 };
 
-type RecursiveListeners<
-  Model extends object,
-  Depth extends string
-> = Depth extends '6'
-  ? Model
-  : ListenerMapper<
-      O.Filter<
-        O.Select<Model, object>,
-        | Array<any>
-        | RegExp
-        | Date
-        | string
-        | Reducer<any, any>
-        | Computed<any, any, any>
-        | Action<any, any>
-        | Thunk<any, any, any, any, any>
-      >,
-      Depth
-    >;
+type RecursiveListeners<ActionsModel extends object> = ListenerMapper<
+  ActionsModel,
+  ValidListenerProperties<ActionsModel>
+>;
 
 /**
- * Filters a model into a type that represents the listeners action creators
+ * Filters a model into a type that represents the listeners actions/thunks
  *
  * @example
  *
- * type OnlyActions = Actions<Model>;
+ * type OnlyListeners = Listeners<Model>;
  */
-export type Listeners<Model extends object = {}> = RecursiveListeners<
-  Model,
-  '1'
->;
+export type Listeners<Model extends object = {}> = RecursiveListeners<Model>;
 
 // #endregion
 
