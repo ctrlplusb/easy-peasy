@@ -38,9 +38,60 @@ type IndexSignatureKeysOfType<A extends Object> = {
     : never;
 }[keyof A];
 
+type InvalidObjectTypes = string | Array<any> | RegExp | Date | Function;
+
+type IncludesDeep3<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? O.Includes<Obj, M>
+          : 0;
+      },
+      1
+    >;
+
+type IncludesDeep2<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? IncludesDeep3<Obj[P], M>
+          : 0;
+      },
+      1
+    >;
+
+type IncludesDeep<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? IncludesDeep2<Obj[P], M>
+          : 0;
+      },
+      1
+    >;
+
+type ActionEmitterTypes = Action<any, any> | Thunk<any, any, any, any, any>;
+
 type ActionTypes =
-  | Action<any, any>
-  | Thunk<any, any, any, any, any>
+  | ActionEmitterTypes
   | ActionOn<any, any>
   | ThunkOn<any, any, any>;
 
@@ -130,48 +181,34 @@ export type Listeners<Model extends object = {}> = RecursiveListeners<
 
 // #region Actions
 
-type ActionMapper<ActionsModel extends object, Depth extends string> = {
-  [P in keyof ActionsModel]: ActionsModel[P] extends Action<any, any>
+type ValidActionProperties<ActionsModel extends object> = {
+  [P in keyof ActionsModel]: P extends IndexSignatureKeysOfType<ActionsModel>
+    ? never
+    : ActionsModel[P] extends ActionEmitterTypes
+    ? P
+    : ActionsModel[P] extends object
+    ? IncludesDeep<ActionsModel[P], ActionEmitterTypes> extends 1
+      ? P
+      : never
+    : never;
+}[keyof ActionsModel];
+
+type ActionMapper<ActionsModel extends object, K extends keyof ActionsModel> = {
+  [P in K]: ActionsModel[P] extends Action<any, any>
     ? ActionCreator<ActionsModel[P]['payload']>
     : ActionsModel[P] extends Thunk<any, any, any, any, any>
     ? ActionsModel[P]['payload'] extends void
       ? ThunkCreator<void, ActionsModel[P]['result']>
       : ThunkCreator<ActionsModel[P]['payload'], ActionsModel[P]['result']>
     : ActionsModel[P] extends object
-    ? RecursiveActions<
-        ActionsModel[P],
-        Depth extends '1'
-          ? '2'
-          : Depth extends '2'
-          ? '3'
-          : Depth extends '3'
-          ? '4'
-          : Depth extends '4'
-          ? '5'
-          : '6'
-      >
-    : unknown;
+    ? RecursiveActions<ActionsModel[P]>
+    : ActionsModel[P];
 };
 
-type RecursiveActions<
-  Model extends object,
-  Depth extends string
-> = Depth extends '6'
-  ? Model
-  : ActionMapper<
-      O.Filter<
-        O.Select<Model, object>,
-        | Array<any>
-        | RegExp
-        | Date
-        | string
-        | Reducer<any, any>
-        | Computed<any, any, any>
-        | ActionOn<any, any>
-        | ThunkOn<any, any, any>
-      >,
-      Depth
-    >;
+type RecursiveActions<ActionsModel extends object> = ActionMapper<
+  ActionsModel,
+  ValidActionProperties<ActionsModel>
+>;
 
 /**
  * Filters a model into a type that represents the action/thunk creators
@@ -180,63 +217,13 @@ type RecursiveActions<
  *
  * type OnlyActions = Actions<Model>;
  */
-export type Actions<Model extends object = {}> = RecursiveActions<Model, '1'>;
+export type Actions<Model extends object = {}> = RecursiveActions<Model>;
 
 // #endregion
 
 // #region State
 
 type StateTypes = Computed<any, any, any> | Reducer<any, any> | ActionTypes;
-
-type InvalidObjectTypes = string | Array<any> | RegExp | Date | Function;
-
-type IncludesDeep3<Obj extends object, M extends any> = O.Includes<
-  Obj,
-  M
-> extends 1
-  ? 1
-  : O.Includes<
-      {
-        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
-          ? 0
-          : Obj[P] extends object
-          ? O.Includes<Obj, M>
-          : 0;
-      },
-      1
-    >;
-
-type IncludesDeep2<Obj extends object, M extends any> = O.Includes<
-  Obj,
-  M
-> extends 1
-  ? 1
-  : O.Includes<
-      {
-        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
-          ? 0
-          : Obj[P] extends object
-          ? IncludesDeep3<Obj[P], M>
-          : 0;
-      },
-      1
-    >;
-
-type IncludesDeep<Obj extends object, M extends any> = O.Includes<
-  Obj,
-  M
-> extends 1
-  ? 1
-  : O.Includes<
-      {
-        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
-          ? 0
-          : Obj[P] extends object
-          ? IncludesDeep2<Obj[P], M>
-          : 0;
-      },
-      1
-    >;
 
 type StateMapper<StateModel extends object> = {
   [P in keyof StateModel]: StateModel[P] extends Generic<infer T>

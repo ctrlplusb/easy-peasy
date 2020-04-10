@@ -76,5 +76,6 @@ const personModel = dataModel<Person>('person', () =>
 const store = createStore(personModel);
 
 store.getActions().fetched([]);
+// typings:expect-error
 store.getActions().data;
 store.getActions().nested.save(1);
