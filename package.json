@@ -62,7 +62,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "symbol-observable": "^1.2.0",
-    "ts-toolbelt": "^6.3.13",
+    "ts-toolbelt": "^6.4.2",
     "use-memo-one": "^1.1.1"
   },
   "devDependencies": {
