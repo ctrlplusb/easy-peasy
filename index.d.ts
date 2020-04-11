@@ -222,7 +222,7 @@ type StateMapper<StateModel extends object> = {
     : StateModel[P] extends object
     ? StateModel[P] extends InvalidObjectTypes
       ? StateModel[P]
-      : IncludesDeep<StateModel[P], StateTypes> extends 1
+      : IncludesDeep<StateModel[P], StateTypes | ActionTypes> extends 1
       ? RecursiveState<StateModel[P]>
       : StateModel[P]
     : StateModel[P];
