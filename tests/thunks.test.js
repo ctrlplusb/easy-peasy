@@ -1,10 +1,10 @@
 import { action, createStore, thunk, reducer } from '../src';
 
 const resolveAfter = (data, ms) =>
-  new Promise(resolve => setTimeout(() => resolve(data), ms));
+  new Promise((resolve) => setTimeout(() => resolve(data), ms));
 
 const trackActionsMiddleware = () => {
-  const middleware = () => next => _action => {
+  const middleware = () => (next) => (_action) => {
     middleware.actions.push(_action);
     return next(_action);
   };
@@ -17,10 +17,10 @@ test('dispatches actions to represent a succeeded thunk', () => {
   const model = {
     foo: {
       counter: 0,
-      increment: action(state => {
+      increment: action((state) => {
         state.counter += 1;
       }),
-      doSomething: thunk(actions => {
+      doSomething: thunk((actions) => {
         actions.increment();
         return 'did something';
       }),
@@ -91,7 +91,7 @@ describe('errors', () => {
         error: thunk(async () => {
           throw err;
         }),
-        doSomething: thunk(async actions => {
+        doSomething: thunk(async (actions) => {
           await actions.error();
         }),
       },
@@ -215,7 +215,7 @@ test('dispatch another branch action', async () => {
     },
     stats: {
       loginAttempts: 0,
-      incrementLoginAttempts: action(state => {
+      incrementLoginAttempts: action((state) => {
         state.loginAttempts += 1;
       }),
     },

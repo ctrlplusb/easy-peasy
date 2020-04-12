@@ -19,7 +19,7 @@ interface StoreModel {
 }
 
 const valid1: ActionOn<ListeningModel, StoreModel> = actionOn(
-  actions => actions.doActionString,
+  (actions) => actions.doActionString,
   (state, target) => {
     const [foo] = target.resolvedTargets;
     foo + 'bar';
@@ -32,7 +32,7 @@ const valid1: ActionOn<ListeningModel, StoreModel> = actionOn(
 );
 
 const invalid1: ActionOn<ListeningModel> = actionOn(
-  actions => actions.doActionNumber,
+  (actions) => actions.doActionNumber,
   (state, target) => {
     // typings:expect-error
     state.logs.push(target.payload);
@@ -40,14 +40,14 @@ const invalid1: ActionOn<ListeningModel> = actionOn(
 );
 
 const valid2: ActionOn<ListeningModel> = actionOn(
-  actions => actions.doThunkString,
+  (actions) => actions.doThunkString,
   (state, target) => {
     state.logs.push(target.payload);
   },
 );
 
 const invalid2: ActionOn<ListeningModel> = actionOn(
-  actions => actions.doThunkNumber,
+  (actions) => actions.doThunkNumber,
   (state, target) => {
     // typings:expect-error
     state.logs.push(target.payload);
@@ -80,14 +80,14 @@ const invalid4: ActionOn<ListeningModel> = actionOn(
 );
 
 const valid4: ActionOn<ListeningModel> = actionOn(
-  actions => [actions.doActionString, actions.doThunkString],
+  (actions) => [actions.doActionString, actions.doThunkString],
   (state, target) => {
     state.logs.push(target.payload);
   },
 );
 
 const invalid5: ActionOn<ListeningModel> = actionOn(
-  actions => [actions.doActionString, actions.doThunkNumber],
+  (actions) => [actions.doActionString, actions.doThunkNumber],
   (state, target) => {
     // typings:expect-error
     state.logs.push(target.payload);
@@ -95,7 +95,7 @@ const invalid5: ActionOn<ListeningModel> = actionOn(
 );
 
 const valid5: ActionOn<ListeningModel> = actionOn(
-  actions => [actions.doActionString, actions.doThunkNumber],
+  (actions) => [actions.doActionString, actions.doThunkNumber],
   (state, target) => {
     if (typeof target.payload === 'string') {
       state.logs.push(target.payload);

@@ -1,15 +1,15 @@
 import isPlainObject from 'is-plain-object';
 import { createDraft, finishDraft, isDraft } from 'immer';
 
-export const deepCloneStateWithoutComputed = source => {
-  const recursiveClone = current => {
+export const deepCloneStateWithoutComputed = (source) => {
+  const recursiveClone = (current) => {
     const next = Object.keys(current).reduce((acc, key) => {
       if (Object.getOwnPropertyDescriptor(current, key).get == null) {
         acc[key] = current[key];
       }
       return acc;
     }, {});
-    Object.keys(next).forEach(key => {
+    Object.keys(next).forEach((key) => {
       if (isPlainObject(next[key])) {
         next[key] = recursiveClone(next[key]);
       }
@@ -19,7 +19,7 @@ export const deepCloneStateWithoutComputed = source => {
   return recursiveClone(source);
 };
 
-export const isPromise = x => {
+export const isPromise = (x) => {
   return x != null && typeof x === 'object' && typeof x.then === 'function';
 };
 
@@ -46,10 +46,10 @@ export function newify(currentPath, currentState, finalValue) {
 export const set = (path, target, value) => {
   if (path.length === 0) {
     if (typeof value === 'object') {
-      Object.keys(target).forEach(key => {
+      Object.keys(target).forEach((key) => {
         delete target[key];
       });
-      Object.keys(value).forEach(key => {
+      Object.keys(value).forEach((key) => {
         target[key] = value[key];
       });
     }

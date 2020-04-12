@@ -34,7 +34,7 @@ test('patched immer works as expected', () => {
   expect(getterCallCount).toBe(1);
 
   // act
-  const immerNoUpdate = produce(original, draft => draft);
+  const immerNoUpdate = produce(original, (draft) => draft);
 
   // assert
   expect(immerNoUpdate).toBe(original);
@@ -50,7 +50,7 @@ test('patched immer works as expected', () => {
   expect(getterCallCount).toBe(2);
 
   // act
-  const immerWithUpdate = produce(original, draft => {
+  const immerWithUpdate = produce(original, (draft) => {
     draft.firstName = 'Mary';
   });
 
@@ -67,7 +67,7 @@ test('defining and accessing a computed property', () => {
     firstName: 'Mary',
     lastName: 'Poppins',
     fullName: computed(
-      [state => state.firstName, state => state.lastName],
+      [(state) => state.firstName, (state) => state.lastName],
       (firstName, lastName) => `${firstName} ${lastName}`,
     ),
   });
@@ -81,8 +81,8 @@ test('computed properties immediately available in an action', () => {
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
-    fullName: computed(state => `${state.firstName} ${state.lastName}`),
-    anAction: action(state => {
+    fullName: computed((state) => `${state.firstName} ${state.lastName}`),
+    anAction: action((state) => {
       // assert
       expect(state.fullName).toBe('Mary Poppins');
     }),
@@ -97,7 +97,7 @@ test('can spread computed', () => {
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
-    fullName: computed(state => `${state.firstName} ${state.lastName}`),
+    fullName: computed((state) => `${state.firstName} ${state.lastName}`),
   });
 
   // act
@@ -115,7 +115,7 @@ test('computed properties are memoized', () => {
     firstName: 'Mary',
     lastName: 'Poppins',
     fullName: computed(
-      [state => state.firstName, state => state.lastName],
+      [(state) => state.firstName, (state) => state.lastName],
       (firstName, lastName) => {
         computedCount += 1;
         return `${firstName} ${lastName}`;
@@ -163,7 +163,7 @@ it('state resolvers are optional', () => {
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
-    fullName: computed(state => `${state.firstName} ${state.lastName}`),
+    fullName: computed((state) => `${state.firstName} ${state.lastName}`),
   });
 
   // assert
@@ -175,11 +175,11 @@ test('computed properties can access global state', () => {
   const store = createStore({
     products: {
       items: [{ id: 1, name: 'boots', price: 20 }],
-      itemMap: computed([state => state.items], items =>
+      itemMap: computed([(state) => state.items], (items) =>
         items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
       ),
       setProductName: action((state, payload) => {
-        const product = state.items.find(p => p.id === payload.id);
+        const product = state.items.find((p) => p.id === payload.id);
         product.name = payload.name;
       }),
     },
@@ -188,9 +188,9 @@ test('computed properties can access global state', () => {
       products: computed(
         [
           (state, storeState) => storeState.products.itemMap,
-          state => state.productIds,
+          (state) => state.productIds,
         ],
-        (productMap, productIds) => productIds.map(id => productMap[id]),
+        (productMap, productIds) => productIds.map((id) => productMap[id]),
       ),
     },
   });
@@ -216,8 +216,8 @@ test('computed properties are available in actions', () => {
   // arrange
   const store = createStore({
     todos: ['test computed'],
-    todosCount: computed(state => state.todos.length),
-    testAction: action(state => {
+    todosCount: computed((state) => state.todos.length),
+    testAction: action((state) => {
       // assert
       expect(state.todosCount).toBe(1);
     }),
@@ -231,7 +231,7 @@ test('computed properties work in a React component', () => {
   // arrange
   let renderCount = 0;
   function Product({ id }) {
-    const product = useStoreState(state => state.products.itemMap[id]);
+    const product = useStoreState((state) => state.products.itemMap[id]);
     renderCount += 1;
     return <div data-testid="name">{product.name}</div>;
   }
@@ -239,17 +239,17 @@ test('computed properties work in a React component', () => {
   const store = createStore({
     products: {
       items: [{ id: 1, name: 'boots' }],
-      itemMap: computed([state => state.items], items =>
+      itemMap: computed([(state) => state.items], (items) =>
         items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
       ),
       setProductName: action((state, payload) => {
-        const product = state.items.find(p => p.id === payload.id);
+        const product = state.items.find((p) => p.id === payload.id);
         product.name = payload.name;
       }),
     },
     other: {
       foo: 'bar',
-      setFoo: action(state => {
+      setFoo: action((state) => {
         state.foo = 'bar';
       }),
     },
@@ -308,10 +308,10 @@ test('computed properties accessing others in React component', () => {
   // arrange
   let renderCount = 0;
   function Basket() {
-    const products = useStoreState(state => state.basket.products);
+    const products = useStoreState((state) => state.basket.products);
     renderCount += 1;
     return (
-      <div data-testid="products">{products.map(x => x.name).join(', ')}</div>
+      <div data-testid="products">{products.map((x) => x.name).join(', ')}</div>
     );
   }
 
@@ -321,11 +321,11 @@ test('computed properties accessing others in React component', () => {
         { id: 1, name: 'boots', price: 20 },
         { id: 2, name: 'shirt', price: 50 },
       ],
-      itemMap: computed([state => state.items], items =>
+      itemMap: computed([(state) => state.items], (items) =>
         items.reduce((acc, cur) => ({ ...acc, [cur.id]: cur }), {}),
       ),
       setProductName: action((state, payload) => {
-        const product = state.items.find(p => p.id === payload.id);
+        const product = state.items.find((p) => p.id === payload.id);
         product.name = payload.name;
       }),
     },
@@ -334,9 +334,9 @@ test('computed properties accessing others in React component', () => {
       products: computed(
         [
           (state, storeState) => storeState.products.itemMap,
-          state => state.productIds,
+          (state) => state.productIds,
         ],
-        (productMap, productIds) => productIds.map(id => productMap[id]),
+        (productMap, productIds) => productIds.map((id) => productMap[id]),
       ),
       addProductToBasket: action((state, payload) => {
         state.productIds.push(payload);
@@ -388,13 +388,13 @@ test('nested computed properties', () => {
 
     nested: {
       numbers: [1, 2, 3],
-      filteredNumbers: computed(state => {
-        return state.numbers.filter(number => number > 1);
+      filteredNumbers: computed((state) => {
+        return state.numbers.filter((number) => number > 1);
       }),
     },
 
     // selectors
-    list: computed([state => state.items], items => Object.values(items)),
+    list: computed([(state) => state.items], (items) => Object.values(items)),
 
     // actions
     fetched: action((state, payload) => {
@@ -421,12 +421,12 @@ test('updating nested state', () => {
 
     nested: {
       numbers: [1, 2, 3],
-      reset: action(state => {
+      reset: action((state) => {
         state.numbers = [5];
       }),
     },
 
-    list: computed([state => state.items], items => Object.values(items)),
+    list: computed([(state) => state.items], (items) => Object.values(items)),
   };
 
   const store = createStore(model);
@@ -443,8 +443,8 @@ test('writes to a computed property are ignored', () => {
   // arrange
   const store = createStore({
     items: ['oi'],
-    count: computed(state => state.items.length),
-    naughtyAction: action(state => {
+    count: computed((state) => state.items.length),
+    naughtyAction: action((state) => {
       state.count = 10;
     }),
   });

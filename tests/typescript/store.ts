@@ -26,7 +26,7 @@ function persistReducer<S, A extends Action>(
 }
 
 const store = createStore(model, {
-  reducerEnhancer: reducer => persistReducer(reducer),
+  reducerEnhancer: (reducer) => persistReducer(reducer),
 });
 
 const configuredStore = createStore(model, {
@@ -36,7 +36,7 @@ const configuredStore = createStore(model, {
   injections: { foo: 'bar' },
   mockActions: true,
   name: 'bob',
-  reducerEnhancer: reducer => reducer,
+  reducerEnhancer: (reducer) => reducer,
 });
 
 store.getActions().doActionVoid();

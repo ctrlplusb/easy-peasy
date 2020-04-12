@@ -9,7 +9,7 @@ interface Model {
 }
 
 const valid1: ThunkOn<Model> = thunkOn(
-  actions => actions.doActionString,
+  (actions) => actions.doActionString,
   (actions, target) => {
     const [foo] = target.resolvedTargets;
     foo + 'bar';
@@ -22,7 +22,7 @@ const valid1: ThunkOn<Model> = thunkOn(
 );
 
 const invalid1: ThunkOn<Model> = thunkOn(
-  actions => actions.doActionNumber,
+  (actions) => actions.doActionNumber,
   (actions, target) => {
     // typings:expect-error
     actions.log(target.payload);
@@ -30,14 +30,14 @@ const invalid1: ThunkOn<Model> = thunkOn(
 );
 
 const valid2: ThunkOn<Model> = thunkOn(
-  actions => actions.doThunkString,
+  (actions) => actions.doThunkString,
   (actions, target) => {
     actions.log(target.payload);
   },
 );
 
 const invalid2: ThunkOn<Model> = thunkOn(
-  actions => actions.doThunkNumber,
+  (actions) => actions.doThunkNumber,
   (actions, target) => {
     // typings:expect-error
     actions.log(target.payload);
@@ -70,7 +70,7 @@ const invalid4: ThunkOn<Model> = thunkOn(
 );
 
 const valid4: ThunkOn<Model> = thunkOn(
-  actions => [
+  (actions) => [
     actions.doActionString.type,
     actions.doThunkString.type,
     actions.doThunkString.startType,
@@ -83,7 +83,7 @@ const valid4: ThunkOn<Model> = thunkOn(
 );
 
 const invalid5: ThunkOn<Model> = thunkOn(
-  actions => [actions.doActionString, actions.doThunkNumber],
+  (actions) => [actions.doActionString, actions.doThunkNumber],
   (actions, target) => {
     // typings:expect-error
     actions.log(target.payload);
@@ -91,7 +91,7 @@ const invalid5: ThunkOn<Model> = thunkOn(
 );
 
 const valid5: ThunkOn<Model> = thunkOn(
-  actions => [actions.doActionString, actions.doThunkNumber],
+  (actions) => [actions.doActionString, actions.doThunkNumber],
   (actions, target) => {
     if (typeof target.payload === 'number') {
     } else {
@@ -133,11 +133,11 @@ const sessionModel: SessionModel = {
   register: action((state, payload) => {
     state.user = payload;
   }),
-  unregister: action(state => {
+  unregister: action((state) => {
     state.user = undefined;
   }),
   sessionListeners: thunkOn(
-    actions => [actions.register, actions.unregister],
+    (actions) => [actions.register, actions.unregister],
     (actions, target) => {
       const { payload } = target;
       if (payload == null) {

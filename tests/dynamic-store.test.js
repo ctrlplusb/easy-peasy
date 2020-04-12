@@ -5,7 +5,7 @@ test('addModel', () => {
   const store = createStore({
     counter: {
       count: 0,
-      increment: action(state => {
+      increment: action((state) => {
         state.count += 1;
       }),
     },
@@ -17,7 +17,7 @@ test('addModel', () => {
     push: action((state, payload) => {
       state.path = payload;
     }),
-    url: computed(state => name => {
+    url: computed((state) => (name) => {
       return `${state.path}${name}`;
     }),
   });
@@ -86,7 +86,7 @@ test('removeModel', () => {
   const store = createStore({
     counter: {
       count: 0,
-      increment: action(state => {
+      increment: action((state) => {
         state.count += 1;
       }),
     },
@@ -130,7 +130,7 @@ test('adding and removing model maintains existing state - issue#184', () => {
   const store = createStore({
     counter: {
       count: 0,
-      inc: action(state => {
+      inc: action((state) => {
         state.count += 1;
       }),
     },

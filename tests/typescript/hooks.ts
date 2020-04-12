@@ -42,28 +42,28 @@ let useActionResult = useStoreActions(
 useActionResult(1);
 
 let store = useStore<Model>();
-`${store.getState().stateString  }world`;
+`${store.getState().stateString}world`;
 
 const typedHooks = createTypedHooks<Model>();
 
-useStoreResult = typedHooks.useStoreState(state => state.stateNumber);
+useStoreResult = typedHooks.useStoreState((state) => state.stateNumber);
 useStoreResult + 1;
-useActionResult = typedHooks.useStoreActions(actions => actions.actionImp);
+useActionResult = typedHooks.useStoreActions((actions) => actions.actionImp);
 useActionResult(1);
 dispatch = typedHooks.useStoreDispatch();
 dispatch({
   type: 'FOO',
 });
 store = typedHooks.useStore();
-`${store.getState().stateString  }world`;
+`${store.getState().stateString}world`;
 
 const actionNoPayload = typedHooks.useStoreActions(
-  actions => actions.actionNoPayload,
+  (actions) => actions.actionNoPayload,
 );
 actionNoPayload();
 
 typedHooks.useStoreState(
-  state => ({ num: state.stateNumber, str: state.stateString }),
+  (state) => ({ num: state.stateNumber, str: state.stateString }),
   (prev, next) => {
     prev.num += 1;
     // typings:expect-error

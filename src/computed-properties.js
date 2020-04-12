@@ -32,7 +32,7 @@ export function createComputedPropertyBinder(
           }
         }
         const state = get(parentPath, storeState);
-        const inputs = computedMeta.stateResolvers.map(resolver =>
+        const inputs = computedMeta.stateResolvers.map((resolver) =>
           resolver(state, storeState),
         );
         return memoisedResultFn(...inputs);
@@ -42,7 +42,7 @@ export function createComputedPropertyBinder(
 }
 
 export function createComputedPropertiesMiddleware(references) {
-  return store => next => action => {
+  return (store) => (next) => (action) => {
     references.internals._computedState.currentState = store.getState();
     references.internals._computedState.isInReducer = true;
     return next(action);

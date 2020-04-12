@@ -10,7 +10,7 @@ import {
 
 const model = {
   count: 0,
-  increment: action(state => {
+  increment: action((state) => {
     state.count += 1;
   }),
 };
@@ -19,8 +19,8 @@ describe('react', () => {
   it('component integration test', () => {
     // arrange
     function ComponentUnderTest() {
-      const count = useStoreState(state => state.count);
-      const increment = useStoreActions(actions => actions.increment);
+      const count = useStoreState((state) => state.count);
+      const increment = useStoreActions((actions) => actions.increment);
       return (
         <div>
           Count: <span data-testid="count">{count}</span>

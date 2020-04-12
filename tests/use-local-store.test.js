@@ -5,7 +5,7 @@ import { useLocalStore, action } from '../src';
 function CountDisplay() {
   const [state, actions] = useLocalStore(() => ({
     count: 0,
-    inc: action(s => {
+    inc: action((s) => {
       s.count += 1;
     }),
   }));
@@ -81,7 +81,7 @@ test('with external data', () => {
     const [state, actions] = useLocalStore(
       () => ({
         count,
-        inc: action(_state => {
+        inc: action((_state) => {
           _state.count += 1;
         }),
       }),
@@ -119,7 +119,7 @@ test('with config', () => {
   // ARRANGE
   const logs = [];
 
-  const customMiddleware = () => next => _action => {
+  const customMiddleware = () => (next) => (_action) => {
     // assert
     logs.push(_action.type);
     next(_action);
@@ -132,7 +132,7 @@ test('with config', () => {
     const [state, actions] = useLocalStore(
       () => ({
         count,
-        inc: action(_state => {
+        inc: action((_state) => {
           _state.count += 1;
         }),
       }),
@@ -234,7 +234,7 @@ test('provides the prevState every time the store is recreated', () => {
   // eslint-disable-next-line no-shadow
   function CountDisplay({ count }) {
     useLocalStore(
-      _prevState => {
+      (_prevState) => {
         prevState = _prevState;
         return {
           count,

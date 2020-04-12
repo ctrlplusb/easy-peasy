@@ -4,7 +4,7 @@ test('deprecated action API does nothing', () => {
   // act
   const store = createStore({
     count: 1,
-    increment: state => {
+    increment: (state) => {
       state.count += 1;
     },
   });
@@ -17,7 +17,7 @@ test('returning the state has no effect', () => {
   // arrange
   const store = createStore({
     count: 1,
-    doNothing: action(state => state),
+    doNothing: action((state) => state),
   });
   const prevState = store.getState();
 

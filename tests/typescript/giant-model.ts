@@ -445,19 +445,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -504,19 +504,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -563,19 +563,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -622,19 +622,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -681,19 +681,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -740,19 +740,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -799,19 +799,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -858,19 +858,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -917,19 +917,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },
@@ -976,19 +976,19 @@ const model: StoreModel = {
       actions.twelve(payload);
     }),
     fourteen: computed(
-      [state => state.one.one, (state, globalState) => globalState.one.one],
+      [(state) => state.one.one, (state, globalState) => globalState.one.one],
       (one, two) => {
         return one + two;
       },
     ),
     fifteen: actionOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (state, target) => {
         state.six = target.payload;
       },
     ),
     sixteen: thunkOn(
-      actions => actions.thirteen,
+      (actions) => actions.thirteen,
       (actions, target) => {
         actions.thirteen(target.payload);
       },

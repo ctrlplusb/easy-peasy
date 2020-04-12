@@ -15,7 +15,7 @@ const todos: TodosModel = {
   add: action((state, payload) => {
     state.items.push(payload);
   }),
-  clear: action(state => {
+  clear: action((state) => {
     state.items = [];
   }),
 };

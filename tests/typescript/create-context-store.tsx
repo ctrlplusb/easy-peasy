@@ -12,23 +12,23 @@ interface InitialData {
 
 const Counter = createContextStore<StoreModel>({
   count: 0,
-  inc: action(state => {
+  inc: action((state) => {
     state.count += 1;
   }),
 });
 
 const CounterWithInitializer = createContextStore<StoreModel, InitialData>(
-  data => ({
+  (data) => ({
     count: data ? data.count + 1 : 0,
-    inc: action(state => {
+    inc: action((state) => {
       state.count += 1;
     }),
   }),
 );
 
 function CountDisplay() {
-  const count = Counter.useStoreState(state => state.count);
-  const inc = Counter.useStoreActions(actions => actions.inc);
+  const count = Counter.useStoreState((state) => state.count);
+  const inc = Counter.useStoreActions((actions) => actions.inc);
   return (
     <>
       <div>{count + 1}</div>
@@ -60,11 +60,11 @@ function TestDispatch() {
   return null;
 }
 
-  <CounterWithInitializer.Provider initialData={{ count: 1 }}>
-    <CountDisplay />
-  </CounterWithInitializer.Provider>;
+<CounterWithInitializer.Provider initialData={{ count: 1 }}>
+  <CountDisplay />
+</CounterWithInitializer.Provider>;
 
 // typings:expect-error
-    <CounterWithInitializer.Provider initialData={{ count: 'foo' }}>
-      <CountDisplay />
-    </CounterWithInitializer.Provider>;
+<CounterWithInitializer.Provider initialData={{ count: 'foo' }}>
+  <CountDisplay />
+</CounterWithInitializer.Provider>;

@@ -2,7 +2,7 @@ import { actionOnSymbol, thunkOnSymbol } from './constants';
 import { get } from './lib';
 
 export function createListenerMiddleware(references) {
-  return () => next => action => {
+  return () => (next) => (action) => {
     const result = next(action);
     if (
       action &&
@@ -11,7 +11,7 @@ export function createListenerMiddleware(references) {
     ) {
       const sourceAction = references.internals._actionCreatorDict[action.type];
       references.internals._listenerActionMap[action.type].forEach(
-        actionCreator => {
+        (actionCreator) => {
           actionCreator({
             type: sourceAction ? sourceAction.type : action.type,
             payload: action.payload,
@@ -31,7 +31,7 @@ export function bindListenerDefinitions(
   _actionCreatorDict,
   _listenerActionMap,
 ) {
-  listenerDefinitions.forEach(listenerActionOrThunk => {
+  listenerDefinitions.forEach((listenerActionOrThunk) => {
     const listenerMeta =
       listenerActionOrThunk[actionOnSymbol] ||
       listenerActionOrThunk[thunkOnSymbol];
@@ -58,7 +58,7 @@ export function bindListenerDefinitions(
 
     listenerMeta.resolvedTargets = targetTypes;
 
-    targetTypes.forEach(targetType => {
+    targetTypes.forEach((targetType) => {
       const listenerReg = _listenerActionMap[targetType] || [];
       listenerReg.push(_actionCreatorDict[listenerMeta.type]);
       _listenerActionMap[targetType] = listenerReg;
