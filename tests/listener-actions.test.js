@@ -34,7 +34,7 @@ it('listening to an action, firing an action', () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
-it('listening to an action, firing a thunk', done => {
+it('listening to an action, firing a thunk', (done) => {
   // arrange
   const math = {
     sum: 0,
@@ -144,7 +144,7 @@ it('listening to a failed thunk', async () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
-it('listening to a thunk, firing a thunk', async done => {
+it('listening to a thunk, firing a thunk', async (done) => {
   // arrange
   const math = {
     sum: 0,
@@ -197,7 +197,7 @@ it('listening to a string, firing an action', async () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
-it('listening to an string, firing a thunk', done => {
+it('listening to an string, firing a thunk', (done) => {
   // arrange
   const audit = {
     logs: [],
@@ -228,7 +228,7 @@ it('action listening to multiple actions', async () => {
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
     onActions: actionOn(
-      actions => [actions.actionTarget, actions.thunkTarget],
+      (actions) => [actions.actionTarget, actions.thunkTarget],
       (state, target) => {
         expect(target.resolvedTargets).toEqual([
           '@action.actionTarget',
@@ -256,7 +256,7 @@ it('thunk listening to multiple actions', async () => {
     actionTarget: action(() => {}),
     thunkTarget: thunk(() => {}),
     onActions: thunkOn(
-      actions => [actions.actionTarget, actions.thunkTarget],
+      (actions) => [actions.actionTarget, actions.thunkTarget],
       thunkSpy,
     ),
   };
@@ -266,7 +266,7 @@ it('thunk listening to multiple actions', async () => {
   store.getActions().actionTarget('action payload');
 
   // assert
-  await new Promise(resolve => setTimeout(resolve, 10));
+  await new Promise((resolve) => setTimeout(resolve, 10));
   expect(thunkSpy).toHaveBeenCalledTimes(1);
   expect(thunkSpy).toHaveBeenCalledWith(
     expect.anything(),
@@ -282,7 +282,7 @@ it('thunk listening to multiple actions', async () => {
 
   // act
   await store.getActions().thunkTarget('thunk payload');
-  await new Promise(resolve => setTimeout(resolve, 10));
+  await new Promise((resolve) => setTimeout(resolve, 10));
 
   // assert
   expect(thunkSpy).toHaveBeenCalledTimes(2);

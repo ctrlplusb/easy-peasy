@@ -50,7 +50,7 @@ test('maps state when props change', async () => {
     },
   });
   function Values({ id }) {
-    const value = useStoreState(state => state.values[id]);
+    const value = useStoreState((state) => state.values[id]);
     return <span data-testid="value">{value}</span>;
   }
   const app = (
@@ -81,14 +81,14 @@ test('store subscribe is only called once', () => {
   // arrange
   const store = createStore({
     count: 1,
-    inc: action(state => {
+    inc: action((state) => {
       state.count += 1;
     }),
   });
   jest.spyOn(store, 'subscribe');
   const renderSpy = jest.fn();
   function Counter() {
-    const count = useStoreState(state => state.count);
+    const count = useStoreState((state) => state.count);
     renderSpy();
     return <span data-testid="count">{count}</span>;
   }
@@ -119,14 +119,14 @@ test('store is unsubscribed on unmount', () => {
   // arrange
   const store = createStore({
     count: 1,
-    inc: action(state => {
+    inc: action((state) => {
       state.count += 1;
     }),
   });
   const unsubscribeSpy = jest.fn();
   store.subscribe = () => unsubscribeSpy;
   function Counter() {
-    const count = useStoreState(state => state.count);
+    const count = useStoreState((state) => state.count);
     return <span data-testid="count">{count}</span>;
   }
   const app = (
@@ -159,14 +159,14 @@ describe('direct form', () => {
     // arrange
     const store = createStore({
       count: 1,
-      inc: action(state => {
+      inc: action((state) => {
         state.count += 1;
       }),
     });
     const renderSpy = jest.fn();
     function Counter() {
-      const count = useStoreState(state => state.count);
-      const inc = useStoreActions(actions => actions.inc);
+      const count = useStoreState((state) => state.count);
+      const inc = useStoreActions((actions) => actions.inc);
       renderSpy();
       return (
         <button data-testid="count" type="button" onClick={inc}>
@@ -208,7 +208,7 @@ describe('direct form', () => {
     });
     const renderSpy = jest.fn();
     function Counter() {
-      const count = useStoreState(state => state.count);
+      const count = useStoreState((state) => state.count);
       renderSpy();
       return <span data-testid="count">{count}</span>;
     }

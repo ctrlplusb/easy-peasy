@@ -7,7 +7,7 @@ interface StoreModel {
 
 const [state, actions, store] = useLocalStore<StoreModel>(() => ({
   count: 0,
-  inc: action(state => {
+  inc: action((state) => {
     state.count += 1;
   }),
 }));
@@ -19,7 +19,7 @@ store.getState().count + 1;
 useLocalStore<StoreModel>(
   () => ({
     count: 0,
-    inc: action(state => {
+    inc: action((state) => {
       state.count += 1;
     }),
   }),
@@ -27,13 +27,13 @@ useLocalStore<StoreModel>(
 );
 
 useLocalStore<StoreModel>(
-  prevState => {
+  (prevState) => {
     if (prevState != null) {
       prevState.count + 1;
     }
     return {
       count: 0,
-      inc: action(state => {
+      inc: action((state) => {
         state.count += 1;
       }),
     };

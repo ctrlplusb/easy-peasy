@@ -7,7 +7,7 @@ const model = {
     state.todos.push(payload);
   }),
   onTodoAdded: actionOn(
-    actions => actions.addTodo,
+    (actions) => actions.addTodo,
     (state, target) => {
       state.logs.push(`Added todo: ${target.payload}`);
     },

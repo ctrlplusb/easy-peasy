@@ -10,7 +10,7 @@ export default function createReducer(
   const simpleProduce = createSimpleProduce(disableImmer);
 
   const runActionReducerAtPath = (state, action, actionReducer, path) => {
-    return simpleProduce(path, state, draft =>
+    return simpleProduce(path, state, (draft) =>
       actionReducer(draft, action.payload),
     );
   };
@@ -32,7 +32,7 @@ export default function createReducer(
 
   const reducerForCustomReducers = (state, action) => {
     return _customReducers.reduce((acc, { parentPath, key, reducer: red }) => {
-      return simpleProduce(parentPath, acc, draft => {
+      return simpleProduce(parentPath, acc, (draft) => {
         draft[key] = red(draft[key], action);
         return draft;
       });

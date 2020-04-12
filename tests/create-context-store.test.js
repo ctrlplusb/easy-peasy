@@ -6,7 +6,7 @@ import { createContextStore, action } from '../src';
 
 const Counter = createContextStore({
   count: 0,
-  inc: action(state => {
+  inc: action((state) => {
     state.count += 1;
   }),
 });
@@ -21,8 +21,8 @@ function CountDisplayUseStore() {
 }
 
 function CountDisplay() {
-  const count = Counter.useStoreState(state => state.count);
-  const inc = Counter.useStoreActions(actions => actions.inc);
+  const count = Counter.useStoreState((state) => state.count);
+  const inc = Counter.useStoreActions((actions) => actions.inc);
   return (
     <>
       <div data-testid="count">{count}</div>
@@ -102,16 +102,16 @@ it('useStore hook', () => {
 
 it('with initial data', () => {
   // arrange
-  const Counter = createContextStore(data => ({
+  const Counter = createContextStore((data) => ({
     count: data.count || 0,
-    inc: action(state => {
+    inc: action((state) => {
       state.count += 1;
     }),
   }));
 
   function CountDisplay() {
-    const count = Counter.useStoreState(state => state.count);
-    const inc = Counter.useStoreActions(actions => actions.inc);
+    const count = Counter.useStoreState((state) => state.count);
+    const inc = Counter.useStoreActions((actions) => actions.inc);
     return (
       <>
         <div data-testid="count">{count}</div>

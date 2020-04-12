@@ -24,8 +24,8 @@ const { useStoreState, useStoreActions, useStoreDispatch } = createTypedHooks<
 >();
 
 function MyComponent() {
-  const items = useStoreState(state => state.items);
-  const addTodo = useStoreActions(actions => actions.addTodo);
+  const items = useStoreState((state) => state.items);
+  const addTodo = useStoreActions((actions) => actions.addTodo);
   addTodo('Install easy peasy');
   const dispatch = useStoreDispatch();
   dispatch({
@@ -34,8 +34,8 @@ function MyComponent() {
   });
   return (
     <div>
-      {items.map(item => (
-        <div>{`Todo: ${  item}`}</div>
+      {items.map((item) => (
+        <div>{`Todo: ${item}`}</div>
       ))}
     </div>
   );

@@ -67,9 +67,9 @@ function createStorageWrapper(storage = sessionStorage, transformers = []) {
 
   return {
     isAsync,
-    getItem: key => {
+    getItem: (key) => {
       if (isAsync) {
-        return storage.getItem(key).then(wrapped => {
+        return storage.getItem(key).then((wrapped) => {
           return wrapped != null ? deserialize(wrapped, key) : undefined;
         });
       }
@@ -79,7 +79,7 @@ function createStorageWrapper(storage = sessionStorage, transformers = []) {
     setItem: (key, data) => {
       return storage.setItem(key, serialize(data, key));
     },
-    removeItem: key => {
+    removeItem: (key) => {
       return storage.removeItem(key);
     },
   };
@@ -104,7 +104,7 @@ function resolvePersistTargets(target, whitelist, blacklist) {
   let targets = Object.keys(target);
   if (whitelist.length > 0) {
     targets = targets.reduce((acc, cur) => {
-      if (whitelist.findIndex(x => x === cur) !== -1) {
+      if (whitelist.findIndex((x) => x === cur) !== -1) {
         return [...acc, cur];
       }
       return acc;
@@ -112,7 +112,7 @@ function resolvePersistTargets(target, whitelist, blacklist) {
   }
   if (blacklist.length > 0) {
     targets = targets.reduce((acc, cur) => {
-      if (blacklist.findIndex(x => x === cur) !== -1) {
+      if (blacklist.findIndex((x) => x === cur) !== -1) {
         return acc;
       }
       return [...acc, cur];
@@ -134,7 +134,7 @@ function createPersistenceClearer(persistKey, references) {
         );
         if (targets.length > 0) {
           Promise.all(
-            targets.map(key => {
+            targets.map((key) => {
               const targetPath = [...path, key];
               return storage.removeItem(persistKey(targetPath));
             }),
@@ -165,7 +165,7 @@ export function createPersistor(persistKey, references) {
             blacklist,
           );
           return acc.concat(
-            targets.map(key => {
+            targets.map((key) => {
               const targetPath = [...path, key];
               return Promise.resolve(
                 storage.setItem(persistKey(targetPath), get(targetPath, state)),
@@ -189,7 +189,7 @@ export function createPersistor(persistKey, references) {
 }
 
 export function createPersistMiddleware(persistor, references) {
-  return () => next => action => {
+  return () => (next) => (action) => {
     const state = next(action);
     if (
       action &&
@@ -211,7 +211,7 @@ export function rehydrateStateFromPersistIfNeeded(
   // If we have any persist configs we will attemp to perform a state rehydration
   let resolveRehydration = Promise.resolve();
   if (references.internals._persistenceConfig.length > 0) {
-    references.internals._persistenceConfig.forEach(persistInstance => {
+    references.internals._persistenceConfig.forEach((persistInstance) => {
       const { path, config } = persistInstance;
       const { blacklist, mergeStrategy, storage, whitelist } = config;
 
@@ -234,7 +234,7 @@ export function rehydrateStateFromPersistIfNeeded(
           set(path, originalState, rehydratedState);
         } else if (mergeStrategy === 'merge') {
           const target = get(path, originalState);
-          Object.keys(rehydratedState).forEach(key => {
+          Object.keys(rehydratedState).forEach((key) => {
             if (hasDataModelChanged(target[key], rehydratedState[key])) {
               // skip as the data model type has changed since the data was persisted
             } else {
@@ -244,7 +244,7 @@ export function rehydrateStateFromPersistIfNeeded(
         } else if (mergeStrategy === 'mergeDeep') {
           const target = get(path, originalState);
           const setAt = (currentTarget, currentNext) => {
-            Object.keys(currentNext).forEach(key => {
+            Object.keys(currentNext).forEach((key) => {
               const data = currentNext[key];
               if (hasDataModelChanged(currentTarget[key], data)) {
                 // skip as the data model type has changed since the data was persisted
@@ -274,8 +274,8 @@ export function rehydrateStateFromPersistIfNeeded(
         }, []);
         if (asyncStateResolvers.length > 0) {
           resolveRehydration = Promise.all(
-            asyncStateResolvers.map(x => x.dataPromise),
-          ).then(resolvedData => {
+            asyncStateResolvers.map((x) => x.dataPromise),
+          ).then((resolvedData) => {
             const next = resolvedData.reduce((acc, cur, idx) => {
               const { key } = asyncStateResolvers[idx];
               if (cur !== undefined) {

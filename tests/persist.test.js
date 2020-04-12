@@ -21,7 +21,7 @@ import {
 // jest.useFakeTimers();
 
 const wait = () =>
-  new Promise(resolve => {
+  new Promise((resolve) => {
     setTimeout(() => resolve(), 20);
   });
 
@@ -38,11 +38,11 @@ const createMemoryStorage = (initial = {}, config = { async: false }) => {
       store[key] = data;
       return undefined;
     },
-    getItem: key => {
+    getItem: (key) => {
       const data = store[key];
       return async ? wait().then(() => data) : data;
     },
-    removeItem: key => {
+    removeItem: (key) => {
       if (async) {
         return wait().then(() => {
           delete store[key];
@@ -706,13 +706,13 @@ test('computed properties', async () => {
       persist(
         {
           todos: ['write tests'],
-          todoCount: computed(state => state.todos.length),
+          todoCount: computed((state) => state.todos.length),
           addTodo: action((state, payload) => {
             state.todos.push(payload);
           }),
           nested: {
             todos: ['write tests'],
-            todoCount: computed(state => state.todos.length),
+            todoCount: computed((state) => state.todos.length),
             addTodo: action((state, payload) => {
               state.todos.push(payload);
             }),
@@ -775,7 +775,7 @@ test('dynamic model with sync storage', async () => {
         { storage: memoryStorage },
       ),
     });
-  const addDynamicModel = store => {
+  const addDynamicModel = (store) => {
     store.addModel(
       'foo',
       persist(
@@ -831,7 +831,7 @@ test('dynamic model with async storage', async () => {
         { storage: memoryStorage },
       ),
     });
-  const addDynamicModel = store =>
+  const addDynamicModel = (store) =>
     store.addModel(
       'foo',
       persist(

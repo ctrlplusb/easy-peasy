@@ -4,7 +4,7 @@ import { createComponentStore, action } from '../src';
 
 const useCounter = createComponentStore({
   count: 0,
-  inc: action(state => {
+  inc: action((state) => {
     state.count += 1;
   }),
 });
@@ -78,9 +78,9 @@ it('multiple instances', async () => {
 it('with initial data', () => {
   // arrange
   // eslint-disable-next-line no-shadow
-  const useCounter = createComponentStore(data => ({
+  const useCounter = createComponentStore((data) => ({
     count: data.count || 0,
-    inc: action(state => {
+    inc: action((state) => {
       state.count += 1;
     }),
   }));

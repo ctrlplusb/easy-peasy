@@ -12,7 +12,7 @@ test('works', () => {
     count: 0,
   });
   const Count = () => {
-    const count = useStoreState(state => state.count);
+    const count = useStoreState((state) => state.count);
     return <span>{count}</span>;
   };
   const app = (

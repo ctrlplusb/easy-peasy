@@ -11,7 +11,7 @@ it('basic', () => {
     }),
     foo: {
       bar: 'baz',
-      update: action(state => {
+      update: action((state) => {
         state.bar = 'bob';
       }),
     },

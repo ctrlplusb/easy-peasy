@@ -40,7 +40,7 @@ const dataModel = <Item extends ObjectWithId>(
     data: {},
     sortBy: 'none',
     name,
-    ids: computed(state => Object.keys(state.data).map(id => parseInt(id))),
+    ids: computed((state) => Object.keys(state.data).map((id) => parseInt(id))),
     fetched: action((state, items) => {
       state.name;
       items.forEach((item, idx) => {
@@ -52,8 +52,8 @@ const dataModel = <Item extends ObjectWithId>(
       actions.fetched(data);
       actions.nested.save(1);
     }),
-    getItemById: computed(state => (id: string) =>
-      Object.values(state.data).find(item => item.id === id),
+    getItemById: computed((state) => (id: string) =>
+      Object.values(state.data).find((item) => item.id === id),
     ),
     nested: {
       save: thunk((actions, payload) => {

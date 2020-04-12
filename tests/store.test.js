@@ -97,7 +97,7 @@ test('root action', () => {
     todos: {
       items: { 1: { text: 'foo' } },
     },
-    doSomething: action(state => {
+    doSomething: action((state) => {
       state.todos.items[2] = { text: 'bar' };
     }),
   });
@@ -141,9 +141,9 @@ test('state with no actions', () => {
   });
 });
 
-test('allows custom middleware', done => {
+test('allows custom middleware', (done) => {
   // arrange
-  const customMiddleware = () => next => _action => {
+  const customMiddleware = () => (next) => (_action) => {
     // assert
     expect(_action.type).toEqual('@action.doFoo');
     next(_action);
@@ -161,7 +161,7 @@ test('allows custom middleware', done => {
 
 test('allows custom middleware with mockActions=true', () => {
   // arrange
-  const customMiddleware = store => next => _action => {
+  const customMiddleware = (store) => (next) => (_action) => {
     if (_action.customMiddleware) {
       // Unfortunately 'store' is plain Redux store, not easy-peasy's one.
       // So we have to use string named action listeners.
@@ -204,7 +204,7 @@ test('allows custom enhancers', () => {
     {},
     {
       enhancers: [
-        storeCreator => {
+        (storeCreator) => {
           // assert
           expect(storeCreator).toBeInstanceOf(Function);
           const store = storeCreator(rootReducer);
@@ -254,7 +254,7 @@ test('supports initial state', () => {
 
 test('complex configuration', async () => {
   // arrange
-  const wrappedThunk = fn =>
+  const wrappedThunk = (fn) =>
     thunk(async (actions, payload, helpers) => {
       try {
         const result = await fn(actions, payload, helpers);
@@ -274,10 +274,10 @@ test('complex configuration', async () => {
     },
     session: {
       isInitialised: false,
-      initialised: action(state => {
+      initialised: action((state) => {
         state.isInitialised = true;
       }),
-      initialise: wrappedThunk(async actions => {
+      initialise: wrappedThunk(async (actions) => {
         actions.initialised();
         return 'done';
       }),
@@ -296,7 +296,7 @@ test('redux thunk configured', async () => {
   // arrange
   const model = { foo: 'bar' };
   const store = createStore(model);
-  const thunkAction = payload => () => Promise.resolve(payload);
+  const thunkAction = (payload) => () => Promise.resolve(payload);
   // act
   const result = await store.dispatch(thunkAction('foo'));
   // assert
@@ -322,7 +322,7 @@ test('nested empty model', () => {
   // arrange
   const store = createStore({
     counters: {
-      add: action(state => {
+      add: action((state) => {
         state[Date.now()] = true;
       }),
     },
@@ -397,7 +397,7 @@ test('support model reconfiguration', () => {
       addTodo: action((state, payload) => {
         state.items.push(payload);
       }),
-      removeTodo: action(state => {
+      removeTodo: action((state) => {
         state.items.pop();
       }),
     },
@@ -416,7 +416,7 @@ test('support model reconfiguration', () => {
   store.reconfigure({
     todos: {
       items: [],
-      removeTodo: action(state => {
+      removeTodo: action((state) => {
         state.items.pop();
       }),
     },
@@ -431,7 +431,7 @@ test('mocking actions', () => {
   const store = createStore(
     {
       counter: 0,
-      inc: action(state => {
+      inc: action((state) => {
         state.counter += 1;
       }),
     },
@@ -457,7 +457,7 @@ test('disableImmer', () => {
   const model = {
     foo: 0,
     setFoo: action((state, foo) => ({ ...state, foo })),
-    doubleFoo: computed(state => state.foo * 2),
+    doubleFoo: computed((state) => state.foo * 2),
   };
   const store = createStore(model, {
     disableImmer: true,

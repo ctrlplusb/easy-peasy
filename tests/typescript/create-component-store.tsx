@@ -12,15 +12,15 @@ interface InitialData {
 
 const useCounter = createComponentStore<StoreModel>({
   count: 0,
-  inc: action(state => {
+  inc: action((state) => {
     state.count += 1;
   }),
 });
 
 const useCounterWithInitializer = createComponentStore<StoreModel, InitialData>(
-  data => ({
+  (data) => ({
     count: data ? data.count + 1 : 0,
-    inc: action(state => {
+    inc: action((state) => {
       state.count += 1;
     }),
   }),

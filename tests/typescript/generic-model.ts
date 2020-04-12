@@ -27,7 +27,7 @@ interface NormalModel {
 
 const normalModel: NormalModel = {
   data: [],
-  fetch: action(state => {
+  fetch: action((state) => {
     //      👍 works
     state.data[0].name;
   }),
@@ -49,7 +49,7 @@ interface GenericModel<Item extends ObjectWithId> {
 const createModel = <Item extends ObjectWithId>(): GenericModel<Item> => {
   return {
     data: [],
-    fetch: action(state => {
+    fetch: action((state) => {
       state.data.forEach(({ id }) => id);
     }),
   };

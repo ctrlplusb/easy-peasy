@@ -10,7 +10,7 @@ import {
   thunkSymbol,
 } from './constants';
 
-export const debug = state => {
+export const debug = (state) => {
   if (isDraft(state)) {
     return original(state);
   }
@@ -26,12 +26,12 @@ export const actionOn = (targetResolver, fn) => {
   return fn;
 };
 
-export const action = fn => {
+export const action = (fn) => {
   fn[actionSymbol] = {};
   return fn;
 };
 
-const defaultStateResolvers = [state => state];
+const defaultStateResolvers = [(state) => state];
 
 export const computed = (fnOrStateResolvers, fn) => {
   if (typeof fn === 'function') {
@@ -64,12 +64,12 @@ export const thunkOn = (targetResolver, fn) => {
   return fn;
 };
 
-export const thunk = fn => {
+export const thunk = (fn) => {
   fn[thunkSymbol] = {};
   return fn;
 };
 
-export const reducer = fn => {
+export const reducer = (fn) => {
   fn[reducerSymbol] = {};
   return fn;
 };

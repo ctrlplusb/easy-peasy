@@ -27,10 +27,10 @@ export default function createStore(model, options = {}) {
     middleware = [],
     mockActions = false,
     name: storeName = `EasyPeasyStore`,
-    reducerEnhancer = rootReducer => rootReducer,
+    reducerEnhancer = (rootReducer) => rootReducer,
   } = options;
 
-  const bindReplaceState = modelDef => {
+  const bindReplaceState = (modelDef) => {
     return {
       ...modelDef,
       ePRS: helpers.action((_, payload) => payload),
@@ -42,11 +42,11 @@ export default function createStore(model, options = {}) {
   let modelDefinition = bindReplaceState(modelClone);
   let mockedActions = [];
 
-  const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
+  const persistKey = (targetPath) => `[${storeName}]@${targetPath.join('.')}`;
   const persistor = createPersistor(persistKey, references);
   const persistMiddleware = createPersistMiddleware(persistor, references);
 
-  const replaceState = nextState =>
+  const replaceState = (nextState) =>
     references.internals._actionCreatorDict['@action.ePRS'](nextState);
 
   const bindStoreInternals = (state = {}) => {
@@ -60,7 +60,7 @@ export default function createStore(model, options = {}) {
     });
   };
 
-  const mockActionsMiddleware = () => () => action => {
+  const mockActionsMiddleware = () => () => (action) => {
     if (action != null) {
       mockedActions.push(action);
     }
@@ -105,17 +105,17 @@ export default function createStore(model, options = {}) {
   references.getState = store.getState;
 
   const bindActionCreators = () => {
-    Object.keys(store.dispatch).forEach(actionsKey => {
+    Object.keys(store.dispatch).forEach((actionsKey) => {
       delete store.dispatch[actionsKey];
     });
-    Object.keys(references.internals._actionCreators).forEach(key => {
+    Object.keys(references.internals._actionCreators).forEach((key) => {
       store.dispatch[key] = references.internals._actionCreators[key];
     });
   };
 
   bindActionCreators();
 
-  const rebindStore = removeKey => {
+  const rebindStore = (removeKey) => {
     const currentState = store.getState();
     if (removeKey) {
       delete currentState[removeKey];
@@ -166,11 +166,11 @@ export default function createStore(model, options = {}) {
       flush: persistor.flush,
       resolveRehydration: () => resolveRehydration,
     },
-    reconfigure: newModel => {
+    reconfigure: (newModel) => {
       modelDefinition = bindReplaceState(newModel);
       rebindStore();
     },
-    removeModel: key => {
+    removeModel: (key) => {
       if (!modelDefinition[key]) {
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console

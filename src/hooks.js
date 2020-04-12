@@ -27,7 +27,7 @@ export function createStoreStateHook(Context) {
     const mountedRef = useRef(true);
     const subscriptionMapStateError = useRef();
 
-    const [, forceRender] = useReducer(s => s + 1, 0);
+    const [, forceRender] = useReducer((s) => s + 1, 0);
 
     if (
       subscriptionMapStateError.current ||

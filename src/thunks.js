@@ -11,7 +11,7 @@ export function createThunkHandler(
   const thunkMeta =
     thunkDefinition[thunkSymbol] || thunkDefinition[thunkOnSymbol];
 
-  return payload => {
+  return (payload) => {
     const helpers = {
       dispatch: references.dispatch,
       getState: () => get(meta.parent, references.getState()),
@@ -46,8 +46,8 @@ export function createThunkActionsCreator(
   thunkMeta.parent = meta.parent;
   thunkMeta.path = meta.path;
 
-  const actionCreator = payload => {
-    const dispatchError = err => {
+  const actionCreator = (payload) => {
+    const dispatchError = (err) => {
       references.dispatch({
         type: failType,
         payload,
@@ -59,7 +59,7 @@ export function createThunkActionsCreator(
         error: err,
       });
     };
-    const dispatchSuccess = result => {
+    const dispatchSuccess = (result) => {
       references.dispatch({
         type: successType,
         payload,
@@ -80,11 +80,11 @@ export function createThunkActionsCreator(
       const result = references.dispatch(() => thunkHandler(payload));
       if (isPromise(result)) {
         return result
-          .then(resolved => {
+          .then((resolved) => {
             dispatchSuccess(resolved);
             return resolved;
           })
-          .catch(err => {
+          .catch((err) => {
             dispatchError(err);
             throw err;
           });

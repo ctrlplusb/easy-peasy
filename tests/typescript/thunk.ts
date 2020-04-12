@@ -51,14 +51,11 @@ const model: StoreModel = {
 
 const store = createStore(model);
 
-store
-  .getActions()
-  .audit.syncThunk()
-  .toUpperCase();
+store.getActions().audit.syncThunk().toUpperCase();
 store
   .getActions()
   .audit.log('foo')
-  .then(result => result + 1);
+  .then((result) => result + 1);
 // typings:expect-error
 store.getActions().audit.log(1);
 // typings:expect-error

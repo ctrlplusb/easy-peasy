@@ -38,7 +38,7 @@ export default function extractDataFromModel(
   };
 
   const recursiveExtractFromModel = (current, parentPath) =>
-    Object.keys(current).forEach(key => {
+    Object.keys(current).forEach((key) => {
       const value = current[key];
       const path = [...parentPath, key];
       const meta = {

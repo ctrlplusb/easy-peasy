@@ -26,24 +26,24 @@ interface StoreModel {
 const model: StoreModel = {
   products: {
     products: [{ id: 1, name: 'boots', price: 20 }],
-    totalPrice: computed(state =>
+    totalPrice: computed((state) =>
       state.products.reduce((total, product) => total + product.price, 0),
     ),
-    totalPriceVerbose: computed([state => state.products], products => {
+    totalPriceVerbose: computed([(state) => state.products], (products) => {
       return products.reduce((total, product) => total + product.price, 0);
     }),
-    priceForProduct: computed(state => id => state.products[id].price),
+    priceForProduct: computed((state) => (id) => state.products[id].price),
   },
   baskets: {
     productIds: [1],
     products: computed(
       [
-        state => state.productIds,
+        (state) => state.productIds,
         (state, storeState) => storeState.products.products,
       ],
       (productIds, products) =>
         productIds.reduce<Product[]>((acc, id) => {
-          const product = products.find(p => p.id === id);
+          const product = products.find((p) => p.id === id);
           if (product) {
             acc.push(product);
           }
