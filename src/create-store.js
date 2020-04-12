@@ -81,8 +81,8 @@ export default function createStore(model, options = {}) {
 
   const easyPeasyMiddleware = [
     createComputedPropertiesMiddleware(references),
-    reduxThunk,
     ...middleware,
+    reduxThunk,
     createListenerMiddleware(references),
     persistMiddleware,
   ];
