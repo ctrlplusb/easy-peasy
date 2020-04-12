@@ -1,4 +1,11 @@
-import { createStore, Action, action, Thunk, thunk } from 'easy-peasy';
+import {
+  createStore,
+  Action,
+  action,
+  Thunk,
+  thunk,
+  ReduxAction,
+} from 'easy-peasy';
 import { Reducer } from 'redux';
 
 interface Model {
@@ -19,7 +26,7 @@ interface PersistPartial {
   persist: string;
 }
 
-function persistReducer<S, A extends Action>(
+function persistReducer<S, A extends ReduxAction>(
   baseReducer: Reducer<S, A>,
 ): Reducer<S & PersistPartial, A> {
   return (baseReducer as unknown) as Reducer<S & PersistPartial, A>;
