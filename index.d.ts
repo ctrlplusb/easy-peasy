@@ -601,32 +601,106 @@ export type Computed<
   result: Result;
 };
 
-type Resolver<Model extends object, StoreModel extends object> = (
+type Resolver<Model extends object, StoreModel extends object, Result = any> = (
   state: State<Model>,
   storeState: State<StoreModel>,
-) => any;
+) => Result;
 
 type DefaultComputationFunc<Model extends object, Result> = (
   state: State<Model>,
 ) => Result;
 
+type NResolvers<Model extends object, StoreModel extends object> =
+  | []
+  | [Resolver<Model, StoreModel, any>]
+  | [Resolver<Model, StoreModel, any>, Resolver<Model, StoreModel, any>]
+  | [
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+    ]
+  | [
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+    ]
+  | [
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+    ]
+  | [
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+      Resolver<Model, StoreModel, any>,
+    ];
+
+type AnyFunction = (...args: any[]) => any;
+
 export function computed<
   Model extends object = {},
   Result = void,
   StoreModel extends object = {},
-  Resolvers extends Resolver<Model, StoreModel>[] = Resolver<
+  Resolvers extends NResolvers<Model, StoreModel> = NResolvers<
     Model,
     StoreModel
-  >[]
+  >
 >(
-  resolversOrCompFunc: (Resolvers | []) | DefaultComputationFunc<Model, Result>,
-  compFunc?: (
-    ...args: {
-      [K in keyof Resolvers]: Resolvers[K] extends (...args: any[]) => any
-        ? ReturnType<Resolvers[K]>
-        : string;
-    }
-  ) => Result,
+  resolversOrCompFunc: Resolvers | DefaultComputationFunc<Model, Result>,
+  compFunc?: Resolvers extends [AnyFunction]
+    ? (arg0: ReturnType<Resolvers[0]>) => Result
+    : Resolvers extends [AnyFunction, AnyFunction]
+    ? (arg0: ReturnType<Resolvers[0]>, arg1: ReturnType<Resolvers[1]>) => Result
+    : Resolvers extends [AnyFunction, AnyFunction, AnyFunction]
+    ? (
+        arg0: ReturnType<Resolvers[0]>,
+        arg1: ReturnType<Resolvers[1]>,
+        arg2: ReturnType<Resolvers[2]>,
+      ) => Result
+    : Resolvers extends [AnyFunction, AnyFunction, AnyFunction, AnyFunction]
+    ? (
+        arg0: ReturnType<Resolvers[0]>,
+        arg1: ReturnType<Resolvers[1]>,
+        arg2: ReturnType<Resolvers[2]>,
+        arg3: ReturnType<Resolvers[3]>,
+      ) => Result
+    : Resolvers extends [
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+      ]
+    ? (
+        arg0: ReturnType<Resolvers[0]>,
+        arg1: ReturnType<Resolvers[1]>,
+        arg2: ReturnType<Resolvers[2]>,
+        arg3: ReturnType<Resolvers[3]>,
+        arg4: ReturnType<Resolvers[4]>,
+      ) => Result
+    : Resolvers extends [
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+      ]
+    ? (
+        arg0: ReturnType<Resolvers[0]>,
+        arg1: ReturnType<Resolvers[1]>,
+        arg2: ReturnType<Resolvers[2]>,
+        arg3: ReturnType<Resolvers[3]>,
+        arg4: ReturnType<Resolvers[4]>,
+        arg5: ReturnType<Resolvers[5]>,
+      ) => Result
+    : () => Result,
 ): Computed<Model, Result, StoreModel>;
 
 // #endregion

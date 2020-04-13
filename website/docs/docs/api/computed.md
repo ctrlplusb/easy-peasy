@@ -79,7 +79,7 @@ const todos = {
   items: [{ id: 1, text: 'answer questions' }],
   // Note how we are returning a function instead of state
   //                          👇
-  todoById: computed(state => id => state.items.find(todo => todo.id === id)) 
+  todoById: computed(state => id => state.items.find(todo => todo.id === id))
 }
 ```
 
@@ -104,7 +104,7 @@ const todos = {
   //                          👇
   todoById: computed(state => memo(
     id => state.items.find(todo => todo.id === id),
-    100 // 👈 cache size  
+    100 // 👈 cache size
   ))
 }
 ```
@@ -128,4 +128,41 @@ You can also access the computed property via the [store's](/docs/api/store.html
 
 ```javascript
 console.log(store.getState().products.totalPrice);
+```
+
+## Known Issues
+
+### TypeScript: Defining a computed property as optional
+
+Unfortunately, due to the way our typing system maps your model, you cannot declare a computed property as being optional via the `?` property postfix.
+
+For example:
+
+```typescript
+interface StoreModel {
+  products: Product[];
+  totalPrice?: Computed<StoreModel, number>;
+  //       👆
+  // Note the optional definition
+}
+
+const storeModel: StoreModel = {
+  products: [];
+  // This will result in a TypeScript error 😢
+  totalPrice: computed(
+    state => state.products.length > 0
+      ? calcPrice(state.products)
+      : undefined
+  )
+}
+```
+
+Luckily there is a workaround; simply adjust the definition of your computed property to indicate that the result could be undefined.
+
+```diff
+  interface StoreModel {
+    products: Product[];
+-   totalPrice?: Computed<StoreModel, number>;
++   totalPrice: Computed<StoreModel, number | undefined>;
+  }
 ```
