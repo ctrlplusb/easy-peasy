@@ -9,7 +9,6 @@ import createStoreInternals from './create-store-internals';
 import {
   createPersistor,
   createPersistMiddleware,
-  createPersistenceClearer,
   rehydrateStateFromPersistIfNeeded,
 } from './persistence';
 import { createComputedPropertiesMiddleware } from './computed-properties';
@@ -46,10 +45,9 @@ export default function createStore(model, options = {}) {
   const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
   const persistor = createPersistor(persistKey, references);
   const persistMiddleware = createPersistMiddleware(persistor, references);
-  const clearPersistance = createPersistenceClearer(persistKey, references);
 
   const replaceState = nextState =>
-    references.internals.actionCreatorDict['@action.ePRS'](nextState);
+    references.internals._actionCreatorDict['@action.ePRS'](nextState);
 
   const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({
@@ -83,8 +81,8 @@ export default function createStore(model, options = {}) {
 
   const easyPeasyMiddleware = [
     createComputedPropertiesMiddleware(references),
-    reduxThunk,
     ...middleware,
+    reduxThunk,
     createListenerMiddleware(references),
     persistMiddleware,
   ];
@@ -95,12 +93,12 @@ export default function createStore(model, options = {}) {
 
   const store = reduxCreateStore(
     references.internals.reducer,
-    references.internals.defaultState,
+    references.internals._defaultState,
     composeEnhancers(applyMiddleware(...easyPeasyMiddleware), ...enhancers),
   );
 
   store.subscribe(() => {
-    references.internals.computedState.isInReducer = false;
+    references.internals._computedState.isInReducer = false;
   });
 
   references.dispatch = store.dispatch;
@@ -110,8 +108,8 @@ export default function createStore(model, options = {}) {
     Object.keys(store.dispatch).forEach(actionsKey => {
       delete store.dispatch[actionsKey];
     });
-    Object.keys(references.internals.actionCreators).forEach(key => {
-      store.dispatch[key] = references.internals.actionCreators[key];
+    Object.keys(references.internals._actionCreators).forEach(key => {
+      store.dispatch[key] = references.internals._actionCreators[key];
     });
   };
 
@@ -124,7 +122,7 @@ export default function createStore(model, options = {}) {
     }
     bindStoreInternals(currentState);
     store.replaceReducer(references.internals.reducer);
-    replaceState(references.internals.defaultState);
+    replaceState(references.internals._defaultState);
     bindActionCreators();
   };
 
@@ -145,16 +143,27 @@ export default function createStore(model, options = {}) {
       }
       modelDefinition[key] = modelForKey;
       rebindStore();
+      // There may have been persisted state for a dynamic model. We should try
+      // and rehydrate the specifc node
+      const addModelRehydration = rehydrateStateFromPersistIfNeeded(
+        persistKey,
+        replaceState,
+        references,
+        key,
+      );
+      return {
+        resolveRehydration: () => addModelRehydration,
+      };
     },
     clearMockedActions: () => {
       mockedActions = [];
     },
-    getActions: () => references.internals.actionCreators,
-    getListeners: () => references.internals.listenerActionCreators,
+    getActions: () => references.internals._actionCreators,
+    getListeners: () => references.internals._listenerActionCreators,
     getMockedActions: () => [...mockedActions],
     persist: {
-      clear: clearPersistance,
-      flush: () => persistor.flush(),
+      clear: persistor.clear,
+      flush: persistor.flush,
       resolveRehydration: () => resolveRehydration,
     },
     reconfigure: newModel => {

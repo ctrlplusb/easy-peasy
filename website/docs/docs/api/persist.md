@@ -1,10 +1,12 @@
 # persist
 
-This helper allows you to persist your store state (by default to `sessionStorage`), allowing it to be rehydrated when your application is remounted (e.g. on page refresh).
+This helper allows you to persist your store state, by default to `sessionStorage`, allowing your state to be rehydrated when your store recreated (e.g. on page refresh).
 
 > This API is _heavily_ inspired by [`redux-persist`](https://github.com/rt2zz/redux-persist), with the intention of providing a lot of compatibility with it so that we can leverage the packages that exist within it's ecosystem.
 
-To utilise this feature you simply need to wrap your model with the helper.
+**Configuring your store to persist**
+
+To utilise this feature you simply need to wrap the part(s) of your model you wish to persist with the helper.
 
 ```javascript
 const store = createStore(
@@ -17,27 +19,37 @@ const store = createStore(
 );
 ```
 
-Every time the state changes it will be saved to the configured storage engine (`sessionStorage` by default). 
+Every time your state changes it will be saved to the configured storage engine (`sessionStorage` by default).
 
-When your application is freshly mounted, e.g. on a page refresh, any data that exists within the configured storage engine will be used to rehydrate your state accordingly.
+> ***Note:*** So that we don't thrash your storage engine with unnecessary operations the persistence operations are batched (debounced to every 1 second), therefore you should ensure that any outstanding persist operations are complete prior to navigating away from your application or performing a page refresh. You can read more about this in the example further below.
+
+**Rehydrating your store with persisted data**
+
+When your store is created, any data that has been persisted will be used to rehydrate your state accordingly.
+
+> ***Note:*** If you are using an asynchronous storage engine then you should adopt a strategy that ensures the data has been rehydrated prior to rendering the parts of your application that require the data. You can read more about this in the example further below.
 
 ```javascript
 const store = createStore(model); // state is automatically rehydrated
 
-// Application then renders with rehydrated state
+// Application renders with rehydrated state 🎉
 const app = (
   <StoreProvider store={store}>
     <MyApp />
   </StoreProvider>
 );
-``` 
+```
 
 ## API
 
+Below is the API of the `persist` helper.
+
+Please be aware that [Store instances](/docs/api/store.html) contain additional APIs relating to persistence; for example - allowing you to ensure all outstanding persist operations complete prior to navigating away from your application. We highly recommend you read the examples in the docs below and familiarize yourself with the API of [Store instances](/docs/api/store.html).
+
   - `model` (Object, *required*)
 
-    The model that you wish to apply persistence to. 
-    
+    The model that you wish to apply persistence to.
+
     > You can surround your entire model, or a nested model. You can even have multiple `persist` configurations scattered throughout your store's model. Feel free to use the API on the parts of your state feel most appropriate for persistence/rehydration.
 
   - `config` (Object, *optional*)
@@ -54,8 +66,8 @@ const app = (
 
     - `mergeStrategy` (string, *optional*)
 
-      The strategy that should be employed when rehydrating the persisted state over your store's initial state. 
-      
+      The strategy that should be employed when rehydrating the persisted state over your store's initial state.
+
       The following values are supported:
 
       - `'merge'` (*default*)
@@ -132,7 +144,7 @@ const app = (
         }
         ```
 
-      - `'mergeDeep'` 
+      - `'mergeDeep'`
 
         The data from the persistence will be merged deeply, recursing through all _object_ structures and merging.
 
@@ -175,7 +187,7 @@ const app = (
         ```
 
         > **Note:** Only *plain objects* will be recursed and merged; no other types such as Arrays, Maps, Sets, Classes etc.
-    
+
     - `transformers` (Array<Transformer>, *optional*)
 
       Transformers are use to apply operations to your data during prior it being persisted or hydrated.
@@ -204,7 +216,7 @@ const app = (
 
       - Custom engine
 
-        A custom storage engine. 
+        A custom storage engine.
 
         [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines) that have been built for it. These can be used here.
 
@@ -239,7 +251,7 @@ const model = persist(
     increment: (state) => {
       state.counter += 1;
     }
-  }, 
+  },
   // 👇 configuration
   {
     whitelist: ['counter'],
@@ -293,7 +305,7 @@ store.persist.resolveRehydration().then(() => {
 
 **Option 2: Eagerly render your application and utilise the `useStoreRehydrated` hook**
 
-You can alternatively render your application immediately, i.e. not wait for the async rehydration to resolve. 
+You can alternatively render your application immediately, i.e. not wait for the async rehydration to resolve.
 
 To improve your user's experience you can utilise the [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook. This hook returns a boolean flag indicating when the rehydration has completed.
 
@@ -322,6 +334,46 @@ ReactDOM.render(
 ```
 
 In the example above, the `<Main />` content will not render until our store has been successfully updated with the rehydration state.
+
+## Deleting all persisted data
+
+Should you wish to remove all the data that has been persisted for your model you can utilise the [Store instance](/docs/api/store.html) API to do so.
+
+```javascript
+const store = createStore(model);
+
+if (someCondition) {
+  store.persist.clear().then(() => {
+    console.log('Store has been cleared');
+  });
+}
+```
+
+Note that a `Promise` was returned, which when resolved indicates that the data has been removed from your persistence layers.
+
+## Utilising `persist` within a dynamically added model
+
+You can still utilise the `persist` API when using the [`store.addModel`](/docs/api/store.html) API to dynamically configure an additional model within your store.
+
+Every time the model is added to your store we will attempt to rehydrate any persisted state.
+
+```typescript
+store.addModel('products', productsModel);
+```
+
+If you are utilizing an asynchronous storage engine then you should utilise the returned `resolveRehydration` helper.
+
+```typescript                             👇
+const { resolveRehydration } = store.addModel('products', productsModel);
+//            👆
+// Deconstruct the returned object to get a handle on resolveRehydration
+
+//     as we are using an asynchronous storage engine we will await the
+// 👇 the promise returned by the resolveRehydration function.
+resolveRehydration().then(() => {
+  console.log('Rehydration is complete');
+});
+```
 
 ## Persisting multiple stores
 

@@ -21,20 +21,20 @@ export default function extractDataFromModel(
   injections,
   references,
 ) {
-  const defaultState = initialState;
-  const actionCreatorDict = {};
-  const actionCreators = {};
-  const actionReducersDict = {};
+  const _defaultState = initialState;
+  const _actionCreatorDict = {};
+  const _actionCreators = {};
+  const _actionReducersDict = {};
   const actionThunks = {};
-  const computedProperties = [];
-  const customReducers = [];
-  const listenerActionCreators = {};
-  const listenerActionMap = {};
+  const _computedProperties = [];
+  const _customReducers = [];
+  const _listenerActionCreators = {};
+  const _listenerActionMap = {};
   const listenerDefinitions = [];
-  const persistenceConfig = [];
-  const computedState = {
+  const _persistenceConfig = [];
+  const _computedState = {
     isInReducer: false,
-    currentState: defaultState,
+    currentState: _defaultState,
   };
 
   const recursiveExtractFromModel = (current, parentPath) =>
@@ -49,14 +49,14 @@ export default function extractDataFromModel(
       const handleValueAsState = () => {
         const initialParentRef = get(parentPath, initialState);
         if (initialParentRef && key in initialParentRef) {
-          set(path, defaultState, initialParentRef[key]);
+          set(path, _defaultState, initialParentRef[key]);
         } else {
-          set(path, defaultState, value);
+          set(path, _defaultState, value);
         }
       };
 
       if (key === persistSymbol) {
-        persistenceConfig.push(extractPersistConfig(parentPath, value));
+        _persistenceConfig.push(extractPersistConfig(parentPath, value));
         return;
       }
 
@@ -64,14 +64,14 @@ export default function extractDataFromModel(
         if (value[actionSymbol] || value[actionOnSymbol]) {
           const actionReducer = value;
           const actionCreator = createActionCreator(value, meta, references);
-          actionCreatorDict[actionCreator.type] = actionCreator;
-          actionReducersDict[actionCreator.type] = actionReducer;
+          _actionCreatorDict[actionCreator.type] = actionCreator;
+          _actionReducersDict[actionCreator.type] = actionReducer;
           if (meta.key !== 'ePRS') {
             if (value[actionOnSymbol]) {
               listenerDefinitions.push(value);
-              set(path, listenerActionCreators, actionCreator);
+              set(path, _listenerActionCreators, actionCreator);
             } else {
-              set(path, actionCreators, actionCreator);
+              set(path, _actionCreators, actionCreator);
             }
           }
         } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
@@ -80,7 +80,7 @@ export default function extractDataFromModel(
             meta,
             references,
             injections,
-            actionCreators,
+            _actionCreators,
           );
           const actionCreator = createThunkActionsCreator(
             value,
@@ -89,33 +89,33 @@ export default function extractDataFromModel(
             thunkHandler,
           );
           set(path, actionThunks, thunkHandler);
-          actionCreatorDict[actionCreator.type] = actionCreator;
+          _actionCreatorDict[actionCreator.type] = actionCreator;
           if (value[thunkOnSymbol]) {
             listenerDefinitions.push(value);
-            set(path, listenerActionCreators, actionCreator);
+            set(path, _listenerActionCreators, actionCreator);
           } else {
-            set(path, actionCreators, actionCreator);
+            set(path, _actionCreators, actionCreator);
           }
         } else if (value[computedSymbol]) {
-          const parent = get(parentPath, defaultState);
+          const parent = get(parentPath, _defaultState);
           const bindComputedProperty = createComputedPropertyBinder(
             parentPath,
             key,
             value,
-            computedState,
+            _computedState,
             references,
           );
           bindComputedProperty(parent);
-          computedProperties.push({ key, parentPath, bindComputedProperty });
+          _computedProperties.push({ key, parentPath, bindComputedProperty });
         } else if (value[reducerSymbol]) {
-          customReducers.push({ key, parentPath, reducer: value });
+          _customReducers.push({ key, parentPath, reducer: value });
         } else {
           handleValueAsState();
         }
       } else if (isPlainObject(value)) {
-        const existing = get(path, defaultState);
+        const existing = get(path, _defaultState);
         if (existing == null) {
-          set(path, defaultState, {});
+          set(path, _defaultState, {});
         }
         recursiveExtractFromModel(value, path);
       } else {
@@ -127,21 +127,21 @@ export default function extractDataFromModel(
 
   bindListenerDefinitions(
     listenerDefinitions,
-    actionCreators,
-    actionCreatorDict,
-    listenerActionMap,
+    _actionCreators,
+    _actionCreatorDict,
+    _listenerActionMap,
   );
 
   return {
-    actionCreatorDict,
-    actionCreators,
-    actionReducersDict,
-    computedProperties,
-    customReducers,
-    computedState,
-    defaultState,
-    listenerActionCreators,
-    listenerActionMap,
-    persistenceConfig,
+    _actionCreatorDict,
+    _actionCreators,
+    _actionReducersDict,
+    _computedProperties,
+    _customReducers,
+    _computedState,
+    _defaultState,
+    _listenerActionCreators,
+    _listenerActionMap,
+    _persistenceConfig,
   };
 }

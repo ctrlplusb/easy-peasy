@@ -4,7 +4,6 @@ import { Component } from 'react';
 import {
   compose,
   AnyAction,
-  Action as ReduxAction,
   Dispatch as ReduxDispatch,
   Reducer as ReduxReducer,
   Store as ReduxStore,
@@ -13,6 +12,8 @@ import {
   Observable,
 } from 'redux';
 import { O } from 'ts-toolbelt';
+
+export type ReduxAction = AnyAction;
 
 /**
  * Picks only the keys of a certain type
@@ -38,13 +39,63 @@ type IndexSignatureKeysOfType<A extends Object> = {
     : never;
 }[keyof A];
 
-type ActionTypes =
-  | Action<any, any>
-  | Thunk<any, any, any, any, any>
-  | ActionOn<any, any>
-  | ThunkOn<any, any, any>;
+type InvalidObjectTypes = string | Array<any> | RegExp | Date | Function;
 
-interface ActionCreator<Payload> {
+type IncludesDeep3<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? O.Includes<Obj, M>
+          : 0;
+      },
+      1
+    >;
+
+type IncludesDeep2<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? IncludesDeep3<Obj[P], M>
+          : 0;
+      },
+      1
+    >;
+
+type IncludesDeep<Obj extends object, M extends any> = O.Includes<
+  Obj,
+  M
+> extends 1
+  ? 1
+  : O.Includes<
+      {
+        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
+          ? 0
+          : Obj[P] extends object
+          ? IncludesDeep2<Obj[P], M>
+          : 0;
+      },
+      1
+    >;
+
+type ActionEmitterTypes = Action<any, any> | Thunk<any, any, any, any, any>;
+
+type ActionListenerTypes = ActionOn<any, any> | ThunkOn<any, any, any>;
+
+type ActionTypes = ActionEmitterTypes | ActionListenerTypes;
+
+interface ActionCreator<Payload = void> {
   (payload: Payload): void;
   type: string;
   z__creator: 'actionWithPayload';
@@ -65,7 +116,9 @@ type ActionOrThunkCreator<Payload = void, Result = void> =
 
 // #region Helpers
 
-export function debug<StateDraft extends any>(state: StateDraft): StateDraft;
+export function debug<StateDraft extends object = {}>(
+  state: StateDraft,
+): StateDraft;
 
 export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
@@ -73,105 +126,77 @@ export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 // #region Listeners
 
-type ListenerMapper<ActionsModel extends object, Depth extends string> = {
-  [P in keyof ActionsModel]: ActionsModel[P] extends ActionOn<any, any>
+type ValidListenerProperties<ActionsModel extends object> = {
+  [P in keyof ActionsModel]: P extends IndexSignatureKeysOfType<ActionsModel>
+    ? never
+    : ActionsModel[P] extends ActionListenerTypes
+    ? P
+    : ActionsModel[P] extends object
+    ? IncludesDeep<ActionsModel[P], ActionListenerTypes> extends 1
+      ? P
+      : never
+    : never;
+}[keyof ActionsModel];
+
+type ListenerMapper<
+  ActionsModel extends object,
+  K extends keyof ActionsModel
+> = {
+  [P in K]: ActionsModel[P] extends ActionOn<any, any>
     ? ActionCreator<TargetPayload<any>>
     : ActionsModel[P] extends ThunkOn<any, any, any>
     ? ThunkCreator<TargetPayload<any>, any>
     : ActionsModel[P] extends object
-    ? RecursiveListeners<
-        ActionsModel[P],
-        Depth extends '1'
-          ? '2'
-          : Depth extends '2'
-          ? '3'
-          : Depth extends '3'
-          ? '4'
-          : Depth extends '4'
-          ? '5'
-          : '6'
-      >
-    : unknown;
+    ? RecursiveListeners<ActionsModel[P]>
+    : ActionsModel[P];
 };
 
-type RecursiveListeners<
-  Model extends object,
-  Depth extends string
-> = Depth extends '6'
-  ? Model
-  : ListenerMapper<
-      O.Filter<
-        O.Select<Model, object>,
-        | Array<any>
-        | RegExp
-        | Date
-        | string
-        | Reducer<any, any>
-        | Computed<any, any, any>
-        | Action<any, any>
-        | Thunk<any, any, any, any, any>
-      >,
-      Depth
-    >;
+type RecursiveListeners<ActionsModel extends object> = ListenerMapper<
+  ActionsModel,
+  ValidListenerProperties<ActionsModel>
+>;
 
 /**
- * Filters a model into a type that represents the listeners action creators
+ * Filters a model into a type that represents the listeners actions/thunks
  *
  * @example
  *
- * type OnlyActions = Actions<Model>;
+ * type OnlyListeners = Listeners<Model>;
  */
-export type Listeners<Model extends object = {}> = RecursiveListeners<
-  Model,
-  '1'
->;
+export type Listeners<Model extends object = {}> = RecursiveListeners<Model>;
 
 // #endregion
 
 // #region Actions
 
-type ActionMapper<ActionsModel extends object, Depth extends string> = {
-  [P in keyof ActionsModel]: ActionsModel[P] extends Action<any, any>
+type ValidActionProperties<ActionsModel extends object> = {
+  [P in keyof ActionsModel]: P extends IndexSignatureKeysOfType<ActionsModel>
+    ? never
+    : ActionsModel[P] extends ActionEmitterTypes
+    ? P
+    : ActionsModel[P] extends object
+    ? IncludesDeep<ActionsModel[P], ActionEmitterTypes> extends 1
+      ? P
+      : never
+    : never;
+}[keyof ActionsModel];
+
+type ActionMapper<ActionsModel extends object, K extends keyof ActionsModel> = {
+  [P in K]: ActionsModel[P] extends Action<any, any>
     ? ActionCreator<ActionsModel[P]['payload']>
     : ActionsModel[P] extends Thunk<any, any, any, any, any>
     ? ActionsModel[P]['payload'] extends void
       ? ThunkCreator<void, ActionsModel[P]['result']>
       : ThunkCreator<ActionsModel[P]['payload'], ActionsModel[P]['result']>
     : ActionsModel[P] extends object
-    ? RecursiveActions<
-        ActionsModel[P],
-        Depth extends '1'
-          ? '2'
-          : Depth extends '2'
-          ? '3'
-          : Depth extends '3'
-          ? '4'
-          : Depth extends '4'
-          ? '5'
-          : '6'
-      >
-    : unknown;
+    ? RecursiveActions<ActionsModel[P]>
+    : ActionsModel[P];
 };
 
-type RecursiveActions<
-  Model extends object,
-  Depth extends string
-> = Depth extends '6'
-  ? Model
-  : ActionMapper<
-      O.Filter<
-        O.Select<Model, object>,
-        | Array<any>
-        | RegExp
-        | Date
-        | string
-        | Reducer<any, any>
-        | Computed<any, any, any>
-        | ActionOn<any, any>
-        | ThunkOn<any, any, any>
-      >,
-      Depth
-    >;
+type RecursiveActions<ActionsModel extends object> = ActionMapper<
+  ActionsModel,
+  ValidActionProperties<ActionsModel>
+>;
 
 /**
  * Filters a model into a type that represents the action/thunk creators
@@ -180,64 +205,35 @@ type RecursiveActions<
  *
  * type OnlyActions = Actions<Model>;
  */
-export type Actions<Model extends object = {}> = RecursiveActions<Model, '1'>;
+export type Actions<Model extends object = {}> = RecursiveActions<Model>;
 
 // #endregion
 
 // #region State
 
-interface Pojo {
-  [key: string]:
-    | bigint
-    | boolean
-    | null
-    | number
-    | string
-    | symbol
-    | undefined
-    | Map<any, any>
-    | Set<any>
-    | Array<any>
-    | Function
-    | object
-    | Generic<any>;
-}
+type StateTypes = Computed<any, any, any> | Reducer<any, any> | ActionTypes;
 
-type StateMapper<StateModel extends object, Depth extends string> = {
+type StateMapper<StateModel extends object> = {
   [P in keyof StateModel]: StateModel[P] extends Generic<infer T>
     ? T
     : P extends IndexSignatureKeysOfType<StateModel>
     ? StateModel[P]
-    : StateModel[P] extends Pojo
-    ? StateModel[P] extends Computed<any, any, any>
-      ? StateModel[P]['result']
-      : StateModel[P] extends Reducer<any, any>
-      ? StateModel[P]['result']
-      : StateModel[P] extends object
-      ? StateModel[P] extends string | Array<any> | RegExp | Date | Function
-        ? StateModel[P]
-        : RecursiveState<
-            StateModel[P],
-            Depth extends '1'
-              ? '2'
-              : Depth extends '2'
-              ? '3'
-              : Depth extends '3'
-              ? '4'
-              : Depth extends '4'
-              ? '5'
-              : '6'
-          >
+    : StateModel[P] extends Computed<any, any, any>
+    ? StateModel[P]['result']
+    : StateModel[P] extends Reducer<any, any>
+    ? StateModel[P]['result']
+    : StateModel[P] extends object
+    ? StateModel[P] extends InvalidObjectTypes
+      ? StateModel[P]
+      : IncludesDeep<StateModel[P], StateTypes | ActionTypes> extends 1
+      ? RecursiveState<StateModel[P]>
       : StateModel[P]
     : StateModel[P];
 };
 
-type RecursiveState<
-  Model extends object,
-  Depth extends string
-> = Depth extends '6'
-  ? Model
-  : StateMapper<O.Filter<Model, ActionTypes>, Depth>;
+type RecursiveState<Model extends object> = StateMapper<
+  O.Filter<Model, ActionTypes>
+>;
 
 /**
  * Filters a model into a type that represents the state only (i.e. no actions)
@@ -246,7 +242,7 @@ type RecursiveState<
  *
  * type StateOnly = State<Model>;
  */
-export type State<Model extends object = {}> = RecursiveState<Model, '1'>;
+export type State<Model extends object = {}> = RecursiveState<Model>;
 
 // #endregion
 
@@ -274,8 +270,8 @@ export type State<Model extends object = {}> = RecursiveState<Model, '1'>;
  * })
  */
 export function createStore<
-  StoreModel extends Object = {},
-  InitialState extends object = {},
+  StoreModel extends object = {},
+  InitialState extends undefined | object = undefined,
   Injections = any
 >(
   model: StoreModel,
@@ -286,7 +282,7 @@ export function createStore<
  * Configuration interface for the createStore
  */
 export interface EasyPeasyConfig<
-  InitialState extends Object = {},
+  InitialState extends undefined | object = undefined,
   Injections = any
 > {
   compose?: typeof compose;
@@ -306,26 +302,41 @@ export interface MockedAction {
   [key: string]: any;
 }
 
+export interface AddModelResult {
+  resolveRehydration: () => Promise<void>;
+}
+
 /**
  * Represents a Redux store, enhanced by easy peasy.
  *
  * @example
  *
+ * import { Store } from 'easy-peasy';
+ * import { StoreModel } from './store';
+ *
  * type EnhancedReduxStore = Store<StoreModel>;
  */
 export interface Store<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = any
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    any
+  >
 > extends ReduxStore<State<StoreModel>> {
   addModel: <ModelSlice extends object>(
     key: string,
     modelSlice: ModelSlice,
-  ) => void;
+  ) => AddModelResult;
   clearMockedActions: () => void;
   dispatch: Dispatch<StoreModel>;
   getActions: () => Actions<StoreModel>;
   getListeners: () => Listeners<StoreModel>;
   getMockedActions: () => MockedAction[];
+  persist: {
+    clear: () => Promise<void>;
+    flush: () => Promise<void>;
+    resolveRehydration: () => Promise<void>;
+  };
   reconfigure: <NewStoreModel extends object>(model: NewStoreModel) => void;
   removeModel: (key: string) => void;
 
@@ -347,11 +358,14 @@ export interface Store<
  *
  * @example
  *
+ * import { Dispatch } from 'easy-peasy';
+ * import { StoreModel } from './store';
+ *
  * type DispatchWithActions = Dispatch<StoreModel>;
  */
 export type Dispatch<
   StoreModel extends object = {},
-  Action extends ReduxAction = ReduxAction<any>
+  Action extends ReduxAction = AnyAction
 > = Actions<StoreModel> & ReduxDispatch<Action>;
 
 // #endregion
@@ -412,7 +426,7 @@ type Meta = {
  * }
  */
 export type Thunk<
-  Model extends object = {},
+  Model extends object,
   Payload = void,
   Injections = any,
   StoreModel extends object = {},
@@ -465,7 +479,7 @@ export function thunk<
 // #region Listener Thunk
 
 export interface ThunkOn<
-  Model extends object = {},
+  Model extends object,
   Injections = any,
   StoreModel extends object = {}
 > {
@@ -512,7 +526,7 @@ export function thunkOn<
  *   addTodo: Action<Model, Todo>;
  * }
  */
-export type Action<Model extends object = {}, Payload = void> = {
+export type Action<Model extends object, Payload = void> = {
   type: 'action';
   payload: Payload;
   result: void | State<Model>;
@@ -579,8 +593,8 @@ export function actionOn<
  * }
  */
 export type Computed<
-  Model extends object = {},
-  Result = any,
+  Model extends object,
+  Result,
   StoreModel extends object = {}
 > = {
   type: 'computed';
@@ -597,10 +611,13 @@ type DefaultComputationFunc<Model extends object, Result> = (
 ) => Result;
 
 export function computed<
-  Model extends object,
-  Result,
-  StoreModel extends object,
-  Resolvers extends Resolver<Model, StoreModel>[]
+  Model extends object = {},
+  Result = void,
+  StoreModel extends object = {},
+  Resolvers extends Resolver<Model, StoreModel>[] = Resolver<
+    Model,
+    StoreModel
+  >[]
 >(
   resolversOrCompFunc: (Resolvers | []) | DefaultComputationFunc<Model, Result>,
   compFunc?: (
@@ -705,18 +722,24 @@ export function generic<T>(value: T): Generic<T>;
 /**
  * A React Hook allowing you to use state within your component.
  *
- * https://github.com/ctrlplusb/easy-peasy#usestoremapstate-externals
+ * https://easy-peasy.now.sh/docs/api/use-store-state.html
+ *
+ * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
  * @example
  *
  * import { useStoreState, State } from 'easy-peasy';
+ * import { StoreModel } from './store';
  *
  * function MyComponent() {
  *   const todos = useStoreState((state: State<StoreModel>) => state.todos.items);
  *   return todos.map(todo => <Todo todo={todo} />);
  * }
  */
-export function useStoreState<StoreState extends State<any>, Result>(
+export function useStoreState<
+  StoreState extends State<any> = State<{}>,
+  Result = any
+>(
   mapState: (state: StoreState) => Result,
   equalityFn?: (prev: Result, next: Result) => boolean,
 ): Result;
@@ -724,7 +747,9 @@ export function useStoreState<StoreState extends State<any>, Result>(
 /**
  * A React Hook allowing you to use actions within your component.
  *
- * https://github.com/ctrlplusb/easy-peasy#useactionsmapactions
+ * https://easy-peasy.now.sh/docs/api/use-store-actions.html
+ *
+ * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
  * @example
  *
@@ -735,12 +760,17 @@ export function useStoreState<StoreState extends State<any>, Result>(
  *   return <AddTodoForm save={addTodo} />;
  * }
  */
-export function useStoreActions<StoreActions extends Actions<any>, Result>(
-  mapActions: (actions: StoreActions) => Result,
-): Result;
+export function useStoreActions<
+  StoreActions extends Actions<any> = Actions<{}>,
+  Result = any
+>(mapActions: (actions: StoreActions) => Result): Result;
 
 /**
  * A react hook that returns the store instance.
+ *
+ * https://easy-peasy.now.sh/docs/api/use-store.html
+ *
+ * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
  * @example
  *
@@ -753,13 +783,18 @@ export function useStoreActions<StoreActions extends Actions<any>, Result>(
  */
 export function useStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = any
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    any
+  >
 >(): Store<StoreModel, StoreConfig>;
 
 /**
  * A React Hook allowing you to use the store's dispatch within your component.
  *
- * https://github.com/ctrlplusb/easy-peasy#usedispatch
+ * https://easypeasy.now.sh/docs/api/use-store-dispatch.html
+ *
+ * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
  * @example
  *
@@ -777,12 +812,16 @@ export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
 /**
  * A utility function used to create pre-typed hooks.
  *
+ * https://easypeasy.now.sh/docs/api/create-typed-hooks.html
+ *
  * @example
+ * import { StoreModel } from './store';
+ *
  * const { useStoreActions, useStoreState, useStoreDispatch, useStore } = createTypedHooks<StoreModel>();
  *
  * useStoreActions(actions => actions.todo.add); // fully typed
  */
-export function createTypedHooks<StoreModel extends Object = {}>(): {
+export function createTypedHooks<StoreModel extends object = {}>(): {
   useStoreActions: <Result>(
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => Result;
@@ -801,11 +840,12 @@ export function createTypedHooks<StoreModel extends Object = {}>(): {
 /**
  * Exposes the store to your app (and hooks).
  *
- * https://github.com/ctrlplusb/easy-peasy#storeprovider
+ * https://easypeasy.now.sh/docs/api/store-provider.html
  *
  * @example
  *
  * import { StoreProvider } from 'easy-peasy';
+ * import store from './store';
  *
  * ReactDOM.render(
  *   <StoreProvider store={store}>
@@ -822,16 +862,16 @@ export class StoreProvider<StoreModel extends object = {}> extends Component<{
 // #region Context + Local Stores
 
 interface StoreModelInitializer<
-  StoreModel extends object = {},
-  InitialData = any
+  StoreModel extends object,
+  InitialData extends undefined | object
 > {
   (initialData?: InitialData): StoreModel;
 }
 
 export function createContextStore<
   StoreModel extends object = {},
-  InitialData = any,
-  StoreConfig extends EasyPeasyConfig<any, any> = any
+  InitialData extends undefined | object = undefined,
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<{}, any>
 >(
   model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
   config?: StoreConfig,
@@ -849,14 +889,17 @@ export function createContextStore<
   useStoreRehydrated: () => boolean;
 };
 
-interface UseLocalStore<StoreModel extends object, InitialData> {
+interface UseLocalStore<
+  StoreModel extends object,
+  InitialData extends undefined | object
+> {
   (initialData?: InitialData): [State<StoreModel>, Actions<StoreModel>];
 }
 
 export function createComponentStore<
   StoreModel extends object = {},
-  InitialData = any,
-  StoreConfig extends EasyPeasyConfig<any, any> = any
+  InitialData extends undefined | object = undefined,
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<{}, any>
 >(
   model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
   config?: StoreConfig,
@@ -864,7 +907,7 @@ export function createComponentStore<
 
 export function useLocalStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<any, any>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<{}, any>
 >(
   modelCreator: (prevState?: State<StoreModel>) => StoreModel,
   dependencies?: any[],
@@ -908,7 +951,7 @@ export function createTransform(
   config?: TransformConfig,
 ): Transformer;
 
-export function persist<Model extends object>(
+export function persist<Model extends object = {}>(
   model: Model,
   config?: PersistConfig<Model>,
 ): Model;

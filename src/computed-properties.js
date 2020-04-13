@@ -6,7 +6,7 @@ export function createComputedPropertyBinder(
   parentPath,
   key,
   definition,
-  computedState,
+  _computedState,
   references,
 ) {
   const computedMeta = definition[computedSymbol];
@@ -17,8 +17,8 @@ export function createComputedPropertyBinder(
       enumerable: true,
       get: () => {
         let storeState;
-        if (computedState.isInReducer) {
-          storeState = computedState.currentState;
+        if (_computedState.isInReducer) {
+          storeState = _computedState.currentState;
         } else if (references.getState == null) {
           return undefined;
         } else {
@@ -43,8 +43,8 @@ export function createComputedPropertyBinder(
 
 export function createComputedPropertiesMiddleware(references) {
   return store => next => action => {
-    references.internals.computedState.currentState = store.getState();
-    references.internals.computedState.isInReducer = true;
+    references.internals._computedState.currentState = store.getState();
+    references.internals._computedState.isInReducer = true;
     return next(action);
   };
 }

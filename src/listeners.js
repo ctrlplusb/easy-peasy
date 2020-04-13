@@ -6,11 +6,11 @@ export function createListenerMiddleware(references) {
     const result = next(action);
     if (
       action &&
-      references.internals.listenerActionMap[action.type] &&
-      references.internals.listenerActionMap[action.type].length > 0
+      references.internals._listenerActionMap[action.type] &&
+      references.internals._listenerActionMap[action.type].length > 0
     ) {
-      const sourceAction = references.internals.actionCreatorDict[action.type];
-      references.internals.listenerActionMap[action.type].forEach(
+      const sourceAction = references.internals._actionCreatorDict[action.type];
+      references.internals._listenerActionMap[action.type].forEach(
         actionCreator => {
           actionCreator({
             type: sourceAction ? sourceAction.type : action.type,
@@ -27,9 +27,9 @@ export function createListenerMiddleware(references) {
 
 export function bindListenerDefinitions(
   listenerDefinitions,
-  actionCreators,
-  actionCreatorDict,
-  listenerActionMap,
+  _actionCreators,
+  _actionCreatorDict,
+  _listenerActionMap,
 ) {
   listenerDefinitions.forEach(listenerActionOrThunk => {
     const listenerMeta =
@@ -37,15 +37,15 @@ export function bindListenerDefinitions(
       listenerActionOrThunk[thunkOnSymbol];
 
     const targets = listenerMeta.targetResolver(
-      get(listenerMeta.parent, actionCreators),
-      actionCreators,
+      get(listenerMeta.parent, _actionCreators),
+      _actionCreators,
     );
     const targetTypes = (Array.isArray(targets) ? targets : [targets]).reduce(
       (acc, target) => {
         if (
           typeof target === 'function' &&
           target.type &&
-          actionCreatorDict[target.type]
+          _actionCreatorDict[target.type]
         ) {
           acc.push(target.type);
         } else if (typeof target === 'string') {
@@ -59,9 +59,9 @@ export function bindListenerDefinitions(
     listenerMeta.resolvedTargets = targetTypes;
 
     targetTypes.forEach(targetType => {
-      const listenerReg = listenerActionMap[targetType] || [];
-      listenerReg.push(actionCreatorDict[listenerMeta.type]);
-      listenerActionMap[targetType] = listenerReg;
+      const listenerReg = _listenerActionMap[targetType] || [];
+      listenerReg.push(_actionCreatorDict[listenerMeta.type]);
+      _listenerActionMap[targetType] = listenerReg;
     });
   });
 }
