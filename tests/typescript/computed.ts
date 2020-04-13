@@ -21,6 +21,14 @@ interface BasketModel {
 interface StoreModel {
   products: ProductsModel;
   baskets: BasketModel;
+  one: string;
+  two: boolean;
+  three: number;
+  four: Set<boolean>;
+  five: Date;
+  six: Map<string, number>;
+  bigComputed: Computed<StoreModel, boolean>;
+  dependentComputed: Computed<StoreModel, boolean>;
 }
 
 const model: StoreModel = {
@@ -51,6 +59,35 @@ const model: StoreModel = {
         }, []),
     ),
   },
+  one: 'one',
+  two: true,
+  three: 3,
+  four: new Set(),
+  five: new Date(),
+  six: new Map(),
+  bigComputed: computed(
+    [
+      (state) => state.one,
+      (state) => state.two,
+      (state) => state.three,
+      (state) => state.four,
+      (state) => state.five,
+      (state) => state.six,
+    ],
+    (one, two, three, four, five, six) => {
+      `${one}foo`;
+      two === true;
+      three + 3;
+      four.has(true);
+      five.getMilliseconds();
+      six.set('foo', 6);
+      return true;
+    },
+  ),
+  dependentComputed: computed(
+    [(state) => state.bigComputed],
+    (bigComputed) => bigComputed,
+  ),
 };
 
 const store = createStore(model);
