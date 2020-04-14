@@ -1,14 +1,16 @@
 # persist
 
-This helper allows you to persist your store state, by default to `sessionStorage`, allowing your state to be rehydrated when your store recreated (e.g. on page refresh).
+This helper allows you to persist your store state (to `sessionStorage` by default) allowing the persisted state to be rehydrated whenever your store recreated (e.g. on page refresh).
 
-> This API is _heavily_ inspired by [`redux-persist`](https://github.com/rt2zz/redux-persist), with the intention of providing a lot of compatibility with it so that we can leverage the packages that exist within it's ecosystem.
+> ***FYI:*** *This API is _heavily_ inspired by [`redux-persist`](https://github.com/rt2zz/redux-persist), with the intention of providing a lot of compatibility with it so that we can leverage the packages that exist within it's ecosystem. Love and thanks goes to to that team and community for the hard work they did in establishing some of these patterns*
 
 **Configuring your store to persist**
 
-To utilise this feature you simply need to wrap the part(s) of your model you wish to persist with the helper.
+To utilise this feature you simply need to wrap your model you wish to persist with the helper.
 
 ```javascript
+import { persist } from 'easy-peasy';
+
 const store = createStore(
   persist({
     count: 1,
@@ -19,26 +21,103 @@ const store = createStore(
 );
 ```
 
-Every time your state changes it will be saved to the configured storage engine (`sessionStorage` by default).
-
-> ***Note:*** So that we don't thrash your storage engine with unnecessary operations the persistence operations are batched (debounced to every 1 second), therefore you should ensure that any outstanding persist operations are complete prior to navigating away from your application or performing a page refresh. You can read more about this in the example further below.
-
-**Rehydrating your store with persisted data**
-
-When your store is created, any data that has been persisted will be used to rehydrate your state accordingly.
-
-> ***Note:*** If you are using an asynchronous storage engine then you should adopt a strategy that ensures the data has been rehydrated prior to rendering the parts of your application that require the data. You can read more about this in the example further below.
+In the example above we are persisting the state for our entire store, but you can alternatively target specific parts of your model to persist:
 
 ```javascript
-const store = createStore(model); // state is automatically rehydrated
-
-// Application renders with rehydrated state 🎉
-const app = (
-  <StoreProvider store={store}>
-    <MyApp />
-  </StoreProvider>
+const store = createStore(
+  products: productsModel,
+  basket: persist(basketModel),
+  session: persist(sessionModel)
 );
 ```
+
+Every time your state changes it will be saved to the configured storage engine (`sessionStorage` by default).
+
+> ***Note:*** *Each persist instance can have it's own unique configuration, although we would recommend utilizing the same configuration across all instances.*
+
+**Ensuring latest store state has persisted**
+
+The persist operations (i.e. saving to the storage engine) are batched so that we don't continuously run write operations against your storage engine - this avoids thrashing where you may have a store that receives frequent updates.
+
+Currently the persist operations are debounced, ensuring that a maximum of 1 write operation is executed every second.
+
+> ***Note:*** *The debounce rate will be made configurable within a future update.*
+
+Therefore it is important to consider that persist operations may be delayed, and manage this by introducing logic within your application which will ensure that any outstanding persist operations have completed prior to performing an action that will cause your application to unmount. For e.g. a page refresh, or navigating away from your site.
+
+[Store instances](/docs/api/store.html) contain an extended API that allow you to do support this. Specifically, the `store.persist.flush()` API will immediately execute any outstanding persist operations and return a `Promise` that resolves when the persist operations have completed.
+
+Below is an example of how you might introduce some guarding logic that makes use of this API.
+
+```javascript
+import store from './store';
+
+const refreshPage = async () => {
+  // Firstly ensure that any outstanding persist operations are complete.
+  // Note that this is an asynchronous operation so we will await on it.
+  await store.persist.flush();
+
+  // we can now safely reload the page
+  window.document.reload();
+}
+```
+
+**Rehydrating your store**
+
+Every time your store is created, any data that has been persisted will be used to rehydrate your state accordingly. Some storage engines operate in an asynchronous manner, therefore, it is best practice to ensure that the data rehydration has completed prior to rendering the parts of your application that depend on the persisted state.
+
+> ***Note:*** *Even if you are 100% sure that your storage engine is synchronous we still recommend that you utilise one of the strategies below. It will only reduce the risk of your application performing in an unexpected manner should you ever inadvertently introduce a persist configuration that utilises an asynchronous storage engine*
+
+There are two strategies that you can employ in regards to ensure data rehydration has completed.
+
+*Strategy 1: Wait for the rehydration to complete prior to rendering the entire application*
+
+The [store instances](/docs/api/store.html) contains an API allowing to gain a handle on when the rehydration process has completed, specifically `store.persist.resolveRehydration()`. Wehen you execute this API you will receive back a `Promise`. The `Promise` will resolve when the data rehydration has completed.
+
+Therefore you can wait on this `Promise` prior to rendering your application, which would ensure that your application is rendered with the expected rehydrated state.
+
+```javascript
+const store = createStore(persist(model));
+
+store.persist.resolveRehydration().then(() => {
+  ReactDOM.render(
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>,
+    document.getElementById('app')
+  );
+});
+```
+
+*Strategy 2: Eagerly render your application and utilise the `useStoreRehydrated` hook*
+
+You can alternatively partially render your application, utilising the [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook to wait for rehydration to complete prior to rendering the parts of your application that depend on the rehydrated state.
+
+```javascript
+import { useStoreRehydrated } from 'easy-peasy';
+
+const store = createStore(persist(model));
+
+function App() {
+  const rehydrated = useStoreRehydrated();
+  return (
+    <div>
+      <Header />
+      {rehydrated ? <Main /> : <div>Loading...</div>}
+      <Footer />
+    </div>
+  )
+}
+
+ReactDOM.render(
+  <StoreProvider store={store}>
+    <App />
+  </StoreProvider>,
+  document.getElementById('app')
+);
+```
+
+In the example above, the `<Main />` content will not render until our store has been successfully updated with the rehydration state.
 
 ## API
 
@@ -54,7 +133,25 @@ Please be aware that [Store instances](/docs/api/store.html) contain additional 
 
   - `config` (Object, *optional*)
 
-    The persistence configuration. It supports the following properties:
+    You can provide a second parameter to your `persist` instances, which represents a configuration for the instance.
+
+    ```javascript
+    const model = persist(
+      {
+        counter: 0,
+        todos: [],
+        increment: (state) => {
+          state.counter += 1;
+        }
+      },
+      // 👇 configuration
+      {
+        whitelist: ['counter'], // We will only persist the "counter" state
+      }
+    );
+    ```
+
+    The configuration object supports the following properties:
 
     - `blacklist` (Array<string>, *optional*)
 
@@ -220,122 +317,7 @@ Please be aware that [Store instances](/docs/api/store.html) contain additional 
 
         [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a robust set of [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines) that have been built for it. These can be used here.
 
-## Example
-
-In the simple example below we will make our entire store persist.
-
-```javascript
-import { persist } from 'easy-peasy';
-//         👆 import the helper
-
-// Then wrap the root model with the helper
-//            👇
-let model = persist({
-  counter: 0,
-  todos: [],
-  increment: (state) => {
-    state.counter += 1;
-  }
-});
-```
-
-## Example with configuration
-
-The below examples demonstrates a configured persistence instance in which we will only persist the `counter`.
-
-```javascript
-const model = persist(
-  {
-    counter: 0,
-    todos: [],
-    increment: (state) => {
-      state.counter += 1;
-    }
-  },
-  // 👇 configuration
-  {
-    whitelist: ['counter'],
-  }
-);
-```
-
-## Nested persistence
-
-The below example demonstrates that you can utilise the `persist` utility at any depth of your model.
-
-```javascript
-const model = {
-  todos: {
-    todos: [],
-    addTodo: (state, payload) => {
-      state.todos.push(payload);
-    }
-  },
-  session: persist({
-    user: null,
-    login: thunk(/* ... */)
-  })
-}
-```
-
-There is no restriction on how many `persist` instances you can have on your model. Provide as many configurations as you require and the respective models will have their state persisted and rehydrated accordingly.
-
-## Working with asynchronous storage engines
-
-When utilising an asynchronous storage engine (i.e. their storage APIs return `Promise`s) you may want to wait for their asynchronous operations to complete prior to rendering your application. This would help to avoid a flash of content change, where your site would initially render with the default store state, and then suddenly rerender with the rehydrated state after it is resolved from the asynchronous storage engine.
-
-There are two strategies that you can employ to deal with this case.
-
-**Option 1: Wait for the rehydration to complete prior to rendering your application**
-
-The store instance contains an API allowing to access a `Promise` that represents the resolution of the asynchronous storage state being resolved during state rehydration.  You can wait on this `Promise` prior to rendering your application, which would ensure that your application is rendered with the expected rehydrated state.
-
-```javascript
-const store = createStore(persist(model, { storage: asyncStorageEngine });
-
-store.persist.resolveRehydration().then(() => {
-  ReactDOM.render(
-    <StoreProvider store={store}>
-      <App />
-    </StoreProvider>,
-    document.getElementById('app')
-  );
-});
-```
-
-**Option 2: Eagerly render your application and utilise the `useStoreRehydrated` hook**
-
-You can alternatively render your application immediately, i.e. not wait for the async rehydration to resolve.
-
-To improve your user's experience you can utilise the [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook. This hook returns a boolean flag indicating when the rehydration has completed.
-
-```javascript
-import { useStoreRehydrated } from 'easy-peasy';
-
-const store = createStore(persist(model, { storage: asyncStorageEngine });
-
-function App() {
-  const rehydrated = useStoreRehydrated();
-  return (
-    <div>
-      <Header />
-      {rehydrated ? <Main /> : <div>Loading...</div>}
-      <Footer />
-    </div>
-  )
-}
-
-ReactDOM.render(
-  <StoreProvider store={store}>
-    <App />
-  </StoreProvider>,
-  document.getElementById('app')
-);
-```
-
-In the example above, the `<Main />` content will not render until our store has been successfully updated with the rehydration state.
-
-## Deleting all persisted data
+## Deleting all persisted data
 
 Should you wish to remove all the data that has been persisted for your model you can utilise the [Store instance](/docs/api/store.html) API to do so.
 
