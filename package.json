@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/ctrlplusb/easy-peasy.git"
   },
-  "homepage": "https://github.com/ctrlplusb/easy-peasy#readme",
+  "homepage": "https://easy-peasy.now.sh",
   "author": "Sean Matheson <sean@ctrlplusb.com>",
   "keywords": [
     "react",
