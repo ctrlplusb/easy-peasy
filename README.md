@@ -2,7 +2,7 @@
 <p align='center'>
   <img src="https://i.imgur.com/UnPLVly.png" width="280" />
 </p>
-<p align='center'>Vegetarian friendly state for React</p>
+<p align='center'><strong>Vegetarian friendly state for React</strong></p>
 <p>&nbsp;</p>
 
 
