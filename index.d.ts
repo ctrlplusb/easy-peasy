@@ -195,10 +195,9 @@ type StateMapper<StateModel extends object, Depth extends string> = {
     ? StateModel[P]['result']
     : StateModel[P] extends Reducer<any, any>
     ? StateModel[P]['result']
-    : StateModel[P] extends object
-    ? StateModel[P] extends string | Array<any> | RegExp | Date | Function
-      ? StateModel[P]
-      : RecursiveState<
+    : StateModel[P] extends number | string | symbol | Array<any> | RegExp | Date | Function
+    ? StateModel[P] extends object
+      ? RecursiveState<
           StateModel[P],
           Depth extends '1'
             ? '2'
@@ -210,6 +209,7 @@ type StateMapper<StateModel extends object, Depth extends string> = {
             ? '5'
             : '6'
         >
+      : StateModel[P]
     : StateModel[P];
 };
 
