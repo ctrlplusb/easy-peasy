@@ -4,6 +4,7 @@ import {
   actionOnSymbol,
   actionSymbol,
   computedSymbol,
+  effectOnSymbol,
   persistSymbol,
   reducerSymbol,
   thunkOnSymbol,
@@ -45,6 +46,13 @@ export const computed = (fnOrStateResolvers, fn) => {
   };
   return fnOrStateResolvers;
 };
+
+export function unstable_effectOn(dependencyResolvers, fn) {
+  fn[effectOnSymbol] = {
+    dependencyResolvers,
+  };
+  return fn;
+}
 
 export function generic(value) {
   return value;

@@ -1,6 +1,6 @@
 # thunk
 
-Declares a [thunk](docs/api/thunk.html) action on your model. [Thunks](docs/api/thunk.html) cannot modify state directly, however, they can dispatch [actions](/docs/api/action.html) to do so. 
+Declares a [thunk](docs/api/thunk.html) action on your model. [Thunks](docs/api/thunk.html) cannot modify state directly, however, they can dispatch [actions](/docs/api/action.html) to do so.
 
 [Thunks](docs/api/thunk.html) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
 
@@ -42,7 +42,7 @@ thunk(async (actions, payload) => {
 
         When executed it will provide the state that is local to the thunk.
 
-        > Note: whilst you are able to access the store's state via this API your thunk should not perform any mutation of this state. That would be considered an anti pattern. All state updates must be contained within actions. This API exists within a thunk purely for convenience sake - allowing you to perform logic based on the existing state.
+        > Note: whilst you are able to access the store's state via this API your thunk should not perform any mutation of this state. That would be considered an anti-pattern. All state updates must be contained within [actions](/docs/api/action.html). This API exists within a thunk purely for convenience sake - allowing you to perform logic based on the existing state.
 
       - `getStoreActions` (Function)
 
@@ -87,7 +87,7 @@ const todosModel = {
   savedTodo: action((state, payload) => {
     state.todos.push(payload);
   }),
-  //     👇 our asynchronous thunk makes use of async/await 
+  //     👇 our asynchronous thunk makes use of async/await
   saveTodo: thunk(async (actions, payload) => {
     const saved = await todoService.save(payload);
     actions.addTodo(saved);
@@ -95,7 +95,7 @@ const todosModel = {
 };
 ```
 
-An asynchronous [thunk](/docs/api/thunk.html) will have its `Promise` returned to the code that dispatched the [thunk](/docs/api/thunk.html). This is especially important in the cases that you would like to execute some code after the [thunk](/docs/api/thunk.html) has completed. 
+An asynchronous [thunk](/docs/api/thunk.html) will have its `Promise` returned to the code that dispatched the [thunk](/docs/api/thunk.html). This is especially important in the cases that you would like to execute some code after the [thunk](/docs/api/thunk.html) has completed.
 
 ```javascript
 function MyComponent() {
