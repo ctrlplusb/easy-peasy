@@ -3,6 +3,7 @@ import {
   actionOnSymbol,
   actionSymbol,
   computedSymbol,
+  effectOnSymbol,
   persistSymbol,
   reducerSymbol,
   thunkOnSymbol,
@@ -14,6 +15,7 @@ import { createActionCreator } from './actions';
 import { createThunkHandler, createThunkActionsCreator } from './thunks';
 import { bindListenerDefinitions } from './listeners';
 import { createComputedPropertyBinder } from './computed-properties';
+import { createEffectHandler, createEffectActionsCreator } from './effects';
 
 export default function extractDataFromModel(
   model,
@@ -28,6 +30,7 @@ export default function extractDataFromModel(
   const actionThunks = {};
   const _computedProperties = [];
   const _customReducers = [];
+  const _effects = [];
   const _listenerActionCreators = {};
   const _listenerActionMap = {};
   const listenerDefinitions = [];
@@ -109,6 +112,26 @@ export default function extractDataFromModel(
           _computedProperties.push({ key, parentPath, bindComputedProperty });
         } else if (value[reducerSymbol]) {
           _customReducers.push({ key, parentPath, reducer: value });
+        } else if (value[effectOnSymbol]) {
+          const effectHandler = createEffectHandler(
+            value,
+            meta,
+            references,
+            injections,
+            _actionCreators,
+          );
+          const actionCreator = createEffectActionsCreator(
+            value,
+            meta,
+            references,
+            effectHandler,
+          );
+          _effects.push({
+            key,
+            parentPath,
+            actionCreator,
+            dependencyResolvers: value[effectOnSymbol].dependencyResolvers,
+          });
         } else {
           handleValueAsState();
         }
@@ -140,6 +163,7 @@ export default function extractDataFromModel(
     _customReducers,
     _computedState,
     _defaultState,
+    _effects,
     _listenerActionCreators,
     _listenerActionMap,
     _persistenceConfig,

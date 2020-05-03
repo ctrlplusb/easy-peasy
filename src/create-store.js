@@ -14,6 +14,7 @@ import {
 import { createComputedPropertiesMiddleware } from './computed-properties';
 import { createListenerMiddleware } from './listeners';
 import { deepCloneStateWithoutComputed } from './lib';
+import { createEffectsMiddleware } from './effects';
 
 export default function createStore(model, options = {}) {
   const modelClone = deepCloneStateWithoutComputed(model);
@@ -84,6 +85,7 @@ export default function createStore(model, options = {}) {
     ...middleware,
     reduxThunk,
     createListenerMiddleware(references),
+    createEffectsMiddleware(references),
     persistMiddleware,
   ];
 

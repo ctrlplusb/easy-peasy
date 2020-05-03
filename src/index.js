@@ -24,6 +24,7 @@ import {
   reducer,
   thunk,
   thunkOn,
+  unstable_effectOn,
 } from './helpers';
 
 /**
@@ -49,6 +50,7 @@ export {
   StoreProvider,
   thunk,
   thunkOn,
+  unstable_effectOn,
   useLocalStore,
   useStoreActions,
   useStoreDispatch,

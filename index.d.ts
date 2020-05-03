@@ -89,11 +89,56 @@ type IncludesDeep<Obj extends object, M extends any> = O.Includes<
       1
     >;
 
+type StateResolver<
+  Model extends object,
+  StoreModel extends object,
+  Result = any
+> = (state: State<Model>, storeState: State<StoreModel>) => Result;
+
+type StateResolvers<Model extends object, StoreModel extends object> =
+  | []
+  | [StateResolver<Model, StoreModel, any>]
+  | [
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+    ]
+  | [
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+    ]
+  | [
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+    ]
+  | [
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+    ]
+  | [
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+      StateResolver<Model, StoreModel, any>,
+    ];
+
+type AnyFunction = (...args: any[]) => any;
+
 type ActionEmitterTypes = Action<any, any> | Thunk<any, any, any, any, any>;
 
 type ActionListenerTypes = ActionOn<any, any> | ThunkOn<any, any, any>;
 
-type ActionTypes = ActionEmitterTypes | ActionListenerTypes;
+type ActionTypes =
+  | ActionEmitterTypes
+  | ActionListenerTypes
+  | Unstable_EffectOn<any, any, any>;
 
 interface ActionCreator<Payload = void> {
   (payload: Payload): void;
@@ -113,6 +158,15 @@ interface ThunkCreator<Payload, Result> {
 type ActionOrThunkCreator<Payload = void, Result = void> =
   | ActionCreator<Payload>
   | ThunkCreator<Payload, Result>;
+
+type Helpers<Model extends object, StoreModel extends object, Injections> = {
+  dispatch: Dispatch<StoreModel>;
+  getState: () => State<Model>;
+  getStoreActions: () => Actions<StoreModel>;
+  getStoreState: () => State<StoreModel>;
+  injections: Injections;
+  meta: Meta;
+};
 
 // #region Helpers
 
@@ -499,14 +553,7 @@ export function thunkOn<
   handler: (
     actions: Actions<Model>,
     target: TargetPayload<PayloadFromResolver<Resolver>>,
-    helpers: {
-      dispatch: Dispatch<StoreModel>;
-      getState: () => State<Model>;
-      getStoreActions: () => Actions<StoreModel>;
-      getStoreState: () => State<StoreModel>;
-      injections: Injections;
-      meta: Meta;
-    },
+    helpers: Helpers<Model, StoreModel, Injections>,
   ) => any,
 ): ThunkOn<Model, Injections, StoreModel>;
 
@@ -601,53 +648,15 @@ export type Computed<
   result: Result;
 };
 
-type Resolver<Model extends object, StoreModel extends object, Result = any> = (
-  state: State<Model>,
-  storeState: State<StoreModel>,
-) => Result;
-
 type DefaultComputationFunc<Model extends object, Result> = (
   state: State<Model>,
 ) => Result;
-
-type NResolvers<Model extends object, StoreModel extends object> =
-  | []
-  | [Resolver<Model, StoreModel, any>]
-  | [Resolver<Model, StoreModel, any>, Resolver<Model, StoreModel, any>]
-  | [
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-    ]
-  | [
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-    ]
-  | [
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-    ]
-  | [
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-      Resolver<Model, StoreModel, any>,
-    ];
-
-type AnyFunction = (...args: any[]) => any;
 
 export function computed<
   Model extends object = {},
   Result = void,
   StoreModel extends object = {},
-  Resolvers extends NResolvers<Model, StoreModel> = NResolvers<
+  Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
     Model,
     StoreModel
   >
@@ -702,6 +711,99 @@ export function computed<
       ) => Result
     : () => Result,
 ): Computed<Model, Result, StoreModel>;
+
+// #endregion
+
+// #region EffectOn
+
+export type Unstable_EffectOn<
+  Model extends object = {},
+  StoreModel extends object = {},
+  Injections = any
+> = {
+  type: 'effectOn';
+};
+
+type DependencyResolver<State> = (state: State) => any;
+
+type Dependencies<
+  Resolvers extends StateResolvers<any, any>
+> = Resolvers extends [AnyFunction]
+  ? [ReturnType<Resolvers[0]>]
+  : Resolvers extends [AnyFunction, AnyFunction]
+  ? [ReturnType<Resolvers[0]>, ReturnType<Resolvers[1]>]
+  : Resolvers extends [AnyFunction, AnyFunction, AnyFunction]
+  ? [
+      ReturnType<Resolvers[0]>,
+      ReturnType<Resolvers[1]>,
+      ReturnType<Resolvers[2]>,
+    ]
+  : Resolvers extends [AnyFunction, AnyFunction, AnyFunction, AnyFunction]
+  ? [
+      ReturnType<Resolvers[0]>,
+      ReturnType<Resolvers[1]>,
+      ReturnType<Resolvers[2]>,
+      ReturnType<Resolvers[3]>,
+    ]
+  : Resolvers extends [
+      AnyFunction,
+      AnyFunction,
+      AnyFunction,
+      AnyFunction,
+      AnyFunction,
+    ]
+  ? [
+      ReturnType<Resolvers[0]>,
+      ReturnType<Resolvers[1]>,
+      ReturnType<Resolvers[2]>,
+      ReturnType<Resolvers[3]>,
+      ReturnType<Resolvers[4]>,
+    ]
+  : Resolvers extends [
+      AnyFunction,
+      AnyFunction,
+      AnyFunction,
+      AnyFunction,
+      AnyFunction,
+      AnyFunction,
+    ]
+  ? [
+      ReturnType<Resolvers[0]>,
+      ReturnType<Resolvers[1]>,
+      ReturnType<Resolvers[2]>,
+      ReturnType<Resolvers[3]>,
+      ReturnType<Resolvers[4]>,
+      ReturnType<Resolvers[4]>,
+    ]
+  : any[];
+
+type Change<Resolvers extends StateResolvers<any, any>> = {
+  prev: Dependencies<Resolvers>;
+  current: Dependencies<Resolvers>;
+  action: {
+    type: string;
+    payload?: any;
+  };
+};
+
+export type Dispose = () => any;
+
+export function unstable_effectOn<
+  Model extends object = {},
+  StoreModel extends object = {},
+  Injections = any,
+  Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
+    Model,
+    StoreModel
+  >
+>(
+  dependencies: Resolvers,
+  effect: (
+    actions: Actions<Model>,
+    change: Change<Resolvers>,
+    helpers: Helpers<Model, StoreModel, Injections>,
+  ) => undefined | Dispose,
+): Unstable_EffectOn<Model, StoreModel, Injections>;
 
 // #endregion
 
