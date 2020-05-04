@@ -22,8 +22,8 @@ const valid1: ActionOn<ListeningModel, StoreModel> = actionOn(
   (actions) => actions.doActionString,
   (state, target) => {
     const [foo] = target.resolvedTargets;
-    foo + 'bar';
-    target.type + 'foo';
+    `${foo}bar`;
+    `${target.type}foo`;
     if (target.error != null) {
       target.error.stack;
     }
@@ -64,7 +64,6 @@ const valid3: ActionOn<ListeningModel> = actionOn(
 const invalid3: ActionOn<ListeningModel> = actionOn(
   // typings:expect-error
   () => 1,
-  // typings:expect-error
   (state, target) => {
     state.logs.push(target.payload);
   },
@@ -73,7 +72,6 @@ const invalid3: ActionOn<ListeningModel> = actionOn(
 const invalid4: ActionOn<ListeningModel> = actionOn(
   // typings:expect-error
   () => undefined,
-  // typings:expect-error
   (state, target) => {
     state.logs.push(target.payload);
   },
