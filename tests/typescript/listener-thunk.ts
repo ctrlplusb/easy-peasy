@@ -54,7 +54,6 @@ const valid3: ThunkOn<Model> = thunkOn(
 const invalid3: ThunkOn<Model> = thunkOn(
   // typings:expect-error
   () => 1,
-  // typings:expect-error
   (actions, target) => {
     actions.log(target.payload);
   },
@@ -63,7 +62,6 @@ const invalid3: ThunkOn<Model> = thunkOn(
 const invalid4: ThunkOn<Model> = thunkOn(
   // typings:expect-error
   () => undefined,
-  // typings:expect-error
   (actions, target) => {
     actions.log(target.payload);
   },

@@ -48,11 +48,7 @@ type IncludesDeep3<Obj extends object, M extends any> = O.Includes<
   ? 1
   : O.Includes<
       {
-        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
-          ? 0
-          : Obj[P] extends object
-          ? O.Includes<Obj, M>
-          : 0;
+        [P in keyof Obj]: Obj[P] extends object ? O.Includes<Obj, M> : 0;
       },
       1
     >;
@@ -64,11 +60,7 @@ type IncludesDeep2<Obj extends object, M extends any> = O.Includes<
   ? 1
   : O.Includes<
       {
-        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
-          ? 0
-          : Obj[P] extends object
-          ? IncludesDeep3<Obj[P], M>
-          : 0;
+        [P in keyof Obj]: Obj[P] extends object ? IncludesDeep3<Obj[P], M> : 0;
       },
       1
     >;
@@ -80,11 +72,7 @@ type IncludesDeep<Obj extends object, M extends any> = O.Includes<
   ? 1
   : O.Includes<
       {
-        [P in keyof Obj]: Obj[P] extends InvalidObjectTypes
-          ? 0
-          : Obj[P] extends object
-          ? IncludesDeep2<Obj[P], M>
-          : 0;
+        [P in keyof Obj]: Obj[P] extends object ? IncludesDeep2<Obj[P], M> : 0;
       },
       1
     >;

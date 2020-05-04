@@ -28,8 +28,8 @@ type Model = {
   computedImp: Computed<Model, number>;
   onAction: ActionOn<Model>;
   onThunk: ThunkOn<Model>;
-  // push: Action<Model>;
-  // pop: Action<Model>;
+  push: Action<Model>;
+  pop: Action<Model>;
   nested: {
     stateArray: Array<string>;
     stateBoolean: boolean;
