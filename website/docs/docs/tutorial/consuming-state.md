@@ -120,7 +120,7 @@ function MyComponent() {
 
 `Array.map` returns a new array instance - therefore `nextMappedState` will never be equal to `prevMappedState`.
 
-This performance pitfall is described within the [useStoreState](/docs/api/use-store-state.html) documentation along with recommendations on how you can avoid it. Later on in this tutorial we will cover some of these techniques so you need not go read the [useStoreState](/docs/api/use-store-state.html) documentation right now.
+This performance pitfall is described within the [useStoreState](/docs/api/use-store-state.html) documentation along with recommendations on how you can avoid it. Later on in this tutorial we will cover some of these techniques so you don't need to read the [useStoreState](/docs/api/use-store-state.html) documentation right now.
 
 > Whilst it is best to avoid the above, in many cases the performance hit will be negligible at best. Don't overstress about pre-optimisation - if you start to see performance issues you can later optimise your `mapState` functions.  Again, we shall later introduce an API to help with the optimisation of these cases.
 
