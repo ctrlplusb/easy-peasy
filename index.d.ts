@@ -196,7 +196,7 @@ type StateMapper<StateModel extends object, Depth extends string> = {
     : StateModel[P] extends Reducer<any, any>
     ? StateModel[P]['result']
     : StateModel[P] extends object
-    ? StateModel[P] extends string | Array<any> | RegExp | Date | Function
+    ? StateModel[P] extends string | Array<any> | RegExp | Date | Function | Map | Set | WeakMap | WeakSet
       ? StateModel[P]
       : RecursiveState<
           StateModel[P],
