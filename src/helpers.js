@@ -1,4 +1,4 @@
-import { isDraft, original } from 'immer';
+import { isDraft, current } from 'immer';
 import memoizerific from 'memoizerific';
 import {
   actionOnSymbol,
@@ -13,7 +13,7 @@ import {
 
 export const debug = (state) => {
   if (isDraft(state)) {
-    return original(state);
+    return current(state);
   }
   return state;
 };
