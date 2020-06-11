@@ -57,7 +57,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "symbol-observable": "^1.2.0",
-    "ts-toolbelt": "^6.6.2",
+    "ts-toolbelt": "^6.9.4",
     "use-memo-one": "^1.1.1"
   },
   "devDependencies": {
@@ -103,7 +103,7 @@
     "rimraf": "^3.0.1",
     "shallowequal": "^1.1.0",
     "title-case": "^3.0.2",
-    "typescript": "3.9.1-rc",
+    "typescript": "3.9.5",
     "typings-tester": "^0.3.2"
   },
   "jest": {
