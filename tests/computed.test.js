@@ -57,8 +57,8 @@ test('patched immer works as expected', () => {
   // assert
   expect(immerWithUpdate).not.toBe(original);
   expect(immerWithUpdate.firstName).toBe('Mary');
-  expect(immerWithUpdate.fullName).toBe(undefined);
-  expect(getterCallCount).toBe(2);
+  expect(immerWithUpdate.fullName).toBe('Bob Fruits');
+  expect(getterCallCount).toBe(3);
 });
 
 test('defining and accessing a computed property', () => {

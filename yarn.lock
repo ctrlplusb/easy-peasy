@@ -4231,10 +4231,10 @@ ignore@^4.0.6:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
 
-immer@6.0.2:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-6.0.2.tgz#5bc08dc4930c756d0749533a2afbd88c8de0cd19"
-  integrity sha512-56CMvUMZl4kkWJFFUe1TjBgGbyb9ibzpLyHD+RSKSVdytuDXgT/HXO1S+GJVywMVl5neGTdAogoR15eRVEd10Q==
+immer@7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-7.0.0.tgz#94d5f567648fd7e977d91e97a61aeb223eb796e2"
+  integrity sha512-fDG+mIa2se3ICnLYtYGazWwKN9L7rtvrIDK56IMisJ53JHY223g01nLvmYs8SXNSmnOYP7OeYfNJMT0aBT4pdA==
 
 import-cwd@^2.0.0:
   version "2.1.0"
