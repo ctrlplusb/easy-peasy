@@ -11,8 +11,6 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "patches",
-    "scripts",
     "src",
     "index.d.ts"
   ],
@@ -53,11 +51,9 @@
   },
   "dependencies": {
     "debounce": "^1.2.0",
-    "immer": "6.0.2",
+    "immer": "7.0.0",
     "is-plain-object": "^3.0.0",
     "memoizerific": "^1.11.3",
-    "patch-package": "^6.2.2",
-    "postinstall-postinstall": "^2.1.0",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "symbol-observable": "^1.2.0",
