@@ -65,10 +65,13 @@ export function generic(value) {
 }
 
 export const persist = (model, config) => {
-  return {
-    ...model,
-    [persistSymbol]: config,
-  };
+  // if we are not running in a browser context this becomes a no-op
+  return typeof window === 'undefined'
+    ? model
+    : {
+        ...model,
+        [persistSymbol]: config,
+      };
 };
 
 export const thunkOn = (targetResolver, fn) => {
