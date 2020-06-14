@@ -63,41 +63,102 @@ export default function extractDataFromModel(
         return;
       }
 
-      if (typeof value === 'function') {
+      if (value != null && typeof value === 'object') {
         if (value[actionSymbol] || value[actionOnSymbol]) {
-          const actionReducer = value;
-          const actionCreator = createActionCreator(value, meta, references);
-          _actionCreatorDict[actionCreator.type] = actionCreator;
-          _actionReducersDict[actionCreator.type] = actionReducer;
+          const definition = { ...value };
+
+          // Determine the category of the action
+          const category = definition[actionSymbol] ? '@action' : '@actionOn';
+
+          // Establish the meta data describing the action
+          definition.meta = {
+            actionName: meta.key,
+            category,
+            type: `${category}.${meta.path.join('.')}`,
+            parent: meta.parent,
+            path: meta.path,
+          };
+
+          // Create the "action creator" function
+          definition.actionCreator = createActionCreator(
+            definition,
+            references,
+          );
+
+          // Create a bidirectional relationship of the definition/actionCreator
+          definition.actionCreator.definition = definition;
+
+          // Create a bidirectional relationship of the definition/reducer
+          definition.fn.definition = definition;
+
+          // Add the action creator to lookup map
+          _actionCreatorDict[definition.meta.type] = definition.actionCreator;
+
+          // Add the reducer to lookup map
+          _actionReducersDict[definition.meta.type] = definition.fn;
+
+          // We don't want to expose the internal action to consumers
           if (meta.key !== 'ePRS') {
-            if (value[actionOnSymbol]) {
-              listenerDefinitions.push(value);
-              set(path, _listenerActionCreators, actionCreator);
+            // Set the action creator in the "actions" object tree for
+            // either the listeners object tree, or the standard actions/thunks
+            // object tree
+            if (definition[actionOnSymbol]) {
+              listenerDefinitions.push(definition);
+              set(path, _listenerActionCreators, definition.actionCreator);
             } else {
-              set(path, _actionCreators, actionCreator);
+              set(path, _actionCreators, definition.actionCreator);
             }
           }
         } else if (value[thunkSymbol] || value[thunkOnSymbol]) {
-          const thunkHandler = createThunkHandler(
-            value,
-            meta,
+          const definition = { ...value };
+
+          // Determine the category of the thunk
+          const category = definition[thunkSymbol] ? '@thunk' : '@thunkOn';
+
+          // Establish the meta data describing the thunk
+          const type = `${category}.${meta.path.join('.')}`;
+          definition.meta = {
+            actionName: meta.key,
+            parent: meta.parent,
+            path: meta.path,
+            type,
+            startType: `${type}(start)`,
+            successType: `${type}(success)`,
+            failType: `${type}(fail)`,
+          };
+
+          // Create the function that will handle, i.e. be executed, when
+          // the thunk action is created/dispatched
+          definition.thunkHandler = createThunkHandler(
+            definition,
             references,
             injections,
             _actionCreators,
           );
-          const actionCreator = createThunkActionsCreator(
-            value,
-            meta,
+
+          // Register the thunk handler
+          set(path, actionThunks, definition.thunkHandler);
+
+          // Create the "action creator" function
+          definition.actionCreator = createThunkActionsCreator(
+            definition,
             references,
-            thunkHandler,
           );
-          set(path, actionThunks, thunkHandler);
-          _actionCreatorDict[actionCreator.type] = actionCreator;
-          if (value[thunkOnSymbol]) {
-            listenerDefinitions.push(value);
-            set(path, _listenerActionCreators, actionCreator);
+
+          // Create a bidirectional relationship of the definition/actionCreator
+          definition.actionCreator.definition = definition;
+
+          // Register the action creator within the lookup map
+          _actionCreatorDict[definition.meta.type] = definition.actionCreator;
+
+          // Set the action creator in the "actions" object tree for
+          // either the listeners object tree, or the standard actions/thunks
+          // object tree
+          if (definition[thunkOnSymbol]) {
+            listenerDefinitions.push(definition);
+            set(path, _listenerActionCreators, definition.actionCreator);
           } else {
-            set(path, _actionCreators, actionCreator);
+            set(path, _actionCreators, definition.actionCreator);
           }
         } else if (value[computedSymbol]) {
           const parent = get(parentPath, _defaultState);
@@ -111,36 +172,47 @@ export default function extractDataFromModel(
           bindComputedProperty(parent);
           _computedProperties.push({ key, parentPath, bindComputedProperty });
         } else if (value[reducerSymbol]) {
-          _customReducers.push({ key, parentPath, reducer: value });
+          _customReducers.push({ key, parentPath, reducer: value.fn });
         } else if (value[effectOnSymbol]) {
+          const definition = { ...value };
+
+          // Establish the meta data describing the effect
+          const type = `@effectOn.${meta.path.join('.')}`;
+          definition.meta = {
+            type,
+            actionName: meta.key,
+            parent: meta.parent,
+            path: meta.path,
+            startType: `${type}(start)`,
+            successType: `${type}(success)`,
+            failType: `${type}(fail)`,
+          };
+
           const effectHandler = createEffectHandler(
-            value,
-            meta,
+            definition,
             references,
             injections,
             _actionCreators,
           );
+
           const actionCreator = createEffectActionsCreator(
-            value,
-            meta,
+            definition,
             references,
             effectHandler,
           );
-          _effects.push({
-            key,
-            parentPath,
-            actionCreator,
-            dependencyResolvers: value[effectOnSymbol].dependencyResolvers,
-          });
+
+          definition.actionCreator = actionCreator;
+
+          _effects.push(definition);
+        } else if (isPlainObject(value)) {
+          const existing = get(path, _defaultState);
+          if (existing == null) {
+            set(path, _defaultState, {});
+          }
+          recursiveExtractFromModel(value, path);
         } else {
           handleValueAsState();
         }
-      } else if (isPlainObject(value)) {
-        const existing = get(path, _defaultState);
-        if (existing == null) {
-          set(path, _defaultState, {});
-        }
-        recursiveExtractFromModel(value, path);
       } else {
         handleValueAsState();
       }

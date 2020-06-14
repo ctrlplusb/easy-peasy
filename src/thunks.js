@@ -1,83 +1,71 @@
-import { thunkSymbol, thunkOnSymbol } from './constants';
+import { thunkOnSymbol } from './constants';
 import { get, isPromise } from './lib';
 
 export function createThunkHandler(
-  thunkDefinition,
-  meta,
+  definition,
   references,
   injections,
   _actionCreators,
 ) {
-  const thunkMeta =
-    thunkDefinition[thunkSymbol] || thunkDefinition[thunkOnSymbol];
-
   return (payload) => {
     const helpers = {
       dispatch: references.dispatch,
-      getState: () => get(meta.parent, references.getState()),
+      getState: () => get(definition.meta.parent, references.getState()),
       getStoreActions: () => _actionCreators,
       getStoreState: references.getState,
       injections,
-      meta,
+      meta: {
+        key: definition.meta.actionName,
+        parent: definition.meta.parent,
+        path: definition.meta.path,
+      },
     };
-    if (thunkDefinition[thunkOnSymbol] && thunkMeta.resolvedTargets) {
-      payload.resolvedTargets = [...thunkMeta.resolvedTargets];
+    if (definition[thunkOnSymbol] && definition.meta.resolvedTargets) {
+      payload.resolvedTargets = [...definition.meta.resolvedTargets];
     }
-    return thunkDefinition(get(meta.parent, _actionCreators), payload, helpers);
+    return definition.fn(
+      get(definition.meta.parent, _actionCreators),
+      payload,
+      helpers,
+    );
   };
 }
 
-export function createThunkActionsCreator(
-  thunkDefinition,
-  meta,
-  references,
-  thunkHandler,
-) {
-  const prefix = thunkDefinition[thunkSymbol] ? '@thunk' : '@thunkOn';
-  const type = `${prefix}.${meta.path.join('.')}`;
-  const startType = `${type}(start)`;
-  const successType = `${type}(success)`;
-  const failType = `${type}(fail)`;
-
-  const thunkMeta =
-    thunkDefinition[thunkSymbol] || thunkDefinition[thunkOnSymbol];
-  thunkMeta.type = type;
-  thunkMeta.actionName = meta.key;
-  thunkMeta.parent = meta.parent;
-  thunkMeta.path = meta.path;
-
+export function createThunkActionsCreator(definition, references) {
   const actionCreator = (payload) => {
     const dispatchError = (err) => {
       references.dispatch({
-        type: failType,
+        type: definition.meta.failType,
         payload,
         error: err,
       });
       references.dispatch({
-        type,
+        type: definition.meta.type,
         payload,
         error: err,
       });
     };
     const dispatchSuccess = (result) => {
       references.dispatch({
-        type: successType,
+        type: definition.meta.successType,
         payload,
         result,
       });
       references.dispatch({
-        type,
+        type: definition.meta.type,
         payload,
         result,
       });
     };
 
     references.dispatch({
-      type: startType,
+      type: definition.meta.startType,
       payload,
     });
     try {
-      const result = references.dispatch(() => thunkHandler(payload));
+      const result = references.dispatch(() =>
+        definition.thunkHandler(payload),
+      );
       if (isPromise(result)) {
         return result
           .then((resolved) => {
@@ -97,10 +85,10 @@ export function createThunkActionsCreator(
     }
   };
 
-  actionCreator.type = type;
-  actionCreator.startType = startType;
-  actionCreator.successType = successType;
-  actionCreator.failType = failType;
+  actionCreator.type = definition.meta.type;
+  actionCreator.successType = definition.meta.successType;
+  actionCreator.failType = definition.meta.failType;
+  actionCreator.startType = definition.meta.startType;
 
   return actionCreator;
 }

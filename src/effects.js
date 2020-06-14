@@ -1,4 +1,3 @@
-import { effectOnSymbol } from './constants';
 import { get, isPromise } from './lib';
 
 export function createEffectsMiddleware(references) {
@@ -9,47 +8,48 @@ export function createEffectsMiddleware(references) {
     const prevState = store.getState();
     const result = next(action);
     const nextState = store.getState();
-    references.internals._effects.forEach(
-      ({ parentPath, actionCreator, dependencyResolvers }) => {
-        const prevLocal = get(parentPath, prevState);
-        const nextLocal = get(parentPath, nextState);
-        if (prevLocal !== nextLocal) {
-          const prevDependencies = dependencyResolvers.map((resolver) =>
-            resolver(prevLocal),
-          );
-          const nextDependencies = dependencyResolvers.map((resolver) =>
-            resolver(nextLocal),
-          );
-          const hasChanged = prevDependencies.some((dependency, idx) => {
-            return dependency !== nextDependencies[idx];
-          });
-          if (hasChanged) {
-            actionCreator(prevDependencies, nextDependencies, action);
-          }
+    references.internals._effects.forEach((definition) => {
+      const prevLocal = get(definition.meta.parent, prevState);
+      const nextLocal = get(definition.meta.parent, nextState);
+      if (prevLocal !== nextLocal) {
+        const prevDependencies = definition.dependencyResolvers.map(
+          (resolver) => resolver(prevLocal),
+        );
+        const nextDependencies = definition.dependencyResolvers.map(
+          (resolver) => resolver(nextLocal),
+        );
+        const hasChanged = prevDependencies.some((dependency, idx) => {
+          return dependency !== nextDependencies[idx];
+        });
+        if (hasChanged) {
+          definition.actionCreator(prevDependencies, nextDependencies, action);
         }
-      },
-    );
+      }
+    });
     return result;
   };
 }
 
 export function createEffectHandler(
-  effectDefinition,
-  meta,
+  definition,
   references,
   injections,
   _actionCreators,
 ) {
-  const actions = get(meta.parent, _actionCreators);
+  const actions = get(definition.meta.parent, _actionCreators);
   let dispose;
   return (change) => {
     const helpers = {
       dispatch: references.dispatch,
-      getState: () => get(meta.parent, references.getState()),
+      getState: () => get(definition.meta.parent, references.getState()),
       getStoreActions: () => _actionCreators,
       getStoreState: references.getState,
       injections,
-      meta,
+      meta: {
+        key: definition.meta.actionName,
+        parent: definition.meta.parent,
+        path: definition.meta.path,
+      },
     };
     if (dispose !== undefined) {
       const disposeResult = dispose();
@@ -63,7 +63,7 @@ export function createEffectHandler(
         });
       }
     }
-    const effectResult = effectDefinition(actions, change, helpers);
+    const effectResult = definition.fn(actions, change, helpers);
 
     if (isPromise(effectResult)) {
       return effectResult.then((resolved) => {
@@ -87,23 +87,10 @@ export function createEffectHandler(
 }
 
 export function createEffectActionsCreator(
-  effectDefinition,
-  meta,
+  definition,
   references,
   effectHandler,
 ) {
-  const prefix = '@effectOn';
-  const type = `${prefix}.${meta.path.join('.')}`;
-  const startType = `${type}(start)`;
-  const successType = `${type}(success)`;
-  const failType = `${type}(fail)`;
-
-  const effectMeta = effectDefinition[effectOnSymbol];
-  effectMeta.type = type;
-  effectMeta.actionName = meta.key;
-  effectMeta.parent = meta.parent;
-  effectMeta.path = meta.path;
-
   const actionCreator = (previousDependencies, nextDependencies, action) => {
     const change = {
       prev: previousDependencies,
@@ -112,17 +99,17 @@ export function createEffectActionsCreator(
     };
     const dispatchError = (err) =>
       references.dispatch({
-        type: failType,
+        type: definition.meta.failType,
         change,
         error: err,
       });
     const dispatchSuccess = () =>
       references.dispatch({
-        type: successType,
+        type: definition.meta.successType,
         change,
       });
     references.dispatch({
-      type: startType,
+      type: definition.meta.startType,
       change,
     });
     try {
@@ -147,10 +134,10 @@ export function createEffectActionsCreator(
     }
   };
 
-  actionCreator.type = type;
-  actionCreator.startType = startType;
-  actionCreator.successType = successType;
-  actionCreator.failType = failType;
+  actionCreator.type = definition.meta.type;
+  actionCreator.startType = definition.meta.startType;
+  actionCreator.successType = definition.meta.successType;
+  actionCreator.failType = definition.meta.failType;
 
   return actionCreator;
 }

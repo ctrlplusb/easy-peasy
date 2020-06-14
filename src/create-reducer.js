@@ -18,13 +18,11 @@ export default function createReducer(
   const reducerForActions = (state, action) => {
     const actionReducer = _actionReducersDict[action.type];
     if (actionReducer) {
-      const actionMeta =
-        actionReducer[actionSymbol] || actionReducer[actionOnSymbol];
       return runActionReducerAtPath(
         state,
         action,
         actionReducer,
-        actionMeta.parent,
+        actionReducer.definition.meta.parent,
       );
     }
     return state;
