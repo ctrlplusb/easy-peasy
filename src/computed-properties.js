@@ -1,6 +1,5 @@
 import memoizerific from 'memoizerific';
 import { get } from './lib';
-import { computedSymbol } from './constants';
 
 export function createComputedPropertyBinder(
   parentPath,
@@ -9,8 +8,7 @@ export function createComputedPropertyBinder(
   _computedState,
   references,
 ) {
-  const computedMeta = definition[computedSymbol];
-  const memoisedResultFn = memoizerific(1)(definition);
+  const memoisedResultFn = memoizerific(1)(definition.fn);
   return function createComputedProperty(o) {
     Object.defineProperty(o, key, {
       configurable: true,
@@ -32,7 +30,7 @@ export function createComputedPropertyBinder(
           }
         }
         const state = get(parentPath, storeState);
-        const inputs = computedMeta.stateResolvers.map((resolver) =>
+        const inputs = definition.stateResolvers.map((resolver) =>
           resolver(state, storeState),
         );
         return memoisedResultFn(...inputs);

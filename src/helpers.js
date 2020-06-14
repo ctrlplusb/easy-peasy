@@ -21,37 +21,43 @@ export const debug = (state) => {
 export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
 
 export const actionOn = (targetResolver, fn) => {
-  fn[actionOnSymbol] = {
+  return {
+    [actionOnSymbol]: true,
+    fn,
     targetResolver,
   };
-  return fn;
 };
 
 export const action = (fn) => {
-  fn[actionSymbol] = {};
-  return fn;
+  return {
+    [actionSymbol]: true,
+    fn,
+  };
 };
 
 const defaultStateResolvers = [(state) => state];
 
 export const computed = (fnOrStateResolvers, fn) => {
   if (typeof fn === 'function') {
-    fn[computedSymbol] = {
+    return {
+      [computedSymbol]: true,
+      fn,
       stateResolvers: fnOrStateResolvers,
     };
-    return fn;
   }
-  fnOrStateResolvers[computedSymbol] = {
+  return {
+    [computedSymbol]: true,
+    fn: fnOrStateResolvers,
     stateResolvers: defaultStateResolvers,
   };
-  return fnOrStateResolvers;
 };
 
 export function unstable_effectOn(dependencyResolvers, fn) {
-  fn[effectOnSymbol] = {
+  return {
+    [effectOnSymbol]: true,
     dependencyResolvers,
+    fn,
   };
-  return fn;
 }
 
 export function generic(value) {
@@ -66,18 +72,23 @@ export const persist = (model, config) => {
 };
 
 export const thunkOn = (targetResolver, fn) => {
-  fn[thunkOnSymbol] = {
+  return {
+    [thunkOnSymbol]: true,
+    fn,
     targetResolver,
   };
-  return fn;
 };
 
 export const thunk = (fn) => {
-  fn[thunkSymbol] = {};
-  return fn;
+  return {
+    [thunkSymbol]: true,
+    fn,
+  };
 };
 
 export const reducer = (fn) => {
-  fn[reducerSymbol] = {};
-  return fn;
+  return {
+    [reducerSymbol]: true,
+    fn,
+  };
 };

@@ -13,7 +13,7 @@
 
 Allows you to declare an effect within your model which will execute every time the targeted state changes.
 
-Two arguments are provided [unstable_effectOn](/docs/api/effect-on.html); namely the `stateResolvers` and the `handler`. The `stateResolvers` are an array of functions which should resolve the target state that the effect should track. When the tracked state changes the `handler` function is executed.
+Two arguments are provided to [unstable_effectOn](/docs/api/effect-on.html); namely the `stateResolvers` and the `handler`. The `stateResolvers` are an array of functions which should resolve the target state that should be tracked. When the tracked state changes the `handler` function is executed..
 
 The `handler` can be *asynchronous* or *synchronous*. It receives the [store](/docs/api/store.html) actions, a `change` object containing the `prev` values for the targeted state and the `current` values as well as the `action` that caused the change in state. It additionally receives a `helper` argument allowing you to access the [store](/docs/api/store.html) state etc.
 

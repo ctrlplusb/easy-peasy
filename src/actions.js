@@ -1,27 +1,19 @@
-import { actionSymbol, actionOnSymbol } from './constants';
+import { actionOnSymbol } from './constants';
 
-export function createActionCreator(actionDefinition, meta, references) {
-  const prefix = actionDefinition[actionSymbol] ? '@action' : '@actionOn';
-  const type = `${prefix}.${meta.path.join('.')}`;
-  const actionMeta =
-    actionDefinition[actionSymbol] || actionDefinition[actionOnSymbol];
-  actionMeta.actionName = meta.key;
-  actionMeta.type = type;
-  actionMeta.parent = meta.parent;
-  actionMeta.path = meta.path;
-
+export function createActionCreator(definition, references) {
   const actionCreator = (payload) => {
     const action = {
-      type,
+      type: definition.meta.type,
       payload,
     };
-    if (actionDefinition[actionOnSymbol] && actionMeta.resolvedTargets) {
-      payload.resolvedTargets = [...actionMeta.resolvedTargets];
+    if (definition[actionOnSymbol] && definition.meta.resolvedTargets) {
+      payload.resolvedTargets = [...definition.meta.resolvedTargets];
     }
-    const result = references.dispatch(action);
-    return result;
+    return references.dispatch(action);
   };
-  actionCreator.type = type;
+
+  // We bind the types to the creator for easy reference by consumers
+  actionCreator.type = definition.meta.type;
 
   return actionCreator;
 }

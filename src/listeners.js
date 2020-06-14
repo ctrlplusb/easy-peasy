@@ -1,4 +1,3 @@
-import { actionOnSymbol, thunkOnSymbol } from './constants';
 import { get } from './lib';
 
 export function createListenerMiddleware(references) {
@@ -13,7 +12,9 @@ export function createListenerMiddleware(references) {
       references.internals._listenerActionMap[action.type].forEach(
         (actionCreator) => {
           actionCreator({
-            type: sourceAction ? sourceAction.type : action.type,
+            type: sourceAction
+              ? sourceAction.definition.meta.type
+              : action.type,
             payload: action.payload,
             error: action.error,
             result: action.result,
@@ -31,23 +32,20 @@ export function bindListenerDefinitions(
   _actionCreatorDict,
   _listenerActionMap,
 ) {
-  listenerDefinitions.forEach((listenerActionOrThunk) => {
-    const listenerMeta =
-      listenerActionOrThunk[actionOnSymbol] ||
-      listenerActionOrThunk[thunkOnSymbol];
-
-    const targets = listenerMeta.targetResolver(
-      get(listenerMeta.parent, _actionCreators),
+  listenerDefinitions.forEach((definition) => {
+    const targets = definition.targetResolver(
+      get(definition.meta.parent, _actionCreators),
       _actionCreators,
     );
+
     const targetTypes = (Array.isArray(targets) ? targets : [targets]).reduce(
       (acc, target) => {
         if (
           typeof target === 'function' &&
-          target.type &&
-          _actionCreatorDict[target.type]
+          target.definition.meta.type &&
+          _actionCreatorDict[target.definition.meta.type]
         ) {
-          acc.push(target.type);
+          acc.push(target.definition.meta.type);
         } else if (typeof target === 'string') {
           acc.push(target);
         }
@@ -56,11 +54,11 @@ export function bindListenerDefinitions(
       [],
     );
 
-    listenerMeta.resolvedTargets = targetTypes;
+    definition.meta.resolvedTargets = targetTypes;
 
     targetTypes.forEach((targetType) => {
       const listenerReg = _listenerActionMap[targetType] || [];
-      listenerReg.push(_actionCreatorDict[listenerMeta.type]);
+      listenerReg.push(_actionCreatorDict[definition.meta.type]);
       _listenerActionMap[targetType] = listenerReg;
     });
   });
