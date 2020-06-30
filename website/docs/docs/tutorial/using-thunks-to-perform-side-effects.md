@@ -70,7 +70,7 @@ export default function Product({ id }) {
   // ...
 ```
 
-As we refactored our `addProduct` [action](/docs/api/action.html) into a [thunk](/docs/api/thunk.html) we don't change our `useStoreActions` code, instead we are prefixing our `addProduct` dispatch with an an `await`, leveraging the `Promise` that will be returned by our asynchronous thunk. This allows us to maintain the existing behaviour around setting the `adding` flag which indicates to the UI when the adding operation is in progress.
+As we refactored our `addProduct` [action](/docs/api/action.html) into a [thunk](/docs/api/thunk.html) we don't change our `useStoreActions` code, instead we are prefixing our `addProduct` dispatch with an `await`, leveraging the `Promise` that will be returned by our asynchronous thunk. This allows us to maintain the existing behaviour around setting the `adding` flag which indicates to the UI when the adding operation is in progress.
 
 Once  you have made this change you will be able to run your application and then test the [thunk](/sdocs/api/thunk.html) by adding a product to your basket.
 
