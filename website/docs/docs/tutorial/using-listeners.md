@@ -95,7 +95,7 @@ export default function App() {
 }
 ```
 
-Great! We have the mechanisms by which to store and render logs, however, we haven't included any logic by which to add a audit log entries.
+Great! We have the mechanisms by which to store and render logs, however, we haven't included any logic by which to add an audit log entries.
 
 ## Adding an actionOn listener
 
