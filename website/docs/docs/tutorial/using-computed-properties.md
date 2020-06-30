@@ -56,7 +56,7 @@ export default function BasketCount() {
 
 **Products in basket**
 
-Next up, we will add a [computed](/docs/api/computed.html) property to represent the products that are currently in our basket. This is a more advanced implementation as we will use data from both our our basket model and our product model.
+Next up, we will add a [computed](/docs/api/computed.html) property to represent the products that are currently in our basket. This is a more advanced implementation as we will use data from both our basket model and our product model.
 
 [Computed](/docs/api/computed.html) properties optionally allow you to provide an array of state resolver functions as the first argument to the [computed](/docs/api/computed.html) property definition. These state resolver functions will receive the state that is local to the [computed](/docs/api/computed.html) property, as well as the entire store state, and allow you to resolve specific slices of state that your [computed](/docs/api/computed.html) function will take as an input.
 
