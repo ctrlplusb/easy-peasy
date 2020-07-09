@@ -56,5 +56,5 @@ export default connect(
   state => ({ todos: state.todos.items }),
   // 👇 Map your required actions
   dispatch => ({ addTodo: dispatch.todos.addTodo })
-)(EditTodo)
+)(TodoList)
 ```
