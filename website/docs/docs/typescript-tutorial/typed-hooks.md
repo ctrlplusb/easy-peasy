@@ -12,9 +12,9 @@ function MyComponent() {
 }
 ```
 
-That is slightly cumbersome, therefore for convenience sake, we expose a [createTypedHooks](/docs/api/create-typed-hooks.html) API which allows you to create versions of the hooks which are pre-bound within your StoreModel. Using the hooks returned by this API allows you to avoid having to provide your StoreModel every time you use one of the hooks.
+That is slightly cumbersome, therefore for convenience sake, we expose a [createTypedHooks](/docs/typescript-api/create-typed-hooks.html) API which allows you to create versions of the hooks which are pre-bound within your StoreModel. Using the hooks returned by this API allows you to avoid having to provide your StoreModel every time you use one of the hooks.
 
-We therefore recommend that you use the [createTypedHooks](/docs/api/create-typed-hooks.html) API to create typed hooks and then export them so that you can use them within your components.
+We therefore recommend that you use the [createTypedHooks](/docs/typescript-api/create-typed-hooks.html) API to create typed hooks and then export them so that you can use them within your components.
 
 ## Exporting the typed hooks
 
