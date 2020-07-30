@@ -1034,7 +1034,7 @@ interface StoreModelInitializer<
 
 export function createContextStore<
   StoreModel extends object = {},
-  InitialData extends undefined | object = StoreModel,
+  InitialData extends undefined | object = State<StoreModel>,
   StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<{}, any>
 >(
   model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
