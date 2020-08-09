@@ -8,7 +8,7 @@ For example, say you had the following:
 const store = createStore({
   products: {
     data: {},
-    ids: selector(
+    ids: computed(
       [state => state.data],
       (resolvedState) => {
         const [data] = resolvedState;
@@ -27,7 +27,7 @@ const store = createStore({
   },
   users: {
     data: {},
-    ids: selector(
+    ids: computed(
       [state => state.data],
       (resolvedState) => {
         const [data] = resolvedState;
@@ -52,7 +52,7 @@ You will note a distinct pattern between the `products` and `users`. You could c
 ```javascript
 const dataModel = (endpoint) => ({
   data: {},
-  ids: selector(
+  ids: computed(
     [state => state.data],
     (resolvedState) => {
       const [data] = resolvedState;
@@ -108,7 +108,7 @@ export const dataModel = <Items extends ObjectWithId>(
   endpoint: () => Promise<Items[]>
 ): DataModel<Items> => ({
   data: {},
-  ids: select(state => Object.keys(state.data)),
+  ids: computed(state => Object.keys(state.data)),
   fetched: (state, items) => {
     state.data = items;
   },
