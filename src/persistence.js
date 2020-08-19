@@ -167,8 +167,12 @@ export function createPersistor(persistKey, references) {
           return acc.concat(
             targets.map((key) => {
               const targetPath = [...path, key];
+              const rawValue = get(targetPath, state);
+              const value = isPlainObject(rawValue)
+                ? deepCloneStateWithoutComputed(rawValue)
+                : rawValue;
               return Promise.resolve(
-                storage.setItem(persistKey(targetPath), get(targetPath, state)),
+                storage.setItem(persistKey(targetPath), value),
               );
             }),
           );

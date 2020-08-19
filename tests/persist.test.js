@@ -731,10 +731,20 @@ test('computed properties', async () => {
   const rehydratedStore = makeStore();
   await rehydratedStore.persist.resolveRehydration();
 
+  // ASSERT interim state of store
+  const nestedKey = Object.keys(memoryStorage.store).find((key) =>
+    key.includes('nested'),
+  );
+  const nestedStore = memoryStorage.store[nestedKey];
+  expect(nestedStore.todoCount).toBeUndefined(); // computed shouldn't be stored
+
+  // ACT
+  rehydratedStore.getActions().addTodo('trigger computed rebinding');
+
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
-    todos: ['write tests', 'write more tests'],
-    todoCount: 2,
+    todos: ['write tests', 'write more tests', 'trigger computed rebinding'],
+    todoCount: 3,
     nested: {
       todos: ['write tests', 'write more tests'],
       todoCount: 2,
