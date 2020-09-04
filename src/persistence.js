@@ -8,29 +8,42 @@ const noopStorage = {
   removeItem: () => undefined,
 };
 
-function getStorage(storageName) {
-  try {
-    if (
-      typeof window !== 'undefined' &&
-      typeof window[storageName] !== 'undefined'
-    ) {
-      return window[storageName];
+const getBrowerStorage = (storageName) => {
+  let storageCache;
+  return () => {
+    if (!storageCache) {
+      try {
+        if (
+          typeof window !== 'undefined' &&
+          typeof window[storageName] !== 'undefined'
+        ) {
+          storageCache = window[storageName];
+        }
+      } catch (_) {
+        // swallow the failure
+      }
+      if (!storageCache) {
+        storageCache = noopStorage;
+      }
     }
-    return noopStorage;
-  } catch (_) {
-    return noopStorage;
+
+    return storageCache;
+  };
+};
+
+const localStorage = getBrowerStorage('localStorage');
+const sessionStorage = getBrowerStorage('sessionStorage');
+
+function createStorageWrapper(storage, transformers = []) {
+  if (storage == null) {
+    storage = sessionStorage();
   }
-}
 
-const localStorage = getStorage('localStorage');
-const sessionStorage = getStorage('sessionStorage');
-
-function createStorageWrapper(storage = sessionStorage, transformers = []) {
   if (typeof storage === 'string') {
     if (storage === 'localStorage') {
-      storage = localStorage;
+      storage = localStorage();
     } else if (storage === 'sessionStorage') {
-      storage = sessionStorage;
+      storage = sessionStorage();
     } else {
       if (process.env.NODE_ENV === 'development') {
         console.warn(
@@ -48,14 +61,14 @@ function createStorageWrapper(storage = sessionStorage, transformers = []) {
     const transformed = transformers.reduce((acc, cur) => {
       return cur.in(acc, simpleKey);
     }, data);
-    return storage === localStorage || storage === sessionStorage
+    return storage === localStorage() || storage === sessionStorage()
       ? JSON.stringify({ data: transformed })
       : transformed;
   };
   const deserialize = (data, key) => {
     const simpleKey = key.substr(key.indexOf('@') + 1);
     const result =
-      storage === localStorage || storage === sessionStorage
+      storage === localStorage() || storage === sessionStorage()
         ? JSON.parse(data).data
         : data;
     return outTransformers.reduce((acc, cur) => {
