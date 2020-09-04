@@ -1044,7 +1044,7 @@ export function createContextStore<
   useStore: () => Store<StoreModel, StoreConfig>;
   useStoreState: <Result = any>(
     mapState: (state: State<StoreModel>) => Result,
-    dependencies?: Array<any>,
+    equalityFn?: (prev: Result, next: Result) => boolean,
   ) => Result;
   useStoreActions: <Result = any>(
     mapActions: (actions: Actions<StoreModel>) => Result,
