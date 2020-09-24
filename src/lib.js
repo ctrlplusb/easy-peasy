@@ -1,4 +1,4 @@
-import isPlainObject from 'is-plain-object';
+import { isPlainObject } from 'is-plain-object';
 import { createDraft, finishDraft, isDraft } from 'immer';
 
 export const deepCloneStateWithoutComputed = (source) => {

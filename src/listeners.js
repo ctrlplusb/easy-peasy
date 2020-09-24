@@ -45,7 +45,12 @@ export function bindListenerDefinitions(
           target.definition.meta.type &&
           _actionCreatorDict[target.definition.meta.type]
         ) {
-          acc.push(target.definition.meta.type);
+          if (target.definition.meta.successType) {
+            acc.push(target.definition.meta.successType);
+            acc.push(target.definition.meta.failType);
+          } else {
+            acc.push(target.definition.meta.type);
+          }
         } else if (typeof target === 'string') {
           acc.push(target);
         }

@@ -373,59 +373,6 @@ test('dispatches actions to represent a succeeded effect', () => {
 });
 
 describe('errors', () => {
-  test('dispatches actions to represent a failed effect', async () => {
-    // ARRANGE
-    const err = new Error('error');
-    const model = {
-      nested: {
-        string: 'one',
-        setString: action((state, payload) => {
-          state.string = payload;
-        }),
-        onStateChanged: unstable_effectOn([(state) => state.string], () => {
-          throw err;
-        }),
-      },
-    };
-    const trackActions = trackActionsMiddleware();
-    const store = createStore(model, { middleware: [trackActions] });
-
-    // ACT
-    try {
-      store.getActions().nested.setString('two');
-    } catch (_err) {
-      // do nothing
-    }
-
-    // ASSERT
-    expect(trackActions.actions).toMatchObject([
-      { type: '@action.nested.setString', payload: 'two' },
-      {
-        type: '@effectOn.nested.onStateChanged(start)',
-        change: {
-          prev: ['one'],
-          current: ['two'],
-          action: {
-            type: '@action.nested.setString',
-            payload: 'two',
-          },
-        },
-      },
-      {
-        type: '@effectOn.nested.onStateChanged(fail)',
-        change: {
-          prev: ['one'],
-          current: ['two'],
-          action: {
-            type: '@action.nested.setString',
-            payload: 'two',
-          },
-        },
-        error: err,
-      },
-    ]);
-  });
-
   test('errors are thrown up through async effects + inner async thunks', async () => {
     // ARRANGE
     const err = new Error('error');
@@ -474,20 +421,6 @@ describe('errors', () => {
         },
       },
       { type: '@thunk.nested.doAsync(start)', payload: 'two' },
-      { type: '@thunk.nested.doAsync(fail)', payload: 'two', error: err },
-      { type: '@thunk.nested.doAsync', payload: 'two', error: err },
-      {
-        type: '@effectOn.nested.onStateChanged(fail)',
-        change: {
-          prev: ['one'],
-          current: ['two'],
-          action: {
-            type: '@action.nested.setString',
-            payload: 'two',
-          },
-        },
-        error: err,
-      },
     ]);
   });
 });

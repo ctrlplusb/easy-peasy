@@ -1,5 +1,5 @@
 import debounce from 'debounce';
-import isPlainObject from 'is-plain-object';
+import { isPlainObject } from 'is-plain-object';
 import { deepCloneStateWithoutComputed, get, isPromise, set } from './lib';
 
 const noopStorage = {

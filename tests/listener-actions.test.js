@@ -84,11 +84,10 @@ it('listening to a successful thunk, firing an action', async () => {
     onMathAdd: actionOn(
       (_, storeActions) => storeActions.math.add,
       (state, target) => {
-        expect(target.type).toBe('@thunk.math.add');
+        expect(target.type).toBe('@thunk.math.add(success)');
         expect(target.payload).toBe(10);
         expect(target.result).toBe('foo');
         expect(target.error).toBeUndefined();
-        expect(target.type).toBe('@thunk.math.add');
         state.logs.push(`Added ${target.payload}`);
       },
     ),
@@ -110,8 +109,8 @@ it('listening to a failed thunk', async () => {
   const err = new Error('💩');
   const math = {
     sum: 0,
-    add: thunk(() => {
-      throw err;
+    add: thunk((actions, payload, { fail }) => {
+      fail(err);
     }),
   };
   const audit = {
@@ -119,11 +118,10 @@ it('listening to a failed thunk', async () => {
     onMathAdd: actionOn(
       (_, storeActions) => storeActions.math.add,
       (state, target) => {
-        expect(target.type).toBe('@thunk.math.add');
+        expect(target.type).toBe('@thunk.math.add(fail)');
         expect(target.payload).toBe(10);
         expect(target.result).toBeUndefined();
         expect(target.error).toBe(err);
-        expect(target.type).toBe('@thunk.math.add');
         state.logs.push(`Added ${target.payload}`);
       },
     ),
@@ -232,7 +230,8 @@ it('action listening to multiple actions', async () => {
       (state, target) => {
         expect(target.resolvedTargets).toEqual([
           '@action.actionTarget',
-          '@thunk.thunkTarget',
+          '@thunk.thunkTarget(success)',
+          '@thunk.thunkTarget(fail)',
         ]);
         state.logs.push(target.payload);
       },
@@ -273,7 +272,11 @@ it('thunk listening to multiple actions', async () => {
     {
       type: store.getActions().actionTarget.type,
       payload: 'action payload',
-      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget'],
+      resolvedTargets: [
+        '@action.actionTarget',
+        '@thunk.thunkTarget(success)',
+        '@thunk.thunkTarget(fail)',
+      ],
       result: undefined,
       error: undefined,
     },
@@ -289,9 +292,13 @@ it('thunk listening to multiple actions', async () => {
   expect(thunkSpy).toHaveBeenLastCalledWith(
     expect.anything(),
     {
-      type: store.getActions().thunkTarget.type,
+      type: store.getActions().thunkTarget.successType,
       payload: 'thunk payload',
-      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget'],
+      resolvedTargets: [
+        '@action.actionTarget',
+        '@thunk.thunkTarget(success)',
+        '@thunk.thunkTarget(fail)',
+      ],
       result: undefined,
       error: undefined,
     },

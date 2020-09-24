@@ -30,6 +30,12 @@ export function createEffectsMiddleware(references) {
   };
 }
 
+const logEffectError = (err) => {
+  // As users can't get a handle on effects we need to report the error
+  // eslint-disable-next-line no-console
+  console.log(err);
+};
+
 export function createEffectHandler(
   definition,
   references,
@@ -37,7 +43,9 @@ export function createEffectHandler(
   _actionCreators,
 ) {
   const actions = get(definition.meta.parent, _actionCreators);
+
   let dispose;
+
   return (change) => {
     const helpers = {
       dispatch: references.dispatch,
@@ -51,18 +59,15 @@ export function createEffectHandler(
         path: definition.meta.path,
       },
     };
+
     if (dispose !== undefined) {
       const disposeResult = dispose();
       dispose = undefined;
       if (isPromise(disposeResult)) {
-        disposeResult.catch((err) => {
-          // We don't want the user completely clueless as to an error occurring,
-          // so we'll log out to the console.
-          // eslint-disable-next-line no-console
-          console.log(err);
-        });
+        disposeResult.catch(logEffectError);
       }
     }
+
     const effectResult = definition.fn(actions, change, helpers);
 
     if (isPromise(effectResult)) {
@@ -83,8 +88,30 @@ export function createEffectHandler(
     if (typeof effectResult === 'function') {
       dispose = effectResult;
     }
+
+    return undefined;
   };
 }
+
+const logEffectEventListenerError = (type, err) => {
+  // eslint-disable-next-line no-console
+  console.log(`An error occurred in a listener for ${type}`);
+  // eslint-disable-next-line no-console
+  console.log(err);
+};
+
+const handleEventDispatchErrors = (type, dispatcher) => (...args) => {
+  try {
+    const result = dispatcher(...args);
+    if (isPromise(result)) {
+      result.catch((err) => {
+        logEffectEventListenerError(type, err);
+      });
+    }
+  } catch (err) {
+    logEffectEventListenerError(type, err);
+  }
+};
 
 export function createEffectActionsCreator(
   definition,
@@ -97,40 +124,42 @@ export function createEffectActionsCreator(
       current: nextDependencies,
       action,
     };
-    const dispatchError = (err) =>
-      references.dispatch({
-        type: definition.meta.failType,
-        change,
-        error: err,
-      });
-    const dispatchSuccess = () =>
-      references.dispatch({
-        type: definition.meta.successType,
-        change,
-      });
-    references.dispatch({
-      type: definition.meta.startType,
-      change,
-    });
+
+    const dispatchStart = handleEventDispatchErrors(
+      definition.meta.startType,
+      () =>
+        references.dispatch({
+          type: definition.meta.startType,
+          change,
+        }),
+    );
+
+    const dispatchSuccess = handleEventDispatchErrors(
+      definition.meta.successType,
+      () =>
+        references.dispatch({
+          type: definition.meta.successType,
+          change,
+        }),
+    );
+
+    dispatchStart();
+
     try {
       const result = references.dispatch(() => effectHandler(change));
+
       if (isPromise(result)) {
-        return result
-          .then((resolved) => {
-            dispatchSuccess(resolved);
-            return resolved;
-          })
-          .catch((err) => {
-            dispatchError(err);
-            // Note: you can't throw the error as the user will not be able to
-            // get a handle on the Promise.
-          });
+        return result.then((resolved) => {
+          dispatchSuccess(resolved);
+          return resolved;
+        }, logEffectError);
       }
+
       dispatchSuccess(result);
+
       return result;
     } catch (err) {
-      dispatchError(err);
-      throw err;
+      logEffectError(err);
     }
   };
 

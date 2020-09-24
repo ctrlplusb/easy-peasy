@@ -42,7 +42,6 @@ test('dispatches actions to represent a succeeded thunk', () => {
       payload,
       result: 'did something',
     },
-    { type: '@thunk.foo.doSomething', payload, result: 'did something' },
   ]);
   expect(actualResult).toBe('did something');
 });
@@ -53,8 +52,8 @@ describe('errors', () => {
     const err = new Error('error');
     const model = {
       foo: {
-        doSomething: thunk(async () => {
-          throw err;
+        doSomething: thunk(async (actions, payload, { fail }) => {
+          fail(err);
         }),
       },
     };
@@ -71,11 +70,6 @@ describe('errors', () => {
         { type: '@thunk.foo.doSomething(start)', payload },
         {
           type: '@thunk.foo.doSomething(fail)',
-          payload,
-          error: err,
-        },
-        {
-          type: '@thunk.foo.doSomething',
           payload,
           error: err,
         },
@@ -110,26 +104,6 @@ describe('errors', () => {
       expect(trackActions.actions).toEqual([
         { type: '@thunk.foo.doSomething(start)', payload },
         { type: '@thunk.foo.error(start)', payload: undefined },
-        {
-          type: '@thunk.foo.error(fail)',
-          payload: undefined,
-          error: err,
-        },
-        {
-          type: '@thunk.foo.error',
-          payload: undefined,
-          error: err,
-        },
-        {
-          type: '@thunk.foo.doSomething(fail)',
-          payload,
-          error: err,
-        },
-        {
-          type: '@thunk.foo.doSomething',
-          payload,
-          error: err,
-        },
       ]);
 
       expect(e).toBe(err);

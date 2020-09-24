@@ -7,9 +7,10 @@ export function createThunkHandler(
   injections,
   _actionCreators,
 ) {
-  return (payload) => {
+  return (payload, fail) => {
     const helpers = {
       dispatch: references.dispatch,
+      fail,
       getState: () => get(definition.meta.parent, references.getState()),
       getStoreActions: () => _actionCreators,
       getStoreState: references.getState,
@@ -31,58 +32,87 @@ export function createThunkHandler(
   };
 }
 
+const logThunkEventListenerError = (type, err) => {
+  // eslint-disable-next-line no-console
+  console.log(`An error occurred in a listener for ${type}`);
+  // eslint-disable-next-line no-console
+  console.log(err);
+};
+
+const handleEventDispatchErrors = (type, dispatcher) => (...args) => {
+  try {
+    const result = dispatcher(...args);
+    if (isPromise(result)) {
+      result.catch((err) => {
+        logThunkEventListenerError(type, err);
+      });
+    }
+  } catch (err) {
+    logThunkEventListenerError(type, err);
+  }
+};
+
 export function createThunkActionsCreator(definition, references) {
   const actionCreator = (payload) => {
-    const dispatchError = (err) => {
-      references.dispatch({
-        type: definition.meta.failType,
-        payload,
-        error: err,
-      });
-      references.dispatch({
-        type: definition.meta.type,
-        payload,
-        error: err,
-      });
-    };
-    const dispatchSuccess = (result) => {
-      references.dispatch({
-        type: definition.meta.successType,
-        payload,
-        result,
-      });
-      references.dispatch({
-        type: definition.meta.type,
-        payload,
-        result,
-      });
+    const dispatchStart = handleEventDispatchErrors(
+      definition.meta.startType,
+      () =>
+        references.dispatch({
+          type: definition.meta.startType,
+          payload,
+        }),
+    );
+
+    const dispatchFail = handleEventDispatchErrors(
+      definition.meta.failType,
+      (err) =>
+        references.dispatch({
+          type: definition.meta.failType,
+          payload,
+          error: err,
+        }),
+    );
+
+    const dispatchSuccess = handleEventDispatchErrors(
+      definition.meta.successType,
+      (result) =>
+        references.dispatch({
+          type: definition.meta.successType,
+          payload,
+          result,
+        }),
+    );
+
+    dispatchStart();
+
+    let failure = null;
+
+    const fail = (_failure) => {
+      failure = _failure;
     };
 
-    references.dispatch({
-      type: definition.meta.startType,
-      payload,
-    });
-    try {
-      const result = references.dispatch(() =>
-        definition.thunkHandler(payload),
-      );
-      if (isPromise(result)) {
-        return result
-          .then((resolved) => {
-            dispatchSuccess(resolved);
-            return resolved;
-          })
-          .catch((err) => {
-            dispatchError(err);
-            throw err;
-          });
-      }
-      dispatchSuccess(result);
-      return result;
-    } catch (err) {
-      dispatchError(err);
-      throw err;
+    const result = references.dispatch(() =>
+      definition.thunkHandler(payload, fail),
+    );
+
+    if (isPromise(result)) {
+      return result.then((resolved) => {
+        if (failure) {
+          dispatchFail(failure);
+        } else {
+          dispatchSuccess(resolved);
+        }
+        return resolved;
+      });
     }
+
+    if (failure) {
+      dispatchFail(failure);
+    } else {
+      dispatchSuccess(result);
+    }
+
+    return result;
   };
 
   actionCreator.type = definition.meta.type;

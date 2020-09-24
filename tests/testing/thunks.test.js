@@ -78,7 +78,6 @@ describe('with mocking actions', () => {
       { type: '@thunk.fetchById(start)', payload: todo.id },
       { type: '@action.fetchedTodo', payload: todo },
       { type: '@thunk.fetchById(success)', payload: todo.id },
-      { type: '@thunk.fetchById', payload: todo.id },
     ]);
   });
 
@@ -86,8 +85,8 @@ describe('with mocking actions', () => {
     // arrange
     const err = new Error('poop');
     const model = {
-      throwing: thunk(() => {
-        throw err;
+      throwing: thunk((actions, payload, { fail }) => {
+        fail(err);
       }),
     };
     const store = createStore(model, {
@@ -107,11 +106,6 @@ describe('with mocking actions', () => {
       { type: '@thunk.throwing(start)', payload: 'A payload' },
       {
         type: '@thunk.throwing(fail)',
-        payload: 'A payload',
-        error: err,
-      },
-      {
-        type: '@thunk.throwing',
         payload: 'A payload',
         error: err,
       },
@@ -143,7 +137,6 @@ describe('with mocking actions', () => {
       { type: '@thunk.add(start)', payload: undefined },
       { type: 'CUSTOM_ACTION', payload: 'the payload' },
       { type: '@thunk.add(success)', payload: undefined },
-      { type: '@thunk.add', payload: undefined },
     ]);
   });
 });
