@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { createContextStore, action } from '../src';
+import { createContextStore, action, thunk } from '../src';
 
 const Counter = createContextStore({
   count: 0,
@@ -100,46 +100,49 @@ it('useStore hook', () => {
   expect(count.firstChild.textContent).toBe('0');
 });
 
-it('with initial data', () => {
+it('injections can be updated', () => {
   // arrange
-  const Counter = createContextStore((data) => ({
-    count: data.count || 0,
-    inc: action((state) => {
-      state.count += 1;
-    }),
-  }));
+  let actualInjections = null;
 
-  function CountDisplay() {
-    const count = Counter.useStoreState((state) => state.count);
-    const inc = Counter.useStoreActions((actions) => actions.inc);
-    return (
-      <>
-        <div data-testid="count">{count}</div>
-        <button data-testid="button" onClick={inc} type="button">
-          +
-        </button>
-      </>
-    );
-  }
-
-  const app = (
-    <Counter.Provider initialData={{ count: 1 }}>
-      <CountDisplay />
-    </Counter.Provider>
+  const Counter = createContextStore(
+    {
+      count: 0,
+      foo: thunk((actions, payload, { injections }) => {
+        actualInjections = injections;
+      }),
+    },
+    {
+      injections: {
+        foo: 'initial',
+      },
+    },
   );
 
-  // act
-  const { getByTestId } = render(app);
+  function Foo({ updater }) {
+    const foo = Counter.useStoreActions((actions) => actions.foo);
+    React.useEffect(() => {
+      foo();
+    }, [foo, updater]);
+    return null;
+  }
 
-  const count = getByTestId('count');
-  const button = getByTestId('button');
+  // act
+  const { rerender } = render(
+    <Counter.Provider>
+      <Foo updater={1} />
+    </Counter.Provider>,
+  );
 
   // assert
-  expect(count.firstChild.textContent).toBe('1');
+  expect(actualInjections.foo).toBe('initial');
 
   // act
-  fireEvent.click(button);
+  rerender(
+    <Counter.Provider injections={{ foo: 'updated' }}>
+      <Foo updater={2} />
+    </Counter.Provider>,
+  );
 
   // assert
-  expect(count.firstChild.textContent).toBe('2');
+  expect(actualInjections.foo).toBe('updated');
 });

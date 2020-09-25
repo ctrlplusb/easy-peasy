@@ -24,12 +24,18 @@ export default function createStore(model, options = {}) {
     disableImmer = false,
     enhancers = [],
     initialState = {},
-    injections,
+    injections = {},
     middleware = [],
     mockActions = false,
     name: storeName = `EasyPeasyStore`,
     reducerEnhancer = (rootReducer) => rootReducer,
   } = options;
+
+  if (process.env.NODE_ENV === 'development') {
+    if (typeof injections !== 'object') {
+      throw new Error('[easy-peasy] Store injections must be an object');
+    }
+  }
 
   const bindReplaceState = (modelDef) => {
     return {

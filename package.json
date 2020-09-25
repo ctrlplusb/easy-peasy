@@ -88,7 +88,8 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
-    "eslint-plugin-react": "^7.21.0",
+    "eslint-plugin-markdown": "^2.0.0-rc.0",
+    "eslint-plugin-react": "^7.21.2",
     "eslint-plugin-react-hooks": "^4.1.2",
     "husky": "^4.3.0",
     "jest": "^26.4.2",
@@ -132,7 +133,8 @@
     },
     "extends": [
       "airbnb",
-      "prettier"
+      "prettier",
+      "plugin:markdown/recommended"
     ],
     "rules": {
       "array-callback-return": 0,
@@ -157,7 +159,7 @@
     "*.ts"
   ],
   "prettier": {
-    "parser": "typescript",
+    "proseWrap": "always",
     "semi": true,
     "singleQuote": true,
     "tabWidth": 2,

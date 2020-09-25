@@ -69,10 +69,12 @@ module.exports = {
                 'api/store-config',
                 'api/store-provider',
                 'api/store',
+                'api/create-context-store',
+                'api/use-local-store',
               ],
             },
             {
-              title: 'Models',
+              title: 'Defining Models',
               children: [
                 'api/action-on',
                 'api/action',
@@ -87,22 +89,13 @@ module.exports = {
               ],
             },
             {
-              title: 'Hooks',
+              title: 'Store Hooks',
               children: [
-                'api/use-local-store',
                 'api/use-store-actions',
                 'api/use-store-dispatch',
                 'api/use-store-rehydrated',
                 'api/use-store-state',
                 'api/use-store',
-              ],
-            },
-            {
-              title: 'Multiple Stores',
-              children: [
-                'api/create-component-store',
-                'api/create-context-store',
-                'api/use-local-store',
               ],
             },
             {

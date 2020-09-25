@@ -2,14 +2,14 @@
 
 import { Component } from 'react';
 import {
-  compose,
   AnyAction,
+  compose,
   Dispatch as ReduxDispatch,
+  Middleware,
+  Observable,
   Reducer as ReduxReducer,
   Store as ReduxStore,
   StoreEnhancer,
-  Middleware,
-  Observable,
 } from 'redux';
 import { O } from 'ts-toolbelt';
 
@@ -314,7 +314,7 @@ export type State<Model extends object = {}> = RecursiveState<Model>;
 export function createStore<
   StoreModel extends object = {},
   InitialState extends undefined | object = undefined,
-  Injections = any
+  Injections extends object = {}
 >(
   model: StoreModel,
   config?: EasyPeasyConfig<InitialState, Injections>,
@@ -325,7 +325,7 @@ export function createStore<
  */
 export interface EasyPeasyConfig<
   InitialState extends undefined | object = undefined,
-  Injections = any
+  Injections extends object = {}
 > {
   compose?: typeof compose;
   devTools?: boolean;
@@ -360,10 +360,7 @@ export interface AddModelResult {
  */
 export interface Store<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
-    undefined,
-    any
-  >
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
 > extends ReduxStore<State<StoreModel>> {
   addModel: <ModelSlice extends object>(
     key: string,
@@ -947,10 +944,7 @@ export function useStoreActions<
  */
 export function useStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
-    undefined,
-    any
-  >
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
 >(): Store<StoreModel, StoreConfig>;
 
 /**
@@ -1025,22 +1019,20 @@ export class StoreProvider<StoreModel extends object = {}> extends Component<{
 
 // #region Context + Local Stores
 
-interface StoreModelInitializer<
-  StoreModel extends object,
-  InitialData extends undefined | object
-> {
-  (initialData?: InitialData): StoreModel;
-}
-
 export function createContextStore<
   StoreModel extends object = {},
-  InitialData extends undefined | object = undefined,
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<{}, any>
+  Injections extends object = {},
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    Injections
+  >
 >(
-  model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
+  model: StoreModel,
   config?: StoreConfig,
 ): {
-  Provider: React.SFC<{ initialData?: InitialData }>;
+  Provider: React.SFC<{
+    injections?: Injections | ((previousInjections: Injections) => Injections);
+  }>;
   useStore: () => Store<StoreModel, StoreConfig>;
   useStoreState: <Result = any>(
     mapState: (state: State<StoreModel>) => Result,
@@ -1053,25 +1045,9 @@ export function createContextStore<
   useStoreRehydrated: () => boolean;
 };
 
-interface UseLocalStore<
-  StoreModel extends object,
-  InitialData extends undefined | object
-> {
-  (initialData?: InitialData): [State<StoreModel>, Actions<StoreModel>];
-}
-
-export function createComponentStore<
-  StoreModel extends object = {},
-  InitialData extends undefined | object = undefined,
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<{}, any>
->(
-  model: StoreModel | StoreModelInitializer<StoreModel, InitialData>,
-  config?: StoreConfig,
-): UseLocalStore<StoreModel, InitialData>;
-
 export function useLocalStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<{}, any>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
 >(
   modelCreator: (prevState?: State<StoreModel>) => StoreModel,
   dependencies?: any[],

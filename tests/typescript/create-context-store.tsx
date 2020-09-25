@@ -1,13 +1,13 @@
+import { Action, action, createContextStore } from 'easy-peasy';
 import * as React from 'react';
-import { createContextStore, Action, action } from 'easy-peasy';
 
 interface StoreModel {
   count: number;
   inc: Action<StoreModel>;
 }
 
-interface InitialData {
-  count: number;
+interface Injections {
+  foo: string;
 }
 
 const Counter = createContextStore<StoreModel>({
@@ -17,13 +17,18 @@ const Counter = createContextStore<StoreModel>({
   }),
 });
 
-const CounterWithInitializer = createContextStore<StoreModel, InitialData>(
-  (data) => ({
-    count: data ? data.count + 1 : 0,
+const CounterWithInjections = createContextStore<StoreModel, Injections>(
+  {
+    count: 0,
     inc: action((state) => {
       state.count += 1;
     }),
-  }),
+  },
+  {
+    injections: {
+      foo: 'bar',
+    },
+  },
 );
 
 function CountDisplay() {
@@ -60,11 +65,17 @@ function TestDispatch() {
   return null;
 }
 
-<CounterWithInitializer.Provider initialData={{ count: 1 }}>
+<CounterWithInjections.Provider injections={{ foo: 'baz' }}>
   <CountDisplay />
-</CounterWithInitializer.Provider>;
+</CounterWithInjections.Provider>;
+
+<CounterWithInjections.Provider
+  injections={(previousInjections) => ({ foo: 'baz' + previousInjections.foo })}
+>
+  <CountDisplay />
+</CounterWithInjections.Provider>;
 
 // typings:expect-error
-<CounterWithInitializer.Provider initialData={{ count: 'foo' }}>
+<CounterWithInjections.Provider injections={{ foo: 1 }}>
   <CountDisplay />
-</CounterWithInitializer.Provider>;
+</CounterWithInjections.Provider>;

@@ -27,7 +27,7 @@ function MyCounter() {
     A function that should return the model representing your store.
 
     ```javascript
-    createComponentStore({
+    useLocalStore(() => ({
       count: 0,
       increment: action(state => {
         state.count += 1;
@@ -119,32 +119,23 @@ There may be cases in which you may want to reinitialize your store based on som
 ```javascript
 import { useLocalStore, action } from 'easy-peasy';
 
-const useCounter = createComponentStore({
-  count: 0,
-  inc: action(state => {
-    state.count += 1;
-  }),
-});
-
-function EditProduct({ id, name }) {
+function EditProduct({ product }) {
   const [state, actions] = useLocalStore(
     () => ({
-      id,
-      name,
-      setName: action((_state, payload) => {
-        _state.name = payload;
-      })
+      product, // 👈 using state to initialize model
+      setPrice: action((_state, payload) => {
+        _state.product.price = payload;
+      }),
     }),
-    [id, name] // 👈 if any of these change the store is recreated
+    [product] // 👈 recreate model every time we receive a different product
   );
 
   return (
     <>
-      <div>Product {state.id}</div>
+      <div>{state.product.name}</div>
       <input
-        onChange={e => actions.setName(e.target.value)}
-        type="text"
-        value={state.name}
+        onChange={e => actions.setPrice(e.target.value)}
+        value={state.product.price}
       />
     </>
   );

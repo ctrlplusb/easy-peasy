@@ -10,16 +10,36 @@ import {
 } from './hooks';
 import createStore from './create-store';
 
-export default function createContextStore(model, config) {
+export default function createContextStore(model, config = {}) {
+  // We create a mutable injections reference to allow updating it
+  const { injections: mutableInjections = {} } = config;
+
   const StoreContext = createContext();
 
-  function Provider({ children, initialData }) {
+  function Provider({ children, injections }) {
+    // If the user provided injections we need to ensure our mutable ref
+    // is up to date. We could consider doing a shallow compare here?
+    if (injections != null) {
+      const nextInjections =
+        typeof injections === 'function'
+          ? injections(mutableInjections)
+          : injections;
+      const nextKeys = Object.keys(nextInjections);
+      const removeKeys = Object.keys(mutableInjections).filter(
+        (k) => !nextKeys.includes(k),
+      );
+      removeKeys.forEach((k) => {
+        delete mutableInjections[k];
+      });
+      Object.assign(mutableInjections, nextInjections);
+    }
+
     const store = useMemoOne(
       () =>
-        createStore(
-          typeof model === 'function' ? model(initialData) : model,
-          config,
-        ),
+        createStore(model, {
+          ...config,
+          originalInjections: mutableInjections,
+        }),
       [],
     );
     return (
