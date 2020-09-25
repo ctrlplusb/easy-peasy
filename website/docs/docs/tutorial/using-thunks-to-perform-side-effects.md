@@ -1,6 +1,6 @@
 # Using thunks to perform side effects
 
-We have refactored our [application](https://codesandbox.io/s/easy-peasy-tutorial-actions-1e62s) with the capability to update state by dispatching [actions](/docs/api/action.html). 
+We have refactored our [application](https://codesandbox.io/s/easy-peasy-tutorial-actions-1e62s) with the capability to update state by dispatching [actions](/docs/api/action.html).
 
 We did however note that there is a network request being made to the basket service within the `Product` component. After the request to the basket service has completed an [action](/docs/api/action.html) is dispatched to add the respective product to the basket state. This type of side effect, which has a direct correlation to our state is perfect for encapsulation within a [thunk](/docs/api/thunk.html).
 
@@ -70,9 +70,9 @@ export default function Product({ id }) {
   // ...
 ```
 
-As we refactored our `addProduct` [action](/docs/api/action.html) into a [thunk](/docs/api/thunk.html) we don't change our `useStoreActions` code, instead we are prefixing our `addProduct` dispatch with an an `await`, leveraging the `Promise` that will be returned by our asynchronous thunk. This allows us to maintain the existing behaviour around setting the `adding` flag which indicates to the UI when the adding operation is in progress.
+As we refactored our `addProduct` [action](/docs/api/action.html) into a [thunk](/docs/api/thunk.html) we don't change our `useStoreActions` code, instead we are prefixing our `addProduct` dispatch with an `await`, leveraging the `Promise` that will be returned by our asynchronous thunk. This allows us to maintain the existing behaviour around setting the `adding` flag which indicates to the UI when the adding operation is in progress.
 
-Once  you have made this change you will be able to run your application and then test the [thunk](/sdocs/api/thunk.html) by adding a product to your basket.
+Once you have made this change you will be able to run your application and then test the [thunk](/sdocs/api/thunk.html) by adding a product to your basket.
 
 ## Review
 

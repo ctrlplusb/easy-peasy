@@ -159,7 +159,6 @@
     "*.ts"
   ],
   "prettier": {
-    "proseWrap": "always",
     "semi": true,
     "singleQuote": true,
     "tabWidth": 2,
