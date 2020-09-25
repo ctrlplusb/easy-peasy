@@ -17,10 +17,13 @@ the underlying Redux store.
   you are creating multiple stores as you will easily be able to distinguish and
   toggle between the different store instances within the Redux dev tools.
 
-- `devTools` (boolean, _optional_, default=true)
+- `devTools` (boolean, _optional_, default=false)
 
   Setting this to `true` will enable the
   [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+
+  > Note: this will be enabled by default if your
+  > `process.env.NODE_ENV !== 'production'`.
 
 - `disableImmer` (boolean, _optional_, default=false)
 

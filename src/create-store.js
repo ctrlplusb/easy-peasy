@@ -20,7 +20,7 @@ export default function createStore(model, options = {}) {
   const modelClone = deepCloneStateWithoutComputed(model);
   const {
     compose,
-    devTools = true,
+    devTools = process.env.NODE_ENV !== 'production',
     disableImmer = false,
     enhancers = [],
     initialState = {},
@@ -31,7 +31,7 @@ export default function createStore(model, options = {}) {
     reducerEnhancer = (rootReducer) => rootReducer,
   } = options;
 
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV !== 'production') {
     if (typeof injections !== 'object') {
       throw new Error('[easy-peasy] Store injections must be an object');
     }
