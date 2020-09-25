@@ -4,8 +4,8 @@ As Easy Peasy outputs a standard Redux store, so it is entirely possible to use 
 
 This allows you to do a few things:
 
- - Slowly migrate a legacy application that is built using `react-redux`
- - Connect your store to Class components via `connect`
+- Slowly migrate a legacy application that is built using `react-redux`
+- Connect your store to Class components via `connect`
 
 **1. First, install the `react-redux` package**
 
@@ -31,7 +31,7 @@ const App = () => (
   <Provider store={store}>
     <TodoList />
   </Provider>
-)
+);
 
 render(<App />, document.querySelector('#app'));
 ```
@@ -45,16 +45,18 @@ import { connect } from 'react-redux'; // 👈 import the connect
 function TodoList({ todos, addTodo }) {
   return (
     <div>
-      {todos.map(({id, text }) => <Todo key={id} text={text} />)}
+      {todos.map(({ id, text }) => (
+        <Todo key={id} text={text} />
+      ))}
       <AddTodo onSubmit={addTodo} />
     </div>
-  )
+  );
 }
 
 export default connect(
   // 👇 Map to your required state
-  state => ({ todos: state.todos.items }),
+  (state) => ({ todos: state.todos.items }),
   // 👇 Map your required actions
-  dispatch => ({ addTodo: dispatch.todos.addTodo })
-)(EditTodo)
+  (dispatch) => ({ addTodo: dispatch.todos.addTodo }),
+)(TodoList);
 ```
