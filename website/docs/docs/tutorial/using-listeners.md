@@ -51,7 +51,7 @@ import React from 'react';
 import { useStoreState } from 'easy-peasy';
 
 export default function AuditLog() {
-  const logs = useStoreState(state => state.audit.logs);
+  const logs = useStoreState((state) => state.audit.logs);
   return (
     <pre>
       <code>{logs.join('\n')}</code>
@@ -95,7 +95,7 @@ export default function App() {
 }
 ```
 
-Great! We have the mechanisms by which to store and render logs, however, we haven't included any logic by which to add a audit log entries.
+Great! We have the mechanisms by which to store and render logs, however, we haven't included any logic by which to add audit log entries.
 
 ## Adding an actionOn listener
 
@@ -130,7 +130,7 @@ export default auditModel;
 
 Note how the first parameter of [actionOn](/docs/api/action-on.html) is a `resolverFunction` which receives both the local actions as well as the store actions. We used the store actions to resolve the `addedProduct` action as our target.
 
-The second parameter to our [actionOn](/docs/api/action-on.html)  listener is the action handler itself,  which will be executed every time our target `addedProduct` action has fired. The action handler will receive as it's first argument the local `state` (i.e. audit model state), allowing us to update it. It's second argument is a `target` object containing the following properties:
+The second parameter to our [actionOn](/docs/api/action-on.html) listener is the action handler itself, which will be executed every time our target `addedProduct` action has fired. The action handler will receive as it's first argument the local `state` (i.e. audit model state), allowing us to update it. It's second argument is a `target` object containing the following properties:
 
 - `payload`: The same payload that the target received
 - `type`: The fully qualified action type of the target being responded to
@@ -148,4 +148,3 @@ Listeners are a very powerful concept which allow us to keep a nice separation o
 In the final section we will introduce a very cool tool allowing you to visualise and debug your global store - the Redux Dev Tools extension.
 
 You can view the progress of our application refactor [here](https://codesandbox.io/s/easy-peasy-tutorial-listeners-rhni3).
-
