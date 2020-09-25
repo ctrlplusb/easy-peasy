@@ -54,7 +54,7 @@ function createStorageWrapper(storage, transformers = []) {
     }
   }
 
-  const outTransformers = transformers.reverse();
+  const outTransformers = [...transformers].reverse();
 
   const serialize = (data, key) => {
     const simpleKey = key.substr(key.indexOf('@') + 1);

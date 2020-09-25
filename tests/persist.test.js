@@ -581,6 +581,71 @@ test('transformers', async () => {
   });
 });
 
+test('transformers order', async () => {
+  // ARRANGE
+  const setTransformer = createTransform(
+    (data) => {
+      return [...data];
+    },
+    (data) => {
+      return new Set(data);
+    },
+  );
+
+  const jsonTransformer = createTransform(
+    (data) => {
+      return JSON.stringify(data);
+    },
+    (data) => {
+      return JSON.parse(data);
+    },
+  );
+
+  const memoryStorage = createMemoryStorage();
+
+  const makeStore = () =>
+    createStore(
+      persist(
+        {
+          one: null,
+          two: null,
+          change: action((_, payload) => {
+            return payload;
+          }),
+        },
+        {
+          storage: memoryStorage,
+          transformers: [setTransformer, jsonTransformer],
+        },
+      ),
+    );
+
+  const store = makeStore();
+
+  // ACT
+  store.getActions().change({
+    one: new Set([1, 2]),
+    two: new Set([3, 4]),
+  });
+  await store.persist.flush();
+
+  // ASSERT
+  expect(memoryStorage.store).toEqual({
+    '[EasyPeasyStore]@one': '[1,2]',
+    '[EasyPeasyStore]@two': '[3,4]',
+  });
+
+  // ACT
+  const rehydratedStore = makeStore();
+  await rehydratedStore.persist.resolveRehydration();
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    one: new Set([1, 2]),
+    two: new Set([3, 4]),
+  });
+});
+
 test('multiple stores', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
