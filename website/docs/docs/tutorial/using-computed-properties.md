@@ -14,8 +14,8 @@ import { computed } from 'easy-peasy'; // 👈 import the helper
 const sessionModel = {
   user: { username: 'jane' },
   //            👇 define a computed property
-  isLoggedIn: computed(state => state.user != null)
-}
+  isLoggedIn: computed((state) => state.user != null),
+};
 ```
 
 You can access [computed](/docs/api/computed.html) state just like any other state via the [useStoreState](/docs/api/use-store-state.html) hook.
@@ -56,7 +56,7 @@ export default function BasketCount() {
 
 **Products in basket**
 
-Next up, we will add a [computed](/docs/api/computed.html) property to represent the products that are currently in our basket. This is a more advanced implementation as we will use data from both our our basket model and our product model.
+Next up, we will add a [computed](/docs/api/computed.html) property to represent the products that are currently in our basket. This is a more advanced implementation as we will use data from both our basket model and our product model.
 
 [Computed](/docs/api/computed.html) properties optionally allow you to provide an array of state resolver functions as the first argument to the [computed](/docs/api/computed.html) property definition. These state resolver functions will receive the state that is local to the [computed](/docs/api/computed.html) property, as well as the entire store state, and allow you to resolve specific slices of state that your [computed](/docs/api/computed.html) function will take as an input.
 
@@ -159,7 +159,7 @@ export default function Product({ id }) {
 Note how we are executing the `getById` [computed](/docs/api/computed.html) property function, providing the `id` prop to it.
 
 ```javascript
-useStoreState(state => state.products.getById(id));
+useStoreState((state) => state.products.getById(id));
 ```
 
 ## Review
@@ -187,7 +187,7 @@ const productsModel = {
   ],
   getById: computed(state =>
     memo(id => state.items.find(product => product.id === id), 100)
-    //                                              cache size 👆 
+    //                                              cache size 👆
   ),
   // ...
 ```
