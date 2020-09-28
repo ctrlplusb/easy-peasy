@@ -100,6 +100,50 @@ it('useStore hook', () => {
   expect(count.firstChild.textContent).toBe('0');
 });
 
+it('with initial data', () => {
+  // arrange
+  const Counter = createContextStore((data) => ({
+    count: data.count || 0,
+    inc: action((state) => {
+      state.count += 1;
+    }),
+  }));
+
+  function CountDisplay() {
+    const count = Counter.useStoreState((state) => state.count);
+    const inc = Counter.useStoreActions((actions) => actions.inc);
+    return (
+      <>
+        <div data-testid="count">{count}</div>
+        <button data-testid="button" onClick={inc} type="button">
+          +
+        </button>
+      </>
+    );
+  }
+
+  const app = (
+    <Counter.Provider runtimeModel={{ count: 1 }}>
+      <CountDisplay />
+    </Counter.Provider>
+  );
+
+  // act
+  const { getByTestId } = render(app);
+
+  const count = getByTestId('count');
+  const button = getByTestId('button');
+
+  // assert
+  expect(count.firstChild.textContent).toBe('1');
+
+  // act
+  fireEvent.click(button);
+
+  // assert
+  expect(count.firstChild.textContent).toBe('2');
+});
+
 it('injections can be updated', () => {
   // arrange
   let actualInjections = null;

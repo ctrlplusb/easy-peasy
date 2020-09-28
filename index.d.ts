@@ -1019,18 +1019,27 @@ export class StoreProvider<StoreModel extends object = {}> extends Component<{
 
 // #region Context + Local Stores
 
+interface StoreModelInitializer<
+  StoreModel extends object,
+  RuntimeModel extends undefined | object
+> {
+  (runtimeModel?: RuntimeModel): StoreModel;
+}
+
 export function createContextStore<
   StoreModel extends object = {},
   Injections extends object = {},
+  RuntimeModel extends undefined | object = StoreModel,
   StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
     undefined,
     Injections
   >
 >(
-  model: StoreModel,
+  model: StoreModel | StoreModelInitializer<StoreModel, RuntimeModel>,
   config?: StoreConfig,
 ): {
-  Provider: React.SFC<{
+  Provider: React.FC<{
+    runtimeModel?: RuntimeModel;
     injections?: Injections | ((previousInjections: Injections) => Injections);
   }>;
   useStore: () => Store<StoreModel, StoreConfig>;

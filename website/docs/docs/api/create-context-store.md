@@ -13,6 +13,7 @@ larger scale applications, or when employing code splitting techniques.
   - [Binding to your application](#binding-to-your-application)
   - [Consuming state from the store](#consuming-state-from-the-store)
   - [Defining injections at runtime](#defining-injections-at-runtime)
+- [Customising your model at runtime](#customising-your-model-at-runtime)
 - [API](#api)
   - [Arguments](#arguments)
   - [Returns](#returns)
@@ -172,6 +173,60 @@ function MyApp({ language }) {
 }
 ```
 
+## Customising your model at runtime
+
+This example shows how you can use the `runtimeModel` prop of your context store's `Provider` in order to customise your model at runtime.
+
+```javascript
+// Use the function form of defining your model. The function will receive the
+// runtime model data that was provided as a prop to the store's Provider
+//                                      👇
+const Counter = createContextStore((runtimeModel) => ({
+  count: runtimeModel.count,
+  inc: action((state) => {
+    state.count += 1;
+  }),
+}));
+
+ReactDOM.render(
+  // Provide the runtime model overrides/customization as a prop
+  //                                 👇
+  <Counter.Provider runtimeModel={{ count: 1 }}>
+    <CounterApp />
+  </Counter.Provider>,
+  document.querySelector('#app'),
+);
+```
+
+If you needed you could even make the `runtimeModel` define the entire model.
+
+```javascript
+// We will just return the runtime model that we expect to receive via the
+// store's Provider
+//                                      👇
+const Counter = createContextStore((runtimeModel) => runtimeModel);
+
+ReactDOM.render(
+  <Counter.Provider
+    // Provide the runtime model as a prop
+    //    👇
+    runtimeModel={{
+      count: runtimeModel.count,
+      inc: action((state) => {
+        state.count += 1;
+      }),
+    }}
+  >
+    <CounterApp />
+  </Counter.Provider>,
+  document.querySelector('#app'),
+);
+```
+
+> Note: this will only be used to initialize the model on the first render. If you
+> wish to create a whole new runtime model you need to ensure that you recreate
+> Provider completely.
+
 ## API
 
 This function can be imported like so:
@@ -184,7 +239,7 @@ import { createContextStore } from 'easy-peasy';
 
 The following arguments are accepted:
 
-- `model` (Object, _required_)
+- `model` (Object | (runtimeModel: any) => Object, _required_)
 
   The model representing your store.
 
@@ -217,6 +272,23 @@ properties:
 
   The provider accepts the following props:
 
+  - `runtimeModel` (Any, not required)
+
+    Allows you to provide runtime overrides for the store's model. This needs to be used in conjunction with the function form of defining your model.
+
+    ```javascript
+    <Counter.Provider
+      runtimeModel={{
+        count: 1,
+        inc: action((state, payload) => {
+          state.count += 1;
+        }),
+      }}
+    >
+      <App />
+    </Counter.Provider>
+    ```
+
   - `injections` (Object || (previousInjections) => Object, _optional_)
 
     Allows you to provide additional data used to initialise your store's model.
@@ -233,7 +305,7 @@ properties:
 
     ```javascript
     <Counter.Provider
-      initialData={(previousInjections) => ({
+      injections={(previousInjections) => ({
         ...previousInjections,
         translator,
       })}

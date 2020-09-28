@@ -6,6 +6,10 @@ interface StoreModel {
   inc: Action<StoreModel>;
 }
 
+interface RuntimeModel {
+  count: number;
+}
+
 interface Injections {
   foo: string;
 }
@@ -16,6 +20,17 @@ const Counter = createContextStore<StoreModel>({
     state.count += 1;
   }),
 });
+
+const CounterWithInitializer = createContextStore<
+  StoreModel,
+  any,
+  RuntimeModel
+>((data) => ({
+  count: data ? data.count + 1 : 0,
+  inc: action((state) => {
+    state.count += 1;
+  }),
+}));
 
 const CounterWithInjections = createContextStore<StoreModel, Injections>(
   {
@@ -68,6 +83,15 @@ function TestDispatch() {
 <CounterWithInjections.Provider injections={{ foo: 'baz' }}>
   <CountDisplay />
 </CounterWithInjections.Provider>;
+
+<CounterWithInitializer.Provider runtimeModel={{ count: 1 }}>
+  <CountDisplay />
+</CounterWithInitializer.Provider>;
+
+// typings:expect-error
+<CounterWithInitializer.Provider runtimeModel={{ count: 'foo' }}>
+  <CountDisplay />
+</CounterWithInitializer.Provider>;
 
 <CounterWithInjections.Provider
   injections={(previousInjections) => ({ foo: 'baz' + previousInjections.foo })}

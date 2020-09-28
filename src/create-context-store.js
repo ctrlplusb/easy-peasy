@@ -16,7 +16,7 @@ export default function createContextStore(model, config = {}) {
 
   const StoreContext = createContext();
 
-  function Provider({ children, injections }) {
+  function Provider({ children, runtimeModel, injections }) {
     // If the user provided injections we need to ensure our mutable ref
     // is up to date. We could consider doing a shallow compare here?
     if (injections != null) {
@@ -36,7 +36,7 @@ export default function createContextStore(model, config = {}) {
 
     const store = useMemoOne(
       () =>
-        createStore(model, {
+        createStore(typeof model === 'function' ? model(runtimeModel) : model, {
           ...config,
           originalInjections: mutableInjections,
         }),
