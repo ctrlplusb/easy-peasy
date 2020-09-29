@@ -8,7 +8,7 @@ test('redux dev tools disabled', () => {
 
   // act
   createStore(model, {
-    devTools: false,
+    devTools: null,
   });
 
   // assert
@@ -28,8 +28,6 @@ test('redux dev tools enabled by default', () => {
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1);
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledWith({
     name: 'EasyPeasyStore',
-    trace: false,
-    traceLimit: 25,
   });
   expect(composeStub).toHaveBeenCalledTimes(1);
 });
@@ -49,8 +47,6 @@ test('redux dev tools supports custom store name', () => {
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1);
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledWith({
     name: 'SwizzleSticks',
-    trace: false,
-    traceLimit: 25,
   });
   expect(composeStub).toHaveBeenCalledTimes(1);
 });
@@ -63,7 +59,10 @@ test('redux dev tools supports enabling debug trace', () => {
 
   // act
   createStore(model, {
-    trace: true,
+    devTools: {
+      trace: true,
+      traceLimit: 12,
+    },
   });
 
   // assert
@@ -71,7 +70,7 @@ test('redux dev tools supports enabling debug trace', () => {
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledWith({
     name: 'EasyPeasyStore',
     trace: true,
-    traceLimit: 25,
+    traceLimit: 12,
   });
   expect(composeStub).toHaveBeenCalledTimes(1);
 });

@@ -10,9 +10,9 @@ We have split the configuration parameters into two groupings, standard and adva
 
   Allows you to customise the name of the store. This is especially useful when you are creating multiple stores as you will easily be able to distinguish and toggle between the different store instances within the Redux dev tools.
 
-- `devTools` (boolean, *optional*, default=true)
+- `devTools` (object, *optional*, default={})
 
-  Setting this to `true` will enable the [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+  Setting this to `null` will disable the Redux Dev Tools Extension. You can pass dev tools options as documented here [https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md]
 
 - `disableImmer` (boolean, *optional*, default=false)
 
