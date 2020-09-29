@@ -24,10 +24,9 @@ underlying Redux store.
   rehydrating the store. You can read more about this within the
   [persist](/docs/api/persist.html) docs.
 
-- `devTools` (boolean, _optional_, default=false)
+- `devTools` (object, *optional*, default={})
 
-  Setting this to `true` will enable the
-  [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+  Setting this to `null` will disable the Redux Dev Tools Extension. You can pass dev tools options as documented here [https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md]
 
   > Note: this will be enabled by default if your
   > `process.env.NODE_ENV !== 'production'`.

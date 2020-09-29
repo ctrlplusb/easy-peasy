@@ -21,7 +21,7 @@ export function createStore(model, options = {}) {
   const modelClone = clone(model);
   const {
     compose,
-    devTools = process.env.NODE_ENV !== 'production',
+    devTools = process.env.NODE_ENV !== 'production' ? {} : null,
     disableImmer = false,
     enhancers = [],
     initialState = undefined,
@@ -76,8 +76,7 @@ export function createStore(model, options = {}) {
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
           name: storeName,
-          trace,
-          traceLimit,
+          ...devTools,
         })
       : reduxCompose);
 
