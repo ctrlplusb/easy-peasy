@@ -41,7 +41,7 @@ const useCounter = createComponentStore({
 
   - `config` (Object, not required)
 
-    Provides custom configuration options for your store. Please see the [StoreConfig](#StoreConfig) API documentation for a full list of configuration options.
+    Provides custom configuration options for your store. Please see the [StoreConfig](/docs/api/store-config.html) API documentation for a full list of configuration options.
 
     ```javascript
     createComponentStore(model, { name: 'Counter' });

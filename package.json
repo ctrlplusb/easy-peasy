@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/easy-peasy.cjs.js",
@@ -38,7 +38,7 @@
     }
   },
   "resolutions": {
-    "@types/react": "16.9.19"
+    "@types/react": "16.9.23"
   },
   "peerDependencies": {
     "react": "^16.8.0"
@@ -67,9 +67,9 @@
     "@babel/preset-typescript": "^7.8.3",
     "@babel/register": "^7.8.3",
     "@testing-library/jest-dom": "^5.0.2",
-    "@testing-library/react": "^9.4.0",
+    "@testing-library/react": "^10.0.1",
     "@testing-library/react-hooks": "^3.2.1",
-    "@types/react": "^16.9.19",
+    "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",
     "@types/react-redux": "^7.1.7",
     "app-root-dir": "^1.0.2",
@@ -95,7 +95,7 @@
     "react-redux": "^7.1.3",
     "react-test-renderer": "^16.12.0",
     "rimraf": "^3.0.1",
-    "rollup": "^1.30.1",
+    "rollup": "^2.0.6",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-filesize": "^6.2.1",
@@ -104,7 +104,7 @@
     "rollup-plugin-uglify": "^6.0.4",
     "shallowequal": "^1.1.0",
     "title-case": "^3.0.2",
-    "typescript": "3.7.5",
+    "typescript": "3.8.3",
     "typings-tester": "^0.3.2"
   },
   "jest": {

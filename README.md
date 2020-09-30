@@ -2,8 +2,11 @@
 <p align='center'>
   <img src="https://i.imgur.com/UnPLVly.png" width="280" />
 </p>
-<p align='center'>Vegetarian friendly state for React</p>
+<p align='center'><strong>Vegetarian friendly state for React</strong></p>
 <p>&nbsp;</p>
+
+
+Easy Peasy provides you with an intuitive API to quickly and easily manage the state for your React application. Batteries are included - no configuration is required to support derived state, API calls, performance optimisation, developer tools etc.
 
 [![npm](https://img.shields.io/npm/v/easy-peasy.svg?style=flat-square)](http://npm.im/easy-peasy)
 [![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
@@ -70,10 +73,6 @@ function TodoList() {
   - React Native supported
   - Redux Dev Tools supported
   - Hot Reloading supported
-
-## Introduction
-
-Easy Peasy provides you with an intuitive API to quickly and easily manage the state for your React application. Batteries are included - no configuration is required to support derived state, API calls, performance optimisation, developer tools etc.
 
 ## Documentation
 

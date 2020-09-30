@@ -25,7 +25,7 @@ The following arguments are accepted:
 
   - `config` (Object, not required)
 
-    Custom [configuration](#storeconfig) for your store. Please see the [StoreConfig](#storeconfig) API documentation for a full list of configuration options.
+    Custom configuration for your store. Please see the [StoreConfig](/docs/api/store-config.html) API documentation for a full list of configuration options.
 
 ## Returns
 
@@ -135,11 +135,11 @@ const Counter = createContextStore({
 
 function MyCounter() {
   const count = Counter.useStoreState(state => state.count);
-  const actions = Counter.useActions(actions => actions.inc);
+  const increment = Counter.useStoreActions(actions => actions.inc);
   return (
     <>
       <div>{count}</div>
-      <button onClick={() => actions.inc()} type="button"> + </button>
+      <button onClick={() => increment()} type="button"> + </button>
     </>
   )
 }
