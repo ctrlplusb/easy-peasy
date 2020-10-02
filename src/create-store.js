@@ -20,7 +20,7 @@ export default function createStore(model, options = {}) {
   const modelClone = deepCloneStateWithoutComputed(model);
   const {
     compose,
-    devTools = true,
+    devTools = {},
     disableImmer = false,
     enhancers = [],
     initialState = {},
@@ -76,6 +76,7 @@ export default function createStore(model, options = {}) {
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
           name: storeName,
+          ...devTools,
         })
       : reduxCompose);
 
