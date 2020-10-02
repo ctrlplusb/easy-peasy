@@ -5,13 +5,14 @@ import {
   useStoreDispatch,
   useStoreState,
   useStoreRehydrated,
+  useStoreModel,
   useStore,
 } from './hooks';
 import createStore from './create-store';
 import createContextStore from './create-context-store';
 import createComponentStore from './create-component-store';
 import createTransform from './create-transform';
-import StoreProvider from './provider';
+import Store from './store';
 import {
   action,
   actionOn,
@@ -29,6 +30,8 @@ import {
  * explicitly disabled it to avoid perf issues.
  */
 setAutoFreeze(false);
+
+const StoreProvider = Store.Provider; // @deprecated backwards compatibility
 
 export {
   action,
@@ -50,5 +53,7 @@ export {
   useStoreDispatch,
   useStoreState,
   useStoreRehydrated,
+  useStoreModel,
   useStore,
+  Store,
 };

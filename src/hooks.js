@@ -111,9 +111,13 @@ export function createStoreDispatchHook(Context) {
 
 export const useStoreDispatch = createStoreDispatchHook(EasyPeasyContext);
 
-export function useStore() {
-  return useContext(EasyPeasyContext);
+export function createStoreHook(Context) {
+  return function useStore() {
+    return useContext(Context);
+  };
 }
+
+export const useStore = createStoreHook(EasyPeasyContext);
 
 export function createStoreRehydratedHook(Context) {
   return function useStoreRehydrated() {
@@ -126,6 +130,26 @@ export function createStoreRehydratedHook(Context) {
   };
 }
 
+export function createStoreModelHook(Context) {
+  return function useStoreModel(model) {
+    const store = useContext(Context);
+    const modelRef = useRef(model);
+
+    useEffect(() => {
+      Object.entries(modelRef.current).forEach(([key, value]) =>
+        store.addModel(key, value),
+      );
+
+      return () =>
+        Object.entries(modelRef.current).forEach(([key, value]) =>
+          store.removeModel(key, value),
+        );
+    }, [store]);
+  };
+}
+
+export const useStoreModel = createStoreModelHook(EasyPeasyContext);
+
 export const useStoreRehydrated = createStoreRehydratedHook(EasyPeasyContext);
 
 export function createTypedHooks() {
@@ -134,6 +158,7 @@ export function createTypedHooks() {
     useStoreDispatch,
     useStoreState,
     useStoreRehydrated,
+    useStoreModel,
     useStore,
   };
 }
