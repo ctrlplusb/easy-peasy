@@ -82,6 +82,6 @@ See the [official website](https://easy-peasy.now.sh) for tutorials, API docs, r
 
 Extreme gratitude to all our backers! [[Become a backer](https://opencollective.com/easy-peasy#backer)].
 
-<a href="https://opencollective.com/easy-peasy#backers">
-    <img src="https://opencollective.com/easy-peasy/backers.svg?width=950" />
+<a href="https://opencollective.com/controlplusb#backers">
+    <img src="https://opencollective.com/controlplusb/backers.svg?width=950" />
 </a>
