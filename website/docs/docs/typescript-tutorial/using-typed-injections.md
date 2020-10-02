@@ -2,30 +2,24 @@
 
 Let's refactor our [thunk](/docs/api/thunk.html) from earlier so that the `todosService` is injected via our [store](/docs/api/store.html).
 
-## Defining interface for injections
+## Defining injections and injecting them into store
 
-Firstly, let's define an interface to represent our injections.
+Firstly, let's define the injections, their type, and update the code used to create our [store](/docs/api/store.html).
 
 ```typescript
 // src/store/index.ts
 
 import * as todosService from '../services/todos-service';
 
-export interface Injections {
-  todosService: typeof todosService;
-}
-```
+const injections = {
+  todosService
+};
 
-## Injecting into store
-
-Now, let's update the code used to create our [store](/docs/api/store.html).
-
-```typescript
-// src/store/index.ts
+export type Injections = typeof injections;
 
 const store = createStore(model, {
   // 👇 provide injections to our store
-  injections: { todosService }
+  injections
 });
 ```
 
