@@ -12,7 +12,6 @@ or provide a custom storage engine.
 
 - [Tutorial](#tutorial)
   - [Configuring your store to persist](#configuring-your-store-to-persist)
-  - [Ensuring persistence completes prior to application unmount](#ensuring-persistence-completes-prior-to-application-unmount)
   - [Rehydrating your store](#rehydrating-your-store)
 - [API](#api)
 - [Merge Strategies](#merge-strategies)
@@ -21,6 +20,7 @@ or provide a custom storage engine.
   - [overwrite](#overwrite)
 - [Merge conflict resolution](#merge-conflict-resolution)
   - [Conflict resolution](#conflict-resolution)
+  - [Ensuring persistence completes prior to application unmount](#ensuring-persistence-completes-prior-to-application-unmount)
 - [Deleting persisted data](#deleting-persisted-data)
 - [Rehydrating dynamic models](#rehydrating-dynamic-models)
 - [Persisting multiple stores](#persisting-multiple-stores)
@@ -91,57 +91,10 @@ the state to the storage
 ([`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage)
 by default).
 
-### Ensuring persistence completes prior to application unmount
-
-Persistence operations are asynchronous, therefore it is possible that a state
-change might not be persisted before your application unmounts.
-
-It is important to consider this when state changes occur prior to events that
-may cause your application to unmount, for e.g. a page refresh, or the user
-navigating away from your site. An event such as this may result in queued
-persistence operations not being executed, resulting in a persisted state that
-is stale.
-
-It is therefore good practice to manage events that could cause this behaviour,
-ensuring that any outstanding persist operations have completed.
-
-Your [store instances](/docs/api/store.html) contain an API which allows you to
-complete the outstanding persist operations, specifically the
-`store.persist.flush()` API.
-
-When this API is executed any outstanding persist operations will be immediately
-performed, with a `Promise` being returned. The resolution of the returned
-`Promise` indicates that the persist has completed, after which you can safely
-continue to unmount the application.
-
-Below are some example utility functions that follow this strategy.
-
-```javascript
-import store from './store';
-
-const refreshPage = async () => {
-  // Firstly ensure that any outstanding persist operations are complete.
-  // Note that this is an asynchronous operation so we will await on it.
-  await store.persist.flush();
-
-  // we can now safely reload the page
-  window.document.reload();
-};
-
-const redirectTo = async (href) => {
-  // Firstly ensure that any outstanding persist operations are complete.
-  // Note that this is an asynchronous operation so we will await on it.
-  await store.persist.flush();
-
-  // We can now safely redirect the browser
-  window.location.href = href;
-};
-```
-
 ### Rehydrating your store
 
 Every time your store is created, any data that has been persisted will be used
-to rehydrate your state accordingly. **_This process is asynchronous!_** It is
+to rehydrate your state accordingly. **_This process is asynchronous_**,
 therefore best practice to ensure that the rehydration has completed prior to
 rendering the components within your application that will access the rehydrated
 state.
@@ -505,6 +458,53 @@ If a user of your application has persisted state
 ### Conflict resolution
 
 <!-- ## `mergeDeep` traversal -->
+
+### Ensuring persistence completes prior to application unmount
+
+**_Persistence operations are asynchronous_**, therefore it is possible that a
+state change might not be persisted before your application unmounts.
+
+It is important to consider this when state changes occur prior to events that
+may cause your application to unmount, for e.g. a page refresh, or the user
+navigating away from your site. An event such as this may result in queued
+persistence operations not being executed, resulting in a persisted state that
+is stale.
+
+It is therefore good practice to manage events that could cause this behaviour,
+ensuring that any outstanding persist operations have completed.
+
+Your [store instances](/docs/api/store.html) contain an API which allows you to
+complete the queued persist operations, specifically the `store.persist.flush()`
+API.
+
+When this API is executed any outstanding persist operations will be immediately
+performed, with a `Promise` being returned. The resolution of the returned
+`Promise` indicates that the persist has completed, after which you can safely
+continue to unmount the application.
+
+Below are some example utility functions that follow this strategy.
+
+```javascript
+import store from './store';
+
+const refreshPage = async () => {
+  // Firstly ensure that any outstanding persist operations are complete.
+  // Note that this is an asynchronous operation so we will await on it.
+  await store.persist.flush();
+
+  // we can now safely reload the page
+  window.document.reload();
+};
+
+const redirectTo = async (href) => {
+  // Firstly ensure that any outstanding persist operations are complete.
+  // Note that this is an asynchronous operation so we will await on it.
+  await store.persist.flush();
+
+  // We can now safely redirect the browser
+  window.location.href = href;
+};
+```
 
 ## Deleting persisted data
 
