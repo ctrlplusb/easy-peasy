@@ -89,6 +89,17 @@ function TodoList() {
   <source src="./assets/screencast.mp4" type="video/mp4">
 </video>
 
+<h2 class="subtitle">Our Backers ❤️</h2>
+
+We have only but great appreciation to those who support this project. If you
+have the ability to help contribute towards the continued maintenance and
+evolution of this library then please consider
+[[becoming a backer](https://opencollective.com/controlplusb#backer)].
+
+<a href="https://opencollective.com/controlplusb#backers">
+    <img src="https://opencollective.com/controlplusb/backers.svg?width=950" />
+</a>
+
 <p class="action">
   <a href="/docs/introduction/quick-start.html" class="action-button">Quick Start</a>
 </p>

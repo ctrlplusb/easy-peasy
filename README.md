@@ -83,16 +83,34 @@ function TodoList() {
 }
 ```
 
+<p>&nbsp;</p>
+
+## Our Backers ❤️
+
+We have only but great appreciation to those who support this project. If you
+have the ability to help contribute towards the continued maintenance and
+evolution of this library then please consider
+[[becoming a backer](https://opencollective.com/controlplusb#backer)].
+
+<a href="https://opencollective.com/controlplusb#backers">
+    <img src="https://opencollective.com/controlplusb/backers.svg?width=950" />
+</a>
+
+<p>&nbsp;</p>
+
 ## Documentation
 
 See the [official website](https://easy-peasy.now.sh) for tutorials, docs,
 recipes, and more.
 
-## Backers ❤️
+<p>&nbsp;</p>
 
-Extreme gratitude to all our backers!
-[[Become a backer](https://opencollective.com/controlplusb#backer)].
+## OS Awards Nominee
 
-<a href="https://opencollective.com/controlplusb#backers">
-    <img src="https://opencollective.com/controlplusb/backers.svg?width=950" />
-</a>
+Easy Peasy was nominated under the "Productivity Booster" category. The
+following screencast will be presented during the awards ceremony at the React
+Summit 2020 conference.
+
+<video style="width: 100%;" controls>
+  <source src="./assets/screencast.mp4" type="video/mp4">
+</video>
