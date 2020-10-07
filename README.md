@@ -12,32 +12,22 @@
 
 <p>Easy Peasy is an abstraction of Redux, providing a reimagined API that focuses on <strong>developer experience</strong>. It allows you to <strong>quickly</strong> and <strong>easily</strong> manage your state, whilst leveraging the strong <strong>architectural guarantees</strong> and extensive <strong>eco-system</strong> that Redux has to offer.</p>
 
-<table>
-  <tr>
-    <td  style="width: 50%">
-      <ul>
-        <li>Zero configuration</li>
-        <li>No boilerplate</li>
-        <li>React hooks based API</li>
-        <li>Extensive TypeScript support</li>
-        <li>Encapsulate data fetching</li>
-        <li>Computed properties</li>
-        <li>Reactive actions</li>
-      </ul>
-    </td>
-    <td  style="width: 50%">
-      <ul>
-        <li>Redux middleware support</li>
-        <li>State persistence</li>
-        <li>Redux Dev Tools</li>
-        <li>Global, context, or local stores</li>
-        <li>Built-in testing utils</li>
-        <li>React Native supported</li>
-        <li>Hot reloading supported</li>
-      </ul>
-    </td>
-  </tr>
-</table>
+<ul>
+  <li>Zero configuration</li>
+  <li>No boilerplate</li>
+  <li>React hooks based API</li>
+  <li>Extensive TypeScript support</li>
+  <li>Encapsulate data fetching</li>
+  <li>Computed properties</li>
+  <li>Reactive actions</li>
+  <li>Redux middleware support</li>
+  <li>State persistence</li>
+  <li>Redux Dev Tools</li>
+  <li>Global, context, or local stores</li>
+  <li>Built-in testing utils</li>
+  <li>React Native supported</li>
+  <li>Hot reloading supported</li>
+</ul>
 
 <p>&nbsp;</p>
 
