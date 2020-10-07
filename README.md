@@ -107,10 +107,4 @@ recipes, and more.
 
 ## OS Awards Nominee
 
-Easy Peasy was nominated under the "Productivity Booster" category. The
-following screencast will be presented during the awards ceremony at the React
-Summit 2020 conference.
-
-<video style="width: 100%;" controls>
-  <source src="./website/docs/assets/screencast.mp4" type="video/mp4">
-</video>
+Easy Peasy was nominated under the "Productivity Booster" category.
