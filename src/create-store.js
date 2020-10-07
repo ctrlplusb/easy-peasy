@@ -49,7 +49,8 @@ export default function createStore(model, options = {}) {
   let modelDefinition = bindReplaceState(modelClone);
   let mockedActions = [];
 
-  const persistKey = (targetPath) => `[${storeName}]@${targetPath.join('.')}`;
+  const persistKey = (targetPath) =>
+    `[${storeName}]${targetPath.length > 0 ? `[${targetPath.join('.')}]` : ''}`;
   const persistor = createPersistor(persistKey, references);
   const persistMiddleware = createPersistMiddleware(persistor, references);
 

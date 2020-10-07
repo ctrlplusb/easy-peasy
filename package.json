@@ -44,7 +44,7 @@
     }
   },
   "resolutions": {
-    "@types/react": "16.9.49"
+    "@types/react": "16.9.50"
   },
   "peerDependencies": {
     "react": "^16.8.0"
@@ -56,7 +56,7 @@
     "memoizerific": "^1.11.3",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "symbol-observable": "^2.0.1",
+    "symbol-observable": "^2.0.3",
     "ts-toolbelt": "^8.0.6",
     "use-memo-one": "^1.1.1"
   },
@@ -75,7 +75,7 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@testing-library/react-hooks": "^3.4.2",
-    "@types/react": "16.9.49",
+    "@types/react": "16.9.50",
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
     "app-root-dir": "^1.0.2",
@@ -159,6 +159,7 @@
     "*.ts"
   ],
   "prettier": {
+    "proseWrap": "always",
     "semi": true,
     "singleQuote": true,
     "tabWidth": 2,

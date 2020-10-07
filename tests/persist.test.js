@@ -12,14 +12,6 @@ import {
   createContextStore,
 } from '../src';
 
-// jest.mock('debounce', () => fn => {
-//   const wrappedFn = (...args) => fn(...args);
-//   wrappedFn.flush = () =>
-//   return wrappedFn;
-// });
-
-// jest.useFakeTimers();
-
 const wait = () =>
   new Promise((resolve) => {
     setTimeout(() => resolve(), 20);
@@ -61,6 +53,10 @@ const makeStore = (config = {}, model, storeConfig) =>
       model || {
         counter: 0,
         msg: 'hello world',
+        address: {
+          street: 'oxford rd',
+          city: 'london',
+        },
         change: action((_, payload) => {
           return payload;
         }),
@@ -87,9 +83,14 @@ test('default storage', async () => {
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      city: 'edinburgh',
+      country: 'england',
+    },
   });
 
   await store.persist.flush();
+
   const rehydratedStore = makeStore();
   await rehydratedStore.persist.resolveRehydration();
 
@@ -97,6 +98,11 @@ test('default storage', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+      country: 'england',
+    },
   });
 });
 
@@ -111,6 +117,10 @@ test('local storage', async () => {
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -121,6 +131,10 @@ test('local storage', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 });
 
@@ -135,6 +149,10 @@ test('session storage', async () => {
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -145,6 +163,10 @@ test('session storage', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 });
 
@@ -160,6 +182,10 @@ test('invalid storage', async () => {
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -170,6 +196,10 @@ test('invalid storage', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 0,
     msg: 'hello world',
+    address: {
+      street: 'oxford rd',
+      city: 'london',
+    },
   });
 });
 
@@ -183,6 +213,10 @@ test('custom sync storage', async () => {
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -193,19 +227,27 @@ test('custom sync storage', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 });
 
-test('whitelist', async () => {
+test('allow', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
-  const persistConfig = { storage: memoryStorage, whitelist: ['msg'] };
+  const persistConfig = { storage: memoryStorage, allow: ['msg'] };
   const store = makeStore(persistConfig);
 
   // ACT
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -216,19 +258,27 @@ test('whitelist', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 0,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'london',
+    },
   });
 });
 
-test('blacklist', async () => {
+test('deny', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
-  const persistConfig = { storage: memoryStorage, blacklist: ['counter'] };
+  const persistConfig = { storage: memoryStorage, deny: ['counter'] };
   const store = makeStore(persistConfig);
 
   // ACT
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -239,6 +289,10 @@ test('blacklist', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 0,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 });
 
@@ -284,12 +338,62 @@ test('nested', async () => {
   });
 });
 
+test('nested persists', async () => {
+  // ARRANGE
+  const makeStore = (config = {}) =>
+    createStore(
+      persist({
+        foo: 'bar',
+        nested: persist(
+          {
+            counter: 0,
+            msg: 'hello world',
+            change: action((_, payload) => payload),
+          },
+          config,
+        ),
+        change: action((state, payload) => payload),
+      }),
+      {
+        disableImmer: true,
+      },
+    );
+  const memoryStorage = createMemoryStorage();
+  const store = makeStore({ storage: memoryStorage });
+
+  // ACT
+  store.getActions().nested.change({
+    counter: 1,
+    msg: 'hello universe',
+  });
+  store.getActions().change({
+    foo: 'bob',
+    nested: {
+      counter: 2,
+      msg: 'hello universe',
+    },
+  });
+
+  await store.persist.flush();
+  const rehydratedStore = makeStore({ storage: memoryStorage });
+  await rehydratedStore.persist.resolveRehydration();
+
+  // ASSERT
+  expect(rehydratedStore.getState()).toEqual({
+    foo: 'bob',
+    nested: {
+      counter: 2,
+      msg: 'hello universe',
+    },
+  });
+});
+
 test('overwrite', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = {
     storage: memoryStorage,
-    whitelist: ['msg'],
+    allow: ['msg'],
     mergeStrategy: 'overwrite',
   };
   const store = makeStore(persistConfig);
@@ -298,6 +402,10 @@ test('overwrite', async () => {
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -313,9 +421,11 @@ test('overwrite', async () => {
 test('mergeDeep', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]@counter': 1,
-    '[EasyPeasyStore]@nested': {
-      msg: 'hello universe',
+    '[EasyPeasyStore]': {
+      counter: 1,
+      nested: {
+        msg: 'hello universe',
+      },
     },
   });
 
@@ -331,7 +441,6 @@ test('mergeDeep', async () => {
       },
       {
         storage: memoryStorage,
-        mergeStrategy: 'mergeDeep',
       },
     ),
   );
@@ -350,9 +459,11 @@ test('mergeDeep', async () => {
 test('mergeDeep with extended model structure', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]@counter': 1,
-    '[EasyPeasyStore]@nested': {
-      msg: 'hello universe',
+    '[EasyPeasyStore]': {
+      counter: 1,
+      nested: {
+        msg: 'hello universe',
+      },
     },
   });
 
@@ -371,7 +482,6 @@ test('mergeDeep with extended model structure', async () => {
       },
       {
         storage: memoryStorage,
-        mergeStrategy: 'mergeDeep',
       },
     ),
   );
@@ -390,12 +500,14 @@ test('mergeDeep with extended model structure', async () => {
   });
 });
 
-test('merge with conflicting model structure', () => {
+test('mergeShallow with conflicting model structure', () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]@counter': 1,
-    '[EasyPeasyStore]@conflicting': {
-      msg: 'hello universe',
+    '[EasyPeasyStore]': {
+      counter: 1,
+      conflicting: {
+        msg: 'hello universe',
+      },
     },
   });
 
@@ -408,7 +520,7 @@ test('merge with conflicting model structure', () => {
       },
       {
         storage: memoryStorage,
-        mergeStrategy: 'merge',
+        mergeStrategy: 'mergeShallow',
       },
     ),
   );
@@ -423,12 +535,14 @@ test('merge with conflicting model structure', () => {
 test('mergeDeep with conflicting model structure', () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]@foo': {
-      conflicting: 'baz',
-      foo: 'bar',
-    },
-    '[EasyPeasyStore]@conflicting': {
-      msg: 'hello universe',
+    '[EasyPeasyStore]': {
+      foo: {
+        conflicting: 'baz',
+        foo: 'bar',
+      },
+      conflicting: {
+        msg: 'hello universe',
+      },
     },
   });
 
@@ -444,7 +558,6 @@ test('mergeDeep with conflicting model structure', () => {
       },
       {
         storage: memoryStorage,
-        mergeStrategy: 'mergeDeep',
       },
     ),
   );
@@ -468,6 +581,10 @@ test('asynchronous storage', async () => {
   store.getActions().change({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 
   await store.persist.flush();
@@ -478,6 +595,10 @@ test('asynchronous storage', async () => {
   expect(rehydratedStore.getState()).toEqual({
     counter: 1,
     msg: 'hello universe',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
 });
 
@@ -495,8 +616,10 @@ test('clear', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]@counter': 1,
-    '[EasyPeasyStore]@msg': 'hello universe',
+    '[EasyPeasyStore]': {
+      counter: 1,
+      msg: 'hello universe',
+    },
   });
 
   // ACT
@@ -566,8 +689,10 @@ test('transformers', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]@one': '_ITEM ONE_',
-    '[EasyPeasyStore]@two': 'item two',
+    '[EasyPeasyStore]': {
+      one: '_ITEM ONE_',
+      two: 'item two',
+    },
   });
 
   // ACT
@@ -631,8 +756,10 @@ test('transformers order', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]@one': '[1,2]',
-    '[EasyPeasyStore]@two': '[3,4]',
+    '[EasyPeasyStore]': {
+      one: '[1,2]',
+      two: '[3,4]',
+    },
   });
 
   // ACT
@@ -659,11 +786,19 @@ test('multiple stores', async () => {
   store1.getActions().change({
     counter: 1,
     msg: 'i am store 1',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
   await store1.persist.flush();
   store2.getActions().change({
     counter: 99,
     msg: 'i am store 2',
+    address: {
+      street: 'oxford rd',
+      city: 'cape town',
+    },
   });
   await store2.persist.flush();
 
@@ -680,10 +815,18 @@ test('multiple stores', async () => {
   expect(rehydratedStore1.getState()).toEqual({
     counter: 1,
     msg: 'i am store 1',
+    address: {
+      street: 'oxford rd',
+      city: 'edinburgh',
+    },
   });
   expect(rehydratedStore2.getState()).toEqual({
     counter: 99,
     msg: 'i am store 2',
+    address: {
+      street: 'oxford rd',
+      city: 'cape town',
+    },
   });
 });
 
@@ -796,20 +939,14 @@ test('computed properties', async () => {
   const rehydratedStore = makeStore();
   await rehydratedStore.persist.resolveRehydration();
 
-  // ASSERT interim state of store
-  const nestedKey = Object.keys(memoryStorage.store).find((key) =>
-    key.includes('nested'),
-  );
-  const nestedStore = memoryStorage.store[nestedKey];
-  expect(nestedStore.todoCount).toBeUndefined(); // computed shouldn't be stored
-
-  // ACT
-  rehydratedStore.getActions().addTodo('trigger computed rebinding');
-
   // ASSERT
+  expect(memoryStorage.store['[EasyPeasyStore]'].todoCount).toBeUndefined(); // computed shouldn't be stored
+  expect(
+    memoryStorage.store['[EasyPeasyStore]'].nested.todoCount,
+  ).toBeUndefined();
   expect(rehydratedStore.getState()).toEqual({
-    todos: ['write tests', 'write more tests', 'trigger computed rebinding'],
-    todoCount: 3,
+    todos: ['write tests', 'write more tests'],
+    todoCount: 2,
     nested: {
       todos: ['write tests', 'write more tests'],
       todoCount: 2,
@@ -832,8 +969,10 @@ test('flush', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]@counter': 1,
-    '[EasyPeasyStore]@msg': 'hello universe',
+    '[EasyPeasyStore]': {
+      counter: 1,
+      msg: 'hello universe',
+    },
   });
 });
 
@@ -952,3 +1091,11 @@ test('dynamic model with async storage', async () => {
     },
   });
 });
+
+test.todo('persist rehydraton with store intialState being set');
+
+test.todo('strict mode mergeShallow');
+
+test.todo('strict mode mergeDeep');
+
+test.todo('strict mode overwrite');

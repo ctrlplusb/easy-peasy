@@ -10,28 +10,33 @@ By default it uses the browser's
 - [Tutorial](#tutorial)
   - [Configuring your store to persist](#configuring-your-store-to-persist)
   - [Controlling the rate of persistence](#controlling-the-rate-of-persistence)
-  - [Ensuring latest store state has completed persistence](#ensuring-latest-store-state-has-completed-persistence)
   - [Rehydrating your store](#rehydrating-your-store)
+  - [Ensuring persistence completes prior to application unmount](#ensuring-persistence-completes-prior-to-application-unmount)
   - [Deleting persisted data](#deleting-persisted-data)
-- [Advanced Tutorial](#advanced-tutorial)
-  - [Handling dynamic models](#handling-dynamic-models)
-  - [Persisting multiple stores](#persisting-multiple-stores)
-  - [Storage Engines](#storage-engines)
-    - [Custom storage engines](#custom-storage-engines)
-    - [Custom data transformers](#custom-data-transformers)
 - [API](#api)
+- [Merge Strategies](#merge-strategies)
+  - [mergeDeep](#mergedeep)
+  - [shallowMerge](#shallowmerge)
+  - [overwrite](#overwrite)
+- [How rehydration merging works](#how-rehydration-merging-works)
+  - [Conflict resolution](#conflict-resolution)
+  - [`mergeDeep` traversal](#mergedeep-traversal)
+- [Rehydrating dynamic models](#rehydrating-dynamic-models)
+- [Persisting multiple stores](#persisting-multiple-stores)
+- [Custom storage engines](#custom-storage-engines)
+- [Custom data transformers](#custom-data-transformers)
 
 ## Tutorial
 
-This section will provide an in-depth introduction to configuring and using the
-`persist` helper within your application.
+This section will provide an in-depth walkthrough to using persistence against
+your store.
 
 ### Configuring your store to persist
 
 When utilising the `persist` helper you firstly need to decide on the scope of
-your persistence; i.e. how much of your store model do you wish to be persisted.
-You can choose to persist the whole store, a partial slice of your store, or
-multiple slices of your store.
+your persistence - i.e. how much of your store model do you wish to be
+persisted. You can choose to persist the whole store, a partial slice of your
+store, or multiple slices of your store.
 
 In the example below we will persist our entire store by wrapping our root model
 with the `persist` helper.
@@ -72,7 +77,7 @@ const store = createStore(
       session: sessionModel,
     },
     {
-      deny: ['products'],
+      allow: ['basket', 'session'],
     },
   ),
 );
@@ -87,58 +92,18 @@ Persistence can become an IO expensive operation, especially with stores that
 are large.
 
 By default we [debounce](https://davidwalsh.name/javascript-debounce-function)
-persist operations so that a persist operation can be executed a maximum of once
-every second. This can help avoid IO thrashing where you may have a store that
-is updated frequently, and in quick session.
-
-Currently the persist operations are debounced, ensuring that a maximum of 1
-write operation is executed every second.
+persist operations so that a persist operation can occur a maximum of once every
+second. This can help avoid IO thrashing where you may have a store that is
+updated frequently.
 
 Depending on your own implementation you may find this rate limit is either too
-small or too high. You can configure the debounce rate via the `persist`
-configuration.
+small or too high. You can customize the debounce rate via the `rateLimit`
+configuration property.
 
 ```javascript
 const storeModel = persist(model, {
   rateLimit: 1000, // in milliseconds
 });
-```
-
-### Ensuring latest store state has completed persistence
-
-As the persistence operations are debounced there may be a delay between when a
-state change occurs and when it is persisted.
-
-It is important to consider this when state changes occur prior to events that
-may cause your application to unmount, for e.g. a page refresh, or the user
-navigating away from your site. An event such as this may result in the queued
-persistence operations not being executed, resulting in a persisted state that
-is stale.
-
-It is therefore good practice to respond to such events, ensuring that any
-outstanding persist operations have completed.
-
-Your [store instances](/docs/api/store.html) contain an API which allows you to
-complete the outstanding persist operations, specifically the
-`store.persist.flush()` API. When this API is executed any outstanding persist
-operations will be immediately executed, with a `Promise` being returned. The
-resolution of the returned `Promise` indicates that the the persist operations
-have completed, after which you can allow original event to continue.
-
-Below is an example of how you might introduce some guarding logic that makes
-use of this API.
-
-```javascript
-import store from './store';
-
-const refreshPage = async () => {
-  // Firstly ensure that any outstanding persist operations are complete.
-  // Note that this is an asynchronous operation so we will await on it.
-  await store.persist.flush();
-
-  // we can now safely reload the page
-  window.document.reload();
-};
 ```
 
 ### Rehydrating your store
@@ -151,23 +116,26 @@ application that will operate against the rehydrated state.
 There are two strategies that you can employ to ensure data rehydration has
 completed.
 
-**Strategy 1: Wait for the rehydration to complete prior to rendering the entire
+**Strategy 1: Wait for rehydration to complete prior to rendering your
 application**
 
-The [store instances](/docs/api/store.html) contains an API allowing to gain a
-handle on when the rehydration process has completed, specifically
-`store.persist.resolveRehydration()`. Wehen you execute this API you will
+A [store instance](/docs/api/store.html) contains an API allowing you to gain a
+handle on when the rehydration process has completed, specifically the
+`store.persist.resolveRehydration()` API. When you execute this API you will
 receive back a `Promise`. The `Promise` will resolve when the data rehydration
 has completed.
 
-Therefore you can wait on this `Promise` prior to rendering your application,
-which would ensure that your application is rendered with the expected
-rehydrated state.
+Therefore you can wait for this `Promise` to resolve prior to rendering your
+application. This would ensure that your application is rendered with the
+expected state rehydrated.
 
 ```javascript
 const store = createStore(persist(model));
 
 store.persist.resolveRehydration().then(() => {
+  // Yay, the rehydration process is complete!
+
+  // Let's render the app now!
   ReactDOM.render(
     <StoreProvider store={store}>
       <App />
@@ -182,7 +150,7 @@ store.persist.resolveRehydration().then(() => {
 
 You can alternatively partially render your application and utilise the
 [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook to wait for
-rehydration to complete prior to rendering the parts of your application that
+rehydration to complete prior to rendering the slices of your application that
 depend on the rehydrated state.
 
 ```javascript
@@ -212,15 +180,62 @@ ReactDOM.render(
 In the example above, the `<Main />` content will not render until our store has
 been successfully updated with the rehydration state.
 
+### Ensuring persistence completes prior to application unmount
+
+As the persistence operations are debounced it is possible that a state change
+might not be persisted before your application unmounts.
+
+It is important to consider this when state changes occur prior to events that
+may cause your application to unmount, for e.g. a page refresh, or the user
+navigating away from your site. An event such as this may result in queued
+persistence operations not being executed, resulting in a persisted state that
+is stale.
+
+It is therefore good practice to manage events that could cause this behaviour,
+ensuring that any outstanding persist operations have completed.
+
+Your [store instances](/docs/api/store.html) contain an API which allows you to
+complete the outstanding persist operations, specifically the
+`store.persist.flush()` API.
+
+When this API is executed any outstanding persist operations will be immediately
+performed, with a `Promise` being returned. The resolution of the returned
+`Promise` indicates that the persist has completed, after which you can safely
+continue to unmount the application.
+
+Below are some example utility functions that follow this strategy.
+
+```javascript
+import store from './store';
+
+const refreshPage = async () => {
+  // Firstly ensure that any outstanding persist operations are complete.
+  // Note that this is an asynchronous operation so we will await on it.
+  await store.persist.flush();
+
+  // we can now safely reload the page
+  window.document.reload();
+};
+
+const redirectTo = async (href) => {
+  // Firstly ensure that any outstanding persist operations are complete.
+  // Note that this is an asynchronous operation so we will await on it.
+  await store.persist.flush();
+
+  // We can now safely redirect the browser
+  window.location.href = href;
+};
+```
+
 ### Deleting persisted data
 
 Should you wish to remove all the data that has been persisted for your model
-you can utilise the [Store instance](/docs/api/store.html) API to do so.
+you can utilise the [store instance's API](/docs/api/store.html) to do so.
 
 ```javascript
 const store = createStore(model);
 
-if (someCondition) {
+if (userIsLoggingOut) {
   store.persist.clear().then(() => {
     console.log('Store has been cleared');
   });
@@ -229,109 +244,6 @@ if (someCondition) {
 
 Note that a `Promise` was returned, which when resolved indicates that the data
 has been removed from your persistence layers.
-
-## Advanced Tutorial
-
-The below sections will cover more advanced use cases.
-
-### Handling dynamic models
-
-The `persist` API will work with dynamic models, i.e. models that were added to
-the store via the [`store.addModel`](/docs/api/store.html) API after the store
-was created.
-
-Every time a dynamic model is added to your store Easy Peasy will attempt to
-rehydrate any persisted state for that model.
-
-```typescript
-store.addModel('products', productsModel);
-```
-
-To ensure that the rehydration has completed you can use the
-`resolveRehydration` helper that is returned by the
-[`store.addModel`](/docs/api/store.html) API.
-
-```typescript
-const { resolveRehydration } = store.addModel('products', productsModel);
-//            👆
-// Deconstruct the returned object to get a handle on resolveRehydration
-
-// 👇 execute the helper and wait on the returned promise
-resolveRehydration().then(() => {
-  console.log('Rehydration is complete');
-});
-```
-
-### Persisting multiple stores
-
-If you utilise multiple stores, each with their own persistence configuration,
-you will need to ensure that each store is configured to have a unique name. The
-store name for each instance of your stores is used within the persistence cache
-keys created by Easy Peasy.
-
-```javascript
-const storeOne = createStore(persist(model), {
-  name: 'StoreOne', // 👈
-});
-
-const storeTwo = createStore(persist(model), {
-  name: 'StoreTwo', // 👈
-});
-```
-
-### Storage Engines
-
-The below sections deal with the advanced topic of creating and using custom
-storage engines and data serializers.
-
-#### Custom storage engines
-
-You can create a custom storage engine by defining an object that satisfies the
-following interface:
-
-- `getItem(key) => any | Promise<any> | void`
-
-  This function will receive the key, i.e. the key of the model item being
-  rehydrated, and should return the associated data from the persistence if it
-  exists. It can alternatively return a `Promise` that resolves the data, or
-  `undefined` if no persisted data was found.
-
-- `setItem(key, data) => void | Promise<void>`
-
-  This function will receive the key, i.e. the key of the model data being
-  persisted, as well as the associated data value. It should then store the
-  respective data. It can alternatively return a `Promise` which indicates when
-  the item has been successfully persisted.
-
-- `removeItem(key) => void | Promise<void>`
-
-  This function will receive the key, i.e. the key of the model item that exists
-  in the persistence, and should remove any data that is currently being stored
-  within the persistence. It can alternatively return a `Promise` which
-  indicates when the item has been successfully removed from the persistence.
-
-Once defined you can reference your custom storage engine within the
-configuration for your `persist` instance.
-
-```javascript
-import myCustomStorageEngine from './my-custom-storage-engine';
-
-const storeModel = persist(model, {
-  storage: myCustomStorageEngine,
-});
-```
-
-#### Custom data transformers
-
-Transforms allow you to customize the state object that gets persisted and
-rehydrated. They allow you to for instance convert store data from a complex
-object, such as a `Map`, into a structure that is JSON serialisable (and back
-again).
-
-Easy Peasy outputs a [`createTransformer`](/docs/api/create-transformer.html)
-function, which has been directly copied from
-[`redux-persist`](https://github.com/rt2zz/redux-persist) in order to maximum
-compatiblity with it's ecosystem.
 
 ## API
 
@@ -368,155 +280,42 @@ familiarize yourself with the API of [Store instances](/docs/api/store.html).
     },
     // 👇 configuration
     {
-      whitelist: ['counter'], // We will only persist the "counter" state
+      allow: ['counter'], // We will only persist the "counter" state
     },
   );
   ```
 
   The configuration object supports the following properties:
 
-  - `blacklist` (Array<string>, _optional_)
-
-    A list of keys, representing the parts of the model that should not be
-    persisted. Any part of the model that is not represented in this list will
-    be persisted.
-
-  - `whitelist` (Array<string>, _optional_)
+  - `allow` (Array&lt;string&gt;, _optional_)
 
     A list of keys, representing the parts of the model that should be
     persisted. Any part of the model that is not represented in this list will
     not be persisted.
 
-  - `mergeStrategy` (string, _optional_)
+  - `deny` (Array&lt;string&gt;, _optional_)
+
+    A list of keys, representing the parts of the model that should not be
+    persisted. Any part of the model that is not represented in this list will
+    be persisted.
+
+  - `mergeStrategy` (string, _optional_, default=mergeDeep)
 
     The strategy that should be employed when rehydrating the persisted state
     over your store's initial state.
 
-    The following values are supported:
+    Please see the [docs](#merge-strategies) below for a full insight and
+    understanding of the various options and their respective implications.
 
-    - `'merge'` (_default_)
+  - `strict` (boolean, _optional_, default=false)
 
-      The data from the persistence will be _shallow_ merged with the initial
-      state represented by your store's model.
+    This value is utilized during the rehydration process.
 
-      i.e.
+    If any conflicts are found when comparing the persisted state against the
+    store model then the rehydration will be entirely cancelled and the initial
+    store state will be used.
 
-      Given the following persisted state:
-
-      ```json
-      {
-        "fruit": "apple",
-        "address": {
-          "city": "cape town"
-        }
-      }
-      ```
-
-      And the following initial state represented by your store's model:
-
-      ```json
-      {
-        "address": {
-          "city": "london",
-          "post code": "e3 1pq"
-        },
-        "animal": "dolphin"
-      }
-      ```
-
-      The resulting state will be:
-
-      ```json
-      {
-        "fruit": "apple",
-        "address": {
-          "city": "cape town"
-        },
-        "animal": "dolphin"
-      }
-      ```
-
-    - `'overwrite'`
-
-      The data from the persistence will _completely_ overwrite the initial
-      state represented by your store's model.
-
-      i.e.
-
-      Given the following persisted state:
-
-      ```json
-      {
-        "fruit": "apple",
-        "city": "cape town"
-      }
-      ```
-
-      And the following initial state represented by your store's model:
-
-      ```json
-      {
-        "fruit": "pear",
-        "animal": "dolphin"
-      }
-      ```
-
-      The resulting state will be:
-
-      ```json
-      {
-        "fruit": "apple",
-        "city": "cape town"
-      }
-      ```
-
-    - `'mergeDeep'`
-
-      The data from the persistence will be merged deeply, recursing through all
-      _object_ structures and merging.
-
-      i.e.
-
-      Given the following persisted state:
-
-      ```json
-      {
-        "fruit": "apple",
-        "address": {
-          "city": "cape town"
-        }
-      }
-      ```
-
-      And the following initial state represented by your store's model:
-
-      ```json
-      {
-        "address": {
-          "city": "london",
-          "post code": "e3 1pq"
-        },
-        "animal": "dolphin"
-      }
-      ```
-
-      The resulting state will be:
-
-      ```json
-      {
-        "fruit": "apple",
-        "address": {
-          "city": "cape town",
-          "post code": "e3 1pq"
-        },
-        "animal": "dolphin"
-      }
-      ```
-
-      > **Note:** Only _plain objects_ will be recursed and merged; no other
-      > types such as Arrays, Maps, Sets, Classes etc.
-
-  - `transformers` (Array<Transformer>, _optional_)
+  - `transformers` (Array&lt;Transformer&gt;, _optional_)
 
     Transformers are use to apply operations to your data during prior it being
     persisted or hydrated.
@@ -534,28 +333,305 @@ familiarize yourself with the API of [Store instances](/docs/api/store.html).
     [transformer packages](https://github.com/rt2zz/redux-persist#transforms)
     that have been built for it. These can be used here.
 
-  - `storage` (string | Object, _optional_)
+## Merge Strategies
 
-    The storage engine to be used. It defaults to `sessionStorage`. The
-    following values are supported:
+The following values are supported:
 
-    - `'sessionStorage'`
+### mergeDeep
 
-      Use the browser's sessionStorage as the persistence layer.
+This is the _default_ strategy.
 
-      i.e. data is available for rehydration for a single browser session
+The data from the persistence will be merged deeply, recursing through all
+_object_ structures and merging.
 
-    - `'localStorage'`
+i.e.
 
-      Use the browser's localStorage as the persistence layer.
+Given a store with the following state defined within the model;
 
-      i.e. data is available across browser sessions
+```json
+{
+  "animal": "dolphin",
+  "address": {
+    "city": "london",
+    "post code": "e3 1pq"
+  }
+}
+```
 
-    - Custom engine
+And the following persisted state;
 
-      A custom storage engine.
+```json
+{
+  "fruit": "apple",
+  "address": {
+    "city": "cape town"
+  }
+}
+```
 
-      [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a
-      robust set of
-      [storage engine packages](https://github.com/rt2zz/redux-persist#storage-engines)
-      that have been built for it. These can be used here.
+The resulting state will be;
+
+```diff
+{
+   "animal": "dolphin",
++  "fruit": "apple",
+   "address": {
+-    "city": "london",
++    "city": "cape town",
+     "post code": "e3 1pq"
+   }
+}
+```
+
+Only _plain objects_ will be recursed and merged; no other types such as Arrays,
+Maps, Sets, Classes etc will be considered when traversing through the model.
+
+### shallowMerge
+
+The data from the persistence will be _shallowly_ merged with the initial state
+represented by your store's model.
+
+i.e.
+
+Given a store with the following definition;
+
+```javascript
+import { persist, createStore } from 'easy-peasy';
+
+const store = createStore(
+  persist(
+    {
+      animal: 'dolphin',
+      address: {
+        city: 'london',
+        postCode: 'e3 1pq',
+      },
+    },
+    {
+      mergeStrategy: 'shallowMerge',
+    },
+  ),
+);
+```
+
+And the following persisted state;
+
+```json
+{
+  "fruit": "apple",
+  "address": {
+    "city": "cape town"
+  }
+}
+```
+
+The resulting state will be;
+
+```diff
+{
+   "animal": "dolphin"
++  "fruit": "apple",
+   "address": {
+-    "city": "london",
+-    "postCode": "e3 1pq"
++    "city": "cape town"
+   },
+}
+```
+
+Pay close attention to above.
+
+The `address.postCode` property from our store's model didn't survive the state
+rehydration process.
+
+This is because the `shallowMerge` strategy only compares the root properties
+against the model that it was bound. The `postCode` proper is nested within the
+`address`. However, as we are performing a shallow merge we will use the
+`address` value from the persisted state, overriding the `address` value from
+our store's model, and losing the `address.postCode` value that was defined
+within the model.
+
+This behaviour may be okay for your use-case, however, if your store model
+evolves with updates to nested properties then it is entirely possible that
+persisted state may not match the required structure based on the evolved store
+model. This could cause errors within your application if your components
+assumed the existing of a particular state structure.
+
+We therefore suggest using this strategy _very_ carefully, and encourage you to
+use the `mergeDeep` strategy instead.
+
+The `shallowMerge` strategy is perhaps more useful if you would like to define
+your persistence on the "leaf" models of your store's model, like so;
+
+```javascript
+import { persist, createStore } from 'easy-peasy';
+
+const model = {
+  address: persist(
+    {
+      city: 'london',
+      postCode: 'e3 1pq',
+    },
+    { mergeStrategy: 'shallowMerge' },
+  ),
+  todos: persist(
+    {
+      items: [],
+    },
+    { mergeStrategy: 'shallowMerge' },
+  ),
+};
+```
+
+This form is far more robust and gives you much more flexibility and control
+over your persistence.
+
+### overwrite
+
+Utilizing this strategy will cause the state from your store model to be
+_completely_ overwritten by the persisted state.
+
+i.e.
+
+Given a store with the following definition;
+
+```javascript
+import { persist, createStore } from 'easy-peasy';
+
+const store = createStore(
+  persist(
+    {
+      fruit: 'pear',
+    },
+    { mergeStrategy: 'overwrite' },
+  ),
+);
+```
+
+And the following persisted state;
+
+```json
+{
+  "city": "cape town"
+}
+```
+
+The resulting state will be:
+
+```diff
+{
+-  "fruit": "pear",
++  "city": "cape town"
+}
+```
+
+This is perhaps the most risky strategy as we intentionally replace our stores
+initial state with that of the persisted state. If the store model has diverged
+you could open yourself up to errors/bugs. Please take extra care and
+consideration when using this strategy.
+
+## How rehydration merging works
+
+When utilizing the `mergeDeep` (the default) or `merge` strategies it can be
+helpful to have some insight into how the rehydration algorithm works.
+Especially in the case that you have been making updates to your store's model.
+
+If a user of your application has persisted state
+
+### Conflict resolution
+
+### `mergeDeep` traversal
+
+## Rehydrating dynamic models
+
+The `persist` API will work with dynamic models, i.e. models that were added to
+the store via the [`store.addModel`](/docs/api/store.html) API after the store
+was created.
+
+Every time a dynamic model is added to your store Easy Peasy will attempt to
+rehydrate any persisted state for that model.
+
+```typescript
+store.addModel('products', productsModel);
+```
+
+To ensure that the rehydration has completed you can use the
+`resolveRehydration` helper that is returned by the
+[`store.addModel`](/docs/api/store.html) API.
+
+```typescript
+const { resolveRehydration } = store.addModel('products', productsModel);
+//            👆
+// Deconstruct the returned object to get a handle on resolveRehydration
+
+// 👇 execute the helper and wait on the returned promise
+resolveRehydration().then(() => {
+  console.log('Rehydration is complete');
+});
+```
+
+## Persisting multiple stores
+
+If you utilise multiple stores, each with their own persistence configuration,
+you will need to ensure that each store is configured to have a unique name. The
+store name for each instance of your stores is used within the persistence cache
+keys created by Easy Peasy.
+
+```javascript
+const storeOne = createStore(persist(model), {
+  name: 'StoreOne', // 👈
+});
+
+const storeTwo = createStore(persist(model), {
+  name: 'StoreTwo', // 👈
+});
+```
+
+## Custom storage engines
+
+You can create a custom storage engine by defining an object that satisfies the
+following interface:
+
+- `getItem(key) => any | Promise<any> | void`
+
+  This function will receive the key, i.e. the key of the model item being
+  rehydrated, and should return the associated data from the persistence if it
+  exists. It can alternatively return a `Promise` that resolves the data, or
+  `undefined` if no persisted data was found.
+
+- `setItem(key, data) => void | Promise<void>`
+
+  This function will receive the key, i.e. the key of the model data being
+  persisted, as well as the associated data value. It should then store the
+  respective data. It can alternatively return a `Promise` which indicates when
+  the item has been successfully persisted.
+
+- `removeItem(key) => void | Promise<void>`
+
+  This function will receive the key, i.e. the key of the model item that exists
+  in the persistence, and should remove any data that is currently being stored
+  within the persistence. It can alternatively return a `Promise` which
+  indicates when the item has been successfully removed from the persistence.
+
+Once defined you can reference your custom storage engine within the
+configuration for your `persist` instance.
+
+```javascript
+import myCustomStorageEngine from './my-custom-storage-engine';
+
+const storeModel = persist(model, {
+  storage: myCustomStorageEngine,
+});
+```
+
+## Custom data transformers
+
+Transforms allow you to customize the state object that gets persisted and
+rehydrated. They allow you to for instance convert store data from a complex
+object, such as a `Map`, into a structure that is JSON serialisable (and back
+again).
+
+Easy Peasy outputs a [`createTransformer`](/docs/api/create-transformer.html)
+function, which has been directly copied from
+[`redux-persist`](https://github.com/rt2zz/redux-persist) in order to maximum
+compatiblity with it's ecosystem.

@@ -56,24 +56,37 @@ function createStorageWrapper(storage, transformers = []) {
 
   const outTransformers = [...transformers].reverse();
 
-  const serialize = (data, key) => {
-    const simpleKey = key.substr(key.indexOf('@') + 1);
-    const transformed = transformers.reduce((acc, cur) => {
-      return cur.in(acc, simpleKey);
-    }, data);
+  const serialize = (data) => {
+    if (transformers.length > 0 && data != null && typeof data === 'object') {
+      Object.keys(data).forEach((key) => {
+        data[key] = transformers.reduce((acc, cur) => {
+          return cur.in(acc, key);
+        }, data[key]);
+      });
+    }
+
     return storage === localStorage() || storage === sessionStorage()
-      ? JSON.stringify({ data: transformed })
-      : transformed;
+      ? JSON.stringify({ data })
+      : data;
   };
-  const deserialize = (data, key) => {
-    const simpleKey = key.substr(key.indexOf('@') + 1);
+
+  const deserialize = (data) => {
     const result =
       storage === localStorage() || storage === sessionStorage()
         ? JSON.parse(data).data
         : data;
-    return outTransformers.reduce((acc, cur) => {
-      return cur.out(acc, simpleKey);
-    }, result);
+    if (
+      outTransformers.length > 0 &&
+      result != null &&
+      typeof result === 'object'
+    ) {
+      Object.keys(result).forEach((key) => {
+        result[key] = outTransformers.reduce((acc, cur) => {
+          return cur.out(acc, key);
+        }, result[key]);
+      });
+    }
+    return result;
   };
 
   const isAsync = isPromise(storage.getItem('_'));
@@ -102,30 +115,30 @@ export function extractPersistConfig(path, persistDefinition = {}) {
   return {
     path,
     config: {
-      blacklist: persistDefinition.blacklist || [],
-      mergeStrategy: persistDefinition.mergeStrategy || 'merge',
+      allow: persistDefinition.allow || [],
+      deny: persistDefinition.deny || [],
+      mergeStrategy: persistDefinition.mergeStrategy || 'mergeDeep',
       storage: createStorageWrapper(
         persistDefinition.storage,
         persistDefinition.transformers,
       ),
-      whitelist: persistDefinition.whitelist || [],
     },
   };
 }
 
-function resolvePersistTargets(target, whitelist, blacklist) {
+function resolvePersistTargets(target, allow, deny) {
   let targets = Object.keys(target);
-  if (whitelist.length > 0) {
+  if (allow.length > 0) {
     targets = targets.reduce((acc, cur) => {
-      if (whitelist.findIndex((x) => x === cur) !== -1) {
+      if (allow.findIndex((x) => x === cur) !== -1) {
         return [...acc, cur];
       }
       return acc;
     }, []);
   }
-  if (blacklist.length > 0) {
+  if (deny.length > 0) {
     targets = targets.reduce((acc, cur) => {
-      if (blacklist.findIndex((x) => x === cur) !== -1) {
+      if (deny.findIndex((x) => x === cur) !== -1) {
         return acc;
       }
       return [...acc, cur];
@@ -135,28 +148,16 @@ function resolvePersistTargets(target, whitelist, blacklist) {
 }
 
 function createPersistenceClearer(persistKey, references) {
-  return () =>
-    new Promise((resolve, reject) => {
-      references.internals._persistenceConfig.forEach(({ path, config }) => {
-        const { storage, whitelist, blacklist } = config;
-        const persistRoot = get(path, references.getState());
-        const targets = resolvePersistTargets(
-          persistRoot,
-          whitelist,
-          blacklist,
-        );
-        if (targets.length > 0) {
-          Promise.all(
-            targets.map((key) => {
-              const targetPath = [...path, key];
-              return storage.removeItem(persistKey(targetPath));
-            }),
-          ).then(() => resolve(), reject);
-        } else {
-          resolve();
-        }
-      });
-    });
+  return () => {
+    if (references.internals._persistenceConfig.length === 0) {
+      return Promise.resolve();
+    }
+    return Promise.all(
+      references.internals._persistenceConfig.map(({ path, config }) =>
+        Promise.resolve(config.storage.removeItem(persistKey(path))),
+      ),
+    );
+  };
 }
 
 export function createPersistor(persistKey, references) {
@@ -169,26 +170,29 @@ export function createPersistor(persistKey, references) {
     persistPromise = Promise.all(
       references.internals._persistenceConfig.reduce(
         (acc, { path, config }) => {
-          const { storage, whitelist, blacklist } = config;
+          const { storage, allow, deny } = config;
           const state = references.getState();
-          const persistRoot = deepCloneStateWithoutComputed(get(path, state));
-          const targets = resolvePersistTargets(
-            persistRoot,
-            whitelist,
-            blacklist,
+          const persistRootState = deepCloneStateWithoutComputed(
+            get(path, state),
           );
-          return acc.concat(
-            targets.map((key) => {
-              const targetPath = [...path, key];
-              const rawValue = get(targetPath, state);
-              const value = isPlainObject(rawValue)
-                ? deepCloneStateWithoutComputed(rawValue)
-                : rawValue;
-              return Promise.resolve(
-                storage.setItem(persistKey(targetPath), value),
-              );
-            }),
+          const persistTargets = resolvePersistTargets(
+            persistRootState,
+            allow,
+            deny,
           );
+          const stateToPersist = {};
+          persistTargets.map((key) => {
+            const targetPath = [...path, key];
+            const rawValue = get(targetPath, state);
+            const value = isPlainObject(rawValue)
+              ? deepCloneStateWithoutComputed(rawValue)
+              : rawValue;
+            stateToPersist[key] = value;
+          });
+          return [
+            ...acc,
+            Promise.resolve(storage.setItem(persistKey(path), stateToPersist)),
+          ];
         },
         [],
       ),
@@ -230,15 +234,13 @@ export function rehydrateStateFromPersistIfNeeded(
   if (references.internals._persistenceConfig.length > 0) {
     references.internals._persistenceConfig.forEach((persistInstance) => {
       const { path, config } = persistInstance;
-      const { blacklist, mergeStrategy, storage, whitelist } = config;
+      const { mergeStrategy, storage } = config;
 
       if (root && (path.length < 1 || path[0] !== root)) {
         return;
       }
 
       const state = references.internals._defaultState;
-      const persistRoot = deepCloneStateWithoutComputed(get(path, state));
-      const targets = resolvePersistTargets(persistRoot, whitelist, blacklist);
 
       const hasDataModelChanged = (dataModel, rehydratingModelData) =>
         dataModel != null &&
@@ -246,78 +248,53 @@ export function rehydrateStateFromPersistIfNeeded(
         (typeof dataModel !== typeof rehydratingModelData ||
           (Array.isArray(dataModel) && !Array.isArray(rehydratingModelData)));
 
-      const applyRehydrationStrategy = (originalState, rehydratedState) => {
+      const applyRehydrationStrategy = (originalState, persistedState) => {
         if (mergeStrategy === 'overwrite') {
-          set(path, originalState, rehydratedState);
-        } else if (mergeStrategy === 'merge') {
-          const target = get(path, originalState);
-          Object.keys(rehydratedState).forEach((key) => {
-            if (hasDataModelChanged(target[key], rehydratedState[key])) {
+          set(path, originalState, persistedState);
+        } else if (mergeStrategy === 'mergeShallow') {
+          const targetState = get(path, originalState);
+          Object.keys(persistedState).forEach((key) => {
+            if (hasDataModelChanged(targetState[key], persistedState[key])) {
               // skip as the data model type has changed since the data was persisted
             } else {
-              target[key] = rehydratedState[key];
+              targetState[key] = persistedState[key];
             }
           });
         } else if (mergeStrategy === 'mergeDeep') {
-          const target = get(path, originalState);
-          const setAt = (currentTarget, currentNext) => {
-            Object.keys(currentNext).forEach((key) => {
-              const data = currentNext[key];
-              if (hasDataModelChanged(currentTarget[key], data)) {
+          const targetState = get(path, originalState);
+          const setAt = (currentTargetState, currentPersistedState) => {
+            Object.keys(currentPersistedState).forEach((key) => {
+              if (
+                hasDataModelChanged(
+                  currentTargetState[key],
+                  currentPersistedState[key],
+                )
+              ) {
                 // skip as the data model type has changed since the data was persisted
-              } else if (isPlainObject(data)) {
-                currentTarget[key] = currentTarget[key] || {};
-                setAt(currentTarget[key], data);
+              } else if (isPlainObject(currentPersistedState[key])) {
+                currentTargetState[key] = currentTargetState[key] || {};
+                setAt(currentTargetState[key], currentPersistedState[key]);
               } else {
-                currentTarget[key] = data;
+                currentTargetState[key] = currentPersistedState[key];
               }
             });
           };
-          setAt(target, rehydratedState);
+          setAt(targetState, persistedState);
         }
       };
 
-      if (storage.isAsync) {
-        const asyncStateResolvers = targets.reduce((acc, key) => {
-          const targetPath = [...path, key];
-          const dataPromise = storage.getItem(persistKey(targetPath));
-          if (isPromise(dataPromise)) {
-            acc.push({
-              key,
-              dataPromise,
-            });
-          }
-          return acc;
-        }, []);
-        if (asyncStateResolvers.length > 0) {
-          resolveRehydration = Promise.all(
-            asyncStateResolvers.map((x) => x.dataPromise),
-          ).then((resolvedData) => {
-            const next = resolvedData.reduce((acc, cur, idx) => {
-              const { key } = asyncStateResolvers[idx];
-              if (cur !== undefined) {
-                acc[key] = cur;
-              }
-              return acc;
-            }, {});
-            if (Object.keys(next).length === 0) {
-              return;
-            }
-            applyRehydrationStrategy(state, next);
-            replaceState(state);
-          });
+      const rehydate = (persistedState) => {
+        if (persistedState != null) {
+          applyRehydrationStrategy(state, persistedState);
         }
-      } else {
-        const next = targets.reduce((acc, key) => {
-          const targetPath = [...path, key];
-          const data = storage.getItem(persistKey(targetPath));
-          if (data !== undefined) {
-            acc[key] = data;
-          }
-          return acc;
-        }, {});
-        applyRehydrationStrategy(state, next);
         replaceState(state);
+      };
+
+      const getItemResult = storage.getItem(persistKey(path));
+      if (isPromise(getItemResult)) {
+        resolveRehydration = getItemResult.then(rehydate);
+      } else {
+        rehydate(getItemResult);
       }
     });
   }

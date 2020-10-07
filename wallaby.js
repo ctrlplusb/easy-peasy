@@ -8,12 +8,14 @@ const babelConfig = JSON.parse(babelConfigContents);
 
 module.exports = (wallaby) => ({
   files: [
+    'tests/lib/*.js',
+    'tests/utils.js',
     'src/**/*.js',
     { pattern: 'tests/**/*.test.js', ignore: true },
     { pattern: 'tests/typescript/**/*', ignore: true },
   ],
   tests: [
-    'tests/*.js',
+    'tests/*.test.js',
     'tests/**/*.test.js',
     { pattern: 'tests/typescript.test.js', ignore: true },
   ],

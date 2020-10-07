@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Easy Peasy',
+  title: 'Easy Peasy v4',
   description: 'Vegetarian friendly state for React',
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
   plugins: [
@@ -24,8 +24,8 @@ module.exports = {
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Quick Start', link: '/docs/quick-start' },
       { text: 'Docs', link: '/docs/introduction/' },
+      { text: 'v3 Docs', link: 'https://easy-peasy-v3.now.sh' },
     ],
 
     sidebarDepth: 0,
@@ -34,36 +34,32 @@ module.exports = {
       '/docs/': [
         {
           title: 'Introduction',
+          path: '/docs/introduction/',
           children: [
-            'introduction/',
             'introduction/installation',
-            'introduction/examples',
-            'introduction/extensions',
-            'introduction/prior-art',
-            'introduction/immer',
+            'introduction/quick-start',
+            'introduction/alternatives',
+            'introduction/downsides',
+            'introduction/browser-support',
+            // 'introduction/examples',
+            // 'introduction/prior-art',
           ],
         },
         {
-          title: 'Tutorial',
+          title: 'Tutorials',
+          path: '/docs/tutorials/',
           children: [
-            'tutorial/',
-            'tutorial/create-your-store',
-            'tutorial/connecting-your-store',
-            'tutorial/consuming-state',
-            'tutorial/using-actions-to-update-state',
-            'tutorial/using-thunks-to-perform-side-effects',
-            'tutorial/using-computed-properties',
-            'tutorial/using-listeners',
-            'tutorial/redux-dev-tools',
-            'tutorial/final-notes',
+            'tutorials/standard',
+            'tutorials/advanced',
+            'tutorials/typescript',
           ],
         },
         {
           title: 'API',
+          path: '/docs/api/',
           children: [
-            'api/',
             {
-              title: 'Store',
+              title: 'Creating Stores',
               children: [
                 'api/create-store',
                 'api/store-config',
@@ -74,7 +70,7 @@ module.exports = {
               ],
             },
             {
-              title: 'Defining Models',
+              title: 'Defining Store Models',
               children: [
                 'api/action-on',
                 'api/action',
@@ -89,7 +85,7 @@ module.exports = {
               ],
             },
             {
-              title: 'Store Hooks',
+              title: 'Using Stores via Hooks',
               children: [
                 'api/use-store-actions',
                 'api/use-store-dispatch',
@@ -102,6 +98,22 @@ module.exports = {
               title: 'Utils',
               children: ['api/create-transform', 'api/debug', 'api/memo'],
             },
+          ],
+        },
+        /*
+        {
+          title: 'Tutorial',
+          children: [
+            'tutorial/',
+            'tutorial/create-your-store',
+            'tutorial/connecting-your-store',
+            'tutorial/consuming-state',
+            'tutorial/using-actions-to-update-state',
+            'tutorial/using-thunks-to-perform-side-effects',
+            'tutorial/using-computed-properties',
+            'tutorial/using-listeners',
+            'tutorial/redux-dev-tools',
+            'tutorial/final-notes',
           ],
         },
         {
@@ -120,10 +132,11 @@ module.exports = {
             'typescript-tutorial/final-notes',
           ],
         },
+        */
         {
           title: 'TypeScript API',
+          path: '/docs/typescript-api/',
           children: [
-            'typescript-api/',
             'typescript-api/action',
             'typescript-api/action-on',
             'typescript-api/actions',
@@ -139,8 +152,8 @@ module.exports = {
         },
         {
           title: 'Testing',
+          path: '/docs/testing/',
           children: [
-            'testing/',
             'testing/testing-actions',
             'testing/testing-components',
             'testing/testing-computed-properties',
@@ -149,9 +162,13 @@ module.exports = {
           ],
         },
         {
+          title: 'Community Extensions',
+          path: '/docs/community-extensions/',
+        },
+        {
           title: 'Recipes',
+          path: '/docs/recipes/',
           children: [
-            'recipes/',
             'recipes/connecting-to-reactotron',
             'recipes/generalising-models',
             'recipes/hot-reloading',
@@ -162,10 +179,8 @@ module.exports = {
         },
         {
           title: 'Known Issues',
-          children: [
-            'known-issues/',
-            'known-issues/using-keyof-in-generic-typescript-model',
-          ],
+          path: '/docs/known-issues/',
+          children: ['known-issues/using-keyof-in-generic-typescript-model'],
         },
       ],
     },
