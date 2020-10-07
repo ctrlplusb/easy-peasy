@@ -95,3 +95,39 @@ export function createSimpleProduce(disableImmer = false) {
     return finishDraft(draft);
   };
 }
+
+const pReduce = (iterable, reducer, initialValue) =>
+  new Promise((resolve, reject) => {
+    const iterator = iterable[Symbol.iterator]();
+    let index = 0;
+
+    const next = async (total) => {
+      const element = iterator.next();
+
+      if (element.done) {
+        resolve(total);
+        return;
+      }
+
+      try {
+        const value = await Promise.all([total, element.value]);
+        // eslint-disable-next-line no-plusplus
+        next(reducer(value[0], value[1], index++));
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    next(initialValue);
+  });
+
+export const pSeries = async (tasks) => {
+  const results = [];
+
+  await pReduce(tasks, async (_, task) => {
+    const value = await task();
+    results.push(value);
+  });
+
+  return results;
+};

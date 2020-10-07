@@ -50,7 +50,6 @@
     "react": "^16.8.0"
   },
   "dependencies": {
-    "debounce": "^1.2.0",
     "immer": "7.0.9",
     "is-plain-object": "^5.0.0",
     "memoizerific": "^1.11.3",

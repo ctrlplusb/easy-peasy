@@ -5,40 +5,43 @@ the store state when the store is recreated (e.g. on page refresh, new browser
 tab, etc).
 
 By default it uses the browser's
-[`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage).
+[`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage),
+however, you can configure it to use
+[`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage),
+or provide a custom storage engine.
 
 - [Tutorial](#tutorial)
   - [Configuring your store to persist](#configuring-your-store-to-persist)
-  - [Controlling the rate of persistence](#controlling-the-rate-of-persistence)
-  - [Rehydrating your store](#rehydrating-your-store)
   - [Ensuring persistence completes prior to application unmount](#ensuring-persistence-completes-prior-to-application-unmount)
-  - [Deleting persisted data](#deleting-persisted-data)
+  - [Rehydrating your store](#rehydrating-your-store)
 - [API](#api)
 - [Merge Strategies](#merge-strategies)
   - [mergeDeep](#mergedeep)
   - [shallowMerge](#shallowmerge)
   - [overwrite](#overwrite)
-- [How rehydration merging works](#how-rehydration-merging-works)
+- [Merge conflict resolution](#merge-conflict-resolution)
   - [Conflict resolution](#conflict-resolution)
-  - [`mergeDeep` traversal](#mergedeep-traversal)
+- [Deleting persisted data](#deleting-persisted-data)
 - [Rehydrating dynamic models](#rehydrating-dynamic-models)
 - [Persisting multiple stores](#persisting-multiple-stores)
 - [Custom storage engines](#custom-storage-engines)
 - [Custom data transformers](#custom-data-transformers)
+- [Frequently Asked Questions](#frequently-asked-questions)
+  - [How do I manage changes to my store model?](#how-do-i-manage-changes-to-my-store-model)
 
 ## Tutorial
 
-This section will provide an in-depth walkthrough to using persistence against
-your store.
+This section will provide an in-depth walkthrough to persisting and rehydrating
+your store's state.
 
 ### Configuring your store to persist
 
-When utilising the `persist` helper you firstly need to decide on the scope of
-your persistence - i.e. how much of your store model do you wish to be
-persisted. You can choose to persist the whole store, a partial slice of your
-store, or multiple slices of your store.
+When choosing to persist your state you firstly need to decide on the scope of
+your persistence - i.e. how much of your state do you wish to be persisted. You
+can persist the whole state, a partial slice of your state, or multiple slices
+of your state.
 
-In the example below we will persist our entire store by wrapping our root model
+In the example below we will persist our entire state by wrapping our root model
 with the `persist` helper.
 
 ```javascript
@@ -54,8 +57,8 @@ const store = createStore(
 );
 ```
 
-You can also target specific parts of your model that you would like to persist
-by wrapping the desired models with the `persist` helper.
+You can alternatively target specific parts of your state by wrapping the
+desired nested models.
 
 ```javascript
 const store = createStore(
@@ -65,8 +68,8 @@ const store = createStore(
 );
 ```
 
-Alternatively, you can utilise the `persist` configuration to explicitly select
-which keys of a model will be persisted.
+Or you can utilise the configuration to explicitly select which keys of a model
+will be persisted.
 
 ```javascript
 const store = createStore(
@@ -83,107 +86,15 @@ const store = createStore(
 );
 ```
 
-Every time your state changes the changes will be persisted to the configured
-storage engine.
-
-### Controlling the rate of persistence
-
-Persistence can become an IO expensive operation, especially with stores that
-are large.
-
-By default we [debounce](https://davidwalsh.name/javascript-debounce-function)
-persist operations so that a persist operation can occur a maximum of once every
-second. This can help avoid IO thrashing where you may have a store that is
-updated frequently.
-
-Depending on your own implementation you may find this rate limit is either too
-small or too high. You can customize the debounce rate via the `rateLimit`
-configuration property.
-
-```javascript
-const storeModel = persist(model, {
-  rateLimit: 1000, // in milliseconds
-});
-```
-
-### Rehydrating your store
-
-Every time your store is created, any data that has been persisted will be used
-to rehydrate your state accordingly. It is best practice to ensure that the data
-rehydration has completed prior to rendering the components within your
-application that will operate against the rehydrated state.
-
-There are two strategies that you can employ to ensure data rehydration has
-completed.
-
-**Strategy 1: Wait for rehydration to complete prior to rendering your
-application**
-
-A [store instance](/docs/api/store.html) contains an API allowing you to gain a
-handle on when the rehydration process has completed, specifically the
-`store.persist.resolveRehydration()` API. When you execute this API you will
-receive back a `Promise`. The `Promise` will resolve when the data rehydration
-has completed.
-
-Therefore you can wait for this `Promise` to resolve prior to rendering your
-application. This would ensure that your application is rendered with the
-expected state rehydrated.
-
-```javascript
-const store = createStore(persist(model));
-
-store.persist.resolveRehydration().then(() => {
-  // Yay, the rehydration process is complete!
-
-  // Let's render the app now!
-  ReactDOM.render(
-    <StoreProvider store={store}>
-      <App />
-    </StoreProvider>,
-    document.getElementById('app'),
-  );
-});
-```
-
-**Strategy 2: Eagerly render your application and utilise the
-`useStoreRehydrated` hook**
-
-You can alternatively partially render your application and utilise the
-[`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook to wait for
-rehydration to complete prior to rendering the slices of your application that
-depend on the rehydrated state.
-
-```javascript
-import { useStoreRehydrated } from 'easy-peasy';
-
-const store = createStore(persist(model));
-
-function App() {
-  const rehydrated = useStoreRehydrated();
-  return (
-    <div>
-      <Header />
-      {rehydrated ? <Main /> : <div>Loading...</div>}
-      <Footer />
-    </div>
-  );
-}
-
-ReactDOM.render(
-  <StoreProvider store={store}>
-    <App />
-  </StoreProvider>,
-  document.getElementById('app'),
-);
-```
-
-In the example above, the `<Main />` content will not render until our store has
-been successfully updated with the rehydration state.
+Every time a state change occurs the persistence process will be queued to save
+the state to the storage
+([`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage)
+by default).
 
 ### Ensuring persistence completes prior to application unmount
 
-As the persistence operations are debounced it is possible that a state change
-might not be persisted before your application unmounts.
+Persistence operations are asynchronous, therefore it is possible that a state
+change might not be persisted before your application unmounts.
 
 It is important to consider this when state changes occur prior to events that
 may cause your application to unmount, for e.g. a page refresh, or the user
@@ -227,23 +138,76 @@ const redirectTo = async (href) => {
 };
 ```
 
-### Deleting persisted data
+### Rehydrating your store
 
-Should you wish to remove all the data that has been persisted for your model
-you can utilise the [store instance's API](/docs/api/store.html) to do so.
+Every time your store is created, any data that has been persisted will be used
+to rehydrate your state accordingly. **_This process is asynchronous!_** It is
+therefore best practice to ensure that the rehydration has completed prior to
+rendering the components within your application that will access the rehydrated
+state.
+
+To aid with this we expose a
+[`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook. This hook will
+return `true` when the rehydration process has completed, otherwise it will
+return `false`.
+
+Using this hook you could for example show a loading indicator in place of the
+components that will depend on the rehydrated state.
+
+This allows for a partial application render, providing the user with some
+perceived performance, as you could render the skeleton of the application in
+the interim.
 
 ```javascript
-const store = createStore(model);
+import { useStoreRehydrated } from 'easy-peasy';
 
-if (userIsLoggingOut) {
-  store.persist.clear().then(() => {
-    console.log('Store has been cleared');
-  });
+const store = createStore(persist(model));
+
+function App() {
+  const isRehydrated = useStoreRehydrated();
+  return (
+    <div>
+      <Header />
+      {isRehydrated ? <Main /> : <div>Loading...</div>}
+      <Footer />
+    </div>
+  );
 }
+
+ReactDOM.render(
+  <StoreProvider store={store}>
+    <App />
+  </StoreProvider>,
+  document.getElementById('app'),
+);
 ```
 
-Note that a `Promise` was returned, which when resolved indicates that the data
-has been removed from your persistence layers.
+In the example above, the `<Main />` content will not render until our store has
+been successfully updated with the rehydration state.
+
+Alternatively you could create a simple component to wrap your application and
+ensure that state rehydration is completed prior to rendering the entire app.
+
+```javascript
+import { useStoreRehydrated } from 'easy-peasy';
+
+function WaitForStateRehydration({ children }) {
+  const isRehydrated = useStoreRehydrated();
+  return isRehydrated ? children : null;
+}
+
+ReactDOM.render(
+  <StoreProvider store={store}>
+    <WaitForStateRehydration>
+      <App />
+    </WaitForStateRehydration>
+  </StoreProvider>,
+  document.getElementById('app'),
+);
+```
+
+Ultimately, as shown, the `useStoreRehydrated` hook provides a lot of
+flexibility.
 
 ## API
 
@@ -530,7 +494,7 @@ initial state with that of the persisted state. If the store model has diverged
 you could open yourself up to errors/bugs. Please take extra care and
 consideration when using this strategy.
 
-## How rehydration merging works
+## Merge conflict resolution
 
 When utilizing the `mergeDeep` (the default) or `merge` strategies it can be
 helpful to have some insight into how the rehydration algorithm works.
@@ -540,7 +504,25 @@ If a user of your application has persisted state
 
 ### Conflict resolution
 
-### `mergeDeep` traversal
+<!-- ## `mergeDeep` traversal -->
+
+## Deleting persisted data
+
+Should you wish to remove all the data that has been persisted for your model
+you can utilise the [store instance's API](/docs/api/store.html) to do so.
+
+```javascript
+const store = createStore(model);
+
+if (userIsLoggingOut) {
+  store.persist.clear().then(() => {
+    console.log('Store has been cleared');
+  });
+}
+```
+
+Note that a `Promise` was returned, which when resolved indicates that the data
+has been removed from your persistence layers.
 
 ## Rehydrating dynamic models
 
@@ -594,10 +576,10 @@ following interface:
 
 - `getItem(key) => any | Promise<any> | void`
 
-  This function will receive the key, i.e. the key of the model item being
-  rehydrated, and should return the associated data from the persistence if it
-  exists. It can alternatively return a `Promise` that resolves the data, or
-  `undefined` if no persisted data was found.
+  This function will receive the key, i.e. the key of the model property item
+  being rehydrated, and should return the associated data from the persistence
+  if it exists. It can alternatively return a `Promise` that resolves the data,
+  or `undefined` if no persisted data was found.
 
 - `setItem(key, data) => void | Promise<void>`
 
@@ -635,3 +617,21 @@ Easy Peasy outputs a [`createTransformer`](/docs/api/create-transformer.html)
 function, which has been directly copied from
 [`redux-persist`](https://github.com/rt2zz/redux-persist) in order to maximum
 compatiblity with it's ecosystem.
+
+## Frequently Asked Questions
+
+Below are some of the common questions we receive about this API.
+
+### How do I manage changes to my store model?
+
+This can be a real problem. It's entirely possible that you perform a
+significant update to your store model which doesn't line up with what a user
+has previously persisted. The result can be a fragile user experience in which
+errors occur due to things like attempting to access state which doesn't exist,
+or which has changed in structure.
+
+By default the persist API utilizes the `mergeDeep` strategy, which attempts to
+perform an optimistic merge of the persisted state against the initial state
+represented by the store model.
+
+TODO

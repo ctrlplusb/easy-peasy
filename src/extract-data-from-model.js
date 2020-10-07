@@ -34,7 +34,7 @@ export default function extractDataFromModel(
   const _listenerActionCreators = {};
   const _listenerActionMap = {};
   const listenerDefinitions = [];
-  const _persistenceConfig = [];
+  let _persistenceConfig = [];
   const _computedState = {
     isInReducer: false,
     currentState: _defaultState,
@@ -217,6 +217,18 @@ export default function extractDataFromModel(
         handleValueAsState();
       }
     });
+
+  _persistenceConfig = _persistenceConfig.sort((a, b) => {
+    const aPath = a.path.join('.');
+    const bPath = b.path.join('.');
+    if (aPath < bPath) {
+      return -1;
+    }
+    if (aPath > bPath) {
+      return 1;
+    }
+    return 0;
+  });
 
   recursiveExtractFromModel(model, []);
 

@@ -1,6 +1,11 @@
-import debounce from 'debounce';
 import { isPlainObject } from 'is-plain-object';
-import { deepCloneStateWithoutComputed, get, isPromise, set } from './lib';
+import {
+  deepCloneStateWithoutComputed,
+  get,
+  isPromise,
+  set,
+  pSeries,
+} from './lib';
 
 const noopStorage = {
   getItem: () => undefined,
@@ -96,14 +101,14 @@ function createStorageWrapper(storage, transformers = []) {
     getItem: (key) => {
       if (isAsync) {
         return storage.getItem(key).then((wrapped) => {
-          return wrapped != null ? deserialize(wrapped, key) : undefined;
+          return wrapped != null ? deserialize(wrapped) : undefined;
         });
       }
       const wrapped = storage.getItem(key);
-      return wrapped != null ? deserialize(wrapped, key) : undefined;
+      return wrapped != null ? deserialize(wrapped) : undefined;
     },
     setItem: (key, data) => {
-      return storage.setItem(key, serialize(data, key));
+      return storage.setItem(key, serialize(data));
     },
     removeItem: (key) => {
       return storage.removeItem(key);
@@ -162,62 +167,93 @@ function createPersistenceClearer(persistKey, references) {
 
 export function createPersistor(persistKey, references) {
   let persistPromise = Promise.resolve();
+  let isPersisting = false;
+  let nextPersistOperation;
 
-  const persist = debounce(() => {
+  const timingMethod =
+    typeof window === 'undefined'
+      ? (fn) => fn()
+      : window.requestIdleCallback != null
+      ? window.requestIdleCallback
+      : window.requestAnimationFrame;
+
+  const persist = (nextState) => {
     if (references.internals._persistenceConfig.length === 0) {
       return;
     }
-    persistPromise = Promise.all(
-      references.internals._persistenceConfig.reduce(
-        (acc, { path, config }) => {
-          const { storage, allow, deny } = config;
-          const state = references.getState();
-          const persistRootState = deepCloneStateWithoutComputed(
-            get(path, state),
-          );
-          const persistTargets = resolvePersistTargets(
-            persistRootState,
-            allow,
-            deny,
-          );
-          const stateToPersist = {};
-          persistTargets.map((key) => {
-            const targetPath = [...path, key];
-            const rawValue = get(targetPath, state);
-            const value = isPlainObject(rawValue)
-              ? deepCloneStateWithoutComputed(rawValue)
-              : rawValue;
-            stateToPersist[key] = value;
+
+    const operation = () => {
+      isPersisting = true;
+      persistPromise = new Promise((resolve) => {
+        timingMethod(() => {
+          pSeries(
+            references.internals._persistenceConfig.map(
+              ({ path, config }) => () => {
+                const { storage, allow, deny } = config;
+                const persistRootState = deepCloneStateWithoutComputed(
+                  get(path, nextState),
+                );
+                const persistTargets = resolvePersistTargets(
+                  persistRootState,
+                  allow,
+                  deny,
+                );
+                const stateToPersist = {};
+                persistTargets.map((key) => {
+                  const targetPath = [...path, key];
+                  const rawValue = get(targetPath, nextState);
+                  const value = isPlainObject(rawValue)
+                    ? deepCloneStateWithoutComputed(rawValue)
+                    : rawValue;
+                  stateToPersist[key] = value;
+                });
+                return Promise.resolve(
+                  storage.setItem(persistKey(path), stateToPersist),
+                );
+              },
+            ),
+          ).finally(() => {
+            isPersisting = false;
+            if (nextPersistOperation) {
+              const next = nextPersistOperation;
+              nextPersistOperation = null;
+              next();
+            } else {
+              resolve();
+            }
           });
-          return [
-            ...acc,
-            Promise.resolve(storage.setItem(persistKey(path), stateToPersist)),
-          ];
-        },
-        [],
-      ),
-    );
-  }, 1000);
+        });
+      });
+    };
+
+    if (isPersisting) {
+      nextPersistOperation = operation;
+    } else {
+      operation();
+    }
+  };
 
   return {
     persist,
     clear: createPersistenceClearer(persistKey, references),
     flush: async () => {
-      persist.flush();
+      if (nextPersistOperation) {
+        nextPersistOperation();
+      }
       await persistPromise;
     },
   };
 }
 
 export function createPersistMiddleware(persistor, references) {
-  return () => (next) => (action) => {
+  return ({ getState }) => (next) => (action) => {
     const state = next(action);
     if (
       action &&
       action.type !== '@action.ePRS' &&
       references.internals._persistenceConfig.length > 0
     ) {
-      persistor.persist(state);
+      persistor.persist(getState());
     }
     return state;
   };
@@ -229,15 +265,17 @@ export function rehydrateStateFromPersistIfNeeded(
   references,
   root,
 ) {
-  // If we have any persist configs we will attemp to perform a state rehydration
-  let resolveRehydration = Promise.resolve();
-  if (references.internals._persistenceConfig.length > 0) {
-    references.internals._persistenceConfig.forEach((persistInstance) => {
+  if (references.internals._persistenceConfig.length === 0) {
+    return Promise.resolve();
+  }
+
+  return pSeries(
+    references.internals._persistenceConfig.map((persistInstance) => () => {
       const { path, config } = persistInstance;
       const { mergeStrategy, storage } = config;
 
       if (root && (path.length < 1 || path[0] !== root)) {
-        return;
+        return Promise.resolve();
       }
 
       const state = references.internals._defaultState;
@@ -292,11 +330,9 @@ export function rehydrateStateFromPersistIfNeeded(
 
       const getItemResult = storage.getItem(persistKey(path));
       if (isPromise(getItemResult)) {
-        resolveRehydration = getItemResult.then(rehydate);
-      } else {
-        rehydate(getItemResult);
+        return getItemResult.then(rehydate);
       }
-    });
-  }
-  return resolveRehydration;
+      return Promise.resolve(rehydate(getItemResult));
+    }),
+  );
 }

@@ -12,18 +12,21 @@ import {
   createContextStore,
 } from '../src';
 
-const wait = () =>
+const wait = (time = 18) =>
   new Promise((resolve) => {
-    setTimeout(() => resolve(), 20);
+    setTimeout(() => resolve(), time);
   });
 
-const createMemoryStorage = (initial = {}, config = { async: false }) => {
+const createMemoryStorage = (
+  initial = {},
+  config = { async: false, asyncTime: 18 },
+) => {
   const store = initial;
-  const { async } = config;
+  const { async, asyncTime } = config;
   return {
     setItem: (key, data) => {
       if (async) {
-        return wait().then(() => {
+        return wait(asyncTime).then(() => {
           store[key] = data;
         });
       }
@@ -32,11 +35,11 @@ const createMemoryStorage = (initial = {}, config = { async: false }) => {
     },
     getItem: (key) => {
       const data = store[key];
-      return async ? wait().then(() => data) : data;
+      return async ? wait(asyncTime).then(() => data) : data;
     },
     removeItem: (key) => {
       if (async) {
-        return wait().then(() => {
+        return wait(asyncTime).then(() => {
           delete store[key];
         });
       }
@@ -500,7 +503,7 @@ test('mergeDeep with extended model structure', async () => {
   });
 });
 
-test('mergeShallow with conflicting model structure', () => {
+test('mergeShallow with conflicting model structure', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
     '[EasyPeasyStore]': {
@@ -525,6 +528,8 @@ test('mergeShallow with conflicting model structure', () => {
     ),
   );
 
+  await rehydratedStore.persist.resolveRehydration();
+
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
     counter: 1,
@@ -532,7 +537,7 @@ test('mergeShallow with conflicting model structure', () => {
   });
 });
 
-test('mergeDeep with conflicting model structure', () => {
+test('mergeDeep with conflicting model structure', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
     '[EasyPeasyStore]': {
@@ -561,6 +566,8 @@ test('mergeDeep with conflicting model structure', () => {
       },
     ),
   );
+
+  await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
   expect(rehydratedStore.getState()).toEqual({
@@ -989,7 +996,7 @@ test('dynamic model with sync storage', async () => {
         { storage: memoryStorage },
       ),
     });
-  const addDynamicModel = (store) => {
+  const addDynamicModel = (store) =>
     store.addModel(
       'foo',
       persist(
@@ -1002,7 +1009,6 @@ test('dynamic model with sync storage', async () => {
         { storage: memoryStorage },
       ),
     );
-  };
   const store = makeStore();
 
   // ACT
@@ -1021,7 +1027,8 @@ test('dynamic model with sync storage', async () => {
   });
 
   // ACT
-  addDynamicModel(rehydratedStore);
+  const { resolveRehydration } = addDynamicModel(rehydratedStore);
+  await resolveRehydration();
   expect(rehydratedStore.getState()).toEqual({
     todos: {
       items: ['foo', 'bar'],
@@ -1090,6 +1097,81 @@ test('dynamic model with async storage', async () => {
       msg: 'bob',
     },
   });
+});
+
+test("multiple changes don't cause concurrent persist operations", async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage(undefined, {
+    async: true,
+    asyncTime: 80,
+  });
+
+  const store = makeStore(
+    {
+      storage: memoryStorage,
+    },
+    {
+      counter: 0,
+      change: action((state, payload) => payload),
+    },
+    {
+      disableImmer: true,
+    },
+  );
+
+  // ACT + ASSERTS
+  store.getActions().change({
+    counter: 1,
+  });
+
+  await wait(20);
+
+  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+
+  store.getActions().change({
+    counter: 2,
+  });
+
+  await wait(20);
+
+  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+
+  store.getActions().change({
+    counter: 3,
+  });
+
+  await wait(20);
+
+  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+
+  store.getActions().change({
+    counter: 4,
+  });
+
+  await wait(20);
+
+  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+
+  store.getActions().change({
+    counter: 5,
+  });
+
+  await wait(20);
+
+  // Now we have waited 100ms, so the storage should have persisted the first
+  // change by now
+  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+
+  // It would then fire the last change (i.e. the counter=5 change), which
+  // would take 80ms to persist in the configured storage engine
+  await wait(20);
+  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+  await wait(20);
+  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+  await wait(20);
+  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+  await wait(30);
+  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(5);
 });
 
 test.todo('persist rehydraton with store intialState being set');
