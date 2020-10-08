@@ -9,27 +9,11 @@ export function createComputedPropertyBinder(
   references,
 ) {
   const memoisedResultFn = memoizerific(1)(definition.fn);
-  return function createComputedProperty(o) {
-    Object.defineProperty(o, key, {
+  return function createComputedProperty(parentState, storeState) {
+    Object.defineProperty(parentState, key, {
       configurable: true,
       enumerable: true,
       get: () => {
-        let storeState;
-        if (_computedState.isInReducer) {
-          storeState = _computedState.currentState;
-        } else if (references.getState == null) {
-          return undefined;
-        } else {
-          try {
-            storeState = references.getState();
-          } catch (err) {
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('Error, failed to executed a computed property');
-              console.log(err);
-            }
-            return undefined;
-          }
-        }
         const state = get(parentPath, storeState);
         const inputs = definition.stateResolvers.map((resolver) =>
           resolver(state, storeState),

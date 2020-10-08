@@ -458,3 +458,26 @@ test('writes to a computed property are ignored', () => {
   // assert
   expect(store.getState().count).toBe(1);
 });
+
+test('computed properties operate against their original store state', () => {
+  // ARRANGE
+  const store = createStore({
+    items: ['one'],
+    count: computed((state) => state.items.length),
+    addItem: action((state, payload) => {
+      state.items.push(payload);
+    }),
+  });
+
+  const stateAtAPointInTime = store.getState();
+
+  // ASSERT
+  expect(stateAtAPointInTime.count).toBe(1);
+
+  // ACT
+  store.getActions().addItem('two');
+
+  // ASSERT
+  expect(stateAtAPointInTime.count).toBe(1);
+  expect(store.getState().count).toBe(2);
+});
