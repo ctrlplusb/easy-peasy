@@ -169,7 +169,7 @@ export default function extractDataFromModel(
             _computedState,
             references,
           );
-          bindComputedProperty(parent);
+          bindComputedProperty(parent, _defaultState);
           _computedProperties.push({ key, parentPath, bindComputedProperty });
         } else if (value[reducerSymbol]) {
           _customReducers.push({ key, parentPath, reducer: value.fn });

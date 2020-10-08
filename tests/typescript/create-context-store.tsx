@@ -21,7 +21,7 @@ const Counter = createContextStore<StoreModel>({
   }),
 });
 
-const CounterWithInitializer = createContextStore<
+const CounterWithCustomRuntimeModel = createContextStore<
   StoreModel,
   any,
   RuntimeModel
@@ -84,14 +84,16 @@ function TestDispatch() {
   <CountDisplay />
 </CounterWithInjections.Provider>;
 
-<CounterWithInitializer.Provider runtimeModel={{ count: 1 }}>
+<CounterWithCustomRuntimeModel.Provider runtimeModel={{ count: 1 }}>
   <CountDisplay />
-</CounterWithInitializer.Provider>;
+</CounterWithCustomRuntimeModel.Provider>;
 
-// typings:expect-error
-<CounterWithInitializer.Provider runtimeModel={{ count: 'foo' }}>
+<CounterWithCustomRuntimeModel.Provider
+  // typings:expect-error
+  runtimeModel={{ count: 'foo' }}
+>
   <CountDisplay />
-</CounterWithInitializer.Provider>;
+</CounterWithCustomRuntimeModel.Provider>;
 
 <CounterWithInjections.Provider
   injections={(previousInjections) => ({ foo: 'baz' + previousInjections.foo })}
@@ -99,7 +101,16 @@ function TestDispatch() {
   <CountDisplay />
 </CounterWithInjections.Provider>;
 
-// typings:expect-error
-<CounterWithInjections.Provider injections={{ foo: 1 }}>
+<CounterWithInjections.Provider
+  // typings:expect-error
+  injections={{ foo: 1 }}
+>
+  <CountDisplay />
+</CounterWithInjections.Provider>;
+
+<CounterWithInjections.Provider
+  // This will default to the StoreModel as we didn't specify a model
+  runtimeModel={{ count: 1, inc: action(() => {}) }}
+>
   <CountDisplay />
 </CounterWithInjections.Provider>;

@@ -157,8 +157,8 @@ function createPersistenceClearer(persistKey, references) {
     if (references.internals._persistenceConfig.length === 0) {
       return Promise.resolve();
     }
-    return Promise.all(
-      references.internals._persistenceConfig.map(({ path, config }) =>
+    return pSeries(
+      references.internals._persistenceConfig.map(({ path, config }) => () =>
         Promise.resolve(config.storage.removeItem(persistKey(path))),
       ),
     );
