@@ -5,7 +5,6 @@
   "license": "MIT",
   "main": "dist/easy-peasy.js",
   "umd:main": "dist/easy-peasy.umd.js",
-  "module": "dist/easy-peasy.esm.js",
   "source": "src/index.js",
   "types": "./index.d.ts",
   "sideEffects": false,
@@ -27,7 +26,7 @@
     "typescript"
   ],
   "scripts": {
-    "build": "microbundle --define NODE_ENV=production --format cjs,es,umd --jsx React.createElement",
+    "build": "microbundle --define NODE_ENV=production --format cjs,umd --jsx React.createElement",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "lint": "eslint src",
     "prepublish": "yarn run build",
