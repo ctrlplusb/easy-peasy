@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Easy Peasy',
+  title: 'Easy Peasy v4',
   description: 'Vegetarian friendly state for React',
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
   plugins: [
@@ -24,8 +24,8 @@ module.exports = {
 
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Quick Start', link: '/docs/quick-start' },
       { text: 'Docs', link: '/docs/introduction/' },
+      { text: 'v3 Docs', link: 'https://easy-peasy-v3.now.sh' },
     ],
 
     sidebarDepth: 0,
@@ -34,47 +34,48 @@ module.exports = {
       '/docs/': [
         {
           title: 'Introduction',
+          path: '/docs/introduction/',
           children: [
-            'introduction/',
             'introduction/installation',
-            'introduction/examples',
-            'introduction/prior-art',
+            'introduction/alternatives',
+            'introduction/downsides',
+            'introduction/browser-support',
           ],
         },
         {
-          title: 'Tutorial',
+          title: 'Tutorials',
+          path: '/docs/tutorials/',
           children: [
-            'tutorial/',
-            'tutorial/create-your-store',
-            'tutorial/connecting-your-store',
-            'tutorial/consuming-state',
-            'tutorial/using-actions-to-update-state',
-            'tutorial/using-thunks-to-perform-side-effects',
-            'tutorial/using-computed-properties',
-            'tutorial/using-listeners',
-            'tutorial/redux-dev-tools',
-            'tutorial/final-notes',
+            'tutorials/quick-start',
+            'tutorials/primary-api',
+            'tutorials/extended-api',
+            'tutorials/typescript',
+            'tutorials/testing',
           ],
         },
         {
           title: 'API',
+          path: '/docs/api/',
           children: [
-            'api/',
             {
-              title: 'Store',
+              title: 'Creating Stores',
               children: [
                 'api/create-store',
                 'api/store-config',
                 'api/store-provider',
                 'api/store',
+                'api/create-context-store',
+                'api/use-local-store',
               ],
             },
             {
-              title: 'Models',
+              title: 'Defining Store Models',
               children: [
                 'api/action-on',
                 'api/action',
                 'api/computed',
+                'api/effect-on',
+                'api/generic',
                 'api/listeners',
                 'api/persist',
                 'api/reducer',
@@ -83,7 +84,7 @@ module.exports = {
               ],
             },
             {
-              title: 'Hooks',
+              title: 'Using Stores via Hooks',
               children: [
                 'api/use-store-actions',
                 'api/use-store-dispatch',
@@ -93,64 +94,35 @@ module.exports = {
               ],
             },
             {
-              title: 'Multiple Stores',
-              children: [
-                'api/create-component-store',
-                'api/create-context-store',
-              ],
-            },
-            {
               title: 'Utils',
               children: ['api/create-transform', 'api/debug', 'api/memo'],
             },
+            {
+              title: 'TypeScript Types',
+              children: [
+                'typescript-api/action',
+                'typescript-api/action-on',
+                'typescript-api/actions',
+                'typescript-api/computed',
+                'typescript-api/create-typed-hooks',
+                'typescript-api/effect-on',
+                'typescript-api/generic',
+                'typescript-api/reducer',
+                'typescript-api/state',
+                'typescript-api/thunk',
+                'typescript-api/thunk-on',
+              ],
+            },
           ],
         },
         {
-          title: 'TypeScript Tutorial',
-          children: [
-            'typescript-tutorial/',
-            'typescript-tutorial/create-your-store',
-            'typescript-tutorial/typed-hooks',
-            'typescript-tutorial/adding-typed-actions',
-            'typescript-tutorial/adding-typed-thunks',
-            'typescript-tutorial/using-typed-injections',
-            'typescript-tutorial/typing-thunk-against-the-store',
-            'typescript-tutorial/adding-typed-listeners',
-            'typescript-tutorial/adding-typed-computed',
-            'typescript-tutorial/typing-computed-with-store-state',
-            'typescript-tutorial/final-notes',
-          ],
-        },
-        {
-          title: 'TypeScript API',
-          children: [
-            'typescript-api/',
-            'typescript-api/action',
-            'typescript-api/action-on',
-            'typescript-api/actions',
-            'typescript-api/computed',
-            'typescript-api/create-typed-hooks',
-            'typescript-api/reducer',
-            'typescript-api/state',
-            'typescript-api/thunk',
-            'typescript-api/thunk-on',
-          ],
-        },
-        {
-          title: 'Testing',
-          children: [
-            'testing/',
-            'testing/testing-actions',
-            'testing/testing-components',
-            'testing/testing-computed-properties',
-            'testing/testing-listeners',
-            'testing/testing-thunks',
-          ],
+          title: 'Community Extensions',
+          path: '/docs/community-extensions/',
         },
         {
           title: 'Recipes',
+          path: '/docs/recipes/',
           children: [
-            'recipes/',
             'recipes/connecting-to-reactotron',
             'recipes/generalising-models',
             'recipes/hot-reloading',
@@ -161,8 +133,9 @@ module.exports = {
         },
         {
           title: 'Known Issues',
+          path: '/docs/known-issues/',
           children: [
-            'known-issues/',
+            'known-issues/typescript-optional-computed-properties',
             'known-issues/using-keyof-in-generic-typescript-model',
           ],
         },

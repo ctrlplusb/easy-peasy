@@ -46,7 +46,7 @@ onAddTodo: thunkOn(
 
 ## `targetResolver`
 
-The first argument you provide to a *listener* definition is the `targetResolver` function. 
+The first argument you provide to a *listener* definition is the `targetResolver` function.
 
 ```javascript
 onAddTodo: thunkOn(
@@ -102,7 +102,7 @@ Instead of a `payload` argument, listeners recieve a `target` argument.
 
 ```javascript
 onAddTodo: thunkOn(
-  actions => actions.addTodo, 
+  actions => actions.addTodo,
   //  The target argument
   //                👇
   async (actions, target) => {
@@ -172,6 +172,8 @@ const auditModel = {
 
 ## Listening to specific stages of a thunk
 
+By default when you resolve a thunk as a target your listener will be triggered when the respective thunk succeeds or fails.
+
 It is possible to target specific stages of a thunk (e.g. start, success, fail) when defining your listeners.
 
 The action creators (i.e. the action instances used to dispatch an action with) have their "types" bound against them as properties.
@@ -197,9 +199,6 @@ We can access the type of each action/thunk like so;
 console.log(store.getActions().todos.addTodo.type); // @action.todos.addTodo
 
 // thunks:
-console.log(store.getActions().todos.saveTodo.type); // @thunk.todos.saveTodo
-
-// You can also access the type information for specific stages of a thunk:
 console.log(store.getActions().todos.saveTodo.startType); // @thunk.todos.saveTodo(start)
 console.log(store.getActions().todos.saveTodo.successType); // @thunk.todos.saveTodo(success)
 console.log(store.getActions().todos.saveTodo.failType); // @thunk.todos.saveTodo(fail)
@@ -219,15 +218,11 @@ As you can see thunks have multiple types, each representing an action which wil
 
    Represents an action that is fired when the thunk has failed
 
-- `type`
-
-  Represents an action that is fired when the thunk has completed (failed or succeeded).
-
 Using this refactoring you can configure your listeners to target a specific action stage of a thunk, for example;
 
 ```javascript
 onAddTodo: actionOn(
-  actions => actions.saveTodo.successType, // 👈 only targeting thunks that succeed
+  actions => actions.saveTodo.successType, // 👈 only targeting thunk success
   (state, target) => {
     state.auditLog.push(`Successfully saved a todo: ${target.payload}`);
   }

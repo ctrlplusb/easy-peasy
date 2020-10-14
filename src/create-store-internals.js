@@ -10,34 +10,36 @@ export default function createStoreInternals({
   references,
 }) {
   const {
-    actionCreatorDict,
-    actionCreators,
-    actionReducersDict,
-    computedState,
-    computedProperties,
-    customReducers,
-    defaultState,
-    listenerActionCreators,
-    listenerActionMap,
-    persistenceConfig,
+    _actionCreatorDict,
+    _actionCreators,
+    _actionReducersDict,
+    _computedState,
+    _computedProperties,
+    _customReducers,
+    _defaultState,
+    _effects,
+    _listenerActionCreators,
+    _listenerActionMap,
+    _persistenceConfig,
   } = extractDataFromModel(model, initialState, injections, references);
 
   const rootReducer = createReducer(
     disableImmer,
-    actionReducersDict,
-    customReducers,
-    computedProperties,
+    _actionReducersDict,
+    _customReducers,
+    _computedProperties,
   );
 
   return {
-    actionCreatorDict,
-    actionCreators,
-    computedProperties,
-    computedState,
-    defaultState,
-    listenerActionCreators,
-    listenerActionMap,
-    persistenceConfig,
+    _actionCreatorDict,
+    _actionCreators,
+    _computedProperties,
+    _computedState,
+    _defaultState,
+    _effects,
+    _listenerActionCreators,
+    _listenerActionMap,
+    _persistenceConfig,
     reducer: reducerEnhancer(rootReducer),
   };
 }

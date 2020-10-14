@@ -8,6 +8,8 @@ addTodo: action((state, payload) => {
 })
 ```
 
+You can mutate the state directly within an action to update your store - mutations are turned into immutable updates against your store via `immer`.
+
 ##  Arguments
 
   - `handler` (Function, *required*)
@@ -101,7 +103,7 @@ addTodo: action((state, payload) => {
 
 ## Switching to an immutable API
 
-By default we use [immer](https://github.com/mweststrate/immer) to provide a mutation based API. 
+By default we use [immer](https://github.com/mweststrate/immer) to provide a mutation based API.
 
 This is completely optional, you can instead return new state from your actions like below.
 
@@ -117,7 +119,7 @@ const model = {
 }
 ```
 
-Should you prefer this approach you can explicitly disable `immer` via the `disableImmer` [configuration](/docs/api/store-config.html) value of [createStore](/docs/api/create-store.html). 
+Should you prefer this approach you can explicitly disable `immer` via the `disableImmer` [configuration](/docs/api/store-config.html) value of [createStore](/docs/api/create-store.html).
 
 ```javascript
 import { createStore } from 'easy-peasy';

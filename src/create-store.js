@@ -9,29 +9,36 @@ import createStoreInternals from './create-store-internals';
 import {
   createPersistor,
   createPersistMiddleware,
-  createPersistenceClearer,
   rehydrateStateFromPersistIfNeeded,
 } from './persistence';
 import { createComputedPropertiesMiddleware } from './computed-properties';
 import { createListenerMiddleware } from './listeners';
 import { deepCloneStateWithoutComputed } from './lib';
+import { createEffectsMiddleware } from './effects';
 
 export default function createStore(model, options = {}) {
   const modelClone = deepCloneStateWithoutComputed(model);
   const {
     compose,
-    devTools = true,
+    devTools = process.env.NODE_ENV !== 'production',
     disableImmer = false,
     enhancers = [],
     initialState = {},
-    injections,
+    injections = {},
     middleware = [],
     mockActions = false,
     name: storeName = `EasyPeasyStore`,
-    reducerEnhancer = rootReducer => rootReducer,
+    version = 0,
+    reducerEnhancer = (rootReducer) => rootReducer,
   } = options;
 
-  const bindReplaceState = modelDef => {
+  if (process.env.NODE_ENV !== 'production') {
+    if (typeof injections !== 'object') {
+      throw new Error('[easy-peasy] Store injections must be an object');
+    }
+  }
+
+  const bindReplaceState = (modelDef) => {
     return {
       ...modelDef,
       ePRS: helpers.action((_, payload) => payload),
@@ -43,13 +50,15 @@ export default function createStore(model, options = {}) {
   let modelDefinition = bindReplaceState(modelClone);
   let mockedActions = [];
 
-  const persistKey = targetPath => `[${storeName}]@${targetPath.join('.')}`;
+  const persistKey = (targetPath) =>
+    `[${storeName}][${version}]${
+      targetPath.length > 0 ? `[${targetPath.join('.')}]` : ''
+    }`;
   const persistor = createPersistor(persistKey, references);
   const persistMiddleware = createPersistMiddleware(persistor, references);
-  const clearPersistance = createPersistenceClearer(persistKey, references);
 
-  const replaceState = nextState =>
-    references.internals.actionCreatorDict['@action.ePRS'](nextState);
+  const replaceState = (nextState) =>
+    references.internals._actionCreatorDict['@action.ePRS'](nextState);
 
   const bindStoreInternals = (state = {}) => {
     references.internals = createStoreInternals({
@@ -62,7 +71,7 @@ export default function createStore(model, options = {}) {
     });
   };
 
-  const mockActionsMiddleware = () => () => action => {
+  const mockActionsMiddleware = () => () => (action) => {
     if (action != null) {
       mockedActions.push(action);
     }
@@ -83,9 +92,10 @@ export default function createStore(model, options = {}) {
 
   const easyPeasyMiddleware = [
     createComputedPropertiesMiddleware(references),
-    reduxThunk,
     ...middleware,
+    reduxThunk,
     createListenerMiddleware(references),
+    createEffectsMiddleware(references),
     persistMiddleware,
   ];
 
@@ -95,36 +105,36 @@ export default function createStore(model, options = {}) {
 
   const store = reduxCreateStore(
     references.internals.reducer,
-    references.internals.defaultState,
+    references.internals._defaultState,
     composeEnhancers(applyMiddleware(...easyPeasyMiddleware), ...enhancers),
   );
 
   store.subscribe(() => {
-    references.internals.computedState.isInReducer = false;
+    references.internals._computedState.isInReducer = false;
   });
 
   references.dispatch = store.dispatch;
   references.getState = store.getState;
 
   const bindActionCreators = () => {
-    Object.keys(store.dispatch).forEach(actionsKey => {
+    Object.keys(store.dispatch).forEach((actionsKey) => {
       delete store.dispatch[actionsKey];
     });
-    Object.keys(references.internals.actionCreators).forEach(key => {
-      store.dispatch[key] = references.internals.actionCreators[key];
+    Object.keys(references.internals._actionCreators).forEach((key) => {
+      store.dispatch[key] = references.internals._actionCreators[key];
     });
   };
 
   bindActionCreators();
 
-  const rebindStore = removeKey => {
+  const rebindStore = (removeKey) => {
     const currentState = store.getState();
     if (removeKey) {
       delete currentState[removeKey];
     }
     bindStoreInternals(currentState);
     store.replaceReducer(references.internals.reducer);
-    replaceState(references.internals.defaultState);
+    replaceState(references.internals._defaultState);
     bindActionCreators();
   };
 
@@ -145,23 +155,34 @@ export default function createStore(model, options = {}) {
       }
       modelDefinition[key] = modelForKey;
       rebindStore();
+      // There may have been persisted state for a dynamic model. We should try
+      // and rehydrate the specifc node
+      const addModelRehydration = rehydrateStateFromPersistIfNeeded(
+        persistKey,
+        replaceState,
+        references,
+        key,
+      );
+      return {
+        resolveRehydration: () => addModelRehydration,
+      };
     },
     clearMockedActions: () => {
       mockedActions = [];
     },
-    getActions: () => references.internals.actionCreators,
-    getListeners: () => references.internals.listenerActionCreators,
+    getActions: () => references.internals._actionCreators,
+    getListeners: () => references.internals._listenerActionCreators,
     getMockedActions: () => [...mockedActions],
     persist: {
-      clear: clearPersistance,
-      flush: () => persistor.flush(),
+      clear: persistor.clear,
+      flush: persistor.flush,
       resolveRehydration: () => resolveRehydration,
     },
-    reconfigure: newModel => {
+    reconfigure: (newModel) => {
       modelDefinition = bindReplaceState(newModel);
       rebindStore();
     },
-    removeModel: key => {
+    removeModel: (key) => {
       if (!modelDefinition[key]) {
         if (process.env.NODE_ENV !== 'production') {
           // eslint-disable-next-line no-console

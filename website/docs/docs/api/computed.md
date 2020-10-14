@@ -79,7 +79,7 @@ const todos = {
   items: [{ id: 1, text: 'answer questions' }],
   // Note how we are returning a function instead of state
   //                          👇
-  todoById: computed(state => id => state.items.find(todo => todo.id === id)) 
+  todoById: computed(state => id => state.items.find(todo => todo.id === id))
 }
 ```
 
@@ -104,7 +104,7 @@ const todos = {
   //                          👇
   todoById: computed(state => memo(
     id => state.items.find(todo => todo.id === id),
-    100 // 👈 cache size  
+    100 // 👈 cache size
   ))
 }
 ```
@@ -128,4 +128,74 @@ You can also access the computed property via the [store's](/docs/api/store.html
 
 ```javascript
 console.log(store.getState().products.totalPrice);
+```
+
+## Known Issues
+
+### TypeScript: Defining a computed property as optional
+
+Unfortunately, due to the way our typing system maps your model, you cannot declare a computed property as being optional via the `?` property postfix.
+
+For example:
+
+```typescript
+interface StoreModel {
+  products: Product[];
+  totalPrice?: Computed<StoreModel, number>;
+  //       👆
+  // Note the optional definition
+}
+
+const storeModel: StoreModel = {
+  products: [];
+  // This will result in a TypeScript error 😢
+  totalPrice: computed(
+    state => state.products.length > 0
+      ? calcPrice(state.products)
+      : undefined
+  )
+}
+```
+
+Luckily there is a workaround; simply adjust the definition of your computed property to indicate that the result could be undefined.
+
+```diff
+  interface StoreModel {
+    products: Product[];
+-   totalPrice?: Computed<StoreModel, number>;
++   totalPrice: Computed<StoreModel, number | undefined>;
+  }
+```
+
+### Computed properties break when destructuring a computed property out of state
+
+Say you had a computed property defined in your model like below.
+
+```javascript
+const storeModel = {
+  session: {
+    user: null,
+    isLoggedIn: computed(state => state.user != null)
+  }
+}
+```
+
+If you destructure the computed property when accessing it in your component, like below, it will not work.
+
+```javascript
+function LoggedInBadge() {
+  const { isLoggedIn } = useStoreState(state => state.session);
+  return isLoggedIn ? <LoggedInSvg /> : <LoggedOutSvg />;
+}
+```
+
+This is because computed properties are in actual fact [getter properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get). If you destructure the property you break the getter mechanism. Therefore you may not receive updates to your computed property based on when the state that your computed property depends on updates.
+
+The resolution to this is to instead resolve the computed property directly.
+
+```javascript
+function LoggedInBadge() {
+  const isLoggedIn = useStoreState(state => state.session.isLoggedIn);
+  return isLoggedIn ? <LoggedInSvg /> : <LoggedOutSvg />;
+}
 ```
