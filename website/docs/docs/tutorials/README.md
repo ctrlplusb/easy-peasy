@@ -1,15 +1,41 @@
 # Tutorials
 
-These tutorials provide a deeper insight into using Easy Peasy. Whilst they cover the APIs pretty extensively we suggest that you also reference the individual API docs for further insight into the behaviour and edge cases of each API.
+These tutorials varying degrees of insight into Easy Peasy.
 
-- [Standard Tutorial](/docs/tutorials/standard.html)
+If this is your first time here we suggest that you jump into the
+[Quick Start](/docs/tutorials/quick-start.html).
 
-  Within this tutorial we will teach you the primary API of Easy Peasy, which will likely satisfy the 90% use case. This is a great place to start if you are new to the project.
+- [Quick Start](/docs/tutorials/quick-start.html)
 
-- [Advanced Tutorial](/docs/tutorials/advanced.html)
+  The best place to start if you are a newcomer. It will give you a light and
+  practical introduction to the primary API so that you can familiarize yourself
+  with Easy Peasy without being overloaded with additional information.
 
-  In this tutorial we will dive deeper into the more "complex" APIs of Easy Peasy, typically only necessary for applications with more bespoke state management needs. We'll cover some great concepts which will allow your store to scale with your application.
+  Taking the learnings from here you should be able to jump straight into
+  creating and managing your own Easy Peasy powered state. Once you gained some
+  comfort and wish for some additional insight then we would suggest coming back
+  and working through the other tutorials as needed.
 
-- [TypeScript Tutorial](/docs/tutorial/typescript.html)
+- [Primary API](/docs/tutorials/primary-api.html)
 
-  Here we will expand on the previous two tutorials, demonstrating how we can introduce end to end type safety across our application state via Easy Peasy's TypeScript support.
+  Within this tutorial we go into depth on the primary Easy Peasy API, touching
+  on some of the important characteristics and caveats.
+
+  This is a helpful companion to those that have adopted Easy Peasy and now wish
+  to solidify their understanding of the library.
+
+- [Extended API](/docs/tutorials/extended-api.html)
+
+  In this tutorial we will dive deeper into the aspects of the Easy Peasy API
+  typically used to solve more advanced / specialized use cases.
+
+  Utilization of these APIs should generally be the exception, rather than the
+  rule.
+
+- [TypeScript](/docs/tutorials/typescript.html)
+
+  Easy Peasy comes with extensive TypeScript support, allowing you to achieve a
+  100% end-to-end typed experience.
+
+  This tutorial will provide a full overview on how to combine TypeScript and
+  Easy Peasy.

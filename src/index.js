@@ -1,4 +1,3 @@
-import { setAutoFreeze } from 'immer';
 import {
   createTypedHooks,
   useStoreActions,
@@ -25,12 +24,6 @@ import {
   thunkOn,
   unstable_effectOn,
 } from './helpers';
-
-/**
- * The auto freeze feature of immer doesn't seem to work in our testing. We have
- * explicitly disabled it to avoid perf issues.
- */
-setAutoFreeze(false);
 
 export {
   action,

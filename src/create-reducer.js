@@ -1,5 +1,4 @@
 import { createSimpleProduce, get } from './lib';
-import { actionSymbol, actionOnSymbol } from './constants';
 
 export default function createReducer(
   disableImmer,

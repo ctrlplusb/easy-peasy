@@ -28,6 +28,7 @@ export default function createStore(model, options = {}) {
     middleware = [],
     mockActions = false,
     name: storeName = `EasyPeasyStore`,
+    version = 0,
     reducerEnhancer = (rootReducer) => rootReducer,
   } = options;
 
@@ -50,7 +51,9 @@ export default function createStore(model, options = {}) {
   let mockedActions = [];
 
   const persistKey = (targetPath) =>
-    `[${storeName}]${targetPath.length > 0 ? `[${targetPath.join('.')}]` : ''}`;
+    `[${storeName}][${version}]${
+      targetPath.length > 0 ? `[${targetPath.join('.')}]` : ''
+    }`;
   const persistor = createPersistor(persistKey, references);
   const persistMiddleware = createPersistMiddleware(persistor, references);
 

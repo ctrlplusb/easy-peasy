@@ -44,7 +44,7 @@
     }
   },
   "resolutions": {
-    "@types/react": "16.9.50"
+    "@types/react": "16.9.52"
   },
   "peerDependencies": {
     "react": "^16.8.0"
@@ -56,7 +56,7 @@
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "symbol-observable": "^2.0.3",
-    "ts-toolbelt": "^8.0.6",
+    "ts-toolbelt": "^8.0.7",
     "use-memo-one": "^1.1.1"
   },
   "devDependencies": {
@@ -74,24 +74,24 @@
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.0.4",
     "@testing-library/react-hooks": "^3.4.2",
-    "@types/react": "16.9.50",
+    "@types/react": "16.9.52",
     "@types/react-dom": "^16.9.8",
     "@types/react-redux": "^7.1.9",
     "app-root-dir": "^1.0.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.3",
-    "babel-jest": "^26.3.0",
-    "codecov": "^3.7.2",
-    "eslint": "^7.10.0",
+    "babel-jest": "^26.5.2",
+    "codecov": "^3.8.0",
+    "eslint": "^7.11.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-prettier": "^6.12.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-jsx-a11y": "^6.3.1",
     "eslint-plugin-markdown": "^2.0.0-rc.0",
-    "eslint-plugin-react": "^7.21.2",
+    "eslint-plugin-react": "^7.21.4",
     "eslint-plugin-react-hooks": "^4.1.2",
     "husky": "^4.3.0",
-    "jest": "^26.4.2",
+    "jest": "^26.5.3",
     "lint-staged": "^10.4.0",
     "microbundle": "^0.12.4",
     "prettier": "^2.1.2",

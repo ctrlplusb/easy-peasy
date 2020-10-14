@@ -424,7 +424,7 @@ test('overwrite', async () => {
 test('mergeDeep', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       counter: 1,
       nested: {
         msg: 'hello universe',
@@ -462,7 +462,7 @@ test('mergeDeep', async () => {
 test('mergeDeep with extended model structure', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       counter: 1,
       nested: {
         msg: 'hello universe',
@@ -506,7 +506,7 @@ test('mergeDeep with extended model structure', async () => {
 test('mergeShallow with conflicting model structure', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       counter: 1,
       conflicting: {
         msg: 'hello universe',
@@ -540,7 +540,7 @@ test('mergeShallow with conflicting model structure', async () => {
 test('mergeDeep with conflicting model structure', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       foo: {
         conflicting: 'baz',
         foo: 'bar',
@@ -623,7 +623,7 @@ test('clear', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       counter: 1,
       msg: 'hello universe',
     },
@@ -696,7 +696,7 @@ test('transformers', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       one: '_ITEM ONE_',
       two: 'item two',
     },
@@ -763,7 +763,7 @@ test('transformers order', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       one: '[1,2]',
       two: '[3,4]',
     },
@@ -947,9 +947,9 @@ test('computed properties', async () => {
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
-  expect(memoryStorage.store['[EasyPeasyStore]'].todoCount).toBeUndefined(); // computed shouldn't be stored
+  expect(memoryStorage.store['[EasyPeasyStore][0]'].todoCount).toBeUndefined(); // computed shouldn't be stored
   expect(
-    memoryStorage.store['[EasyPeasyStore]'].nested.todoCount,
+    memoryStorage.store['[EasyPeasyStore][0]'].nested.todoCount,
   ).toBeUndefined();
   expect(rehydratedStore.getState()).toEqual({
     todos: ['write tests', 'write more tests'],
@@ -976,7 +976,7 @@ test('flush', async () => {
 
   // ASSERT
   expect(memoryStorage.store).toEqual({
-    '[EasyPeasyStore]': {
+    '[EasyPeasyStore][0]': {
       counter: 1,
       msg: 'hello universe',
     },
@@ -1126,7 +1126,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
 
   await wait(20);
 
-  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+  expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
   store.getActions().change({
     counter: 2,
@@ -1134,7 +1134,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
 
   await wait(20);
 
-  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+  expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
   store.getActions().change({
     counter: 3,
@@ -1142,7 +1142,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
 
   await wait(20);
 
-  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+  expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
   store.getActions().change({
     counter: 4,
@@ -1150,7 +1150,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
 
   await wait(20);
 
-  expect(memoryStorage.store['[EasyPeasyStore]']).toBeUndefined();
+  expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
   store.getActions().change({
     counter: 5,
@@ -1160,24 +1160,113 @@ test("multiple changes don't cause concurrent persist operations", async () => {
 
   // Now we have waited 100ms, so the storage should have persisted the first
   // change by now
-  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+  expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
 
   // It would then fire the last change (i.e. the counter=5 change), which
   // would take 80ms to persist in the configured storage engine
   await wait(20);
-  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+  expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
   await wait(20);
-  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+  expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
   await wait(20);
-  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(1);
+  expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
   await wait(30);
-  expect(memoryStorage.store['[EasyPeasyStore]'].counter).toBe(5);
+  expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(5);
+});
+
+test.only('store version number change ignores persisted state', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage();
+
+  const model = {
+    counter: 0,
+    inc: action((state) => {
+      state.counter += 1;
+    }),
+  };
+
+  const store = makeStore({ storage: memoryStorage }, model, {
+    version: 1,
+  });
+
+  // ACT
+  store.getActions().inc();
+  await store.persist.flush();
+
+  // ASSERT
+  expect(memoryStorage.store['[EasyPeasyStore][1]']).toEqual({
+    counter: 1,
+  });
+
+  // ACT
+  const storeVersion2 = makeStore({ storage: memoryStorage }, model, {
+    version: 2,
+  });
+  await storeVersion2.persist.resolveRehydration();
+
+  // ASSERT
+  expect(storeVersion2.getState()).toEqual({
+    counter: 0,
+  });
+
+  // ACT
+  const storeVersion1 = makeStore({ storage: memoryStorage }, model, {
+    version: 1,
+  });
+  await storeVersion1.persist.resolveRehydration();
+
+  // ASSERT
+  expect(storeVersion1.getState()).toEqual({
+    counter: 1,
+  });
+});
+
+test.only('mergeDeepDocs', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore][0]': {
+      address: {
+        city: 'cape town',
+      },
+      flagged: true,
+      fruits: ['banana'],
+      id: 'one',
+      name: 'Wonder Woman',
+      counter: null,
+    },
+  });
+
+  const store = makeStore(
+    { storage: memoryStorage },
+    {
+      animal: 'dolphin',
+      address: {
+        city: 'london',
+        postCode: 'e3 1pq',
+      },
+      fruits: ['apple'],
+      id: 1,
+      name: null,
+      counter: 20,
+    },
+  );
+
+  // ACT
+  await store.persist.resolveRehydration();
+
+  // ASSERT
+  expect(store.getState()).toEqual({
+    animal: 'dolphin',
+    address: {
+      city: 'cape town',
+      postCode: 'e3 1pq',
+    },
+    flagged: true,
+    fruits: ['banana'],
+    id: 1,
+    name: 'Wonder Woman',
+    counter: null,
+  });
 });
 
 test.todo('persist rehydraton with store intialState being set');
-
-test.todo('strict mode mergeShallow');
-
-test.todo('strict mode mergeDeep');
-
-test.todo('strict mode overwrite');

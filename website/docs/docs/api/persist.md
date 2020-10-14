@@ -10,23 +10,93 @@ however, you can configure it to use
 [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage),
 or provide a custom storage engine.
 
+- [API](#api)
+  - [Arguments](#arguments)
+  - [Related APIs](#related-apis)
 - [Tutorial](#tutorial)
   - [Configuring your store to persist](#configuring-your-store-to-persist)
   - [Rehydrating your store](#rehydrating-your-store)
   - [Managing model updates](#managing-model-updates)
-- [API](#api)
-- [Merge Strategies](#merge-strategies)
-  - [mergeDeep](#mergedeep)
-  - [shallowMerge](#shallowmerge)
-  - [overwrite](#overwrite)
-- [Merge conflict resolution](#merge-conflict-resolution)
-  - [Conflict resolution](#conflict-resolution)
-- [Ensuring persistence completes prior to application unmount](#ensuring-persistence-completes-prior-to-application-unmount)
-- [Deleting persisted data](#deleting-persisted-data)
-- [Rehydrating dynamic models](#rehydrating-dynamic-models)
-- [Persisting multiple stores](#persisting-multiple-stores)
-- [Custom storage engines](#custom-storage-engines)
-- [Custom data transformers](#custom-data-transformers)
+- [Advanced Tutorial](#advanced-tutorial)
+  - [Merge Strategies](#merge-strategies)
+    - [mergeDeep](#mergedeep)
+    - [mergeShallow](#mergeshallow)
+    - [overwrite](#overwrite)
+  - [Ensuring persistence completes prior to application unmount](#ensuring-persistence-completes-prior-to-application-unmount)
+  - [Deleting persisted data](#deleting-persisted-data)
+  - [Rehydrating dynamic models](#rehydrating-dynamic-models)
+  - [Persisting multiple stores](#persisting-multiple-stores)
+  - [Custom storage engines](#custom-storage-engines)
+  - [Custom data transformers](#custom-data-transformers)
+
+## API
+
+Below is the API of the `persist` helper function.
+
+### Arguments
+
+- `model` (Object, _required_)
+
+  The model that you wish to apply persistence to.
+
+- `config` (Object, _optional_)
+
+  You can provide a second parameter to your `persist` instances, which
+  represents a configuration for the instance. The configuration object supports
+  the following properties:
+
+  - `allow` (Array&lt;string&gt;, _optional_)
+
+    A list of keys, representing the parts of the model that should be
+    persisted. Any part of the model that is not represented in this list will
+    not be persisted.
+
+  - `deny` (Array&lt;string&gt;, _optional_)
+
+    A list of keys, representing the parts of the model that should not be
+    persisted. Any part of the model that is not represented in this list will
+    be persisted.
+
+  - `mergeStrategy` (string, _optional_, default=mergeDeep)
+
+    The strategy that should be employed when rehydrating the persisted state
+    over your store's initial state. It can be one of the following values:
+
+    - `mergeDeep`
+    - `mergeShallow`
+    - `overwrite`
+
+    Please see the [docs](#merge-strategies) below for a full insight and
+    understanding of the various options and their respective implications.
+
+  - `transformers` (Array&lt;Transformer&gt;, _optional_)
+
+    Transformers are use to apply operations to your data during prior it being
+    persisted or hydrated.
+
+    One use case for a transformer is to handle data that can't be parsed to a
+    JSON string. For example a `Map` or `Set`. To handle these data types you
+    could utilise a transformer that converts the `Map`/`Set` to/from an `Array`
+    or `Object`.
+
+    Transformers are applied left to right during data persistence, and are
+    applied right to left during data rehydration.
+
+    [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a
+    robust set of
+    [transformer packages](https://github.com/rt2zz/redux-persist#transforms)
+    that have been built for it. These can be used here.
+
+### Related APIs
+
+Please be aware that [Store instances](/docs/api/store.html) contain additional
+APIs relating to persistence.
+
+For example the `store.persist.flush()` API will immediately execute any queued
+persist operations. This can be useful in the context of actions that cause your
+application to unmount, like the user navigating away from your application.
+
+See the [Store](/docs/api/store.html) docs for more information.
 
 ## Tutorial
 
@@ -241,104 +311,73 @@ Please note that this is entirely optional. If you feel confident that your
 model changes are simple enough to be resolved by the `mergeDeep` strategy then
 there is no need to increment this version number.
 
-## API
+## Advanced Tutorial
 
-Below is the API of the `persist` helper.
+Below we will cover some of the more advanced aspects of the persist api.
 
-Please be aware that [Store instances](/docs/api/store.html) contain additional
-APIs relating to persistence; for example - allowing you to ensure all
-outstanding persist operations complete prior to navigating away from your
-application. We highly recommend you read the examples in the docs below and
-familiarize yourself with the API of [Store instances](/docs/api/store.html).
-
-- `model` (Object, _required_)
-
-  The model that you wish to apply persistence to.
-
-- `config` (Object, _optional_)
-
-  You can provide a second parameter to your `persist` instances, which
-  represents a configuration for the instance. The configuration object supports
-  the following properties:
-
-  - `allow` (Array&lt;string&gt;, _optional_)
-
-    A list of keys, representing the parts of the model that should be
-    persisted. Any part of the model that is not represented in this list will
-    not be persisted.
-
-  - `deny` (Array&lt;string&gt;, _optional_)
-
-    A list of keys, representing the parts of the model that should not be
-    persisted. Any part of the model that is not represented in this list will
-    be persisted.
-
-  - `mergeStrategy` (string, _optional_, default=mergeDeep)
-
-    The strategy that should be employed when rehydrating the persisted state
-    over your store's initial state. It can be one of the following values:
-
-    - `mergeDeep`
-    - `mergeShallow`
-    - `overwrite`
-
-    Please see the [docs](#merge-strategies) below for a full insight and
-    understanding of the various options and their respective implications.
-
-  - `transformers` (Array&lt;Transformer&gt;, _optional_)
-
-    Transformers are use to apply operations to your data during prior it being
-    persisted or hydrated.
-
-    One use case for a transformer is to handle data that can't be parsed to a
-    JSON string. For example a `Map` or `Set`. To handle these data types you
-    could utilise a transformer that converts the `Map`/`Set` to/from an `Array`
-    or `Object`.
-
-    Transformers are applied left to right during data persistence, and are
-    applied right to left during data rehydration.
-
-    [`redux-persist`](https://github.com/rt2zz/redux-persist) already has a
-    robust set of
-    [transformer packages](https://github.com/rt2zz/redux-persist#transforms)
-    that have been built for it. These can be used here.
-
-## Merge Strategies
+### Merge Strategies
 
 When configuring persistence against your model you can choose from 3 different
 merge strategies. Each of them have their own unique merits. We invite you to
 read the docs for each below so that you can choose the strategy that will work
 best for your needs.
 
-### mergeDeep
+#### mergeDeep
 
 This is the _default_ strategy.
 
+The `mergeDeep` strategy attempts to perform an optimistic merge of the
+persisted state against the store model.
+
 The data from the persistence will be merged deeply, recursing through all
-_object_ structures and merging.
+_objects_ and then performing a merge for each item within the _object_.
 
-i.e.
+It will not merge arrays and other structures such as Map/Set. If it finds any
+of these structures it will use the value defined within the persisted state,
+else the value from the store model.
 
-Given a store with the following state defined within the model;
+It will also verify the types of data at each key. If there is a misalignment
+(ignoring null or undefined) then it will opt for using the data from the store
+model instead as this generally indicates that the respective state has been
+refactored.
 
-```json
-{
-  "animal": "dolphin",
-  "address": {
-    "city": "london",
-    "post code": "e3 1pq"
-  }
-}
+Where it finds that the persisted state is missing keys that are present in the
+store model, it will ensure to use the respective state from the store model.
+
+We can demonstrate the above behaviour via the following example.
+
+Given a store with the following definition;
+
+```javascript
+import { persist, createStore } from 'easy-peasy';
+
+const store = createStore(
+  persist({
+    animal: 'dolphin',
+    address: {
+      city: 'london',
+      postCode: 'e3 1pq',
+    },
+    fruits: ['apple'],
+    id: 1,
+    name: null,
+    counter: 20,
+  }),
+);
 ```
 
 And the following persisted state;
 
 ```json
 {
-  "fruit": "apple",
   "address": {
     "city": "cape town"
-  }
+  },
+  "flagged": true,
+  "fruits": ["banana"],
+  "id": "one",
+  "name": "Wonder Woman",
+  "counter": null
 }
 ```
 
@@ -347,22 +386,69 @@ The resulting state will be;
 ```diff
 {
    "animal": "dolphin",
-+  "fruit": "apple",
+
    "address": {
 -    "city": "london",
 +    "city": "cape town",
-     "post code": "e3 1pq"
+
+     "postCode": "e3 1pq"
    }
+
++  "flagged": true,
+
+-  "fruits": ["apple"],
++  "fruits": ["banana"],
+
+   "id": 1,
+
+-  "name": null,
++  "name": "Wonder Woman",
+
+-  "counter": 20
++  "counter": null
 }
 ```
 
-Only _plain objects_ will be recursed and merged; no other types such as Arrays,
-Maps, Sets, Classes etc will be considered when traversing through the model.
+We can break down the reasoning behind each state item like so;
 
-### shallowMerge
+- `animal` - The original value from the store model was maintained as their was
+  no value within the persisted state
+- `address.city` - The persisted state contained a different value for this
+  property, and hence this value was used.
+- `address.postCode` - The original value from the store model was maintained as
+  their was no value within the persisted state
+- `flagged` - The store model didn't contain this property, however, as our
+  persisted state did we copied it across.
+- `fruits` - The persisted state contained a different value for this property,
+  and hence this value was used.
+- `id` - The persisted state contained a different data type for this property,
+  so we assumed the model may have changed and therefore used the store model
+  value.
+- `name` - The persisted state contained a different value for this property,
+  and hence this value was used. Remember `null` and `undefined` don't break the
+  type comparison. We consider this a nullable value.
+- `counter` - The persisted state contained a different value for this property,
+  and hence this value was used. Remember `null` and `undefined` don't break the
+  type comparison. We consider this a nullable value.
 
-The data from the persistence will be _shallowly_ merged with the initial state
-represented by your store's model.
+#### mergeShallow
+
+The `mergeShallow` strategy will compare and merge the properties at the root of
+the model it was bound against.
+
+It will not merge arrays and other structures such as Map/Set. If it finds any
+of these structures it will use the value defined within the persisted state,
+else the value from the store model.
+
+It will also verify the types of data at each key. If there is a misalignment
+(ignoring null or undefined) then it will opt for using the data from the store
+model instead as this generally indicates that the respective state has been
+refactored.
+
+Where it finds that the persisted state is missing keys that are present in the
+store model, it will ensure to use the respective state from the store model.
+
+We can demonstrate the above behaviour via the following example.
 
 i.e.
 
@@ -379,9 +465,13 @@ const store = createStore(
         city: 'london',
         postCode: 'e3 1pq',
       },
+      fruits: ['apple'],
+      id: 1,
+      name: null,
+      counter: 20,
     },
     {
-      mergeStrategy: 'shallowMerge',
+      mergeStrategy: 'mergeShallow',
     },
   ),
 );
@@ -391,10 +481,14 @@ And the following persisted state;
 
 ```json
 {
-  "fruit": "apple",
   "address": {
     "city": "cape town"
-  }
+  },
+  "flagged": true,
+  "fruits": ["banana"],
+  "id": "one",
+  "name": "Wonder Woman",
+  "counter": null
 }
 ```
 
@@ -402,39 +496,63 @@ The resulting state will be;
 
 ```diff
 {
-   "animal": "dolphin"
-+  "fruit": "apple",
-   "address": {
+   "animal": "dolphin",
+
+-  "address": {
 -    "city": "london",
 -    "postCode": "e3 1pq"
+-  },
++  "address": {
 +    "city": "cape town"
-   },
++  },
+
++  "flagged": true,
+
+-  "fruits": ["apple"],
++  "fruits": ["banana"],
+
+   "id": 1,
+
+-  "name": null,
++  "name": "Wonder Woman",
+
+-  "counter": 20
++  "counter": null
 }
 ```
 
-Pay close attention to above.
+We can break down the reasoning behind each state item like so;
 
-The `address.postCode` property from our store's model didn't survive the state
-rehydration process.
+- `animal` - The original value from the store model was maintained as their was
+  no value within the persisted state
+- `address` - As we are doing a `mergeShallow` the `address` from the persisted
+  state is used, replacing the `address` from the store model completely. In the
+  process the `address.postCode` property from our store model is lost.
+- `flagged` - The store model didn't contain this property, however, as our
+  persisted state did we copied it across.
+- `fruits` - The persisted state contained a different value for this property,
+  and hence this value was used.
+- `id` - The persisted state contained a different data type for this property,
+  so we assumed the model may have changed and therefore used the store model
+  value.
+- `name` - The persisted state contained a different value for this property,
+  and hence this value was used. Remember `null` and `undefined` don't break the
+  type comparison. We consider this a nullable value.
+- `counter` - The persisted state contained a different value for this property,
+  and hence this value was used. Remember `null` and `undefined` don't break the
+  type comparison. We consider this a nullable value.
 
-This is because the `shallowMerge` strategy only compares the root properties
-against the model that it was bound. The `postCode` proper is nested within the
-`address`. However, as we are performing a shallow merge we will use the
-`address` value from the persisted state, overriding the `address` value from
-our store's model, and losing the `address.postCode` value that was defined
-within the model.
-
-This behaviour may be okay for your use-case, however, if your store model
-evolves with updates to nested properties then it is entirely possible that
-persisted state may not match the required structure based on the evolved store
-model. This could cause errors within your application if your components
-assumed the existing of a particular state structure.
+The behaviour of `mergeShallow` may be okay for your use-case, however, if you
+update nested models then it is entirely possible that persisted state may not
+match the required structure based on the evolved store model. This could cause
+errors within your application if your components assumed the existing of a
+particular state structure.
 
 We therefore suggest using this strategy _very_ carefully, and encourage you to
 use the `mergeDeep` strategy instead.
 
-The `shallowMerge` strategy is perhaps more useful if you would like to define
-your persistence on the "leaf" models of your store's model, like so;
+The `mergeShallow` strategy is perhaps more useful if you would like to define
+your persistence on the "leaf" models of your store, like so;
 
 ```javascript
 import { persist, createStore } from 'easy-peasy';
@@ -445,21 +563,18 @@ const model = {
       city: 'london',
       postCode: 'e3 1pq',
     },
-    { mergeStrategy: 'shallowMerge' },
+    { mergeStrategy: 'mergeShallow' },
   ),
   todos: persist(
     {
       items: [],
     },
-    { mergeStrategy: 'shallowMerge' },
+    { mergeStrategy: 'mergeShallow' },
   ),
 };
 ```
 
-This form is far more robust and gives you much more flexibility and control
-over your persistence.
-
-### overwrite
+#### overwrite
 
 Utilizing this strategy will cause the state from your store model to be
 _completely_ overwritten by the persisted state.
@@ -491,10 +606,9 @@ And the following persisted state;
 
 The resulting state will be:
 
-```diff
+```json
 {
--  "fruit": "pear",
-+  "city": "cape town"
+  "city": "cape town"
 }
 ```
 
@@ -503,19 +617,7 @@ initial state with that of the persisted state. If the store model has diverged
 you could open yourself up to errors/bugs. Please take extra care and
 consideration when using this strategy.
 
-## Merge conflict resolution
-
-When utilizing the `mergeDeep` (the default) or `merge` strategies it can be
-helpful to have some insight into how the rehydration algorithm works.
-Especially in the case that you have been making updates to your store's model.
-
-If a user of your application has persisted state
-
-### Conflict resolution
-
-<!-- ## `mergeDeep` traversal -->
-
-## Ensuring persistence completes prior to application unmount
+### Ensuring persistence completes prior to application unmount
 
 **_Persistence operations are asynchronous._** Therefore if you perform a state
 update prior to unmounting your application it is possible that the state change
@@ -554,7 +656,7 @@ export const redirectTo = async (href) => {
 };
 ```
 
-## Deleting persisted data
+### Deleting persisted data
 
 Should you wish to remove all persisted data you can utilise the
 [store instance's API](/docs/api/store.html) to do so.
@@ -570,7 +672,7 @@ store.persist.clear().then(() => {
 Note that a `Promise` was returned, which when resolved indicates that the data
 removal has completed.
 
-## Rehydrating dynamic models
+### Rehydrating dynamic models
 
 The `persist` API will work with dynamic models, i.e. models that were added to
 the store via the [`store.addModel`](/docs/api/store.html) API after the store
@@ -598,7 +700,7 @@ resolveRehydration().then(() => {
 });
 ```
 
-## Persisting multiple stores
+### Persisting multiple stores
 
 If you utilise multiple stores, each with their own persistence configuration,
 you will need to ensure that each store is configured to have a unique name. The
@@ -616,7 +718,7 @@ const storeTwo = createStore(persist(model), {
 });
 ```
 
-## Custom storage engines
+### Custom storage engines
 
 You can create a custom storage engine by defining an object that satisfies the
 following interface:
@@ -651,7 +753,7 @@ const storeModel = persist(model, {
 });
 ```
 
-## Custom data transformers
+### Custom data transformers
 
 Transforms allow you to customize the state object that gets persisted and
 rehydrated. They allow you to for instance convert store data from a complex

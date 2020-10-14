@@ -101,5 +101,5 @@ evolution of this library then please consider
 </a>
 
 <p class="action">
-  <a href="/docs/introduction/quick-start.html" class="action-button">Quick Start</a>
+  <a href="/docs/tutorials/quick-start.html" class="action-button">Quick Start</a>
 </p>

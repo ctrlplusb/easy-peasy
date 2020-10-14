@@ -1,10 +1,10 @@
 import {
-  createStore,
   Action,
   action,
+  createStore,
+  ReduxAction,
   Thunk,
   thunk,
-  ReduxAction,
 } from 'easy-peasy';
 import { Reducer } from 'redux';
 
@@ -43,6 +43,7 @@ const configuredStore = createStore(model, {
   injections: { foo: 'bar' },
   mockActions: true,
   name: 'bob',
+  version: 1,
   reducerEnhancer: (reducer) => reducer,
 });
 

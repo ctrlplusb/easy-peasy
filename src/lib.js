@@ -1,5 +1,16 @@
 import { isPlainObject } from 'is-plain-object';
-import { createDraft, finishDraft, isDraft } from 'immer';
+import { Immer, isDraft } from 'immer';
+
+/**
+ * We create our own immer instance to avoid potential issues with autoFreeze
+ * becoming default enabled everywhere. We want to disable autofreeze as it
+ * does not suit the design of Easy Peasy.
+ * https://github.com/immerjs/immer/issues/681#issuecomment-705581111
+ */
+const easyPeasyImmer = new Immer({
+  useProxies: true,
+  autoFreeze: false,
+});
 
 export const deepCloneStateWithoutComputed = (source) => {
   const recursiveClone = (current) => {
@@ -76,15 +87,15 @@ export function createSimpleProduce(disableImmer = false) {
       return state;
     }
     if (path.length === 0) {
-      const draft = createDraft(state);
+      const draft = easyPeasyImmer.createDraft(state);
       const result = fn(draft);
       if (result) {
-        return isDraft(result) ? finishDraft(result) : result;
+        return isDraft(result) ? easyPeasyImmer.finishDraft(result) : result;
       }
-      return finishDraft(draft);
+      return easyPeasyImmer.finishDraft(draft);
     }
     const parentPath = path.slice(0, path.length - 1);
-    const draft = createDraft(state);
+    const draft = easyPeasyImmer.createDraft(state);
     const parent = get(parentPath, state);
     const current = get(path, draft);
     const result = fn(current);
@@ -92,7 +103,7 @@ export function createSimpleProduce(disableImmer = false) {
     if (result) {
       parent[path[path.length - 1]] = result;
     }
-    return finishDraft(draft);
+    return easyPeasyImmer.finishDraft(draft);
   };
 }
 

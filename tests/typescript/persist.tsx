@@ -1,4 +1,4 @@
-import { persist, createTransform, useStoreRehydrated } from 'easy-peasy';
+import { createTransform, persist, useStoreRehydrated } from 'easy-peasy';
 
 persist({
   foo: 'bar',
@@ -9,9 +9,9 @@ const model = persist(
     foo: 'bar',
   },
   {
-    blacklist: ['foo'],
-    whitelist: ['foo'],
-    mergeStrategy: 'merge',
+    allow: ['foo'],
+    deny: ['foo'],
+    mergeStrategy: 'mergeShallow',
     storage: 'sessionStorage',
     transformers: [
       {

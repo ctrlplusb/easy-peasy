@@ -17,6 +17,13 @@ the underlying Redux store.
   you are creating multiple stores as you will easily be able to distinguish and
   toggle between the different store instances within the Redux dev tools.
 
+- `version` (number, _optional_, default=0)
+
+  Allows you to tag the "version" of your store. This is particularly useful
+  when utilizing the persist APIs as they reference the version number to ensure
+  that any persisted state matches the required store version prior to
+  rehydrating the store.
+
 - `devTools` (boolean, _optional_, default=false)
 
   Setting this to `true` will enable the

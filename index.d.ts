@@ -336,6 +336,7 @@ export interface EasyPeasyConfig<
   middleware?: Array<Middleware<any, any, any>>;
   mockActions?: boolean;
   name?: string;
+  version?: number;
   reducerEnhancer?: (reducer: ReduxReducer<any, any>) => ReduxReducer<any, any>;
 }
 
@@ -1082,11 +1083,11 @@ export interface Transformer {
 }
 
 export interface PersistConfig<Model extends object> {
-  blacklist?: Array<keyof Model>;
-  mergeStrategy?: 'merge' | 'mergeDeep' | 'overwrite';
+  allow?: Array<keyof Model>;
+  deny?: Array<keyof Model>;
+  mergeStrategy?: 'mergeDeep' | 'mergeShallow' | 'overwrite';
   storage?: 'localStorage' | 'sessionStorage' | PersistStorage;
   transformers?: Array<Transformer>;
-  whitelist?: Array<keyof Model>;
 }
 
 export interface TransformConfig {

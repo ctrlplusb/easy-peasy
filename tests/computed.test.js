@@ -38,7 +38,7 @@ test('patched immer works as expected', () => {
 
   // assert
   expect(immerNoUpdate).toBe(original);
-  expect(getterCallCount).toBe(1);
+  expect(getterCallCount).toBe(2);
 
   const newState = {
     ...original,
@@ -47,7 +47,7 @@ test('patched immer works as expected', () => {
 
   // assert
   expect(newState.fullName).toBe('Bob Fruits');
-  expect(getterCallCount).toBe(2);
+  expect(getterCallCount).toBe(3);
 
   // act
   const immerWithUpdate = produce(original, (draft) => {
@@ -58,7 +58,7 @@ test('patched immer works as expected', () => {
   expect(immerWithUpdate).not.toBe(original);
   expect(immerWithUpdate.firstName).toBe('Mary');
   expect(immerWithUpdate.fullName).toBe('Bob Fruits');
-  expect(getterCallCount).toBe(3);
+  expect(getterCallCount).toBe(4);
 });
 
 test('defining and accessing a computed property', () => {
