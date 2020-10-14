@@ -116,7 +116,7 @@ it('listening to a failed thunk', async () => {
   const audit = {
     logs: [],
     onMathAdd: actionOn(
-      (_, storeActions) => storeActions.math.add,
+      (_, storeActions) => storeActions.math.add.failType,
       (state, target) => {
         expect(target.type).toBe('@thunk.math.add(fail)');
         expect(target.payload).toBe(10);
@@ -231,7 +231,6 @@ it('action listening to multiple actions', async () => {
         expect(target.resolvedTargets).toEqual([
           '@action.actionTarget',
           '@thunk.thunkTarget(success)',
-          '@thunk.thunkTarget(fail)',
         ]);
         state.logs.push(target.payload);
       },
@@ -272,11 +271,7 @@ it('thunk listening to multiple actions', async () => {
     {
       type: store.getActions().actionTarget.type,
       payload: 'action payload',
-      resolvedTargets: [
-        '@action.actionTarget',
-        '@thunk.thunkTarget(success)',
-        '@thunk.thunkTarget(fail)',
-      ],
+      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget(success)'],
       result: undefined,
       error: undefined,
     },
@@ -294,11 +289,7 @@ it('thunk listening to multiple actions', async () => {
     {
       type: store.getActions().thunkTarget.successType,
       payload: 'thunk payload',
-      resolvedTargets: [
-        '@action.actionTarget',
-        '@thunk.thunkTarget(success)',
-        '@thunk.thunkTarget(fail)',
-      ],
+      resolvedTargets: ['@action.actionTarget', '@thunk.thunkTarget(success)'],
       result: undefined,
       error: undefined,
     },

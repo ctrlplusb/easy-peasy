@@ -47,7 +47,7 @@ export function bindListenerDefinitions(
         ) {
           if (target.definition.meta.successType) {
             acc.push(target.definition.meta.successType);
-            acc.push(target.definition.meta.failType);
+            // acc.push(target.definition.meta.failType);
           } else {
             acc.push(target.definition.meta.type);
           }

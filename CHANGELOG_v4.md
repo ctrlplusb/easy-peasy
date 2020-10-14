@@ -1,24 +1,27 @@
-This PR is currently published as `easy-peasy@4.0.0-beta.1`
+The long wait is over.
 
-We would appreciate early testing and feedback. 💜
+v4 has arrived! 🎉
 
-The updated website for this PR can be found at https://easy-peasy-v4.now.sh/
+This release includes an insane amount of improvements and fixes, with an
+ironing over some of the APIs and features that were introduced in v3.
+
+This release will also include a completely overhauled website. This work is
+still in progress and is likely to continue even after the v4 release. It's a
+lot of work and I don't want it to be the sole reason for us holding back on the
+v4 release.
+
+Unfortunately there are breaking changes, however, I expect the breaking changes
+will only impact a subset of our userbase that are using the more advanced
+features of Easy Peasy.
 
 ## Breaking Changes
 
-### Upgrades to `immer@7`
-
-We use Immer internally to support the mutation based API
-
 ### Replaced `createComponentStore` with a `useLocalStore` hook
 
-The API for `createComponentStore` was a bit verbose and limited.We have
-introduced a new API, `useLocalStore`, which replaces this one.
+The API for `createComponentStore` was a verbose and limited.
 
-The `useLocalStore` hook allows you to create a store to represent the state for
-an individual React component. This is essentially an alternative to the
-official `useState` and `useReducer` hooks provided by React for component-level
-state.
+Taking learnings from it we have replaced it with a new API; namely
+`useLocalStore`.
 
 ```javascript
 function MyCounter() {
@@ -39,10 +42,124 @@ function MyCounter() {
 ```
 
 Please see the
-[API documentation](https://easy-peasy-v4.now.sh/docs/api/use-local-store.html)
-for more information.
+[API documentation](https://easy-peasy.now.sh/docs/api/use-local-store.html) for
+more information.
 
-Closes #451 Closes #439
+### Persist API rewrite
+
+The [persist](https://easy-peasy.now.sh/docs/api/persist.html) API received a
+huge overhaul to the point that it should essentially be considered a rewrite.
+
+We suggest that you read the
+[updated docs](https://easy-peasy.now.sh/docs/api/persist.html) and update your
+implementations accordingly.
+
+Some notable changes include:
+
+- API is now always asynchronous in terms of persisting and rehydrating. This
+  allows us to support a single recommended API structure for implementing
+  persisting and rehydration.
+- Persist operations are now optimised utilizing a combination of the browser's
+  requestIdleCallback or requestAnimationFrame APIs.
+- The merge strategies have been renamed as follows:
+  - mergeDeep
+  - mergeShallow
+  - overwrite
+- The mergeDeep strategy is now the default
+- Merging strategies are now sensitive to model updates. If we note a type
+  difference comparing the store model's initial state to persisted state we
+  will use the store model's initial state instead as it likely indicates an
+  evolved model. Null or undefined values are excluded from this comparison.
+- A "version" number has been introduced on the creatStore config. If you
+  utilize this value we will compare the persisted state version number against
+  the current store version number - if they do not align the persisted state
+  will be ignored. This gives you absolute guarantees if you wish to ship a
+  refactored store model without worrying about breaking clients with already
+  persisted state.
+- New APIs and support has been added for managing rehydration of dynamically
+  added models.
+- A huge number of bug fixes. Some of these marked as critical.
+
+### Upgraded to `immer@7`
+
+We used to managed a forked version of [Immer](https://github.com/immerjs/immer)
+as it previously did not support computed properties. This is no longer the
+case! We now rely on the native Immer package.
+
+A side effect of this is that you may experience browser support issues for
+browsers that do not support support
+[Proxy](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy).
+
+If you require your application to work on such environments (e.g. Internet
+Explorer 11 or some versions of React Native on Android) then please ensure that
+you import and execute the `enableES5` feature from Immer.
+
+```javascript
+import { enableES5 } from 'immer';
+
+enableES5();
+```
+
+### Moved internal `redux-thunk` binding to grant user defined middleware higher priority
+
+This will allow you to influence thunks prior to their execution. For advanced
+cases.
+
+This likely will have zero impact on anyone, but given the nature of the change
+we are marking it as breaking.
+
+### Thunk action states, error handling, and listener behaviour updates
+
+Easy Peasy will no longer catch any errors within your thunks and dispatch a
+"failed" state action. If you wish to explicitly mark your thunk as failed, so
+that an action listener can respond to it accordingly then you need to use the
+new `fail` helper that is provided to thunks.
+
+```javascript
+const model = {
+  myNaughtyThunk: thunk((actions, payload, helpers) => {
+    try {
+      await axios.get('/an-endpoint-that-fails');
+    } catch (err) {
+      // This will dispatch a @thunk.myNaughtyThunk(fail) action with the err attached
+      fail(err);
+    }
+  })
+};
+```
+
+Error handling is now explicitly your responsibility.
+
+The actions that are dispatch to represent thunk states have been updated.
+Taking the example above here are the possible action types that will be
+dispatched and visible in the redux dev tools:
+
+- `@thunk.myThunk(start)`
+
+  Dispatched at the start of a thunk execution.
+
+- `@thunk.myThunk(success)`
+
+  Dispatched when a thunk has completed - i.e. with no uncaught errors
+  occurring.
+
+- `@thunk.myThunk(fail)`
+
+  Dispatched if the `fail` helper was called. In this case the
+  `@thunk.myThunk(success)` would not have been dispatched.
+
+Listeners (actionOn and thunkOn) will now by default only respond to the
+"success" event of a thunk. If you wish to handle the "fail" events then you
+will need to explicitly resolve them.
+
+```javascript
+onAddTodoFailed: actionOn(
+  (actions) => actions.saveTodo.failType,
+  (state, target) => {
+    state.auditLog.push(`Failed to save todo: ${target.payload}`);
+  },
+);
+```
 
 ## New Features
 
@@ -95,9 +212,38 @@ const todosModel = {
 };
 ```
 
-Closes #419
+### Context stores now allow you to override injections at runtime
 
-### TypeScript: Added support for generics in models
+Simply pass your injections as a prop to the `Provider` for the context store.
+
+See the
+[updated docs](https://easy-peasy.now.sh/docs/api/create-context-store.html) for
+more information.
+
+## Fixes
+
+### Computed properties are now immutable bound to state
+
+Previously if you executed a computed property it would always resolve against
+the latest version of the store state. Now it will operate against the state at
+the moment of time it was pulled out from.
+
+In doing this we also addressed a strange case where you may get an error for
+invalid computed property access.
+
+### Internals rewritten to utilize incoming model definitions immutably
+
+This will address any issues where you may have been providing model definitions
+to different stores.
+
+## TypeScript
+
+### Loads of fixes and improvements to the typings
+
+Phew. Too many to mention. Just take our word for it. Tons of nitty issues have
+been addressed.
+
+### Added support for generics in models
 
 Previously if you defined a model containing generic state, like below,
 TypeScript would break within your actions.
@@ -164,148 +310,13 @@ value of the generic model state. Within your actions and anywhere you consume
 the state you would treat the value as the underlying generic value (i.e. a
 `number` in the example).
 
-Closes #300 Closes #361
-
-### Improves the persist APIs on the store instances
-
-We had undocumented APIs regarding persistence that were being exposed on the
-store instances. These are helpful in many cases, such as being able to flush
-persistence prior to navigating away from your application, or awaiting for
-persisted data to be rehydrated prior to rendering your application. We highly
-recommend you read the respective Store API docs.
-
-Closes #454
-
-### Removes limit on TypeScript model mapping
+### Removed the limit on TypeScript model depth
 
 Previously, if you had a model more than 6 levels deep, in terms of object
 structure, the TypeScript mapping wouldn't work as expected. This is no longer
 the case.
 
-I still think having that deep of a model is a bit excessive though. 😅
-
-### Replaces `immer-peasy` with official `immer`
-
-We have replaced our forked/patched version of immer with the official version.
-Thanks to their newly released support for computed properties. 🎉
-
-Closes #462 Closes #446 Closes #440
-
-### Adds ability to await on rehydration of persisted data for dynamically added model
-
-When utilising `persist` against a dynamically added model, i.e. via
-`store.addModel`, you may need to await on the rehydration due to utilising an
-asynchronous storage engine.
-
-You can now do so via the returned `resolveRehydration` helper.
-
-```typescript 👇
-const { resolveRehydration } = store.addModel('products', productsModel);
-//            👆
-// Deconstruct the returned object to get a handle on resolveRehydration
-
-//     as we are using an asynchronous storage engine we will await the
-// 👇 the promise returned by the resolveRehydration function.
-resolveRehydration().then(() => {
-  console.log('Rehydration is complete');
-});
-```
-
-Closes #444
-
-## Patches
-
-## Persist
-
-The persist feature has had a fairly major overhaul that includes breaking
-changes and many fixes.
-
-### Fixed `persist` data not being rehydrated for dynamically added models
-
-Data persisted within models added via the `store.addModel` API were not having
-their data rehydrated. This is now fixed.
-
-### Fixed `merge` and `mergeDeep` strategies for `persist` rehydration
-
-A bug was identified where it was possible for persisted state to be misaligned
-with an evolving datamodel in terms of data types.
-
-For example, you could have the following state persisted:
-
-```json
-{
-  "counter": {
-    "count": 1337
-  },
-  "todos": ["one", "two", "three"]
-}
-```
-
-And since the state was persisted there occurred an update to the data model:
-
-```typescript
-const storeModel = {
-  counter: {
-    count: 1,
-    increment: action(/* ... */),
-  },
-  todos: {
-    items: ['one', 'two', 'three'],
-    addTodo: action(/* ... */),
-  },
-};
-```
-
-Note how the data structure for `todos` has evolved since the persisted state.
-It is now an object with nested properties.
-
-Previously, for `merge` and `mergeDeep` it did not take into consideration the
-evolving store model and would rehydrate a persisted state despite it being
-misaligned in terms of tree data type structure. With the fix if a misaligned
-data type is found then the data specified on the store model is used instead of
-the persisted state.
-
-The logic for this ignores values where they are `null` or `undefined`, but
-otherwise will compare data types of the model vs persisted state to ensure the
-types match. If the types do not match then the store model is used over the
-persisted value. So for our example above the rehydrated state would be the
-following:
-
-```json
-{
-  "counter": {
-    "count": 1337
-  },
-  "todos": {
-    "items": ["one", "two", "three"]
-  }
-}
-```
-
-Note how `todos.items` matches the store model rather than the persisted state.
-
-### Changed the default merge strategy to `mergeDeep`
-
-In using and testing the persist feature we identified that
-
-This will ensure that the types are aligned right down the entire tree of the
-persisted state vs your store model.
-
-### Moved internal `redux-thunk` binding to grant user defined middleware higher priority
-
-This will allow you to influence thunks prior to their execution. For advanced
-cases.
-
-### TypeScript: Loads of fixes and improvements to the typings
-
-The typings are being combed over multiple times and various fixes and
-improvements are being made. This is an ongoing task and you can expect many
-more improvements to be made still, including the addition of proper
-documentation on each type within the typings. This should improve the dev
-experience within your editor as you will get inline guidance on the APIs along
-with links to the official documentation for them.
-
-### TypeScript: Fixes the statemapper eating up "classes"
+### Fixed the statemapper eating up "classes"
 
 If you assigned a class instance to your state the typings from `getState` /
 `useStoreState` etc would report your type as being something similar to:
@@ -315,89 +326,18 @@ If you assigned a class instance to your state the typings from `getState` /
 With this fix your state will correctly be reported back as the actual class
 type (`Person` in the examples case).
 
-Closes #402
+### Fixed action mapper so that state isn't display when viewing actions
 
-### TypeScript: Fixes action mapper so that state isn't display when viewing actions
+The VSCode intellisense for actions were showing state. The types have been
+patched so that only actions will be displayed.
 
-The VSCode intellisense for actions was showing state. The types have been
-patched so that only actions will beb displayed.
-
-### TypeScript: Fixes state mapper where actions were still being represented on state
+### Fixed state mapper where actions were still being represented on state
 
 There were cases if you had a nested action and only primitive state next to it
 that you would see the nested action. This is no longer the case.
 
-### TypeScript: Fixes computed properties state resolvers not inferring resolved types correctly
+### Fixed computed properties state resolvers not inferring resolved types correctly
 
 If you used a state resolver array within your computed properties, whilst using
 TypeScript, the inferred types based on the resolved state was incorrect. This
 is now fixed.
-
-Closes #427
-
-### Website: Adds a known issue in regards to computed properties + Typescript
-
-Unfortunately, due to the way our typing system maps your model, you cannot
-declare a computed property as being optional via the `?` property postfix.
-
-For example:
-
-```typescript
-interface StoreModel {
-  products: Product[];
-  totalPrice?: Computed<StoreModel, number>;
-  //       👆
-  // Note the optional definition
-}
-
-const storeModel: StoreModel = {
-  products: [];
-  // This will result in a TypeScript error 😢
-  totalPrice: computed(
-    state => state.products.length > 0
-      ? calcPrice(state.products)
-      : undefined
-  )
-}
-```
-
-Luckily there is a workaround; simply adjust the definition of your computed
-property to indicate that the result could be undefined.
-
-```diff
-  interface StoreModel {
-    products: Product[];
--   totalPrice?: Computed<StoreModel, number>;
-+   totalPrice: Computed<StoreModel, number | undefined>;
-  }
-```
-
-### Fixes computed properties error for dynamically added model
-
-Thanks goes to @jchamb for this fix. 💜
-
-Computed properties were throwing errors intermittently when the
-`store.addModel` API was being used. This fix puts a guard in place to protect
-against the error.
-
-### Fixes an error on the website -> docs -> quick-start.md
-
-Thanks goes to @hualu00 for this fix. 💜
-
-### Replaces `rollup` with `microbundle` to bundle library
-
-Saves some more valuable bytes in bundlesize.
-
-Closes #452
-
-### Updates website to include known issue on computed property destructuring
-
-Closes #386
-
-### Improves the `persist` API documentation
-
-Closes #454
-
-### Adds "Community Extensions" page to website
-
-Closes #359

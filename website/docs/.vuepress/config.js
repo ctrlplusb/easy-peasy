@@ -134,7 +134,10 @@ module.exports = {
         {
           title: 'Known Issues',
           path: '/docs/known-issues/',
-          children: ['known-issues/using-keyof-in-generic-typescript-model'],
+          children: [
+            'known-issues/typescript-optional-computed-properties',
+            'known-issues/using-keyof-in-generic-typescript-model',
+          ],
         },
       ],
     },
