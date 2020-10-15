@@ -85,15 +85,15 @@ function TodoList() {
 
 <p>&nbsp;</p>
 
-## Our Backers ❤️
+## Our Sponsors ❤️
 
 We have only but great appreciation to those who support this project. If you
 have the ability to help contribute towards the continued maintenance and
 evolution of this library then please consider
-[[becoming a backer](https://opencollective.com/controlplusb#backer)].
+[[becoming a sponsor](https://opencollective.com/easy-peasy#backer)].
 
-<a href="https://opencollective.com/controlplusb#backers">
-    <img src="https://opencollective.com/controlplusb/backers.svg?width=950" />
+<a href="https://opencollective.com/easy-peasy#backers">
+    <img src="https://opencollective.com/easy-peasy/backers.svg?width=950" />
 </a>
 
 <p>&nbsp;</p>
