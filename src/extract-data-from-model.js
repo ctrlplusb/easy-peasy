@@ -166,8 +166,6 @@ export default function extractDataFromModel(
             parentPath,
             key,
             value,
-            _computedState,
-            references,
           );
           bindComputedProperty(parent, _defaultState);
           _computedProperties.push({ key, parentPath, bindComputedProperty });

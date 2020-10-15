@@ -11,6 +11,13 @@ interface ProductsModel {
   totalPrice: Computed<ProductsModel, number>;
   totalPriceVerbose: Computed<ProductsModel, number>;
   priceForProduct: Computed<ProductsModel, (id: number) => number>;
+  // https://github.com/ctrlplusb/easy-peasy/issues/567
+  packages: Computed<
+    ProductsModel,
+    | { core: Product[]; waves: Product[][]; hasWavesContent: boolean }
+    | undefined,
+    StoreModel
+  >;
 }
 
 interface BasketModel {
@@ -41,6 +48,11 @@ const model: StoreModel = {
       return products.reduce((total, product) => total + product.price, 0);
     }),
     priceForProduct: computed((state) => (id) => state.products[id].price),
+    packages: computed((state) => ({
+      core: state.products,
+      hasWavesContent: true,
+      waves: [],
+    })),
   },
   baskets: {
     productIds: [1],
@@ -94,3 +106,4 @@ const store = createStore(model);
 
 store.getState().products.priceForProduct(1) + 1;
 store.getState().products.totalPrice + 1;
+store.getState().products.packages?.core[0];

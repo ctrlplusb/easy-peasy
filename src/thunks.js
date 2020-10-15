@@ -34,7 +34,7 @@ export function createThunkHandler(
 
 const logThunkEventListenerError = (type, err) => {
   // eslint-disable-next-line no-console
-  console.log(`An error occurred in a listener for ${type}`);
+  console.log(`Error in ${type}`);
   // eslint-disable-next-line no-console
   console.log(err);
 };

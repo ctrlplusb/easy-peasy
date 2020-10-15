@@ -78,7 +78,7 @@ export function createEffectHandler(
             // Doing so would provide inconsistent behaviour around their execution.
             // eslint-disable-next-line no-console
             console.warn(
-              '[easy-peasy] You have an effect which is asynchronously resolving a dispose function. This is considered an anti-pattern. Please read the API documentation for more information.',
+              '[easy-peasy] Effect is asynchronously resolving a dispose fn.',
             );
           }
         }
@@ -95,7 +95,7 @@ export function createEffectHandler(
 
 const logEffectEventListenerError = (type, err) => {
   // eslint-disable-next-line no-console
-  console.log(`An error occurred in a listener for ${type}`);
+  console.log(`Error in ${type}`);
   // eslint-disable-next-line no-console
   console.log(err);
 };

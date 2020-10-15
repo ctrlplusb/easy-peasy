@@ -32,12 +32,6 @@ export function createStore(model, options = {}) {
     reducerEnhancer = (rootReducer) => rootReducer,
   } = options;
 
-  if (process.env.NODE_ENV !== 'production') {
-    if (typeof injections !== 'object') {
-      throw new Error('[easy-peasy] Store injections must be an object');
-    }
-  }
-
   const bindReplaceState = (modelDef) => {
     return {
       ...modelDef,
@@ -147,10 +141,6 @@ export function createStore(model, options = {}) {
   return Object.assign(store, {
     addModel: (key, modelForKey) => {
       if (modelDefinition[key] && process.env.NODE_ENV !== 'production') {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `easy-peasy: The store model already contains a model definition for "${key}"`,
-        );
         store.removeModel(key);
       }
       modelDefinition[key] = modelForKey;
@@ -184,12 +174,6 @@ export function createStore(model, options = {}) {
     },
     removeModel: (key) => {
       if (!modelDefinition[key]) {
-        if (process.env.NODE_ENV !== 'production') {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `easy-peasy: The store model does not contain a model definition for "${key}"`,
-          );
-        }
         return;
       }
       delete modelDefinition[key];
