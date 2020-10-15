@@ -16,7 +16,7 @@ import { createListenerMiddleware } from './listeners';
 import { deepCloneStateWithoutComputed } from './lib';
 import { createEffectsMiddleware } from './effects';
 
-export default function createStore(model, options = {}) {
+export function createStore(model, options = {}) {
   const modelClone = deepCloneStateWithoutComputed(model);
   const {
     compose,

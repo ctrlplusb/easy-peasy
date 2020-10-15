@@ -3,7 +3,7 @@
  * The intention being to support as much of the redux-persist API as possible.
  */
 
-export default function createTransform(inbound, outbound, config = {}) {
+export function createTransform(inbound, outbound, config = {}) {
   const whitelist = config.whitelist || null;
   const blacklist = config.blacklist || null;
 

@@ -1,10 +1,11 @@
 {
   "name": "easy-peasy",
-  "version": "4.0.1",
+  "version": "4.1.0-alpha.1",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
-  "main": "dist/easy-peasy.js",
-  "umd:main": "dist/easy-peasy.umd.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
+  "umd:main": "dist/index.iife.js",
   "source": "src/index.js",
   "types": "./index.d.ts",
   "sideEffects": false,
@@ -26,16 +27,13 @@
     "typescript"
   ],
   "scripts": {
-    "build": "microbundle --define NODE_ENV=production --format cjs,umd --jsx React.createElement",
+    "build": "rollup -c",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "lint": "eslint src",
     "prepublish": "yarn run build",
     "test": "jest",
     "test:coverage": "yarn run test -- --coverage",
     "test:coverage:deploy": "yarn run test:coverage && codecov"
-  },
-  "mangle": {
-    "regex": "^_"
   },
   "husky": {
     "hooks": {
@@ -61,10 +59,14 @@
   "devDependencies": {
     "@babel/cli": "^7.11.6",
     "@babel/core": "^7.11.6",
+    "@babel/plugin-external-helpers": "^7.10.4",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
     "@babel/plugin-proposal-json-strings": "^7.10.4",
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
     "@babel/plugin-syntax-import-meta": "^7.10.4",
+    "@babel/plugin-transform-react-jsx": "^7.10.4",
+    "@babel/plugin-transform-runtime": "^7.11.5",
+    "@babel/plugin-transform-typescript": "^7.11.0",
     "@babel/polyfill": "^7.11.5",
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-react": "^7.10.4",
@@ -92,7 +94,6 @@
     "husky": "^4.3.0",
     "jest": "^26.5.3",
     "lint-staged": "^10.4.0",
-    "microbundle": "^0.12.4",
     "prettier": "^2.1.2",
     "prettier-eslint": "^11.0.0",
     "react": "^16.13.1",
@@ -100,6 +101,10 @@
     "react-redux": "^7.2.1",
     "react-test-renderer": "^16.13.1",
     "rimraf": "^3.0.1",
+    "rollup": "^2.30.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-size-snapshot": "^0.12.0",
     "shallowequal": "^1.1.0",
     "title-case": "^3.0.2",
     "typescript": "4.0.3",
