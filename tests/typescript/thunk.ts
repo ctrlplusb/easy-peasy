@@ -1,4 +1,4 @@
-import { createStore, Thunk, thunk, Action } from 'easy-peasy';
+import { createStore, Thunk, thunk } from 'easy-peasy';
 
 interface Injections {
   fetch: () => Promise<void>;
@@ -9,7 +9,9 @@ interface AuditModel {
   log: Thunk<AuditModel, string, Injections, StoreModel, Promise<number>>;
   empty: Thunk<AuditModel>;
   syncThunk: Thunk<AuditModel, undefined, undefined, StoreModel, string>;
-  optionalPayloadThunk: Thunk<AuditModel, string | void>;
+  optionalPayloadThunk: Thunk<AuditModel, { foo: string } | void>;
+  optionalPayloadThunkTwo: Thunk<AuditModel, { foo: string } | undefined>;
+  optionalPayloadThunkThree: Thunk<AuditModel, { foo: string } | null>;
 }
 
 interface StoreModel {
@@ -48,10 +50,18 @@ const model: StoreModel = {
     }),
     empty: thunk(() => {}),
     optionalPayloadThunk: thunk((actions, payload) => {
+      // typings:expect-error
+      const foo = payload?.foo.substr(0, 3);
       if (payload == null) {
         return;
       }
-      const foo = payload.substr(0, 3);
+      payload.foo.substr(0, 3);
+    }),
+    optionalPayloadThunkTwo: thunk((actions, payload) => {
+      const foo = payload?.foo.substr(0, 3);
+    }),
+    optionalPayloadThunkThree: thunk((actions, payload) => {
+      const foo = payload?.foo.substr(0, 3);
     }),
   },
 };
@@ -59,7 +69,13 @@ const model: StoreModel = {
 const store = createStore(model);
 
 store.getActions().audit.optionalPayloadThunk();
-store.getActions().audit.optionalPayloadThunk('foo');
+store.getActions().audit.optionalPayloadThunk({ foo: 'bar' });
+store.getActions().audit.optionalPayloadThunkTwo();
+store.getActions().audit.optionalPayloadThunkTwo({ foo: 'bar' });
+// typings:expect-error
+store.getActions().audit.optionalPayloadThunkThree();
+store.getActions().audit.optionalPayloadThunkThree(null);
+store.getActions().audit.optionalPayloadThunkThree({ foo: 'bar' });
 // typings:expect-error
 store.getActions().audit.optionalPayloadThunk(1);
 store.getActions().audit.syncThunk().toUpperCase();

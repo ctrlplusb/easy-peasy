@@ -134,8 +134,8 @@ interface ActionCreator<Payload = void> {
   z__creator: 'actionWithPayload';
 }
 
-interface ThunkCreator<Payload, Result> {
-  (payload: Payload): Result;
+interface ThunkCreator<Payload = void, Result = any> {
+  (payload: Payload extends undefined ? void : Payload): Result;
   type: string;
   startType: string;
   successType: string;
@@ -291,25 +291,23 @@ export type State<Model extends object = {}> = RecursiveState<Model>;
 // #region Store + Config + Creation
 
 /**
- * Creates an easy-peasy powered Redux store.
+ * Creates a store.
  *
- * https://github.com/ctrlplusb/easy-peasy#createstoremodel-config
+ * https://easy-peasy.now.sh/docs/api/create-store.html
  *
  * @example
  *
+ * ```typescript
  * import { createStore } from 'easy-peasy';
  *
  * interface StoreModel {
- *   todos: {
- *     items: Array<string>;
- *   }
+ *   todos: string[];
  * }
  *
  * const store = createStore<StoreModel>({
- *   todos: {
- *     items: [],
- *   }
- * })
+ *   todos: []
+ * });
+ * ```
  */
 export function createStore<
   StoreModel extends object = {},
@@ -452,9 +450,15 @@ type Meta = {
 };
 
 /**
- * A thunk type.
+ * Declares a thunk against your model type definition.
  *
- * Useful when declaring your model.
+ * https://easy-peasy.now.sh/docs/typescript-api/thunk.html
+ *
+ * @param Model - The model that the thunk is being bound to.
+ * @param Payload - The type of the payload expected. Set to undefined if none.
+ * @param Injections - The type for the injections provided to the store
+ * @param StoreModel - The root model type for the store. Useful if using getStoreState helper.
+ * @param Result - The type for the expected return from the thunk.
  *
  * @example
  *
@@ -467,7 +471,7 @@ type Meta = {
  */
 export type Thunk<
   Model extends object,
-  Payload = void,
+  Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
   Result = any
@@ -478,24 +482,29 @@ export type Thunk<
 };
 
 /**
- * Declares an thunk action type against your model.
+ * Declares an thunk against your model.
  *
- * https://github.com/ctrlplusb/easy-peasy#thunkaction
+ * Thunks are typically used to encapsulate side effects and are able to
+ * dispatch other actions.
+ *
+ * https://easy-peasy.now.sh/docs/api/thunk.html
  *
  * @example
  *
+ * ```typescript
  * import { thunk } from 'easy-peasy';
  *
  * const store = createStore({
  *   login: thunk(async (actions, payload) => {
- *    const user = await loginService(payload);
- *    actions.loginSucceeded(user);
- *  })
+ *      const user = await loginService(payload);
+ *      actions.loginSucceeded(user);
+ *   })
  * });
+ * ```
  */
 export function thunk<
   Model extends object = {},
-  Payload = void,
+  Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
   Result = any
