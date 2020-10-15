@@ -8,9 +8,9 @@ import {
   createStoreStateHook,
   createStoreRehydratedHook,
 } from './hooks';
-import createStore from './create-store';
+import { createStore } from './create-store';
 
-export default function createContextStore(model, config = {}) {
+export function createContextStore(model, config = {}) {
   // We create a mutable injections reference to allow updating it
   const { injections: mutableInjections = {} } = config;
 

@@ -16,6 +16,7 @@ coverage
 
 # Build output
 dist
+.size-snapshot.json
 
 # Flow
 flow-coverage

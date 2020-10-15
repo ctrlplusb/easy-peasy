@@ -1,5 +1,3 @@
-/* eslint-disable no-shadow */
-
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { createContextStore, action, thunk } from '../src';
@@ -99,6 +97,8 @@ it('useStore hook', () => {
   // assert
   expect(count.firstChild.textContent).toBe('0');
 });
+
+/* eslint-disable no-shadow */
 
 it('with initial data', () => {
   // arrange
