@@ -51,9 +51,7 @@ function createStorageWrapper(storage, transformers = []) {
       storage = sessionStorage();
     } else {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(
-          `Invalid storage provider specified for Easy Peasy persist: ${storage}\nValid values include "localStorage", "sessionStorage" or a custom storage engine.`,
-        );
+        console.warn(`Invalid storage provider`);
       }
       storage = noopStorage;
     }
