@@ -14,7 +14,7 @@ isLoggedIn: computed(state => state.user != null)
 
   > Note: this is an optional parameter, you can omit it and instead just provide a `computationFunc`.
 
-  State resolvers allows you to isolate the specific parts of your state as inputs to your computation function. They also have the added benefit of being able to expose the entire store state to your computed property. Each state resolver function receives the following arguments:
+  State resolvers allow you to isolate the specific parts of your state as inputs to your computation function. They also have the added benefit of being able to expose the entire store state to your computed property. Each state resolver function receives the following arguments:
 
   - `state` (Object)
 
