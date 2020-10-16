@@ -1,7 +1,7 @@
-import { isPlainObject } from 'is-plain-object';
 import {
   deepCloneStateWithoutComputed,
   get,
+  isPlainObject,
   isPromise,
   set,
   pSeries,

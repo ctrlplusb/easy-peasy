@@ -1,4 +1,3 @@
-import { isPlainObject } from 'is-plain-object';
 import {
   actionOnSymbol,
   actionSymbol,
@@ -9,7 +8,7 @@ import {
   thunkOnSymbol,
   thunkSymbol,
 } from './constants';
-import { get, set } from './lib';
+import { get, isPlainObject, set } from './lib';
 import { extractPersistConfig } from './persistence';
 import { createActionCreator } from './actions';
 import { createThunkHandler, createThunkActionsCreator } from './thunks';
