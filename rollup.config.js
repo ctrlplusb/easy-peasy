@@ -70,7 +70,6 @@ function createIIFEConfig(input, output, globalName) {
         'redux-thunk': 'reduxThunk',
         immer: 'immer',
         memoizerific: 'memoizerific',
-        'is-plain-object': 'isPlainObject',
         'use-memo-one': 'useMemoOne',
       },
     },

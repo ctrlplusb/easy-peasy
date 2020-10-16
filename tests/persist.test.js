@@ -1174,7 +1174,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(5);
 });
 
-test.only('store version number change ignores persisted state', async () => {
+test('store version number change ignores persisted state', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
 
@@ -1221,7 +1221,7 @@ test.only('store version number change ignores persisted state', async () => {
   });
 });
 
-test.only('mergeDeepDocs', async () => {
+test('mergeDeepDocs', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
     '[EasyPeasyStore][0]': {
