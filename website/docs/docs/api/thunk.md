@@ -37,6 +37,10 @@ thunk(async (actions, payload) => {
       - `dispatch` (Function)
 
         The Redux dispatch function, allowing you to dispatch "standard" Redux actions.
+        
+      - `fail` (Function)
+      
+        The Fail API function, allowing you to explicitly signal thunk failure, see [Debugging Thunks](/docs/api/thunk.html#debugging-thunks). You may pass your error object or any arbitrary payload to fail.  
 
       - `getState` (Function)
 
@@ -139,6 +143,8 @@ Dispatching these actions results in the following benefits:
 2. Enables listeners to be attached to specific [thunk](/docs/api/thunk.html) states (i.e. *started*, *completed*, or *failed*)
 
 Using the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension you will be able see your dispatched [thunks](/docs/api/thunk.html) as they flow through each of their states. You will also see the payload that was provided to the [thunk](/docs/api/thunk.html).
+
+> Note: The `start` and `success` actions will dispatch automatically. To trigger the `fail` action, call `helpers.fail(error)` within your thunk. In addition to the thunk's payload, this action will receive the argument you pass to `fail()`, which can be any arbitrary data useful in to your debugging.
 
 <img src="../../assets/devtools-thunk.png" />
 
