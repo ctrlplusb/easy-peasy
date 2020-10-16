@@ -147,6 +147,7 @@ type ActionOrThunkCreator<Payload = void, Result = void> =
 
 type Helpers<Model extends object, StoreModel extends object, Injections> = {
   dispatch: Dispatch<StoreModel>;
+  fail: AnyFunction;
   getState: () => State<Model>;
   getStoreActions: () => Actions<StoreModel>;
   getStoreState: () => State<StoreModel>;
