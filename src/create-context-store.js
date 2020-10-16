@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 
 import React, { createContext, useContext } from 'react';
-import { useMemoOne } from 'use-memo-one';
 import {
   createStoreActionsHook,
   createStoreDispatchHook,
@@ -9,6 +8,7 @@ import {
   createStoreRehydratedHook,
 } from './hooks';
 import { createStore } from './create-store';
+import { useMemoOne } from './lib';
 
 export function createContextStore(model, config = {}) {
   // We create a mutable injections reference to allow updating it

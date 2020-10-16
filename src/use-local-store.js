@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useMemoOne } from 'use-memo-one';
+import { useMemoOne } from './lib';
 import { createStore } from './create-store';
 
 export function useLocalStore(modelCreator, dependencies = [], configCreator) {

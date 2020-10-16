@@ -1,5 +1,4 @@
 import { isDraft, current } from 'immer';
-import memoizerific from 'memoizerific';
 import {
   actionOnSymbol,
   actionSymbol,
@@ -18,7 +17,16 @@ export const debug = (state) => {
   return state;
 };
 
-export const memo = (fn, cacheSize) => memoizerific(cacheSize)(fn);
+// eslint-disable-next-line no-unused-vars
+export const memo = (fn, cacheSize) => {
+  if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.log(
+      'Easy Peasy no longer ships with a memoization util. We suggest installing something like fast-memoize as an alternative.',
+    );
+  }
+  return fn;
+};
 
 export const actionOn = (targetResolver, fn) => {
   return {
