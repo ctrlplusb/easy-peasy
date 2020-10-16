@@ -1,3 +1,4 @@
+import React from 'react';
 import { Immer, isDraft } from 'immer';
 
 /**
@@ -43,8 +44,8 @@ export function isPlainObject(o) {
   return true;
 }
 
-export const deepCloneStateWithoutComputed = (source) => {
-  const recursiveClone = (current) => {
+export function deepCloneStateWithoutComputed(source) {
+  function recursiveClone(current) {
     const next = Object.keys(current).reduce((acc, key) => {
       if (Object.getOwnPropertyDescriptor(current, key).get == null) {
         acc[key] = current[key];
@@ -57,13 +58,13 @@ export const deepCloneStateWithoutComputed = (source) => {
       }
     });
     return next;
-  };
+  }
   return recursiveClone(source);
-};
+}
 
-export const isPromise = (x) => {
+export function isPromise(x) {
   return x != null && typeof x === 'object' && typeof x.then === 'function';
-};
+}
 
 export function get(path, target) {
   return path.reduce((acc, cur) => {
@@ -85,7 +86,7 @@ export function newify(currentPath, currentState, finalValue) {
   return newState;
 }
 
-export const set = (path, target, value) => {
+export function set(path, target, value) {
   if (path.length === 0) {
     if (typeof value === 'object') {
       Object.keys(target).forEach((key) => {
@@ -105,7 +106,7 @@ export const set = (path, target, value) => {
     }
     return acc[cur];
   }, target);
-};
+}
 
 export function createSimpleProduce(disableImmer = false) {
   return function simpleProduce(path, state, fn) {
@@ -173,3 +174,69 @@ export const pSeries = async (tasks) => {
 
   return results;
 };
+
+export function areInputsEqual(newInputs, lastInputs) {
+  if (newInputs.length !== lastInputs.length) {
+    return false;
+  }
+  for (let i = 0; i < newInputs.length; i += 1) {
+    if (newInputs[i] !== lastInputs[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function memoizeOne(resultFn) {
+  let lastArgs = [];
+  let lastResult;
+  let calledOnce = false;
+
+  return function memoized(...args) {
+    if (calledOnce && areInputsEqual(args, lastArgs)) {
+      return lastResult;
+    }
+    lastResult = resultFn(...args);
+    calledOnce = true;
+    lastArgs = args;
+    return lastResult;
+  };
+}
+
+export function useMemoOne(
+  // getResult changes on every call,
+  getResult,
+  // the inputs array changes on every call
+  inputs,
+) {
+  // using useState to generate initial value as it is lazy
+  const initial = React.useState(() => ({
+    inputs,
+    result: getResult(),
+  }))[0];
+
+  const committed = React.useRef(initial);
+
+  // persist any uncommitted changes after they have been committed
+
+  const isInputMatch = Boolean(
+    inputs &&
+      committed.current.inputs &&
+      areInputsEqual(inputs, committed.current.inputs),
+  );
+
+  // create a new cache if required
+  const cache = isInputMatch
+    ? committed.current
+    : {
+        inputs,
+        result: getResult(),
+      };
+
+  // commit the cache
+  React.useEffect(() => {
+    committed.current = cache;
+  }, [cache]);
+
+  return cache.result;
+}

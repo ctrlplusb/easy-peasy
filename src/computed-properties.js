@@ -1,8 +1,7 @@
-import memoizerific from 'memoizerific';
-import { get } from './lib';
+import { get, memoizeOne } from './lib';
 
 export function createComputedPropertyBinder(parentPath, key, definition) {
-  const memoisedResultFn = memoizerific(1)(definition.fn);
+  const memoisedResultFn = memoizeOne(definition.fn);
   return function createComputedProperty(parentState, storeState) {
     Object.defineProperty(parentState, key, {
       configurable: true,

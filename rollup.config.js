@@ -69,8 +69,6 @@ function createIIFEConfig(input, output, globalName) {
         redux: 'Redux',
         'redux-thunk': 'reduxThunk',
         immer: 'immer',
-        memoizerific: 'memoizerific',
-        'use-memo-one': 'useMemoOne',
       },
     },
     external,

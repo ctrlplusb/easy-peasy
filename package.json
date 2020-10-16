@@ -48,12 +48,11 @@
   },
   "dependencies": {
     "immer": "7.0.9",
-    "memoizerific": "^1.11.3",
+    "memoize-one": "^5.1.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "symbol-observable": "^2.0.3",
-    "ts-toolbelt": "^8.0.7",
-    "use-memo-one": "^1.1.1"
+    "ts-toolbelt": "^8.0.7"
   },
   "devDependencies": {
     "@babel/cli": "^7.11.6",

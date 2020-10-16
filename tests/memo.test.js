@@ -1,6 +1,6 @@
 import { memo } from '../src';
 
-it('should memoize according to the cache size limit', () => {
+it.skip('should memoize according to the cache size limit', () => {
   // arrange
   let fnHit = 0;
   const memoized = memo((firstName, lastName) => {
@@ -31,4 +31,12 @@ it('should memoize according to the cache size limit', () => {
 
   // assert
   expect(fnHit).toBe(3);
+});
+
+it('does not memoize', () => {
+  const memoized = memo((firstName, lastName) => {
+    return `${firstName} ${lastName}`;
+  }, 2);
+
+  expect(memoized('Bob', 'Poppins')).toEqual('Bob Poppins');
 });
