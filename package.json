@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "4.1.0-alpha.3",
+  "version": "4.1.0-alpha.4",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/index.cjs.js",
@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "immer": "7.0.9",
-    "memoize-one": "^5.1.1",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "symbol-observable": "^2.0.3",
