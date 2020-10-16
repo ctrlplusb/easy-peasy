@@ -144,7 +144,7 @@ Dispatching these actions results in the following benefits:
 
 Using the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension you will be able see your dispatched [thunks](/docs/api/thunk.html) as they flow through each of their states. You will also see the payload that was provided to the [thunk](/docs/api/thunk.html).
 
-> Note: The `start` and `success` actions will dispatch automatically. To trigger the `fail` action, call `helpers.fail(error)` within your thunk. In addition to the thunk's payload, this action will receive the argument you pass to `fail()`, which can be any arbitrary data useful in to your debugging.
+> Note: The `start` and `success` actions will dispatch automatically. To trigger the `fail` action, call `helpers.fail(error)` within your thunk. In addition to the thunk's payload, this action will receive the argument you pass to `fail()`, which can be any arbitrary data useful for your debugging.
 
 <img src="../../assets/devtools-thunk.png" />
 
