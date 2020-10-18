@@ -1,5 +1,3 @@
-/// <reference types="symbol-observable" />
-
 import { Component } from 'react';
 import {
   AnyAction,

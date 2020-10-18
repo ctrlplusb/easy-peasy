@@ -1,7 +1,7 @@
 import path from 'path';
 import babel from 'rollup-plugin-babel';
 import resolve from 'rollup-plugin-node-resolve';
-// import { sizeSnapshot } from 'rollup-plugin-size-snapshot';
+import { sizeSnapshot } from 'rollup-plugin-size-snapshot';
 import pkg from './package.json';
 
 const babelRuntimeVersion = pkg.dependencies['@babel/runtime'].replace(
@@ -34,7 +34,7 @@ function createESMConfig(input, output) {
         sourceMaps: true,
         inputSourceMap: true,
       }),
-      // sizeSnapshot(),
+      sizeSnapshot(),
     ],
   };
 }
@@ -55,12 +55,11 @@ function createCommonJSConfig(input, output) {
         sourceMaps: true,
         inputSourceMap: true,
       }),
-      // sizeSnapshot(),
+      sizeSnapshot(),
     ],
   };
 }
 
-/*
 function createIIFEConfig(input, output, globalName) {
   return {
     input,
@@ -72,9 +71,7 @@ function createIIFEConfig(input, output, globalName) {
       name: globalName,
       globals: {
         react: 'React',
-        '@babel/runtime/helpers/extends': '_extends',
-        '@babel/runtime/helpers/asyncToGenerator': '_asyncToGenerator',
-        '@babel/runtime/regenerator': '_regeneratorRuntime',
+        '@babel/runtime/helpers/objectSpread2': '_objectSpread',
         redux: 'Redux',
         'redux-thunk': 'reduxThunk',
         immer: 'immer',
@@ -83,15 +80,22 @@ function createIIFEConfig(input, output, globalName) {
     external,
     plugins: [
       resolve({ extensions }),
-      babel(getBabelOptions({ ie: 11 })),
-      // sizeSnapshot(),
+      babel({
+        extensions,
+        plugins: [
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
+        ],
+        runtimeHelpers: true,
+        sourceMaps: true,
+        inputSourceMap: true,
+      }),
+      sizeSnapshot(),
     ],
   };
 }
-*/
 
 export default [
   createESMConfig('src/index.js', 'dist/index.js'),
   createCommonJSConfig('src/index.js', 'dist/index.cjs.js'),
-  // createIIFEConfig('src/index.js', 'dist/index.iife.js', 'easyPeasy'),
+  createIIFEConfig('src/index.js', 'dist/index.iife.js', 'easyPeasy'),
 ];
