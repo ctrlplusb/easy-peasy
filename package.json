@@ -4,6 +4,7 @@
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/index.cjs.js",
+  "umd:main": "dist/index.iife.js",
   "module": "dist/index.js",
   "source": "src/index.js",
   "types": "./index.d.ts",
@@ -50,7 +51,6 @@
     "immer": "7.0.9",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
-    "symbol-observable": "^2.0.3",
     "ts-toolbelt": "^8.0.7"
   },
   "devDependencies": {
