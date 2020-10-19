@@ -512,14 +512,7 @@ export function thunk<
   thunk: (
     actions: Actions<Model>,
     payload: Payload,
-    helpers: {
-      dispatch: Dispatch<StoreModel>;
-      getState: () => State<Model>;
-      getStoreActions: () => Actions<StoreModel>;
-      getStoreState: () => State<StoreModel>;
-      injections: Injections;
-      meta: Meta;
-    },
+    helpers: Helpers<Model, StoreModel, Injections>,
   ) => Result,
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
 
