@@ -1170,7 +1170,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
   await wait(20);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
-  await wait(30);
+  await wait(40);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(5);
 });
 
