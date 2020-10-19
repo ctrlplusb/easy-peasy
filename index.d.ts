@@ -1117,3 +1117,11 @@ export function persist<Model extends object = {}>(
 export function useStoreRehydrated(): boolean;
 
 // #endregion
+
+
+// #region Polyfills
+
+export function enableES5(): void;
+export function enableMapSet(): void;
+
+// #endregion

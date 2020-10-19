@@ -5,3 +5,4 @@ export * from './create-transform';
 export * from './provider';
 export * from './use-local-store';
 export * from './helpers';
+export * from './polyfills';
