@@ -36,24 +36,27 @@ addTodo: action((state, payload) => {
 
 That's just a simple example. More complex/nested updates can get very tricky to manage.
 
-## Configuring Immer to support ES5
+## Supporting older browsers (IE11)
+
+> **TL;DR**:
+> To support older browsers, you need to import polyfills at the start of your app:<br>
+> `import 'easy-peasy/polyfill'`
 
 When Immer released version 7 of the library they tried to tackle the growing package size. In order to do so they split out "additional" features into separate imports. For example support for ES5, or for Map/Set support.
 
-We have decided to not include these features by default, so if you are in need of supporting older browsers or React Native environments then you need to explicity import the `enableES5` helper from Immer.
+So in order to support older browsers, polyfilling immer is required (it is best to add this at the start of your application):
 
 ```javascript
-import { enableES5 } from 'immer';
-
-enableES5();
+import 'easy-peasy/polyfill/patch-immer';
 ```
 
 In addition to this, if you would like to support mutating of Map/Set based state then you can run the required helper like so.
 
 ```javascript
-import { enableMapSet } from 'immer';
-
-enableMapSet();
+import 'easy-peasy/polyfill/patch-map-set';
 ```
 
-It is best to do this at the start of your application.
+But in this case, you can simply enable all polyfills:
+```javascript
+import 'easy-peasy/polyfill';
+```
