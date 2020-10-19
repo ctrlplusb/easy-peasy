@@ -1,7 +1,3 @@
-import { enableES5 } from 'immer';
-
-enableES5();
-
 export * from './hooks';
 export * from './create-store';
 export * from './create-context-store';
