@@ -1,4 +1,4 @@
-import { Computed, computed, createStore } from 'easy-peasy';
+import { Computed, computed, createStore, createTypedHooks } from 'easy-peasy';
 
 interface Product {
   id: number;
@@ -18,6 +18,7 @@ interface ProductsModel {
     | undefined,
     StoreModel
   >;
+  firstProduct: Computed<ProductsModel, Product | undefined>;
 }
 
 interface BasketModel {
@@ -40,6 +41,9 @@ interface StoreModel {
 
 const model: StoreModel = {
   products: {
+    firstProduct: computed((state) =>
+      state.products.length > 0 ? state.products[0] : undefined,
+    ),
     products: [{ id: 1, name: 'boots', price: 20 }],
     totalPrice: computed((state) =>
       state.products.reduce((total, product) => total + product.price, 0),
@@ -104,6 +108,18 @@ const model: StoreModel = {
 
 const store = createStore(model);
 
+if (store.getState().products.firstProduct) {
+  store.getState().products.firstProduct?.name + 'foo';
+}
 store.getState().products.priceForProduct(1) + 1;
 store.getState().products.totalPrice + 1;
 store.getState().products.packages?.core[0];
+
+// https://github.com/ctrlplusb/easy-peasy/issues/570
+const typedHooks = createTypedHooks<StoreModel>();
+
+const useProducts = () => typedHooks.useStoreState((state) => state.products);
+
+const { firstProduct } = useProducts();
+
+firstProduct?.name;
