@@ -267,6 +267,12 @@ export function rehydrateStateFromPersistIfNeeded(
     return Promise.resolve();
   }
 
+  const state = deepCloneStateWithoutComputed(
+    references.internals._defaultState,
+  );
+
+  let rehydrating = false;
+
   return pSeries(
     references.internals._persistenceConfig.map((persistInstance) => () => {
       const { path, config } = persistInstance;
@@ -276,19 +282,17 @@ export function rehydrateStateFromPersistIfNeeded(
         return Promise.resolve();
       }
 
-      const state = references.internals._defaultState;
-
       const hasDataModelChanged = (dataModel, rehydratingModelData) =>
         dataModel != null &&
         rehydratingModelData != null &&
         (typeof dataModel !== typeof rehydratingModelData ||
           (Array.isArray(dataModel) && !Array.isArray(rehydratingModelData)));
 
-      const applyRehydrationStrategy = (originalState, persistedState) => {
+      const applyRehydrationStrategy = (persistedState) => {
         if (mergeStrategy === 'overwrite') {
-          set(path, originalState, persistedState);
+          set(path, state, persistedState);
         } else if (mergeStrategy === 'mergeShallow') {
-          const targetState = get(path, originalState);
+          const targetState = get(path, state);
           Object.keys(persistedState).forEach((key) => {
             if (hasDataModelChanged(targetState[key], persistedState[key])) {
               // skip as the data model type has changed since the data was persisted
@@ -297,7 +301,7 @@ export function rehydrateStateFromPersistIfNeeded(
             }
           });
         } else if (mergeStrategy === 'mergeDeep') {
-          const targetState = get(path, originalState);
+          const targetState = get(path, state);
           const setAt = (currentTargetState, currentPersistedState) => {
             Object.keys(currentPersistedState).forEach((key) => {
               if (
@@ -321,9 +325,9 @@ export function rehydrateStateFromPersistIfNeeded(
 
       const rehydate = (persistedState) => {
         if (persistedState != null) {
-          applyRehydrationStrategy(state, persistedState);
+          applyRehydrationStrategy(persistedState);
+          rehydrating = true;
         }
-        replaceState(state);
       };
 
       const getItemResult = storage.getItem(persistKey(path));
@@ -332,5 +336,9 @@ export function rehydrateStateFromPersistIfNeeded(
       }
       return Promise.resolve(rehydate(getItemResult));
     }),
-  );
+  ).then(() => {
+    if (rehydrating) {
+      replaceState(state);
+    }
+  });
 }

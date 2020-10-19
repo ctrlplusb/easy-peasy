@@ -7,10 +7,7 @@ import { Immer, isDraft } from 'immer';
  * does not suit the design of Easy Peasy.
  * https://github.com/immerjs/immer/issues/681#issuecomment-705581111
  */
-const easyPeasyImmer = new Immer({
-  useProxies: true,
-  autoFreeze: false,
-});
+let easyPeasyImmer;
 
 /*!
  * is-plain-object <https://github.com/jonschlinkert/is-plain-object>
@@ -117,6 +114,18 @@ export function createSimpleProduce(disableImmer = false) {
         return newify(path, state, next);
       }
       return state;
+    }
+    if (!easyPeasyImmer) {
+      easyPeasyImmer = new Immer({
+        // We need to ensure that we disable proxies if they aren't available
+        // on the environment. Users need to ensure that they use the enableES5
+        // feature of immer.
+        useProxies:
+          typeof window !== 'undefined' && typeof window.Proxy !== 'undefined',
+        // Autofreezing breaks easy-peasy, we need a mixed version of immutability
+        // and mutability in order to apply updates to our computed properties
+        autoFreeze: false,
+      });
     }
     if (path.length === 0) {
       const draft = easyPeasyImmer.createDraft(state);
