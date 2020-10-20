@@ -6,7 +6,7 @@
     "baseUrl": "../..",
     "skipLibCheck": false,
     "paths": {
-      "easy-peasy": ["index.d.ts"]
+      "easy-peasy": ["index.d.ts"],
     }
   }
 }
