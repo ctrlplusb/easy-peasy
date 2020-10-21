@@ -153,7 +153,7 @@ const pReduce = (iterable, reducer, initialValue) =>
     const iterator = iterable[Symbol.iterator]();
     let index = 0;
 
-    const next = async (total) => {
+    const next = (total) => {
       const element = iterator.next();
 
       if (element.done) {
@@ -161,27 +161,24 @@ const pReduce = (iterable, reducer, initialValue) =>
         return;
       }
 
-      try {
-        const value = await Promise.all([total, element.value]);
-        // eslint-disable-next-line no-plusplus
-        next(reducer(value[0], value[1], index++));
-      } catch (error) {
-        reject(error);
-      }
+      Promise.all([total, element.value])
+        .then((value) =>
+          // eslint-disable-next-line no-plusplus
+          next(reducer(value[0], value[1], index++)),
+        )
+        .catch((err) => reject(err));
     };
 
     next(initialValue);
   });
 
-export const pSeries = async (tasks) => {
+export const pSeries = (tasks) => {
   const results = [];
-
-  await pReduce(tasks, async (_, task) => {
-    const value = await task();
-    results.push(value);
-  });
-
-  return results;
+  return pReduce(tasks, (_, task) => {
+    return task().then((value) => {
+      results.push(value);
+    });
+  }).then(() => results);
 };
 
 export function areInputsEqual(newInputs, lastInputs) {
