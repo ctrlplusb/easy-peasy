@@ -233,11 +233,11 @@ export function createPersistor(persistKey, references) {
   return {
     persist,
     clear: createPersistenceClearer(persistKey, references),
-    flush: async () => {
+    flush: () => {
       if (nextPersistOperation) {
         nextPersistOperation();
       }
-      await persistPromise;
+      return persistPromise;
     },
   };
 }
