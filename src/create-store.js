@@ -5,7 +5,8 @@ import {
 } from 'redux';
 import reduxThunk from 'redux-thunk';
 import * as helpers from './helpers';
-import createStoreInternals from './create-store-internals';
+import createReducer from './create-reducer';
+import extractDataFromModel from './extract-data-from-model';
 import {
   createPersistor,
   createPersistMiddleware,
@@ -55,14 +56,23 @@ export function createStore(model, options = {}) {
     references.internals._actionCreatorDict['@action.ePRS'](nextState);
 
   const bindStoreInternals = (state = {}) => {
-    references.internals = createStoreInternals({
-      disableImmer,
-      initialState: state,
+    const data = extractDataFromModel(
+      modelDefinition,
+      state,
       injections,
-      model: modelDefinition,
-      reducerEnhancer,
       references,
-    });
+    );
+    references.internals = {
+      ...data,
+      reducer: reducerEnhancer(
+        createReducer(
+          disableImmer,
+          data._actionReducersDict,
+          data._customReducers,
+          data._computedProperties,
+        ),
+      ),
+    };
   };
 
   const mockActionsMiddleware = () => () => (action) => {

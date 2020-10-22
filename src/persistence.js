@@ -95,7 +95,6 @@ function createStorageWrapper(storage, transformers = []) {
   const isAsync = isPromise(storage.getItem('_'));
 
   return {
-    isAsync,
     getItem: (key) => {
       if (isAsync) {
         return storage.getItem(key).then((wrapped) => {
