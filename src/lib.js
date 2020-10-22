@@ -115,9 +115,7 @@ export function createSimpleProduce(disableImmer = false) {
       return easyPeasyImmer.finishDraft(draft);
     }
     const parentPath = path.slice(0, path.length - 1);
-    console.log('pre draft');
     const draft = easyPeasyImmer.createDraft(state);
-    console.log('post draft');
     const parent = get(parentPath, state);
     const current = get(path, draft);
     const result = fn(current);
