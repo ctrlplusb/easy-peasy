@@ -1,8 +1,8 @@
-export const actionSymbol = '$ep_a';
-export const actionOnSymbol = '$ep_aO';
-export const computedSymbol = '$ep_c';
-export const effectOnSymbol = '$ep_e';
-export const persistSymbol = '$ep_p';
-export const reducerSymbol = '$ep_r';
-export const thunkOnSymbol = '$ep_tO';
-export const thunkSymbol = '$ep_t';
+export const actionSymbol = '$_a';
+export const actionOnSymbol = '$_aO';
+export const computedSymbol = '$_c';
+export const effectOnSymbol = '$_e';
+export const persistSymbol = '$_p';
+export const reducerSymbol = '$_r';
+export const thunkOnSymbol = '$_tO';
+export const thunkSymbol = '$_t';

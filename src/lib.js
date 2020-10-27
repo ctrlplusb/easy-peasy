@@ -20,7 +20,7 @@ export function isPlainObject(obj) {
   return Object.getPrototypeOf(obj) === proto;
 }
 
-export function deepCloneStateWithoutComputed(source) {
+export function clone(source) {
   function recursiveClone(current) {
     const next = Object.keys(current).reduce((acc, key) => {
       if (Object.getOwnPropertyDescriptor(current, key).get == null) {

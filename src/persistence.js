@@ -1,11 +1,4 @@
-import {
-  deepCloneStateWithoutComputed,
-  get,
-  isPlainObject,
-  isPromise,
-  set,
-  pSeries,
-} from './lib';
+import { clone, get, isPlainObject, isPromise, set, pSeries } from './lib';
 
 const noopStorage = {
   getItem: () => undefined,
@@ -113,16 +106,16 @@ function createStorageWrapper(storage, transformers = []) {
   };
 }
 
-export function extractPersistConfig(path, persistDefinition = {}) {
+export function extractPersistConfig(path, persistdef = {}) {
   return {
     path,
     config: {
-      allow: persistDefinition.allow || [],
-      deny: persistDefinition.deny || [],
-      mergeStrategy: persistDefinition.mergeStrategy || 'mergeDeep',
+      allow: persistdef.allow || [],
+      deny: persistdef.deny || [],
+      mergeStrategy: persistdef.mergeStrategy || 'mergeDeep',
       storage: createStorageWrapper(
-        persistDefinition.storage,
-        persistDefinition.transformers,
+        persistdef.storage,
+        persistdef.transformers,
       ),
     },
   };
@@ -149,20 +142,20 @@ function resolvePersistTargets(target, allow, deny) {
   return targets;
 }
 
-function createPersistenceClearer(persistKey, references) {
+function createPersistenceClearer(persistKey, _r) {
   return () => {
-    if (references.internals._persistenceConfig.length === 0) {
+    if (_r._i._persistenceConfig.length === 0) {
       return Promise.resolve();
     }
     return pSeries(
-      references.internals._persistenceConfig.map(({ path, config }) => () =>
+      _r._i._persistenceConfig.map(({ path, config }) => () =>
         Promise.resolve(config.storage.removeItem(persistKey(path))),
       ),
     );
   };
 }
 
-export function createPersistor(persistKey, references) {
+export function createPersistor(persistKey, _r) {
   let persistPromise = Promise.resolve();
   let isPersisting = false;
   let nextPersistOperation;
@@ -175,7 +168,7 @@ export function createPersistor(persistKey, references) {
       : window.requestAnimationFrame;
 
   const persist = (nextState) => {
-    if (references.internals._persistenceConfig.length === 0) {
+    if (_r._i._persistenceConfig.length === 0) {
       return;
     }
 
@@ -184,31 +177,27 @@ export function createPersistor(persistKey, references) {
       persistPromise = new Promise((resolve) => {
         timingMethod(() => {
           pSeries(
-            references.internals._persistenceConfig.map(
-              ({ path, config }) => () => {
-                const { storage, allow, deny } = config;
-                const persistRootState = deepCloneStateWithoutComputed(
-                  get(path, nextState),
-                );
-                const persistTargets = resolvePersistTargets(
-                  persistRootState,
-                  allow,
-                  deny,
-                );
-                const stateToPersist = {};
-                persistTargets.map((key) => {
-                  const targetPath = [...path, key];
-                  const rawValue = get(targetPath, nextState);
-                  const value = isPlainObject(rawValue)
-                    ? deepCloneStateWithoutComputed(rawValue)
-                    : rawValue;
-                  stateToPersist[key] = value;
-                });
-                return Promise.resolve(
-                  storage.setItem(persistKey(path), stateToPersist),
-                );
-              },
-            ),
+            _r._i._persistenceConfig.map(({ path, config }) => () => {
+              const { storage, allow, deny } = config;
+              const persistRootState = clone(get(path, nextState));
+              const persistTargets = resolvePersistTargets(
+                persistRootState,
+                allow,
+                deny,
+              );
+              const stateToPersist = {};
+              persistTargets.map((key) => {
+                const targetPath = [...path, key];
+                const rawValue = get(targetPath, nextState);
+                const value = isPlainObject(rawValue)
+                  ? clone(rawValue)
+                  : rawValue;
+                stateToPersist[key] = value;
+              });
+              return Promise.resolve(
+                storage.setItem(persistKey(path), stateToPersist),
+              );
+            }),
           ).finally(() => {
             isPersisting = false;
             if (nextPersistOperation) {
@@ -232,7 +221,7 @@ export function createPersistor(persistKey, references) {
 
   return {
     persist,
-    clear: createPersistenceClearer(persistKey, references),
+    clear: createPersistenceClearer(persistKey, _r),
     flush: () => {
       if (nextPersistOperation) {
         nextPersistOperation();
@@ -242,13 +231,13 @@ export function createPersistor(persistKey, references) {
   };
 }
 
-export function createPersistMiddleware(persistor, references) {
+export function createPersistMiddleware(persistor, _r) {
   return ({ getState }) => (next) => (action) => {
     const state = next(action);
     if (
       action &&
       action.type !== '@action.ePRS' &&
-      references.internals._persistenceConfig.length > 0
+      _r._i._persistenceConfig.length > 0
     ) {
       persistor.persist(getState());
     }
@@ -259,21 +248,19 @@ export function createPersistMiddleware(persistor, references) {
 export function rehydrateStateFromPersistIfNeeded(
   persistKey,
   replaceState,
-  references,
+  _r,
   root,
 ) {
-  if (references.internals._persistenceConfig.length === 0) {
+  if (_r._i._persistenceConfig.length === 0) {
     return Promise.resolve();
   }
 
-  const state = deepCloneStateWithoutComputed(
-    references.internals._defaultState,
-  );
+  const state = clone(_r._i._dS);
 
   let rehydrating = false;
 
   return pSeries(
-    references.internals._persistenceConfig.map((persistInstance) => () => {
+    _r._i._persistenceConfig.map((persistInstance) => () => {
       const { path, config } = persistInstance;
       const { mergeStrategy, storage } = config;
 
