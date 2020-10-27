@@ -104,6 +104,61 @@ it('listening to a successful thunk, firing an action', async () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
+it('listening to a successful or failed thunk, firing an action', async () => {
+  // ARRANGE
+  let actualTarget;
+
+  const store = createStore({
+    math: {
+      sum: 0,
+      add: thunk(async (actions, payload, helpers) => {
+        if (payload === 7) {
+          helpers.fail('💩');
+          return undefined;
+        }
+        return 'foo';
+      }),
+    },
+    audit: {
+      logs: [],
+      onMathAdd: actionOn(
+        (_, storeActions) => [
+          storeActions.math.add,
+          storeActions.math.add.failType,
+        ],
+        (state, target) => {
+          actualTarget = target;
+          if (target.error) {
+            state.logs.push(`Failed to add ${target.payload}`);
+          } else {
+            state.logs.push(`Added ${target.payload}`);
+          }
+        },
+      ),
+    },
+  });
+
+  // ACT
+  await store.getActions().math.add(10);
+
+  // ASSERT
+  expect(actualTarget.type).toBe('@thunk.math.add(success)');
+  expect(actualTarget.payload).toBe(10);
+  expect(actualTarget.result).toBe('foo');
+  expect(actualTarget.error).toBeUndefined();
+  expect(store.getState().audit.logs).toEqual(['Added 10']);
+
+  // ACT
+  await store.getActions().math.add(7);
+
+  // ASSERT
+  expect(actualTarget.type).toBe('@thunk.math.add(fail)');
+  expect(actualTarget.payload).toBe(7);
+  expect(actualTarget.result).toBeUndefined();
+  expect(actualTarget.error).toBe('💩');
+  expect(store.getState().audit.logs).toEqual(['Added 10', 'Failed to add 7']);
+});
+
 it('listening to a failed thunk', async () => {
   // arrange
   const err = new Error('💩');
