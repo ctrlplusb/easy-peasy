@@ -12,6 +12,37 @@ import {
   StoreProvider,
 } from '../src';
 
+test('computed properties should not execute when not accessed', () => {
+  let computedCount = 0;
+
+  const store = createStore({
+    firstName: 'Mary',
+    lastName: 'Poppins',
+    fullName: computed(
+      [(state) => state.firstName, (state) => state.lastName],
+      (firstName, lastName) => {
+        computedCount += 1;
+        return `${firstName} ${lastName}`;
+      },
+    ),
+    setLastName: action((state, payload) => {
+      state.lastName = payload;
+    }),
+  });
+
+  store.getActions().setLastName('Poppins01');
+  store.getActions().setLastName('Poppins02');
+  store.getActions().setLastName('Poppins03');
+  store.getActions().setLastName('Poppins04');
+  store.getActions().setLastName('Poppins05');
+  store.getActions().setLastName('Poppins06');
+
+  // ASSERT
+  expect(computedCount).toBe(0);
+  expect(store.getState().fullName).toBe('Mary Poppins06');
+  expect(computedCount).toBe(1);
+});
+
 test('patched immer works as expected', () => {
   const original = {
     firstName: 'Bob',
@@ -20,7 +51,7 @@ test('patched immer works as expected', () => {
 
   let getterCallCount = 0;
 
-  // act
+  // ACT
   Object.defineProperty(original, 'fullName', {
     enumerable: true,
     get: () => {
@@ -29,14 +60,14 @@ test('patched immer works as expected', () => {
     },
   });
 
-  // assert
+  // ASSERT
   expect(original.fullName).toBe('Bob Fruits');
   expect(getterCallCount).toBe(1);
 
-  // act
+  // ACT
   const immerNoUpdate = produce(original, (draft) => draft);
 
-  // assert
+  // ASSERT
   expect(immerNoUpdate).toBe(original);
   expect(getterCallCount).toBe(2);
 
@@ -45,16 +76,16 @@ test('patched immer works as expected', () => {
     firstName: 'Mary',
   };
 
-  // assert
+  // ASSERT
   expect(newState.fullName).toBe('Bob Fruits');
   expect(getterCallCount).toBe(3);
 
-  // act
+  // ACT
   const immerWithUpdate = produce(original, (draft) => {
     draft.firstName = 'Mary';
   });
 
-  // assert
+  // ASSERT
   expect(immerWithUpdate).not.toBe(original);
   expect(immerWithUpdate.firstName).toBe('Mary');
   expect(immerWithUpdate.fullName).toBe('Bob Fruits');
@@ -62,7 +93,7 @@ test('patched immer works as expected', () => {
 });
 
 test('defining and accessing a computed property', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
@@ -72,43 +103,43 @@ test('defining and accessing a computed property', () => {
     ),
   });
 
-  // act
+  // ACT
   expect(store.getState().fullName).toBe('Mary Poppins');
 });
 
-test('computed properties immediately available in an action', () => {
-  // arrange
+test('computed properties ARE NOT IMMEDIATELY available in an action', () => {
+  // ARRANGE
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
     fullName: computed((state) => `${state.firstName} ${state.lastName}`),
     anAction: action((state) => {
-      // assert
-      expect(state.fullName).toBe('Mary Poppins');
+      // ASSERT
+      expect(state.fullName).toBeUndefined();
     }),
   });
 
-  // act
+  // ACT
   store.getActions().anAction();
 });
 
 test('can spread computed', () => {
-  // arange
+  // ARRANGE
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
     fullName: computed((state) => `${state.firstName} ${state.lastName}`),
   });
 
-  // act
+  // ACT
   const myState = { ...store.getState() };
 
-  // assert
+  // ASSERT
   expect(myState.fullName).toBe('Mary Poppins');
 });
 
 test('computed properties are memoized', () => {
-  // arrange
+  // ARRANGE
   let computedCount = 0;
 
   const store = createStore({
@@ -126,52 +157,52 @@ test('computed properties are memoized', () => {
     }),
   });
 
-  // assert
+  // ASSERT
   expect(computedCount).toBe(0);
 
-  // act
+  // ACT
   // eslint-disable-next-line no-unused-expressions
   store.getState().fullName;
 
-  // assert
+  // ASSERT
   expect(computedCount).toBe(1);
 
-  // act
+  // ACT
   // eslint-disable-next-line no-unused-expressions
   store.getState().fullName;
 
-  // assert
+  // ASSERT
   expect(computedCount).toBe(1);
 
-  // act
+  // ACT
   store.getActions().setFirstName('Bob');
 
-  // assert
+  // ASSERT
   expect(store.getState().fullName).toBe('Bob Poppins');
   expect(computedCount).toBe(2);
 
-  // act
+  // ACT
   store.getActions().setFirstName('Bob');
 
-  // assert
+  // ASSERT
   expect(store.getState().fullName).toBe('Bob Poppins');
   expect(computedCount).toBe(2);
 });
 
-it('state resolvers are optional', () => {
-  // arrange
+test('state resolvers are optional', () => {
+  // ARRANGE
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
     fullName: computed((state) => `${state.firstName} ${state.lastName}`),
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().fullName).toBe('Mary Poppins');
 });
 
 test('computed properties can access global state', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     products: {
       items: [{ id: 1, name: 'boots', price: 20 }],
@@ -195,40 +226,40 @@ test('computed properties can access global state', () => {
     },
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().basket.products).toEqual([
     { id: 1, name: 'boots', price: 20 },
   ]);
 
-  // act
+  // ACT
   store.getActions().products.setProductName({
     id: 1,
     name: 'shoes',
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().basket.products).toEqual([
     { id: 1, name: 'shoes', price: 20 },
   ]);
 });
 
-test('computed properties are available in actions', () => {
-  // arrange
+test('computed properties are NOT available in actions', () => {
+  // ARRANGE
   const store = createStore({
     todos: ['test computed'],
     todosCount: computed((state) => state.todos.length),
     testAction: action((state) => {
-      // assert
-      expect(state.todosCount).toBe(1);
+      // ASSERT
+      expect(state.todosCount).toBeUndefined();
     }),
   });
 
-  // act
+  // ACT
   store.getActions().testAction();
 });
 
 test('computed properties work in a React component', () => {
-  // arrange
+  // ARRANGE
   let renderCount = 0;
   function Product({ id }) {
     const product = useStoreState((state) => state.products.itemMap[id]);
@@ -261,14 +292,14 @@ test('computed properties work in a React component', () => {
     </StoreProvider>
   );
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
 
-  // assert
+  // ASSERT
   expect(getByTestId('name').textContent).toBe('boots');
   expect(renderCount).toBe(1);
 
-  // act
+  // ACT
   act(() => {
     store.getActions().products.setProductName({
       id: 1,
@@ -276,13 +307,13 @@ test('computed properties work in a React component', () => {
     });
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().products.items).toEqual([{ id: 1, name: 'shoes' }]);
   expect(getByTestId('name').textContent).toBe('shoes');
 
   expect(renderCount).toBe(2);
 
-  // act
+  // ACT
   act(() => {
     store.getActions().products.setProductName({
       id: 1,
@@ -290,22 +321,22 @@ test('computed properties work in a React component', () => {
     });
   });
 
-  // assert
+  // ASSERT
   expect(getByTestId('name').textContent).toBe('shoes');
   expect(renderCount).toBe(2);
 
-  // act
+  // ACT
   act(() => {
     store.getActions().other.setFoo('qux');
   });
 
-  // assert
+  // ASSERT
   expect(getByTestId('name').textContent).toBe('shoes');
   expect(renderCount).toBe(2);
 });
 
 test('computed properties accessing others in React component', () => {
-  // arrange
+  // ARRANGE
   let renderCount = 0;
   function Basket() {
     const products = useStoreState((state) => state.basket.products);
@@ -354,28 +385,28 @@ test('computed properties accessing others in React component', () => {
     </StoreProvider>
   );
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
 
-  // assert
+  // ASSERT
   expect(getByTestId('products').textContent).toBe('boots');
   expect(renderCount).toBe(1);
 
-  // act
+  // ACT
   act(() => {
     store.getActions().basket.addProductToBasket(2);
   });
 
-  // assert
+  // ASSERT
   expect(getByTestId('products').textContent).toBe('boots, shirt');
   expect(renderCount).toBe(2);
 
-  // act
+  // ACT
   act(() => {
     store.getActions().basket.setProperty('bar');
   });
 
-  // assert
+  // ASSERT
   expect(getByTestId('products').textContent).toBe('boots, shirt');
   expect(renderCount).toBe(2);
 });
@@ -396,7 +427,7 @@ test('nested computed properties', () => {
     // selectors
     list: computed([(state) => state.items], (items) => Object.values(items)),
 
-    // actions
+    // ACTions
     fetched: action((state, payload) => {
       state.nested.numbers = payload;
       state.items['1'] = 'bar';
@@ -405,10 +436,10 @@ test('nested computed properties', () => {
 
   const store = createStore(model);
 
-  // act
+  // ACT
   store.getActions().fetched([4, 5, 6]);
 
-  // assert
+  // ASSERT
   expect(store.getState().nested.filteredNumbers).toEqual([4, 5, 6]);
   expect(store.getState().list).toEqual(['bar']);
 });
@@ -431,16 +462,16 @@ test('updating nested state', () => {
 
   const store = createStore(model);
 
-  // act
+  // ACT
   store.getActions().nested.reset();
 
-  // assert
+  // ASSERT
   expect(store.getState().nested.numbers).toEqual([5]);
   expect(store.getState().list).toEqual([{ id: 1, text: 'foo' }]);
 });
 
 test('writes to a computed property are ignored', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     items: ['oi'],
     count: computed((state) => state.items.length),
@@ -449,13 +480,13 @@ test('writes to a computed property are ignored', () => {
     }),
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().count).toBe(1);
 
-  // act
+  // ACT
   store.getActions().naughtyAction();
 
-  // assert
+  // ASSERT
   expect(store.getState().count).toBe(1);
 });
 

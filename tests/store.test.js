@@ -1,7 +1,7 @@
 import { action, computed, createStore, reducer, thunk } from '../src';
 
 test('empty object in state', () => {
-  // arrange
+  // ARRANGE
   const model = {
     todos: {
       items: {},
@@ -9,9 +9,9 @@ test('empty object in state', () => {
     },
     bar: null,
   };
-  // act
+  // ACT
   const store = createStore(model);
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     todos: {
       items: {},
@@ -22,7 +22,7 @@ test('empty object in state', () => {
 });
 
 test('basic features', () => {
-  // arrange
+  // ARRANGE
   const model = {
     session: {
       user: undefined,
@@ -31,19 +31,19 @@ test('basic features', () => {
       }),
     },
   };
-  // act
+  // ACT
   const store = createStore(model);
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     session: {
       user: undefined,
     },
   });
-  // act
+  // ACT
   store.getActions().session.login({
     name: 'bob',
   });
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     session: {
       user: {
@@ -54,7 +54,7 @@ test('basic features', () => {
 });
 
 test('nested action', () => {
-  // arrange
+  // ARRANGE
   const model = {
     session: {
       user: undefined,
@@ -67,9 +67,9 @@ test('nested action', () => {
       login: action(() => undefined),
     },
   };
-  // act
+  // ACT
   const store = createStore(model);
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     session: {
       user: undefined,
@@ -78,9 +78,9 @@ test('nested action', () => {
       },
     },
   });
-  // act
+  // ACT
   store.getActions().session.settings.setFavouriteColor('blue');
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     session: {
       user: undefined,
@@ -92,7 +92,7 @@ test('nested action', () => {
 });
 
 test('root action', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     todos: {
       items: { 1: { text: 'foo' } },
@@ -101,15 +101,15 @@ test('root action', () => {
       state.todos.items[2] = { text: 'bar' };
     }),
   });
-  // act
+  // ACT
   store.getActions().doSomething();
-  // assert
+  // ASSERT
   const actual = store.getState().todos.items;
   expect(actual).toEqual({ 1: { text: 'foo' }, 2: { text: 'bar' } });
 });
 
 test('state with no actions', () => {
-  // arrange
+  // ARRANGE
   const model = {
     session: {
       user: undefined,
@@ -122,13 +122,13 @@ test('state with no actions', () => {
       foo: [],
     },
   };
-  // act
+  // ACT
   const store = createStore(model);
-  // act
+  // ACT
   store.getActions().session.login({
     name: 'bob',
   });
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     session: {
       user: {
@@ -142,14 +142,14 @@ test('state with no actions', () => {
 });
 
 test('allows custom middleware', (done) => {
-  // arrange
+  // ARRANGE
   const customMiddleware = () => (next) => (_action) => {
-    // assert
+    // ASSERT
     expect(_action.type).toEqual('@action.doFoo');
     next(_action);
     done();
   };
-  // act
+  // ACT
   const store = createStore(
     {
       doFoo: action(() => {}),
@@ -160,7 +160,7 @@ test('allows custom middleware', (done) => {
 });
 
 test('allows custom middleware with mockActions=true', () => {
-  // arrange
+  // ARRANGE
   const customMiddleware = (store) => (next) => (_action) => {
     if (_action.customMiddleware) {
       // Unfortunately 'store' is plain Redux store, not easy-peasy's one.
@@ -183,10 +183,10 @@ test('allows custom middleware with mockActions=true', () => {
     { middleware: [customMiddleware], mockActions: true },
   );
 
-  // act
+  // ACT
   store.dispatch({ customMiddleware: 'operateOnAPI' });
 
-  // assert
+  // ASSERT
   expect(store.getMockedActions()).toEqual([
     { type: 'API_REQUEST' },
     { type: 'API_RESPONSE', payload: { success: true } },
@@ -195,17 +195,17 @@ test('allows custom middleware with mockActions=true', () => {
 });
 
 test('allows custom enhancers', () => {
-  // arrange
+  // ARRANGE
   const _defaultState = { foo: 'bar' };
   const rootReducer = (state = _defaultState) => state;
 
-  // act
+  // ACT
   createStore(
     {},
     {
       enhancers: [
         (storeCreator) => {
-          // assert
+          // ASSERT
           expect(storeCreator).toBeInstanceOf(Function);
           const store = storeCreator(rootReducer);
           expect(store.getState()).toEqual({ foo: 'bar' });
@@ -215,11 +215,11 @@ test('allows custom enhancers', () => {
     },
   );
 
-  // assert
+  // ASSERT
 });
 
 test('supports initial state', () => {
-  // arrange
+  // ARRANGE
   const model = {
     foo: {
       bar: {
@@ -237,9 +237,9 @@ test('supports initial state', () => {
       },
     },
   };
-  // act
+  // ACT
   const store = createStore(model, { initialState });
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     foo: {
       bar: {
@@ -253,7 +253,7 @@ test('supports initial state', () => {
 });
 
 test('complex configuration', async () => {
-  // arrange
+  // ARRANGE
   const wrappedThunk = (fn) =>
     thunk(async (actions, payload, helpers) => {
       try {
@@ -284,27 +284,27 @@ test('complex configuration', async () => {
     },
   });
 
-  // act
+  // ACT
   const result = await store.getActions().session.initialise();
 
-  // assert
+  // ASSERT
   expect(store.getState().session.isInitialised).toBe(true);
   expect(result).toBe('done');
 });
 
 test('redux thunk configured', async () => {
-  // arrange
+  // ARRANGE
   const model = { foo: 'bar' };
   const store = createStore(model);
   const thunkAction = (payload) => () => Promise.resolve(payload);
-  // act
+  // ACT
   const result = await store.dispatch(thunkAction('foo'));
-  // assert
+  // ASSERT
   expect(result).toBe('foo');
 });
 
 test('initialState is respected even if not in model', () => {
-  // act
+  // ACT
   const store = createStore(
     {},
     {
@@ -314,12 +314,12 @@ test('initialState is respected even if not in model', () => {
     },
   );
 
-  // assert
+  // ASSERT
   expect(store.getState().foo).toEqual('bar');
 });
 
 test('nested empty model', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counters: {
       add: action((state) => {
@@ -328,15 +328,15 @@ test('nested empty model', () => {
     },
   });
 
-  // act
+  // ACT
   store.getActions().counters.add();
 
-  // assert
+  // ASSERT
   expect(Object.keys(store.getState().counters).length).toBe(1);
 });
 
 test('supports non literal objects as state - i.e. classes etc', () => {
-  // arrange
+  // ARRANGE
   class Person {
     constructor(name, surname) {
       this.name = name;
@@ -346,7 +346,7 @@ test('supports non literal objects as state - i.e. classes etc', () => {
     fullName = () => `${this.name} ${this.surname}`;
   }
 
-  // act
+  // ACT
   const store = createStore({
     person: new Person('bob', 'boberson'),
     changePerson: action((state, person) => {
@@ -354,12 +354,12 @@ test('supports non literal objects as state - i.e. classes etc', () => {
     }),
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().person).toBeInstanceOf(Person);
 });
 
 test('support model reconfiguration', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     todos: {
       items: [],
@@ -370,7 +370,7 @@ test('support model reconfiguration', () => {
   });
   store.getActions().todos.addTodo('support hot reloading');
 
-  // act
+  // ACT
   store.reconfigure({
     todos: {
       items: [],
@@ -382,7 +382,7 @@ test('support model reconfiguration', () => {
   });
   store.getActions().todos.addTodo('zing');
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     todos: {
       items: ['support hot reloading', 'zing'],
@@ -390,7 +390,7 @@ test('support model reconfiguration', () => {
     },
   });
 
-  // act
+  // ACT
   store.reconfigure({
     todos: {
       items: [],
@@ -404,7 +404,7 @@ test('support model reconfiguration', () => {
   });
   store.getActions().todos.removeTodo();
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     todos: {
       items: ['support hot reloading'],
@@ -412,7 +412,7 @@ test('support model reconfiguration', () => {
     },
   });
 
-  // act
+  // ACT
   store.reconfigure({
     todos: {
       items: [],
@@ -422,12 +422,12 @@ test('support model reconfiguration', () => {
     },
   });
 
-  // assert
+  // ASSERT
   expect(store.getActions().todos.addTodo).toBeUndefined();
 });
 
 test('mocking actions', () => {
-  // arrange
+  // ARRANGE
   const store = createStore(
     {
       counter: 0,
@@ -438,22 +438,22 @@ test('mocking actions', () => {
     { mockActions: true },
   );
 
-  // act
+  // ACT
   store.getActions().inc();
 
-  // assert
+  // ASSERT
   expect(store.getState().counter).toBe(0);
   expect(store.getMockedActions()).toMatchObject([{ type: '@action.inc' }]);
 
-  // act
+  // ACT
   store.clearMockedActions();
 
-  // assert
+  // ASSERT
   expect(store.getMockedActions()).toEqual([]);
 });
 
 test('disableImmer', () => {
-  // arrange
+  // ARRANGE
   const model = {
     foo: 0,
     setFoo: action((state, foo) => ({ ...state, foo })),
@@ -463,15 +463,15 @@ test('disableImmer', () => {
     disableImmer: true,
   });
 
-  // act
+  // ACT
   store.getActions().setFoo(5);
 
-  // assert
+  // ASSERT
   expect(store.getState().doubleFoo).toBe(10);
 });
 
 test('disableImmer - nested update', () => {
-  // arrange
+  // ARRANGE
   const model = {
     nested: {
       foo: 0,
@@ -480,15 +480,15 @@ test('disableImmer - nested update', () => {
   };
   const store = createStore(model, { disableImmer: true });
 
-  // act
+  // ACT
   store.dispatch.nested.setFoo(5);
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({ nested: { foo: 5 } });
 });
 
 test('disableImmer - deeply nested update', () => {
-  // arrange
+  // ARRANGE
   const model = {
     deeply: {
       nested: {
@@ -499,15 +499,15 @@ test('disableImmer - deeply nested update', () => {
   };
   const store = createStore(model, { disableImmer: true });
 
-  // act
+  // ACT
   store.dispatch.deeply.nested.setFoo(5);
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({ deeply: { nested: { foo: 5 } } });
 });
 
 it('disableImmer - nested reducer', () => {
-  // arrange
+  // ARRANGE
   const store = createStore(
     {
       stuff: {
@@ -524,10 +524,10 @@ it('disableImmer - nested reducer', () => {
     },
   );
 
-  // act
+  // ACT
   store.dispatch({ type: 'INCREMENT' });
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     stuff: {
       counter: 2,

@@ -1,7 +1,7 @@
 import { action, createStore } from '../src';
 
 test('deprecated action API does nothing', () => {
-  // act
+  // ACT
   const store = createStore({
     count: 1,
     increment: (state) => {
@@ -9,21 +9,21 @@ test('deprecated action API does nothing', () => {
     },
   });
 
-  // assert
+  // ASSERT
   expect(store.getActions().increment).toBeUndefined();
 });
 
 test('returning the state has no effect', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     count: 1,
     doNothing: action((state) => state),
   });
   const prevState = store.getState();
 
-  // act
+  // ACT
   store.getActions().doNothing();
 
-  // assert
+  // ASSERT
   expect(store.getState()).toBe(prevState);
 });

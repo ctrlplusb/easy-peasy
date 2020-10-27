@@ -4,7 +4,7 @@ import { render } from '@testing-library/react';
 import { createStore, StoreProvider, useStore } from '../src';
 
 test('returns the store instance', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     foo: 'bar',
   });
@@ -15,7 +15,7 @@ test('returns the store instance', () => {
     return null;
   };
 
-  // act
+  // ACT
   render(
     <StoreProvider store={store}>
       <Consumer />

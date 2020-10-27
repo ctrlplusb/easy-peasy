@@ -23,17 +23,17 @@ afterEach(() => {
 });
 
 test('exposes dispatch', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({ foo: 'bar' });
 
   function MyComponent() {
     const dispatch = useStoreDispatch();
-    // assert
+    // ASSERT
     expect(dispatch).toBe(store.dispatch);
     return null;
   }
 
-  // act
+  // ACT
   render(
     <StoreProvider store={store}>
       <MyComponent />
@@ -42,7 +42,7 @@ test('exposes dispatch', () => {
 });
 
 test('maps state when props change', async () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     values: {
       1: 'foo',
@@ -59,26 +59,26 @@ test('maps state when props change', async () => {
     </StoreProvider>
   );
 
-  // act
+  // ACT
   const { getByTestId, rerender } = render(app);
 
-  // assert
+  // ASSERT
   const value = getByTestId('value');
   expect(value.firstChild.textContent).toBe('foo');
 
-  // act
+  // ACT
   rerender(
     <StoreProvider store={store}>
       <Values id={2} />
     </StoreProvider>,
   );
 
-  // assert
+  // ASSERT
   expect(value.firstChild.textContent).toBe('bar');
 });
 
 test('store subscribe is only called once', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     count: 1,
     inc: action((state) => {
@@ -98,25 +98,25 @@ test('store subscribe is only called once', () => {
     </StoreProvider>
   );
 
-  // act
+  // ACT
   render(app);
 
-  // assert
+  // ASSERT
   expect(renderSpy).toBeCalledTimes(1);
   expect(store.subscribe).toBeCalledTimes(1);
 
-  // act
+  // ACT
   act(() => {
     store.getActions().inc();
   });
 
-  // assert
+  // ASSERT
   expect(renderSpy).toBeCalledTimes(2);
   expect(store.subscribe).toBeCalledTimes(1);
 });
 
 test('store is unsubscribed on unmount', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     count: 1,
     inc: action((state) => {
@@ -135,28 +135,28 @@ test('store is unsubscribed on unmount', () => {
     </StoreProvider>
   );
 
-  // act
+  // ACT
   const { unmount } = render(app);
 
-  // assert
+  // ASSERT
   expect(unsubscribeSpy).toBeCalledTimes(0);
 
-  // act
+  // ACT
   store.getActions().inc();
 
-  // assert
+  // ASSERT
   expect(unsubscribeSpy).toBeCalledTimes(0);
 
-  // act
+  // ACT
   unmount();
 
-  // assert
+  // ASSERT
   expect(unsubscribeSpy).toBeCalledTimes(1);
 });
 
 describe('direct form', () => {
   test('component updates with state change', () => {
-    // arrange
+    // ARRANGE
     const store = createStore({
       count: 1,
       inc: action((state) => {
@@ -181,24 +181,24 @@ describe('direct form', () => {
       </StoreProvider>
     );
 
-    // act
+    // ACT
     const { getByTestId } = render(app);
 
-    // assert
+    // ASSERT
     const countButton = getByTestId('count');
     expect(countButton.firstChild.textContent).toBe('1');
     expect(renderSpy).toHaveBeenCalledTimes(1);
 
-    // act
+    // ACT
     fireEvent.click(countButton);
 
-    // assert
+    // ASSERT
     expect(countButton.firstChild.textContent).toBe('2');
     expect(renderSpy).toHaveBeenCalledTimes(2);
   });
 
   test('component only updates with state change', () => {
-    // arrange
+    // ARRANGE
     const store = createStore({
       count: 1,
       somethingElse: null,
@@ -218,18 +218,18 @@ describe('direct form', () => {
       </StoreProvider>
     );
 
-    // act
+    // ACT
     const { getByTestId } = render(app);
 
-    // assert
+    // ASSERT
     const countButton = getByTestId('count');
     expect(countButton.firstChild.textContent).toBe('1');
     expect(renderSpy).toHaveBeenCalledTimes(1);
 
-    // act
+    // ACT
     store.getActions().updateSomethingElse('foo');
 
-    // assert
+    // ASSERT
     expect(countButton.firstChild.textContent).toBe('1');
     expect(renderSpy).toHaveBeenCalledTimes(1);
   });

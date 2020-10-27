@@ -1,7 +1,7 @@
 import { action, createStore, reducer } from '../src';
 
 it('basic', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: reducer((state = 1, _action) => {
       if (_action.type === 'INCREMENT') {
@@ -17,13 +17,13 @@ it('basic', () => {
     },
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().counter).toEqual(1);
 
-  // act
+  // ACT
   store.dispatch({ type: 'INCREMENT' });
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     counter: 2,
     foo: {
@@ -33,7 +33,7 @@ it('basic', () => {
 });
 
 it('nested', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     stuff: {
       counter: reducer((state = 1, _action) => {
@@ -45,10 +45,10 @@ it('nested', () => {
     },
   });
 
-  // act
+  // ACT
   store.dispatch({ type: 'INCREMENT' });
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     stuff: {
       counter: 2,

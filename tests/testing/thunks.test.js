@@ -16,7 +16,7 @@ const todosModel = {
 
 describe('without mocking actions', () => {
   it('succeeds', async () => {
-    // arrange
+    // ARRANGE
     const todo = { id: 1, text: 'Test my store' };
     const mockTodosService = {
       fetchById: jest.fn(() => Promise.resolve(todo)),
@@ -25,10 +25,10 @@ describe('without mocking actions', () => {
       injections: { todosService: mockTodosService },
     });
 
-    // act
+    // ACT
     await store.getActions().fetchById(todo.id);
 
-    // assert
+    // ASSERT
     expect(mockTodosService.fetchById).toHaveBeenCalledWith(todo.id);
     expect(store.getState()).toEqual({
       items: {
@@ -38,7 +38,7 @@ describe('without mocking actions', () => {
   });
 
   it('an error occurs', async () => {
-    // arrange
+    // ARRANGE
     const model = {
       throwing: thunk(async () => {
         await tick();
@@ -47,11 +47,11 @@ describe('without mocking actions', () => {
     };
     const store = createStore(model);
 
-    // act
+    // ACT
     try {
       await store.getActions().throwing('A payload');
     } catch (err) {
-      // assert
+      // ASSERT
       expect(err.message).toEqual('poop');
     }
   });
@@ -59,7 +59,7 @@ describe('without mocking actions', () => {
 
 describe('with mocking actions', () => {
   it('succeeds', async () => {
-    // arrange
+    // ARRANGE
     const todo = { id: 1, text: 'Test my store' };
     const mockTodosService = {
       fetchById: jest.fn(() => Promise.resolve(todo)),
@@ -69,10 +69,10 @@ describe('with mocking actions', () => {
       mockActions: true,
     });
 
-    // act
+    // ACT
     await store.getActions().fetchById(todo.id);
 
-    // assert
+    // ASSERT
     expect(mockTodosService.fetchById).toHaveBeenCalledWith(todo.id);
     expect(store.getMockedActions()).toEqual([
       { type: '@thunk.fetchById(start)', payload: todo.id },
@@ -82,7 +82,7 @@ describe('with mocking actions', () => {
   });
 
   it('an error occurs', async () => {
-    // arrange
+    // ARRANGE
     const err = new Error('poop');
     const model = {
       throwing: thunk((actions, payload, { fail }) => {
@@ -93,15 +93,15 @@ describe('with mocking actions', () => {
       mockActions: true,
     });
 
-    // act
+    // ACT
     try {
       await store.getActions().throwing('A payload');
     } catch (thrownError) {
-      // assert
+      // ASSERT
       expect(thrownError.message).toEqual('poop');
     }
 
-    // assert
+    // ASSERT
     expect(store.getMockedActions()).toMatchObject([
       { type: '@thunk.throwing(start)', payload: 'A payload' },
       {
@@ -113,7 +113,7 @@ describe('with mocking actions', () => {
   });
 
   it('string action fired within thunk', async () => {
-    // arrange
+    // ARRANGE
     const store = createStore(
       {
         items: [],
@@ -129,10 +129,10 @@ describe('with mocking actions', () => {
       },
     );
 
-    // act
+    // ACT
     await store.getActions().add();
 
-    // assert
+    // ASSERT
     expect(store.getMockedActions()).toEqual([
       { type: '@thunk.add(start)', payload: undefined },
       { type: 'CUSTOM_ACTION', payload: 'the payload' },

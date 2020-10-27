@@ -7,10 +7,10 @@ import {
 } from '../src';
 
 test('exports all hooks', () => {
-  // act
+  // ACT
   const typedHooks = createTypedHooks();
 
-  // assert
+  // ASSERT
   expect(typedHooks.useStoreActions).toBe(useStoreActions);
   expect(typedHooks.useStoreState).toBe(useStoreState);
   expect(typedHooks.useStoreDispatch).toBe(useStoreDispatch);

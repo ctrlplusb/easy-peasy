@@ -7,7 +7,7 @@ import { renderToString } from 'react-dom/server';
 import { createStore, useStoreState, StoreProvider } from '../src';
 
 test('works', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     count: 0,
   });
@@ -21,9 +21,9 @@ test('works', () => {
     </StoreProvider>
   );
 
-  // act
+  // ACT
   const actual = renderToString(app);
 
-  // assert
+  // ASSERT
   expect(actual).toEqual('<span>0</span>');
 });

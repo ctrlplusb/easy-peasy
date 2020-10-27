@@ -36,7 +36,6 @@ export default function extractDataFromModel(
   let _persistenceConfig = [];
   const _computedState = {
     isInReducer: false,
-    currentState: _defaultState,
   };
 
   const recursiveExtractFromModel = (current, parentPath) =>
@@ -165,6 +164,7 @@ export default function extractDataFromModel(
             parentPath,
             key,
             value,
+            references,
           );
           bindComputedProperty(parent, _defaultState);
           _computedProperties.push({ key, parentPath, bindComputedProperty });

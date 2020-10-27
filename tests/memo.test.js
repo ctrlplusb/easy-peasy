@@ -1,35 +1,35 @@
 import { memo } from '../src';
 
 it.skip('should memoize according to the cache size limit', () => {
-  // arrange
+  // ARRANGE
   let fnHit = 0;
   const memoized = memo((firstName, lastName) => {
     fnHit += 1;
     return `${firstName} ${lastName}`;
   }, 2);
 
-  // act
+  // ACT
   memoized('Bob', 'Poppins');
 
-  // assert
+  // ASSERT
   expect(fnHit).toBe(1);
 
-  // act
+  // ACT
   memoized('Mary', 'Poppins');
 
-  // assert
+  // ASSERT
   expect(fnHit).toBe(2);
 
-  // act
+  // ACT
   memoized('Bob', 'Poppins');
 
-  // assert
+  // ASSERT
   expect(fnHit).toBe(2);
 
-  // act
+  // ACT
   memoized('Isla', 'Poppins');
 
-  // assert
+  // ASSERT
   expect(fnHit).toBe(3);
 });
 
