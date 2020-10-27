@@ -1,3 +1,4 @@
+import { isDraft, original } from 'immer';
 import { createSimpleProduce, get } from './lib';
 
 export default function createReducer(disableImmer, _aRD, _cR, _cP) {
@@ -23,9 +24,12 @@ export default function createReducer(disableImmer, _aRD, _cR, _cP) {
   };
 
   const reducerForCustomReducers = (state, action) => {
-    return _cR.reduce((acc, { parentPath, key, reducer: red }) => {
+    return _cR.reduce((acc, { parentPath, key, reducer }) => {
       return simpleProduce(parentPath, acc, (draft) => {
-        draft[key] = red(draft[key], action);
+        draft[key] = reducer(
+          isDraft(draft[key]) ? original(draft[key]) : draft[key],
+          action,
+        );
         return draft;
       });
     }, state);

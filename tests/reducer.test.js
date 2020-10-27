@@ -55,3 +55,24 @@ it('nested', () => {
     },
   });
 });
+
+it('no-op', () => {
+  // ARRANGE
+  const store = createStore({
+    counter: reducer((state = 1, _action) => {
+      if (_action.type === 'INCREMENT') {
+        return state + 1;
+      }
+      return state;
+    }),
+    doNothing: action((state) => state),
+  });
+
+  const initial = store.getState();
+
+  // ACT
+  store.getActions().doNothing();
+
+  // ASSERT
+  expect(store.getState()).toBe(initial);
+});
