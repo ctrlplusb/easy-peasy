@@ -157,10 +157,37 @@ type Helpers<Model extends object, StoreModel extends object, Injections> = {
 
 // #region Helpers
 
+/**
+ * This utility will pull the state within an action out of the Proxy form into
+ * a natural form, allowing you to console.log or inspect it.
+ *
+ * @param state - The action state
+ *
+ * @example
+ *
+ * ```typescript
+ * import { debug, action } from 'easy-peasy';
+ *
+ * const model = {
+ *   todos: [],
+ *   addTodo: action((state, payload) => {
+ *     console.log(debug(state));
+ *     state.todos.push(payload);
+ *     console.log(debug(state));
+ *   })
+ * }
+ * ```
+ */
 export function debug<StateDraft extends object = {}>(
   state: StateDraft,
 ): StateDraft;
 
+/**
+ * This utility is deprecated. Please utilize a memoization library of your
+ * choice.
+ *
+ * @deprecated
+ */
 export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 // #endregion
@@ -198,7 +225,7 @@ type RecursiveListeners<ActionsModel extends object> = ListenerMapper<
 >;
 
 /**
- * Filters a model into a type that represents the listeners actions/thunks
+ * Filters a model into a type that represents the listener actions/thunks
  *
  * @example
  *
@@ -240,11 +267,20 @@ type RecursiveActions<ActionsModel extends object> = ActionMapper<
 >;
 
 /**
- * Filters a model into a type that represents the action/thunk creators
+ * Filters a model into a type that represents the action/thunk creators.
  *
  * @example
  *
- * type OnlyActions = Actions<Model>;
+ * ```typescript
+ * import { Actions, useStoreActions } from 'easy-peasy';
+ * import { StoreModel } from './my-store';
+ *
+ * function MyComponent() {
+ *   const doSomething = useStoreActions(
+ *    (actions: Actions<StoreModel>) => actions.doSomething
+ *   );
+ * }
+ * ```
  */
 export type Actions<Model extends object = {}> = RecursiveActions<Model>;
 
@@ -281,7 +317,14 @@ type RecursiveState<Model extends object> = StateMapper<
  *
  * @example
  *
- * type StateOnly = State<Model>;
+ * ```typescript
+ * import { State, useStoreState } from 'easy-peasy';
+ * import { StoreModel } from './my-store';
+ *
+ * function MyComponent() {
+ *   const stuff = useStoreState((state: State<StoreModel>) => state.stuff);
+ * }
+ * ```
  */
 export type State<Model extends object = {}> = RecursiveState<Model>;
 
@@ -318,7 +361,19 @@ export function createStore<
 ): Store<StoreModel, EasyPeasyConfig<InitialState, Injections>>;
 
 /**
- * Configuration interface for the createStore
+ * Configuration interface for stores.
+ *
+ * @example
+ *
+ * ```typescript
+ * import { createStore } from 'easy-peasy';
+ * import model from './my-model';
+ *
+ * const store = createStore(model, {
+ *   devTools: false,
+ *   name: 'MyConfiguredStore',
+ * });
+ * ```
  */
 export interface EasyPeasyConfig<
   InitialState extends undefined | object = undefined,
@@ -347,14 +402,17 @@ export interface AddModelResult {
 }
 
 /**
- * Represents a Redux store, enhanced by easy peasy.
+ * An Easy Peasy store. This is essentially a Redux store with additional enhanced
+ * APIs attached.
  *
  * @example
  *
+ * ```typescript
  * import { Store } from 'easy-peasy';
  * import { StoreModel } from './store';
  *
- * type EnhancedReduxStore = Store<StoreModel>;
+ * type MyEasyPeasyStore = Store<StoreModel>;
+ * ```
  */
 export interface Store<
   StoreModel extends object = {},
