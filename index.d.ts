@@ -152,6 +152,7 @@ type Helpers<Model extends object, StoreModel extends object, Injections> = {
   getState: () => State<Model>;
   getStoreActions: () => Actions<StoreModel>;
   getStoreState: () => State<StoreModel>;
+  fail: (error: Error) => void,
   injections: Injections;
   meta: Meta;
 };
@@ -517,6 +518,7 @@ export function thunk<
       getState: () => State<Model>;
       getStoreActions: () => Actions<StoreModel>;
       getStoreState: () => State<StoreModel>;
+      fail: (error: Error) => void;
       injections: Injections;
       meta: Meta;
     },
