@@ -77,6 +77,37 @@ test('does not fire when the dependencies have not changed', () => {
   expect(fired).toBe(false);
 });
 
+test('fires when store dependency changes', () => {
+  // ARRANGE
+  const store = createStore({
+    listener: {
+      fired: false,
+      setFired: action((state, payload) => {
+        state.fired = payload;
+      }),
+      onTodosChanged: unstable_effectOn(
+        [(state, storeState) => storeState.todos],
+        (actions) => {
+          actions.setFired(true);
+        },
+      ),
+    },
+    todos: [],
+    addTodo: action((state, payload) => {
+      state.todos.push(payload);
+    }),
+  });
+
+  // ASSERT
+  expect(store.getState().listener.fired).toBe(false);
+
+  // ACT
+  store.getActions().addTodo('add onEffect api');
+
+  // ASSERT
+  expect(store.getState().listener.fired).toBe(true);
+});
+
 test('it receives the local actions', () => {
   // ARRANGE
   const store = createStore({
