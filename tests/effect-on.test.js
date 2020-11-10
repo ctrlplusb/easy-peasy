@@ -77,6 +77,37 @@ test('does not fire when the dependencies have not changed', () => {
   expect(fired).toBe(false);
 });
 
+test('fires when store dependency changes', () => {
+  // ARRANGE
+  const store = createStore({
+    listener: {
+      fired: false,
+      setFired: action((state, payload) => {
+        state.fired = payload;
+      }),
+      onTodosChanged: unstable_effectOn(
+        [(state, storeState) => storeState.todos],
+        (actions) => {
+          actions.setFired(true);
+        },
+      ),
+    },
+    todos: [],
+    addTodo: action((state, payload) => {
+      state.todos.push(payload);
+    }),
+  });
+
+  // ASSERT
+  expect(store.getState().listener.fired).toBe(false);
+
+  // ACT
+  store.getActions().addTodo('add onEffect api');
+
+  // ASSERT
+  expect(store.getState().listener.fired).toBe(true);
+});
+
 test('it receives the local actions', () => {
   // ARRANGE
   const store = createStore({
@@ -201,6 +232,35 @@ test('getStoreState is exposed in helpers', async () => {
       number: 1,
     },
   });
+});
+
+test('getActions is exposed in helpers', () => {
+  // ARRANGE
+  const store = createStore({
+    fired: false,
+    todos: [],
+    addTodo: action((state, payload) => {
+      state.todos.push(payload);
+    }),
+    setFired: action((state, payload) => {
+      state.fired = payload;
+    }),
+    onTodosChanged: unstable_effectOn(
+      [(state) => state.todos],
+      (_actions, _target, { getActions }) => {
+        getActions().setFired(true);
+      },
+    ),
+  });
+
+  // ASSERT
+  expect(store.getState().fired).toBe(false);
+
+  // ACT
+  store.getActions().addTodo('add onEffect api');
+
+  // ASSERT
+  expect(store.getState().fired).toBe(true);
 });
 
 test('meta values are exposed in helpers', async () => {
