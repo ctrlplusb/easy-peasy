@@ -50,6 +50,7 @@ export function createEffectHandler(
     const helpers = {
       dispatch: references.dispatch,
       getState: () => get(definition.meta.parent, references.getState()),
+      getActions: () => get(definition.meta.parent, _actionCreators),
       getStoreActions: () => _actionCreators,
       getStoreState: references.getState,
       injections,
