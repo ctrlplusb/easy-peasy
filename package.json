@@ -49,7 +49,7 @@
     "react": "^16.8.0"
   },
   "dependencies": {
-    "immer": "7.0.9",
+    "immer": "8.0.1",
     "is-plain-object": "^5.0.0",
     "memoizerific": "^1.11.3",
     "redux": "^4.0.5",
