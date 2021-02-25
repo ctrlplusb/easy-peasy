@@ -95,7 +95,7 @@
     "jest": "^26.5.3",
     "lint-staged": "^10.5.4",
     "microbundle": "^0.12.4",
-    "prettier": "^2.1.2",
+    "prettier": "^2.2.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.1",
