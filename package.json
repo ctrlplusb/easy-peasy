@@ -136,7 +136,11 @@
       "prettier",
       "plugin:markdown/recommended"
     ],
+    "plugins": [
+      "prettier"
+    ],
     "rules": {
+      "prettier/prettier": "error",
       "array-callback-return": 0,
       "camelcase": 0,
       "consistent-return": 0,
