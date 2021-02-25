@@ -25,8 +25,8 @@ module.exports = {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/docs/introduction/' },
-      { text: 'v3', link: 'https://easy-peasy-v3.now.sh' },
-      { text: 'v4', link: 'https://easy-peasy-v4.now.sh' },
+      { text: 'v3', link: 'https://easy-peasy-v3.vercel.app/' },
+      { text: 'v4', link: 'https://easy-peasy-v4.vercel.app/' },
     ],
 
     sidebarDepth: 0,
