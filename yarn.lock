@@ -3171,10 +3171,10 @@ eslint-plugin-jsx-a11y@^6.4.1:
     jsx-ast-utils "^3.1.0"
     language-tags "^1.0.5"
 
-eslint-plugin-markdown@^2.0.0-rc.0:
-  version "2.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-markdown/-/eslint-plugin-markdown-2.0.0-rc.0.tgz#5068eeea783ba2702a61483b7893f1cfe9357209"
-  integrity sha512-B63Jk8TmHLEhRBtSl5U5w9wi+bPuPLuz+UsFmI6BOelpugOVD8mgGfq4D7isXkR1If1uerqPCNqlaWrMNyioQQ==
+eslint-plugin-markdown@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-markdown/-/eslint-plugin-markdown-2.0.0.tgz#cd650beda2b599cd9e4535ea369266b5d0e49d23"
+  integrity sha512-zt10JoexHeJFMTE5egDcetAJ34bn5k/92s0wAuRZfhDAyI0ryEj+O91JL2CbBExajie6BE5L63y47dN1Sbp6mQ==
   dependencies:
     remark-parse "^5.0.0"
     unified "^6.1.2"
