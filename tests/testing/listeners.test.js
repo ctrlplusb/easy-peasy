@@ -15,15 +15,15 @@ const model = {
 };
 
 test('listener gets dispatched when target fires', () => {
-  // arrange
+  // ARRANGE
   const store = createStore(model, {
     mockActions: true,
   });
 
-  // act
+  // ACT
   store.getActions().addTodo('Write docs');
 
-  // assert
+  // ASSERT
   expect(store.getMockedActions()).toMatchObject([
     { type: '@action.addTodo', payload: 'Write docs' },
     {
@@ -37,15 +37,15 @@ test('listener gets dispatched when target fires', () => {
 });
 
 test('listener acts as expected', () => {
-  // arrange
+  // ARRANGE
   const store = createStore(model);
 
-  // act
+  // ACT
   store.getListeners().onTodoAdded({
     type: '@action.addTodo',
     payload: 'Test listeners',
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().logs).toEqual(['Added todo: Test listeners']);
 });

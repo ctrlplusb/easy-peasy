@@ -1,28 +1,28 @@
 # StoreConfig
 
 When [creating your stores](/docs/api/create-store.html) you can provide
-configuration for more advanced scenarios. In most cases you shouldn't need to
-reach for these configuration options, however, they can be useful so it is good
-to familiarise yourself with them.
+configuration for more advanced scenarios.
 
 We have split the configuration parameters into two groupings, standard and
-advanced. The advanced configuration options cover the options used to customise
-the underlying Redux store.
+advanced. The advanced configuration options are used to customise the
+underlying Redux store.
 
 ## Standard configuration
 
 - `name` (string, _optional_, default=EasyPeasyStore)
 
   Allows you to customise the name of the store. This is especially useful when
-  you are creating multiple stores as you will easily be able to distinguish and
-  toggle between the different store instances within the Redux dev tools.
+  you are creating multiple stores as you will easily be able to distinguish the
+  store instances within the
+  [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
 
 - `version` (number, _optional_, default=0)
 
   Allows you to tag the "version" of your store. This is particularly useful
   when utilizing the persist APIs as they reference the version number to ensure
   that any persisted state matches the required store version prior to
-  rehydrating the store.
+  rehydrating the store. You can read more about this within the
+  [persist](/docs/api/persist.html) docs.
 
 - `devTools` (boolean, _optional_, default=false)
 
@@ -36,8 +36,8 @@ the underlying Redux store.
 
   If you set this to true, then [immer](https://github.com/mweststrate/immer)
   will be disabled, meaning you can no longer mutate state directly within
-  actions and will instead have to return immutable state as in a standard Redux
-  reducer.
+  actions and will instead have to return new immutable state as is typical of
+  standard Redux reducers.
 
 - `initialState` (Object, _optional_, default=undefined)
 
@@ -46,8 +46,8 @@ the underlying Redux store.
 
 - `injections` (Object, _optional_, default=undefined)
 
-  Any dependencies you would like to inject. These will be exposed to your
-  thunks and effects.
+  Any dependencies you would like to exposed to your thunks and effects. These
+  are exposed via the `helpers` argument to both APIs.
 
 - `mockActions` (boolean, _optional_, default=false)
 

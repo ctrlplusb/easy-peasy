@@ -1,5 +1,3 @@
-/// <reference types="symbol-observable" />
-
 import { Component } from 'react';
 import {
   AnyAction,
@@ -149,6 +147,7 @@ type ActionOrThunkCreator<Payload = void, Result = void> =
 
 type Helpers<Model extends object, StoreModel extends object, Injections> = {
   dispatch: Dispatch<StoreModel>;
+  fail: AnyFunction;
   getState: () => State<Model>;
   getStoreActions: () => Actions<StoreModel>;
   getStoreState: () => State<StoreModel>;
@@ -158,11 +157,30 @@ type Helpers<Model extends object, StoreModel extends object, Injections> = {
 
 // #region Helpers
 
+/**
+ * This utility will pull the state within an action out of the Proxy form into
+ * a natural form, allowing you to console.log or inspect it.
+ *
+ * @param state - The action state
+ *
+ * @example
+ *
+ * ```typescript
+ * import { debug, action } from 'easy-peasy';
+ *
+ * const model = {
+ *   todos: [],
+ *   addTodo: action((state, payload) => {
+ *     console.log(debug(state));
+ *     state.todos.push(payload);
+ *     console.log(debug(state));
+ *   })
+ * }
+ * ```
+ */
 export function debug<StateDraft extends object = {}>(
   state: StateDraft,
 ): StateDraft;
-
-export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 // #endregion
 
@@ -199,7 +217,7 @@ type RecursiveListeners<ActionsModel extends object> = ListenerMapper<
 >;
 
 /**
- * Filters a model into a type that represents the listeners actions/thunks
+ * Filters a model into a type that represents the listener actions/thunks
  *
  * @example
  *
@@ -241,11 +259,20 @@ type RecursiveActions<ActionsModel extends object> = ActionMapper<
 >;
 
 /**
- * Filters a model into a type that represents the action/thunk creators
+ * Filters a model into a type that represents the action/thunk creators.
  *
  * @example
  *
- * type OnlyActions = Actions<Model>;
+ * ```typescript
+ * import { Actions, useStoreActions } from 'easy-peasy';
+ * import { StoreModel } from './my-store';
+ *
+ * function MyComponent() {
+ *   const doSomething = useStoreActions(
+ *    (actions: Actions<StoreModel>) => actions.doSomething
+ *   );
+ * }
+ * ```
  */
 export type Actions<Model extends object = {}> = RecursiveActions<Model>;
 
@@ -282,7 +309,14 @@ type RecursiveState<Model extends object> = StateMapper<
  *
  * @example
  *
- * type StateOnly = State<Model>;
+ * ```typescript
+ * import { State, useStoreState } from 'easy-peasy';
+ * import { StoreModel } from './my-store';
+ *
+ * function MyComponent() {
+ *   const stuff = useStoreState((state: State<StoreModel>) => state.stuff);
+ * }
+ * ```
  */
 export type State<Model extends object = {}> = RecursiveState<Model>;
 
@@ -293,7 +327,7 @@ export type State<Model extends object = {}> = RecursiveState<Model>;
 /**
  * Creates a store.
  *
- * https://easy-peasy.now.sh/docs/api/create-store.html
+ * https://easy-peasy.dev/docs/api/create-store.html
  *
  * @example
  *
@@ -319,7 +353,19 @@ export function createStore<
 ): Store<StoreModel, EasyPeasyConfig<InitialState, Injections>>;
 
 /**
- * Configuration interface for the createStore
+ * Configuration interface for stores.
+ *
+ * @example
+ *
+ * ```typescript
+ * import { createStore } from 'easy-peasy';
+ * import model from './my-model';
+ *
+ * const store = createStore(model, {
+ *   devTools: false,
+ *   name: 'MyConfiguredStore',
+ * });
+ * ```
  */
 export interface EasyPeasyConfig<
   InitialState extends undefined | object = undefined,
@@ -348,14 +394,17 @@ export interface AddModelResult {
 }
 
 /**
- * Represents a Redux store, enhanced by easy peasy.
+ * An Easy Peasy store. This is essentially a Redux store with additional enhanced
+ * APIs attached.
  *
  * @example
  *
+ * ```typescript
  * import { Store } from 'easy-peasy';
  * import { StoreModel } from './store';
  *
- * type EnhancedReduxStore = Store<StoreModel>;
+ * type MyEasyPeasyStore = Store<StoreModel>;
+ * ```
  */
 export interface Store<
   StoreModel extends object = {},
@@ -452,7 +501,7 @@ type Meta = {
 /**
  * Declares a thunk against your model type definition.
  *
- * https://easy-peasy.now.sh/docs/typescript-api/thunk.html
+ * https://easy-peasy.dev/docs/typescript-api/thunk.html
  *
  * @param Model - The model that the thunk is being bound to.
  * @param Payload - The type of the payload expected. Set to undefined if none.
@@ -487,7 +536,7 @@ export type Thunk<
  * Thunks are typically used to encapsulate side effects and are able to
  * dispatch other actions.
  *
- * https://easy-peasy.now.sh/docs/api/thunk.html
+ * https://easy-peasy.dev/docs/api/thunk.html
  *
  * @example
  *
@@ -512,14 +561,7 @@ export function thunk<
   thunk: (
     actions: Actions<Model>,
     payload: Payload,
-    helpers: {
-      dispatch: Dispatch<StoreModel>;
-      getState: () => State<Model>;
-      getStoreActions: () => Actions<StoreModel>;
-      getStoreState: () => State<StoreModel>;
-      injections: Injections;
-      meta: Meta;
-    },
+    helpers: Helpers<Model, StoreModel, Injections>,
   ) => Result,
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
 
@@ -577,7 +619,7 @@ export type Action<Model extends object, Payload = void> = {
 /**
  * Declares an action.
  *
- * https://easy-peasy.now.sh/docs/api/action
+ * https://easy-peasy.dev/docs/api/action
  *
  * @example
  *
@@ -893,7 +935,7 @@ export function generic<T>(value: T): Generic<T>;
 /**
  * A React Hook allowing you to use state within your component.
  *
- * https://easy-peasy.now.sh/docs/api/use-store-state.html
+ * https://easy-peasy.dev/docs/api/use-store-state.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -918,7 +960,7 @@ export function useStoreState<
 /**
  * A React Hook allowing you to use actions within your component.
  *
- * https://easy-peasy.now.sh/docs/api/use-store-actions.html
+ * https://easy-peasy.dev/docs/api/use-store-actions.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -939,7 +981,7 @@ export function useStoreActions<
 /**
  * A react hook that returns the store instance.
  *
- * https://easy-peasy.now.sh/docs/api/use-store.html
+ * https://easy-peasy.dev/docs/api/use-store.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -973,9 +1015,9 @@ export function useStore<
  *   return <AddTodoForm save={(todo) => dispatch({ type: 'ADD_TODO', payload: todo })} />;
  * }
  */
-export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
-  StoreModel
->;
+export function useStoreDispatch<
+  StoreModel extends object = {}
+>(): Dispatch<StoreModel>;
 
 /**
  * A utility function used to create pre-typed hooks.

@@ -1,0 +1,16 @@
+Internal Variable Reference
+
+_r    = _references
+_r._i = _r._internals
+
+_aRD  =  _actionReducersDict
+_cR   =  _customReducers
+_cP   =  _computedProperties
+_dS   =  _defaultState
+_aCD  =  _actionCreatorDict
+_aC   =  _actionCreators
+_e    =  _effects
+_lAC  =  _listenerActionCreators
+_lAM  =  _listenerActionMap
+_cS   =  _computedState
+

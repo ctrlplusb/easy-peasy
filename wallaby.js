@@ -3,8 +3,7 @@ const path = require('path');
 
 process.env.NODE_ENV = 'test';
 
-const babelConfigContents = fs.readFileSync(path.join(__dirname, '.babelrc'));
-const babelConfig = JSON.parse(babelConfigContents);
+const babelConfig = require('./.babelrc.js');
 
 module.exports = (wallaby) => ({
   files: [

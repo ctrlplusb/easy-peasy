@@ -12,7 +12,7 @@ afterEach(() => {
 });
 
 it('should return state with changes applied', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     logs: ['foo'],
     add: action((state, payload) => {
@@ -22,20 +22,20 @@ it('should return state with changes applied', () => {
     }),
   });
 
-  // act
+  // ACT
   store.getActions().add('bar');
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({ logs: ['foo', 'bar'] });
 });
 
 it('returns argument when not a draft', () => {
-  // arrange
+  // ARRANGE
   const notADraft = { foo: 'bar' };
 
-  // act
+  // ACT
   const actual = debug(notADraft);
 
-  // assert
+  // ASSERT
   expect(actual).toBe(notADraft);
 });

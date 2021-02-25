@@ -1,30 +1,30 @@
 import { createStore } from '../src';
 
 test('redux dev tools disabled', () => {
-  // arrange
+  // ARRANGE
   const model = { foo: 'bar' };
   const composeStub = jest.fn();
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
 
-  // act
+  // ACT
   createStore(model, {
     devTools: false,
   });
 
-  // assert
+  // ASSERT
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).not.toHaveBeenCalled();
 });
 
 test('redux dev tools enabled by default', () => {
-  // arrange
+  // ARRANGE
   const model = { foo: 'bar' };
   const composeStub = jest.fn();
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
 
-  // act
+  // ACT
   createStore(model);
 
-  // assert
+  // ASSERT
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1);
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledWith({
     name: 'EasyPeasyStore',
@@ -33,17 +33,17 @@ test('redux dev tools enabled by default', () => {
 });
 
 test('redux dev tools supports custom store name', () => {
-  // arrange
+  // ARRANGE
   const model = { foo: 'bar' };
   const composeStub = jest.fn();
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
 
-  // act
+  // ACT
   createStore(model, {
     name: 'SwizzleSticks',
   });
 
-  // assert
+  // ASSERT
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledTimes(1);
   expect(window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__).toHaveBeenCalledWith({
     name: 'SwizzleSticks',

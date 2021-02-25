@@ -1,7 +1,7 @@
 import { action, createStore, thunk, actionOn, thunkOn } from '../src';
 
 it('listening to an action, firing an action', () => {
-  // arrange
+  // ARRANGE
   const math = {
     sum: 0,
     add: action((state, payload) => {
@@ -27,15 +27,15 @@ it('listening to an action, firing an action', () => {
     audit,
   });
 
-  // act
+  // ACT
   store.getActions().math.add(10);
 
-  // assert
+  // ASSERT
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
 it('listening to an action, firing a thunk', (done) => {
-  // arrange
+  // ARRANGE
   const math = {
     sum: 0,
     add: action((state, payload) => {
@@ -45,7 +45,7 @@ it('listening to an action, firing a thunk', (done) => {
   const audit = {
     logs: [],
     add: action((state, payload) => {
-      // assert
+      // ASSERT
       expect(payload).toBe('Added 10');
       done();
     }),
@@ -66,12 +66,12 @@ it('listening to an action, firing a thunk', (done) => {
     audit,
   });
 
-  // act
+  // ACT
   store.getActions().math.add(10);
 });
 
 it('listening to a successful thunk, firing an action', async () => {
-  // arrange
+  // ARRANGE
   const math = {
     sum: 0,
     add: thunk(async () => {
@@ -97,15 +97,70 @@ it('listening to a successful thunk, firing an action', async () => {
     audit,
   });
 
-  // act
+  // ACT
   await store.getActions().math.add(10);
 
-  // assert
+  // ASSERT
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
+it('listening to a successful or failed thunk, firing an action', async () => {
+  // ARRANGE
+  let actualTarget;
+
+  const store = createStore({
+    math: {
+      sum: 0,
+      add: thunk(async (actions, payload, helpers) => {
+        if (payload === 7) {
+          helpers.fail('💩');
+          return undefined;
+        }
+        return 'foo';
+      }),
+    },
+    audit: {
+      logs: [],
+      onMathAdd: actionOn(
+        (_, storeActions) => [
+          storeActions.math.add,
+          storeActions.math.add.failType,
+        ],
+        (state, target) => {
+          actualTarget = target;
+          if (target.error) {
+            state.logs.push(`Failed to add ${target.payload}`);
+          } else {
+            state.logs.push(`Added ${target.payload}`);
+          }
+        },
+      ),
+    },
+  });
+
+  // ACT
+  await store.getActions().math.add(10);
+
+  // ASSERT
+  expect(actualTarget.type).toBe('@thunk.math.add(success)');
+  expect(actualTarget.payload).toBe(10);
+  expect(actualTarget.result).toBe('foo');
+  expect(actualTarget.error).toBeUndefined();
+  expect(store.getState().audit.logs).toEqual(['Added 10']);
+
+  // ACT
+  await store.getActions().math.add(7);
+
+  // ASSERT
+  expect(actualTarget.type).toBe('@thunk.math.add(fail)');
+  expect(actualTarget.payload).toBe(7);
+  expect(actualTarget.result).toBeUndefined();
+  expect(actualTarget.error).toBe('💩');
+  expect(store.getState().audit.logs).toEqual(['Added 10', 'Failed to add 7']);
+});
+
 it('listening to a failed thunk', async () => {
-  // arrange
+  // ARRANGE
   const err = new Error('💩');
   const math = {
     sum: 0,
@@ -131,19 +186,19 @@ it('listening to a failed thunk', async () => {
     audit,
   });
 
-  // act
+  // ACT
   try {
     await store.getActions().math.add(10);
   } catch (error) {
     expect(error).toBe(err);
   }
 
-  // assert
+  // ASSERT
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
 it('listening to a thunk, firing a thunk', async (done) => {
-  // arrange
+  // ARRANGE
   const math = {
     sum: 0,
     add: thunk(() => {
@@ -153,7 +208,7 @@ it('listening to a thunk, firing a thunk', async (done) => {
   const audit = {
     logs: [],
     add: action((state, payload) => {
-      // assert
+      // ASSERT
       expect(payload).toEqual('Added 10');
       done();
     }),
@@ -169,12 +224,12 @@ it('listening to a thunk, firing a thunk', async (done) => {
     audit,
   });
 
-  // act
+  // ACT
   await store.getActions().math.add(10);
 });
 
 it('listening to a string, firing an action', async () => {
-  // arrange
+  // ARRANGE
   const audit = {
     logs: [],
     onMathAdd: actionOn(
@@ -188,19 +243,19 @@ it('listening to a string, firing an action', async () => {
     audit,
   });
 
-  // act
+  // ACT
   await store.dispatch({ type: 'MATH_ADD', payload: 10 });
 
-  // assert
+  // ASSERT
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
 it('listening to an string, firing a thunk', (done) => {
-  // arrange
+  // ARRANGE
   const audit = {
     logs: [],
     add: action((state, payload) => {
-      // assert
+      // ASSERT
       expect(payload).toBe('Added 10');
       done();
     }),
@@ -215,12 +270,12 @@ it('listening to an string, firing a thunk', (done) => {
     audit,
   });
 
-  // act
+  // ACT
   store.dispatch({ type: 'MATH_ADD', payload: 10 });
 });
 
 it('action listening to multiple actions', async () => {
-  // arrange
+  // ARRANGE
   const model = {
     logs: [],
     actionTarget: action(() => {}),
@@ -238,16 +293,16 @@ it('action listening to multiple actions', async () => {
   };
   const store = createStore(model);
 
-  // act
+  // ACT
   store.getActions().actionTarget('action payload');
   await store.getActions().thunkTarget('thunk payload');
 
-  // assert
+  // ASSERT
   expect(store.getState().logs).toEqual(['action payload', 'thunk payload']);
 });
 
 it('thunk listening to multiple actions', async () => {
-  // arrange
+  // ARRANGE
   const thunkSpy = jest.fn();
   const model = {
     logs: [],
@@ -260,10 +315,10 @@ it('thunk listening to multiple actions', async () => {
   };
   const store = createStore(model);
 
-  // act
+  // ACT
   store.getActions().actionTarget('action payload');
 
-  // assert
+  // ASSERT
   await new Promise((resolve) => setTimeout(resolve, 10));
   expect(thunkSpy).toHaveBeenCalledTimes(1);
   expect(thunkSpy).toHaveBeenCalledWith(
@@ -278,11 +333,11 @@ it('thunk listening to multiple actions', async () => {
     expect.anything(),
   );
 
-  // act
+  // ACT
   await store.getActions().thunkTarget('thunk payload');
   await new Promise((resolve) => setTimeout(resolve, 10));
 
-  // assert
+  // ASSERT
   expect(thunkSpy).toHaveBeenCalledTimes(2);
   expect(thunkSpy).toHaveBeenLastCalledWith(
     expect.anything(),

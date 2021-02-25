@@ -17,7 +17,7 @@ const model = {
 
 describe('react', () => {
   it('component integration test', () => {
-    // arrange
+    // ARRANGE
     function ComponentUnderTest() {
       const count = useStoreState((state) => state.count);
       const increment = useStoreActions((actions) => actions.increment);
@@ -39,16 +39,16 @@ describe('react', () => {
       </StoreProvider>
     );
 
-    // act
+    // ACT
     const { getByTestId, getByText } = render(app);
 
-    // assert
+    // ASSERT
     expect(getByTestId('count').textContent).toEqual('0');
 
-    // act
+    // ACT
     fireEvent.click(getByText('+'));
 
-    // assert
+    // ASSERT
     expect(getByTestId('count').textContent).toEqual('1');
   });
 });

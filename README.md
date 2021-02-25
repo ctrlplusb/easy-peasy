@@ -100,8 +100,8 @@ evolution of this library then please consider
 
 ## Documentation
 
-See the [official website](https://easy-peasy.now.sh) for tutorials, docs,
-recipes, and more.
+See the [official website](https://easy-peasy.dev) for tutorials, docs, recipes,
+and more.
 
 <p>&nbsp;</p>
 

@@ -1,7 +1,7 @@
 import { createStore, thunk } from '../src';
 
 test('exposes dependencies to effect actions', async () => {
-  // arrange
+  // ARRANGE
   const injection = jest.fn();
   const store = createStore(
     {
@@ -16,9 +16,9 @@ test('exposes dependencies to effect actions', async () => {
     },
   );
 
-  // act
+  // ACT
   await store.getActions().doSomething();
 
-  // assert
+  // ASSERT
   expect(injection).toHaveBeenCalledTimes(1);
 });

@@ -1,7 +1,7 @@
 import { action, createStore, computed } from '../src';
 
 test('addModel', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: {
       count: 0,
@@ -11,7 +11,7 @@ test('addModel', () => {
     },
   });
 
-  // act
+  // ACT
   store.addModel('router', {
     path: '/',
     push: action((state, payload) => {
@@ -22,31 +22,31 @@ test('addModel', () => {
     }),
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().router.path).toBe('/');
   expect(store.getState().router.url('home')).toBe('/home');
 
-  // act
+  // ACT
   store.getActions().router.push('/foo');
 
-  // assert
+  // ASSERT
   expect(store.getState().router.path).toBe('/foo');
 });
 
 test('addModel replaces an existing model', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: {
       count: 0,
     },
   });
 
-  // act
+  // ACT
   store.addModel('counter', {
     count: 1,
   });
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     counter: {
       count: 1,
@@ -55,7 +55,7 @@ test('addModel replaces an existing model', () => {
 });
 
 test('addModel with initial state that does not match model', () => {
-  // arrange
+  // ARRANGE
   const store = createStore(
     {
       counter: {
@@ -67,12 +67,12 @@ test('addModel with initial state that does not match model', () => {
     },
   );
 
-  // act
+  // ACT
   store.addModel('counter', {
     count: 1,
   });
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     counter: {
       count: 1,
@@ -82,7 +82,7 @@ test('addModel with initial state that does not match model', () => {
 });
 
 test('removeModel', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: {
       count: 0,
@@ -98,10 +98,10 @@ test('removeModel', () => {
     },
   });
 
-  // act
+  // ACT
   store.removeModel('router');
 
-  // assert
+  // ASSERT
   expect(store.getActions().router).toBeUndefined();
   expect(store.getState()).toEqual({
     counter: {
@@ -111,22 +111,22 @@ test('removeModel', () => {
 });
 
 test('removeModel does nothing when model does not exist', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: {
       count: 0,
     },
   });
 
-  // act
+  // ACT
   store.removeModel('foo');
 
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({ counter: { count: 0 } });
 });
 
 test('adding and removing model maintains existing state - issue#184', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: {
       count: 0,
@@ -138,11 +138,11 @@ test('adding and removing model maintains existing state - issue#184', () => {
 
   store.getActions().counter.inc(1);
 
-  // act
+  // ACT
   store.addModel('router', 'router', {
     path: '/',
   });
 
-  // assert
+  // ASSERT
   expect(store.getState().counter.count).toBe(1);
 });

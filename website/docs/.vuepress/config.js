@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Easy Peasy v4',
+  title: 'Easy Peasy v5',
   description: 'Vegetarian friendly state for React',
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
   plugins: [
@@ -25,7 +25,8 @@ module.exports = {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/docs/introduction/' },
-      { text: 'v3 Docs', link: 'https://easy-peasy-v3.now.sh' },
+      { text: 'v3', link: 'https://easy-peasy-v3.vercel.app/' },
+      { text: 'v4', link: 'https://easy-peasy-v4.vercel.app/' },
     ],
 
     sidebarDepth: 0,
@@ -48,7 +49,6 @@ module.exports = {
           children: [
             'tutorials/quick-start',
             'tutorials/primary-api',
-            'tutorials/extended-api',
             'tutorials/typescript',
             'tutorials/testing',
           ],
@@ -95,7 +95,7 @@ module.exports = {
             },
             {
               title: 'Utils',
-              children: ['api/create-transform', 'api/debug', 'api/memo'],
+              children: ['api/create-transform', 'api/debug'],
             },
             {
               title: 'TypeScript Types',
