@@ -55,9 +55,10 @@ function createStorageWrapper(storage, transformers = []) {
   const serialize = (data) => {
     if (transformers.length > 0 && data != null && typeof data === 'object') {
       Object.keys(data).forEach((key) => {
-        data[key] = transformers.reduce((acc, cur) => {
-          return cur.in(acc, key);
-        }, data[key]);
+        data[key] = transformers.reduce(
+          (acc, cur) => cur.in(acc, key),
+          data[key],
+        );
       });
     }
 
@@ -77,9 +78,10 @@ function createStorageWrapper(storage, transformers = []) {
       typeof result === 'object'
     ) {
       Object.keys(result).forEach((key) => {
-        result[key] = outTransformers.reduce((acc, cur) => {
-          return cur.out(acc, key);
-        }, result[key]);
+        result[key] = outTransformers.reduce(
+          (acc, cur) => cur.out(acc, key),
+          result[key],
+        );
       });
     }
     return result;
@@ -90,19 +92,17 @@ function createStorageWrapper(storage, transformers = []) {
   return {
     getItem: (key) => {
       if (isAsync) {
-        return storage.getItem(key).then((wrapped) => {
-          return wrapped != null ? deserialize(wrapped) : undefined;
-        });
+        return storage
+          .getItem(key)
+          .then((wrapped) =>
+            wrapped != null ? deserialize(wrapped) : undefined,
+          );
       }
       const wrapped = storage.getItem(key);
       return wrapped != null ? deserialize(wrapped) : undefined;
     },
-    setItem: (key, data) => {
-      return storage.setItem(key, serialize(data));
-    },
-    removeItem: (key) => {
-      return storage.removeItem(key);
-    },
+    setItem: (key, data) => storage.setItem(key, serialize(data)),
+    removeItem: (key) => storage.removeItem(key),
   };
 }
 

@@ -33,12 +33,10 @@ export function createStore(model, options = {}) {
     reducerEnhancer = (rootReducer) => rootReducer,
   } = options;
 
-  const bindReplaceState = (modelDef) => {
-    return {
-      ...modelDef,
-      ePRS: helpers.action((_, payload) => payload),
-    };
-  };
+  const bindReplaceState = (modelDef) => ({
+    ...modelDef,
+    ePRS: helpers.action((_, payload) => payload),
+  });
 
   const _r = {};
 

@@ -1,12 +1,16 @@
 # StoreProvider
 
-Exposes the [store](/docs/api/store.html) to your React application, so that your components will be able to consume and interact with the [store](/docs/api/store.html) via the hooks.
+This component is responsible for exposing your [store](/docs/api/store.html) to
+your React application. This ensures that any of the store hooks within your
+application have access to the store.
+
+Really important stuff here. :)
 
 ## Example
 
 ```javascript
 import { StoreProvider, createStore } from 'easy-peasy';
-import model from './model'
+import model from './model';
 
 const store = createStore(model);
 

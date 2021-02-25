@@ -1,7 +1,7 @@
 {
   "private": true,
   "engines": {
-    "node": "12.x"
+    "node": "14.x"
   },
   "scripts": {
     "dev": "vuepress dev docs",

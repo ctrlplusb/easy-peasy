@@ -22,14 +22,16 @@ export function useLocalStore(modelCreator, dependencies = [], configCreator) {
 
   const [currentState, setCurrentState] = useState(() => store.getState());
 
-  useEffect(() => {
-    return store.subscribe(() => {
-      const nextState = store.getState();
-      if (currentState !== nextState) {
-        setCurrentState(nextState);
-      }
-    });
-  }, [store]);
+  useEffect(
+    () =>
+      store.subscribe(() => {
+        const nextState = store.getState();
+        if (currentState !== nextState) {
+          setCurrentState(nextState);
+        }
+      }),
+    [store],
+  );
 
   return [currentState, store.getActions(), store];
 }

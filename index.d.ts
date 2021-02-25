@@ -182,14 +182,6 @@ export function debug<StateDraft extends object = {}>(
   state: StateDraft,
 ): StateDraft;
 
-/**
- * This utility is deprecated. Please utilize a memoization library of your
- * choice.
- *
- * @deprecated
- */
-export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
-
 // #endregion
 
 // #region Listeners
@@ -1023,9 +1015,9 @@ export function useStore<
  *   return <AddTodoForm save={(todo) => dispatch({ type: 'ADD_TODO', payload: todo })} />;
  * }
  */
-export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
-  StoreModel
->;
+export function useStoreDispatch<
+  StoreModel extends object = {}
+>(): Dispatch<StoreModel>;
 
 /**
  * A utility function used to create pre-typed hooks.

@@ -17,20 +17,16 @@ export const debug = (state) => {
   return state;
 };
 
-export const actionOn = (targetResolver, fn) => {
-  return {
-    [actionOnSymbol]: true,
-    fn,
-    targetResolver,
-  };
-};
+export const actionOn = (targetResolver, fn) => ({
+  [actionOnSymbol]: true,
+  fn,
+  targetResolver,
+});
 
-export const action = (fn) => {
-  return {
-    [actionSymbol]: true,
-    fn,
-  };
-};
+export const action = (fn) => ({
+  [actionSymbol]: true,
+  fn,
+});
 
 const defaultStateResolvers = [(state) => state];
 
@@ -61,34 +57,27 @@ export function generic(value) {
   return value;
 }
 
-export const persist = (model, config) => {
+export const persist = (model, config) =>
   // if we are not running in a browser context this becomes a no-op
-  return typeof window === 'undefined'
+  typeof window === 'undefined'
     ? model
     : {
         ...model,
         [persistSymbol]: config,
       };
-};
 
-export const thunkOn = (targetResolver, fn) => {
-  return {
-    [thunkOnSymbol]: true,
-    fn,
-    targetResolver,
-  };
-};
+export const thunkOn = (targetResolver, fn) => ({
+  [thunkOnSymbol]: true,
+  fn,
+  targetResolver,
+});
 
-export const thunk = (fn) => {
-  return {
-    [thunkSymbol]: true,
-    fn,
-  };
-};
+export const thunk = (fn) => ({
+  [thunkSymbol]: true,
+  fn,
+});
 
-export const reducer = (fn) => {
-  return {
-    [reducerSymbol]: true,
-    fn,
-  };
-};
+export const reducer = (fn) => ({
+  [reducerSymbol]: true,
+  fn,
+});

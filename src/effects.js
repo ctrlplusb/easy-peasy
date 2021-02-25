@@ -18,9 +18,9 @@ export function createEffectsMiddleware(_r) {
         const nextDependencies = def.dependencyResolvers.map((resolver) =>
           resolver(nextLocal),
         );
-        const hasChanged = prevDependencies.some((dependency, idx) => {
-          return dependency !== nextDependencies[idx];
-        });
+        const hasChanged = prevDependencies.some(
+          (dependency, idx) => dependency !== nextDependencies[idx],
+        );
         if (hasChanged) {
           def.actionCreator(prevDependencies, nextDependencies, action);
         }

@@ -25,10 +25,7 @@ function createESMConfig(input, output) {
       babel({
         extensions,
         plugins: [
-          [
-            '@babel/plugin-transform-runtime',
-            { version: babelRuntimeVersion, useESModules: true },
-          ],
+          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
         ],
         runtimeHelpers: true,
         sourceMaps: true,

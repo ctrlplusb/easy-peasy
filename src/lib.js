@@ -43,9 +43,10 @@ export function isPromise(x) {
 }
 
 export function get(path, target) {
-  return path.reduce((acc, cur) => {
-    return isPlainObject(acc) ? acc[cur] : undefined;
-  }, target);
+  return path.reduce(
+    (acc, cur) => (isPlainObject(acc) ? acc[cur] : undefined),
+    target,
+  );
 }
 
 export function newify(currentPath, currentState, finalValue) {
@@ -155,11 +156,11 @@ const pReduce = (iterable, reducer, initialValue) =>
 
 export const pSeries = (tasks) => {
   const results = [];
-  return pReduce(tasks, (_, task) => {
-    return task().then((value) => {
+  return pReduce(tasks, (_, task) =>
+    task().then((value) => {
       results.push(value);
-    });
-  }).then(() => results);
+    }),
+  ).then(() => results);
 };
 
 export function areInputsEqual(newInputs, lastInputs) {
