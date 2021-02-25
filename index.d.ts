@@ -327,7 +327,7 @@ export type State<Model extends object = {}> = RecursiveState<Model>;
 /**
  * Creates a store.
  *
- * https://easy-peasy.now.sh/docs/api/create-store.html
+ * https://easy-peasy.dev/docs/api/create-store.html
  *
  * @example
  *
@@ -501,7 +501,7 @@ type Meta = {
 /**
  * Declares a thunk against your model type definition.
  *
- * https://easy-peasy.now.sh/docs/typescript-api/thunk.html
+ * https://easy-peasy.dev/docs/typescript-api/thunk.html
  *
  * @param Model - The model that the thunk is being bound to.
  * @param Payload - The type of the payload expected. Set to undefined if none.
@@ -536,7 +536,7 @@ export type Thunk<
  * Thunks are typically used to encapsulate side effects and are able to
  * dispatch other actions.
  *
- * https://easy-peasy.now.sh/docs/api/thunk.html
+ * https://easy-peasy.dev/docs/api/thunk.html
  *
  * @example
  *
@@ -619,7 +619,7 @@ export type Action<Model extends object, Payload = void> = {
 /**
  * Declares an action.
  *
- * https://easy-peasy.now.sh/docs/api/action
+ * https://easy-peasy.dev/docs/api/action
  *
  * @example
  *
@@ -935,7 +935,7 @@ export function generic<T>(value: T): Generic<T>;
 /**
  * A React Hook allowing you to use state within your component.
  *
- * https://easy-peasy.now.sh/docs/api/use-store-state.html
+ * https://easy-peasy.dev/docs/api/use-store-state.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -960,7 +960,7 @@ export function useStoreState<
 /**
  * A React Hook allowing you to use actions within your component.
  *
- * https://easy-peasy.now.sh/docs/api/use-store-actions.html
+ * https://easy-peasy.dev/docs/api/use-store-actions.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -981,7 +981,7 @@ export function useStoreActions<
 /**
  * A react hook that returns the store instance.
  *
- * https://easy-peasy.now.sh/docs/api/use-store.html
+ * https://easy-peasy.dev/docs/api/use-store.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
