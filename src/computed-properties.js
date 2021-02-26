@@ -26,6 +26,8 @@ export function createComputedPropertyBinder(parentPath, key, def, _r) {
 export function createComputedPropertiesMiddleware(_r) {
   return () => (next) => (action) => {
     _r._i._cS.isInReducer = true;
-    return next(action);
+    const result = next(action);
+    _r._i._cS.isInReducer = false;
+    return result;
   };
 }
