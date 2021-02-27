@@ -12,35 +12,87 @@ import {
   StoreProvider,
 } from '../src';
 
-test('computed properties should not execute when not accessed', () => {
-  let computedCount = 0;
-
+test('accessing computed properties within an action', () => {
   const store = createStore({
     firstName: 'Mary',
     lastName: 'Poppins',
-    fullName: computed(
-      [(state) => state.firstName, (state) => state.lastName],
-      (firstName, lastName) => {
-        computedCount += 1;
-        return `${firstName} ${lastName}`;
-      },
-    ),
-    setLastName: action((state, payload) => {
-      state.lastName = payload;
+    fullName: computed((state) => `${state.firstName} ${state.lastName}`),
+    fruits: ['apple', 'pear', 'banana'],
+    fruitCount: computed((state) => state.fruits.length),
+    mutltipleFruitCount: computed((state) => state.fruitCount * 2),
+    details: computed((state) => ({
+      fullName: `${state.firstName} ${state.lastName}`,
+    })),
+    flag: computed((state) => state.firstName === 'Mary'),
+    report: action((state) => {
+      expect(state.flag).toBe(true);
+      expect(state.flag).toBe(true);
+      state.result = `${state.fullName} ${state.fruitCount} ${
+        state.mutltipleFruitCount
+      } ${JSON.stringify(state.details)} ${state.flag}`;
     }),
   });
 
-  store.getActions().setLastName('Poppins01');
-  store.getActions().setLastName('Poppins02');
-  store.getActions().setLastName('Poppins03');
-  store.getActions().setLastName('Poppins04');
-  store.getActions().setLastName('Poppins05');
-  store.getActions().setLastName('Poppins06');
+  store.getActions().report();
+
+  expect(store.getState().result).toEqual(
+    'Mary Poppins 3 6 {"fullName":"Mary Poppins"} true',
+  );
+});
+
+test('computed properties should not execute until they are accessed', () => {
+  let computedCount = 0;
+  let fruitComputedCount = 0;
+
+  const store = createStore({
+    person: {
+      firstName: 'Mary',
+      lastName: 'Poppins',
+      fullName: computed(
+        [(state) => state.firstName, (state) => state.lastName],
+        (firstName, lastName) => {
+          computedCount += 1;
+          return `${firstName} ${lastName}`;
+        },
+      ),
+      setLastName: action((state, payload) => {
+        state.lastName = payload;
+      }),
+    },
+    fruits: {
+      items: [],
+      itemCount: computed((state) => {
+        fruitComputedCount += 1;
+        return state.items.length;
+      }),
+    },
+  });
+
+  store.getActions().person.setLastName('Poppins01');
+  store.getActions().person.setLastName('Poppins02');
+  store.getActions().person.setLastName('Poppins03');
+  store.getActions().person.setLastName('Poppins04');
+  store.getActions().person.setLastName('Poppins05');
+  store.getActions().person.setLastName('Poppins06');
 
   // ASSERT
-  expect(computedCount).toBe(0);
-  expect(store.getState().fullName).toBe('Mary Poppins06');
+  expect(fruitComputedCount).toBe(0);
+
+  // we expect at least one "initialisation" call
   expect(computedCount).toBe(1);
+
+  expect(store.getState().person.fullName).toBe('Mary Poppins06');
+  expect(computedCount).toBe(2);
+  expect(store.getState().person.fullName).toBe('Mary Poppins06');
+  expect(computedCount).toBe(2);
+
+  // ACT
+  store.getActions().person.setLastName('Poppins07');
+
+  // ASSERT
+  expect(computedCount).toBe(2);
+  expect(store.getState().person.fullName).toBe('Mary Poppins07');
+  expect(computedCount).toBe(3);
 });
 
 test('patched immer works as expected', () => {
@@ -107,7 +159,7 @@ test('defining and accessing a computed property', () => {
   expect(store.getState().fullName).toBe('Mary Poppins');
 });
 
-test('computed properties ARE NOT IMMEDIATELY available in an action', () => {
+test('computed properties ARE IMMEDIATELY available in an action', () => {
   // ARRANGE
   const store = createStore({
     firstName: 'Mary',
@@ -115,7 +167,7 @@ test('computed properties ARE NOT IMMEDIATELY available in an action', () => {
     fullName: computed((state) => `${state.firstName} ${state.lastName}`),
     anAction: action((state) => {
       // ASSERT
-      expect(state.fullName).toBeUndefined();
+      expect(state.fullName).toBe('Mary Poppins');
     }),
   });
 
@@ -243,14 +295,14 @@ test('computed properties can access global state', () => {
   ]);
 });
 
-test('computed properties are NOT available in actions', () => {
+test('computed properties are available in actions', () => {
   // ARRANGE
   const store = createStore({
     todos: ['test computed'],
     todosCount: computed((state) => state.todos.length),
     testAction: action((state) => {
       // ASSERT
-      expect(state.todosCount).toBeUndefined();
+      expect(state.todosCount).toBe(1);
     }),
   });
 
