@@ -12,6 +12,61 @@ import {
   StoreProvider,
 } from '../src';
 
+/*
+test.only('issue#633', () => {
+  // ARRANGE
+  const createModel = (type) => ({
+    items: Array(100)
+      .fill({})
+      .map((_, index) => ({
+        id: `${type}-${index}`,
+        type,
+        done: index % 2 === 0,
+      })),
+
+    completedItems: computed((state) =>
+      state.items.filter((i) => i.done === true),
+    ),
+
+    setItems: action((state, payload) => {
+      state.items = payload;
+    }),
+
+    removeCompletedItems: action((state) => {
+      console.log('foo');
+      const completedIds = state.completedItems.map((i) => i.id);
+      console.log(completedIds);
+
+      state.items = state.items.filter(
+        (item) => !completedIds.includes(item.id),
+      );
+    }),
+  });
+
+  const store = createStore({
+    abc: createModel('abc'),
+    def: createModel('def'),
+    allCompletedItems: computed(
+      [(_, storeState) => storeState.abc, (_, storeState) => storeState.def],
+      (abcItems, defItems) => {
+        console.log(abcItems.completedItems.length);
+        return [...abcItems.completedItems, ...defItems.completedItems];
+      },
+    ),
+  });
+
+  // ACT
+  store.getActions().abc.removeCompletedItems();
+  store.getActions().def.removeCompletedItems();
+
+  // ASSERT
+  expect(store.getState().abc.items.length).toBe(50);
+  expect(store.getState().abc.completedItems.length).toBe(50);
+  expect(store.getState().def.items.length).toBe(50);
+  expect(store.getState().allCompletedItems.length).toBe(100);
+});
+*/
+
 test('accessing computed properties within an action', () => {
   const store = createStore({
     firstName: 'Mary',

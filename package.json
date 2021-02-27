@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "5.0.2",
+  "version": "5.0.3",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/index.cjs.js",
