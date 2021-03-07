@@ -88,7 +88,7 @@ To enable a [thunk](/docs/api/thunk.html) to be asynchronous simply use `async/a
 ```javascript
 const todosModel = {
   todos: [],
-  savedTodo: action((state, payload) => {
+  addTodo: action((state, payload) => {
     state.todos.push(payload);
   }),
   //     👇 our asynchronous thunk makes use of async/await
