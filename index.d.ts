@@ -627,7 +627,7 @@ export type Action<Model extends object, Payload = void> = {
  *
  * const store = createStore({
  *   count: 0,
- *   increment: action((state)) => {
+ *   increment: action((state) => {
  *    state.count += 1;
  *   })
  * });
