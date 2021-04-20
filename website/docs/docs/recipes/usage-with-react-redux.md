@@ -5,7 +5,7 @@ As Easy Peasy outputs a standard Redux store, so it is entirely possible to use 
 This allows you to do a few things:
 
 - Slowly migrate a legacy application that is built using `react-redux`
-- Connect your store to Class components via `connect`
+- Connect your store to Class components via `useDispatch and useSelectors`
 
 **1. First, install the `react-redux` package**
 
@@ -36,27 +36,25 @@ const App = () => (
 render(<App />, document.querySelector('#app'));
 ```
 
-**3. Finally, use `connect` against your components**
+**3. Finally, use `useSelector` and `useDispatch` against your components**
 
 ```javascript
-import React, { Component } from 'react';
-import { connect } from 'react-redux'; // 👈 import the connect
+import React from 'react';
+import { useSelector, useStoreActions } from "./model"; // 👈 For connecting the store with the components and dispatching actions
 
-function TodoList({ todos, addTodo }) {
+const TodoList = ({ todos, addTodo }) => {
+  const todos = useSelector(state => state.todos.items);
+  const addTodo = useStoreActions(dispatch => dispatch.todos.addTodo);
+  
   return (
     <div>
-      {todos.map(({ id, text }) => (
+      {todos.map(({ id, text }) => 
         <Todo key={id} text={text} />
-      ))}
+      )}
       <AddTodo onSubmit={addTodo} />
     </div>
   );
 }
 
-export default connect(
-  // 👇 Map to your required state
-  (state) => ({ todos: state.todos.items }),
-  // 👇 Map your required actions
-  (dispatch) => ({ addTodo: dispatch.todos.addTodo }),
-)(TodoList);
+export default TodoList;
 ```
