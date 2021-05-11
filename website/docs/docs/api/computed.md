@@ -158,10 +158,12 @@ function Todo({ id }) {
 Note that only the function that you return will be memoized. If you wish to
 memoize the results from the function itself you will need to utilize a
 memoization utility, such as
-[`fast-memoize`](https://github.com/caiogondim/fast-memoize.js).
+[`memoizerific`](https://github.com/caiogondim/fast-memoize.js).
 
 ```javascript
-import memoize from 'fast-memoize';
+import memoize from 'memoizerific';
+
+const memoizedFind = memoize((state, id) => state.items.find((todo) => todo.id === id), 1)
 
 const todos = {
   items: [{ id: 1, text: 'answer questions' }],
@@ -169,7 +171,7 @@ const todos = {
   todoById: computed((state) => {
     // Wrap the returned function with the memoize utility
     //        👇
-    return memoize((id) => state.items.find((todo) => todo.id === id));
+    return (id) => memoizedFind(state, id);
   }),
 };
 ```
