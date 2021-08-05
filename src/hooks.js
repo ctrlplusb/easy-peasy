@@ -1,3 +1,4 @@
+import get from 'lodash.get';
 import {
   useContext,
   useEffect,
@@ -22,6 +23,12 @@ const useIsomorphicLayoutEffect =
 export function createStoreStateHook(Context) {
   return function useStoreState(mapState, equalityFn) {
     const store = useContext(Context);
+
+    if (typeof mapState === 'string') {
+      const path = mapState;
+      mapState = (state) => get(state, path);
+    }
+
     const mapStateRef = useRef(mapState);
     const stateRef = useRef();
     const mountedRef = useRef(true);
@@ -96,6 +103,12 @@ export const useStoreState = createStoreStateHook(EasyPeasyContext);
 export function createStoreActionsHook(Context) {
   return function useStoreActions(mapActions) {
     const store = useContext(Context);
+
+    if (typeof mapActions === 'string') {
+      const path = mapActions;
+      mapActions = (state) => get(state, path);
+    }
+
     return mapActions(store.getActions());
   };
 }

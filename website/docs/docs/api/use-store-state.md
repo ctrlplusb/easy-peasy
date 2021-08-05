@@ -8,13 +8,15 @@ const todos = useStoreState(state => state.todos.items);
 
 ## Arguments
 
-  - `mapState` (Function, *required*)
+  - `mapState` (Function or String, *required*)
 
     The function that is used to resolve the piece of state that your component requires. The function will receive the following arguments:
 
     - `state` (Object)
 
       The state of your store.
+
+    Or a [lodash-style path notation](https://lodash.com/docs/4.17.15#get).
 
   - `equalityFn` (Function, *optional*)
 
@@ -48,6 +50,21 @@ import { useStoreState } from 'easy-peasy';
 const BasketTotal = () => {
   const totalPrice = useStoreState(state => state.basket.totalPrice);
   const netPrice = useStoreState(state => state.basket.netPrice);
+  return (
+    <div>
+      <div>Total: {totalPrice}</div>
+      <div>Net: {netPrice}</div>
+    </div>
+  );
+};
+```
+
+```javascript
+import { useStoreState } from 'easy-peasy';
+
+const BasketTotal = () => {
+  const totalPrice = useStoreState('basket.totalPrice);
+  const netPrice = useStoreState('basket.netPrice');
   return (
     <div>
       <div>Total: {totalPrice}</div>

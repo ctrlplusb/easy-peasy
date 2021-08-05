@@ -51,6 +51,7 @@
   "dependencies": {
     "@babel/runtime": "^7.13.8",
     "immer": "^8.0.1",
+    "lodash.get": "^4.4.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "ts-toolbelt": "^9.3.12"

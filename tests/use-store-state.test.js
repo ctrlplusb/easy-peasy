@@ -348,3 +348,65 @@ test('equality function', () => {
   expect(renderSpy).toHaveBeenCalledTimes(2);
   expect(getByTestId('name').textContent).toBe('joel');
 });
+
+test('accessing state using lodash-style path notation', () => {
+  const randomName = Math.random().toString();
+  const store = createStore({
+    user: {
+      name: randomName,
+    },
+  });
+
+  function App() {
+    const name = useStoreState('user.name');
+    return (
+      <>
+        <span data-testid="name">{name}</span>
+      </>
+    );
+  }
+
+  const { getByTestId } = render(
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>,
+  );
+
+  expect(getByTestId('name').textContent).toBe(randomName);
+});
+
+test('accessing actions using lodash-style path notation', () => {
+  const randomName = Math.random().toString();
+  const randomName2 = Math.random().toString();
+  const store = createStore({
+    user: {
+      name: randomName,
+      change: action((state, payload) => {
+        state.name = payload;
+      }),
+    },
+  });
+
+  function App() {
+    const name = useStoreState('user.name');
+    const change = useStoreActions('user.change');
+    return (
+      <>
+        <span data-testid="name">{name}</span>
+        <button data-testid="change" onClick={() => change(randomName2)}>
+          Change
+        </button>
+      </>
+    );
+  }
+
+  const { getByTestId } = render(
+    <StoreProvider store={store}>
+      <App />
+    </StoreProvider>,
+  );
+
+  fireEvent.click(getByTestId('change'));
+
+  expect(getByTestId('name').textContent).toBe(randomName2);
+});

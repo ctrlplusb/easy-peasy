@@ -953,7 +953,7 @@ export function useStoreState<
   StoreState extends State<any> = State<{}>,
   Result = any
 >(
-  mapState: (state: StoreState) => Result,
+  mapState: (state: StoreState) => Result | string,
   equalityFn?: (prev: Result, next: Result) => boolean,
 ): Result;
 
@@ -976,7 +976,7 @@ export function useStoreState<
 export function useStoreActions<
   StoreActions extends Actions<any> = Actions<{}>,
   Result = any
->(mapActions: (actions: StoreActions) => Result): Result;
+>(mapActions: (actions: StoreActions) => Result | string): Result;
 
 /**
  * A react hook that returns the store instance.
