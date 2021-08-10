@@ -267,3 +267,41 @@ test('provides the prevState every time the store is recreated', () => {
     count: 100,
   });
 });
+
+test('updates the store if a dependency changes', () => {
+  // ARRANGE
+  let currentState;
+
+  // eslint-disable-next-line no-shadow
+  function CountDisplay({ count }) {
+    [ currentState ] = useLocalStore(
+      () => ({ count }),
+      [count],
+    );
+    return null;
+  }
+
+  // ACT
+  const { rerender } = render(<CountDisplay count={1} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 1,
+  });
+
+  // ACT
+  rerender(<CountDisplay count={100} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 100,
+  });
+
+  // ACT
+  rerender(<CountDisplay count={200} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 200,
+  });
+});
