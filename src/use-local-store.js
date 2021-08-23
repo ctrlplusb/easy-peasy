@@ -23,13 +23,15 @@ export function useLocalStore(modelCreator, dependencies = [], configCreator) {
   const [currentState, setCurrentState] = useState(() => store.getState());
 
   useEffect(
-    () =>
+    () => {
+      setCurrentState(store.getState());
       store.subscribe(() => {
         const nextState = store.getState();
         if (currentState !== nextState) {
           setCurrentState(nextState);
         }
-      }),
+      });
+    },
     [store],
   );
 
