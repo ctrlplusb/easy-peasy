@@ -43,7 +43,7 @@
     "postpublish": "pinst --enable"
   },
   "resolutions": {
-    "@types/react": "17.0.19"
+    "@types/react": "^17.0.19"
   },
   "peerDependencies": {
     "react": ">= 16.8.0"
