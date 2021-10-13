@@ -43,13 +43,13 @@
     }
   },
   "resolutions": {
-    "@types/react": "16.9.52"
+    "@types/react": "^16"
   },
   "peerDependencies": {
     "react": "^16.8.0"
   },
   "dependencies": {
-    "immer": "7.0.9",
+    "immer": "^9.0.6",
     "is-plain-object": "^5.0.0",
     "memoizerific": "^1.11.3",
     "redux": "^4.0.5",
@@ -102,7 +102,7 @@
     "rimraf": "^3.0.1",
     "shallowequal": "^1.1.0",
     "title-case": "^3.0.2",
-    "typescript": "4.0.3",
+    "typescript": "4.4.4",
     "typings-tester": "^0.3.2"
   },
   "jest": {
