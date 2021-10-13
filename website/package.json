@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "vuepress dev docs",
     "build": "vuepress build docs",
-    "now-build": "vuepress build docs"
+    "now-build": "vuepress build docs",
+    "deploy": "vercel --prod"
   },
   "devDependencies": {
-    "@vuepress/plugin-google-analytics": "^1.6.0",
-    "vuepress": "^1.6.0"
+    "@vuepress/plugin-google-analytics": "^1.8.2",
+    "vuepress": "^1.8.2"
   }
 }
