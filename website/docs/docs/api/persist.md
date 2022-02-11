@@ -7,7 +7,7 @@ tab, etc).
 By default it uses the browser's
 [`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage),
 however, you can configure it to use
-[`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage),
+[`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage),
 or provide a custom storage engine.
 
 - [API](#api)
