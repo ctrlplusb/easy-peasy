@@ -1065,6 +1065,7 @@ export function createTypedHooks<StoreModel extends object = {}>(): {
  */
 export class StoreProvider<StoreModel extends object = {}> extends Component<{
   store: Store<StoreModel>;
+  children?: React.ReactNode;
 }> {}
 
 // #endregion
