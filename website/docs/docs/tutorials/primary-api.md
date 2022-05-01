@@ -131,7 +131,7 @@ the `state` argument would be:
 
 The second argument to actions, the `payload`, will be the value that was
 provided to the action when it was dispatched. If no value was provided to the
-action when it was dispatched then they `payload` will be `undefined`.
+action when it was dispatched, then the `payload` will be `undefined`.
 
 ### Modifying the state
 
@@ -393,7 +393,7 @@ if (prevState !== nextState) {
 If the newly resolved state is not equal to the previously resolved state your
 component will be re-rendered, receiving the new state.
 
-With this in mind it is important to take care not to create a selector that
+With this in mind, it is important to take care not to create a selector that
 will return a value which will always break strict equality checking.
 
 ```javascript
@@ -420,7 +420,7 @@ resolved object/array values and therefore our component will re-render for any
 update to our store.
 
 Please avoid pitfalls such as above. If you need to derive different forms of
-state then we recommend either using computed properties (will be introduced
+state, then we recommend either using computed properties (will be introduced
 later), or to pull out the individual pieces of state within your component and
 then derive the new state directly within your component's render.
 
