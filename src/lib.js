@@ -175,6 +175,10 @@ export function areInputsEqual(newInputs, lastInputs) {
   return true;
 }
 
+export function areValuesEqual(newValue, lastValue) {
+  return newValue === lastValue || JSON.stringify(newValue) === JSON.stringify(lastValue);
+}
+
 // export function memoizeOne(resultFn) {
 //   let lastArgs = [];
 //   let lastResult;

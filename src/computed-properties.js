@@ -1,4 +1,4 @@
-import { areInputsEqual } from './lib';
+import { areValuesEqual } from './lib';
 
 export function createComputedPropertyBinder(parentPath, key, def, _r) {
   let runOnce = false;
@@ -14,7 +14,7 @@ export function createComputedPropertyBinder(parentPath, key, def, _r) {
         );
         if (
           runOnce &&
-          (areInputsEqual(prevInputs, inputs) ||
+          (areValuesEqual(prevInputs, inputs) ||
             (_r._i._cS.isInReducer &&
               new Error().stack.match(/shallowCopy/gi) !== null))
         ) {
@@ -24,7 +24,12 @@ export function createComputedPropertyBinder(parentPath, key, def, _r) {
           return prevValue;
         }
         prevInputs = inputs;
-        prevValue = def.fn(...inputs);
+
+        const newValue = def.fn(...inputs);
+        if(!areValuesEqual(newValue, prevValue)) {
+          prevValue = newValue;
+        }
+
         runOnce = true;
         return prevValue;
       },
