@@ -1,12 +1,12 @@
 # thunk
 
-Declares a [thunk](docs/api/thunk.html) action on your model. [Thunks](docs/api/thunk.html) cannot modify state directly, however, they can dispatch [actions](/docs/api/action.html) to do so.
+Declares a [thunk](/docs/api/thunk.html) action on your model. [Thunks](/docs/api/thunk.html) cannot modify state directly, however, they can dispatch [actions](/docs/api/action.html) to do so.
 
-[Thunks](docs/api/thunk.html) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
+[Thunks](/docs/api/thunk.html) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
 
-When you use `async/await` or return a `Promise` from your [thunk](docs/api/thunk.html), Easy Peasy will wait for the asynchronous work to complete prior to firing any listeners that are targeting the [thunk](docs/api/thunk.html).
+When you use `async/await` or return a `Promise` from your [thunk](/docs/api/thunk.html), Easy Peasy will wait for the asynchronous work to complete prior to firing any listeners that are targeting the [thunk](/docs/api/thunk.html).
 
-Another interesting property of [thunks](docs/api/thunk.html) is that any value that is returned from a [thunk](docs/api/thunk.html) will be provided to the caller - i.e. where it was dispatched from. Therefore if you were using `async/await`, or returned a `Promise`, from your [thunk](docs/api/thunk.html) the caller would be able to chain off the returned `Promise` to know when the [thunk](docs/api/thunk.html) has completed execution.
+Another interesting property of [thunks](/docs/api/thunk.html) is that any value that is returned from a [thunk](/docs/api/thunk.html) will be provided to the caller - i.e. where it was dispatched from. Therefore if you were using `async/await`, or returned a `Promise`, from your [thunk](/docs/api/thunk.html) the caller would be able to chain off the returned `Promise` to know when the [thunk](/docs/api/thunk.html) has completed execution.
 
 ```javascript
 thunk(async (actions, payload) => {
