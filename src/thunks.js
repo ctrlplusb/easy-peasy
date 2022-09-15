@@ -30,18 +30,20 @@ const logThunkEventListenerError = (type, err) => {
   console.log(err);
 };
 
-const handleEventDispatchErrors = (type, dispatcher) => (...args) => {
-  try {
-    const result = dispatcher(...args);
-    if (isPromise(result)) {
-      result.catch((err) => {
-        logThunkEventListenerError(type, err);
-      });
+const handleEventDispatchErrors =
+  (type, dispatcher) =>
+  (...args) => {
+    try {
+      const result = dispatcher(...args);
+      if (isPromise(result)) {
+        result.catch((err) => {
+          logThunkEventListenerError(type, err);
+        });
+      }
+    } catch (err) {
+      logThunkEventListenerError(type, err);
     }
-  } catch (err) {
-    logThunkEventListenerError(type, err);
-  }
-};
+  };
 
 export function createThunkActionsCreator(def, _r) {
   const actionCreator = (payload) => {
