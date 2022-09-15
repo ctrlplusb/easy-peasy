@@ -175,26 +175,6 @@ export function areInputsEqual(newInputs, lastInputs) {
   return true;
 }
 
-export function areValuesEqual(newValue, lastValue) {
-  return newValue === lastValue || JSON.stringify(newValue) === JSON.stringify(lastValue);
-}
-
-// export function memoizeOne(resultFn) {
-//   let lastArgs = [];
-//   let lastResult;
-//   let calledOnce = false;
-
-//   return function memoized(...args) {
-//     if (calledOnce && areInputsEqual(args, lastArgs)) {
-//       return lastResult;
-//     }
-//     lastResult = resultFn(...args);
-//     calledOnce = true;
-//     lastArgs = args;
-//     return lastResult;
-//   };
-// }
-
 export function useMemoOne(
   // getResult changes on every call,
   getResult,

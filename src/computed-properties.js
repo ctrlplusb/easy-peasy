@@ -1,20 +1,34 @@
-import { areValuesEqual } from './lib';
+import equal from 'fast-deep-equal/es6';
 
 export function createComputedPropertyBinder(parentPath, key, def, _r) {
   let runOnce = false;
   let prevInputs = [];
   let prevValue;
+
+  let performingEqualityCheck = false;
+
+  const areEqual = (a, b) => {
+    performingEqualityCheck = true;
+    const result = equal(a, b);
+    performingEqualityCheck = false;
+    return result;
+  };
+
   return function createComputedProperty(parentState, storeState) {
     Object.defineProperty(parentState, key, {
       configurable: true,
       enumerable: true,
       get: () => {
+        if (performingEqualityCheck) {
+          return undefined;
+        }
+
         const inputs = def.stateResolvers.map((resolver) =>
           resolver(parentState, storeState),
         );
         if (
           runOnce &&
-          (areValuesEqual(prevInputs, inputs) ||
+          (areEqual(prevInputs, inputs) ||
             (_r._i._cS.isInReducer &&
               new Error().stack.match(/shallowCopy/gi) !== null))
         ) {
@@ -26,7 +40,7 @@ export function createComputedPropertyBinder(parentPath, key, def, _r) {
         prevInputs = inputs;
 
         const newValue = def.fn(...inputs);
-        if(!areValuesEqual(newValue, prevValue)) {
+        if (!areEqual(newValue, prevValue)) {
           prevValue = newValue;
         }
 

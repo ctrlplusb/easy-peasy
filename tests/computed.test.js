@@ -526,9 +526,9 @@ test('nested computed properties', () => {
 
     nested: {
       numbers: [1, 2, 3],
-      filteredNumbers: computed((state) => {
-        return state.numbers.filter((number) => number > 1);
-      }),
+      filteredNumbers: computed((state) =>
+        state.numbers.filter((number) => number > 1),
+      ),
     },
 
     // selectors

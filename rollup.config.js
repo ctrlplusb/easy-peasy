@@ -72,6 +72,7 @@ function createIIFEConfig(input, output, globalName) {
         redux: 'Redux',
         'redux-thunk': 'reduxThunk',
         immer: 'immer',
+        equal: 'fast-deep-equal/es6',
       },
     },
     external,
