@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useMemoOne } from './lib';
 import { createStore } from './create-store';
 
-export function useLocalStore(modelCreator, dependencies = [], configCreator) {
+export function useLocalStore(
+  modelCreator,
+  dependencies = [],
+  configCreator = null,
+) {
   const storeRef = useRef();
 
   const configRef = useRef();
@@ -22,18 +26,15 @@ export function useLocalStore(modelCreator, dependencies = [], configCreator) {
 
   const [currentState, setCurrentState] = useState(() => store.getState());
 
-  useEffect(
-    () => {
-      setCurrentState(store.getState());
-      store.subscribe(() => {
-        const nextState = store.getState();
-        if (currentState !== nextState) {
-          setCurrentState(nextState);
-        }
-      });
-    },
-    [store],
-  );
+  useEffect(() => {
+    setCurrentState(store.getState());
+    store.subscribe(() => {
+      const nextState = store.getState();
+      if (currentState !== nextState) {
+        setCurrentState(nextState);
+      }
+    });
+  }, [store]);
 
   return [currentState, store.getActions(), store];
 }
