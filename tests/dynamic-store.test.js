@@ -17,9 +17,7 @@ test('addModel', () => {
     push: action((state, payload) => {
       state.path = payload;
     }),
-    url: computed((state) => (name) => {
-      return `${state.path}${name}`;
-    }),
+    url: computed((state) => (name) => `${state.path}${name}`),
   });
 
   // ASSERT

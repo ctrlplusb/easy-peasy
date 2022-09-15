@@ -95,18 +95,20 @@ const logEffectEventListenerError = (type, err) => {
   console.log(err);
 };
 
-const handleEventDispatchErrors = (type, dispatcher) => (...args) => {
-  try {
-    const result = dispatcher(...args);
-    if (isPromise(result)) {
-      result.catch((err) => {
-        logEffectEventListenerError(type, err);
-      });
+const handleEventDispatchErrors =
+  (type, dispatcher) =>
+  (...args) => {
+    try {
+      const result = dispatcher(...args);
+      if (isPromise(result)) {
+        result.catch((err) => {
+          logEffectEventListenerError(type, err);
+        });
+      }
+    } catch (err) {
+      logEffectEventListenerError(type, err);
     }
-  } catch (err) {
-    logEffectEventListenerError(type, err);
-  }
-};
+  };
 
 export function createEffectActionsCreator(def, _r, effectHandler) {
   const actionCreator = (previousDependencies, nextDependencies, action) => {
@@ -150,6 +152,8 @@ export function createEffectActionsCreator(def, _r, effectHandler) {
     } catch (err) {
       logEffectError(err);
     }
+
+    return undefined;
   };
 
   actionCreator.type = def.meta.type;

@@ -197,7 +197,7 @@ it('listening to a failed thunk', async () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
-it('listening to a thunk, firing a thunk', async (done) => {
+it('listening to a thunk, firing a thunk', (done) => {
   // ARRANGE
   const math = {
     sum: 0,
@@ -225,7 +225,7 @@ it('listening to a thunk, firing a thunk', async (done) => {
   });
 
   // ACT
-  await store.getActions().math.add(10);
+  store.getActions().math.add(10);
 });
 
 it('listening to a string, firing an action', async () => {
