@@ -839,7 +839,7 @@ export function unstable_effectOn<
     actions: Actions<Model>,
     change: Change<Resolvers>,
     helpers: Helpers<Model, StoreModel, Injections>,
-  ) => undefined | Dispose,
+  ) => undefined | void | Dispose,
 ): Unstable_EffectOn<Model, StoreModel, Injections>;
 
 // #endregion
