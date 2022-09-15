@@ -179,7 +179,7 @@ issues.
 
 ## Limitations and Known Issues
 
-### Computed properties are not accessible within actions
+### Computed properties will return the cached value when accessed from within actions
 
 This design decision was made so that we can guarantee the lazy resolution of
 computed properties, ensuring that they are only computed when they are being
@@ -192,7 +192,7 @@ const model = {
   todos: [],
   todoCount: computed(state => state.todos.length),
   addTodo: action((state, payload) => {
-    // Invalid! todoCount will be undefined
+    // todoCount will not be recomputed and will return the last cached value
     //           👇
     if (state.todoCount) < 10) {
       state.todos.push(payload);
