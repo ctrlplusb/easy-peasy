@@ -1,10 +1,10 @@
 import { useContext, useDebugValue, useEffect, useState } from 'react';
 import EasyPeasyContext from './context';
 
-const uSESNotInitialized = () => {
+const useNotInitialized = () => {
   throw new Error('uSES not initialized!');
 };
-let useSyncExternalStoreWithSelector = uSESNotInitialized;
+let useSyncExternalStoreWithSelector = useNotInitialized;
 export const initializeUseStoreState = (fn) => {
   useSyncExternalStoreWithSelector = fn;
 };
