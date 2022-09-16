@@ -44,8 +44,8 @@ interface Todo {
   done: boolean;
 }
 
-interface StoreModel {
-  todos: Todo[];
+interface TodoModel {
+  items: Todo[];
 }
 ```
 
@@ -56,8 +56,8 @@ To define an action you need to import the associated type from Easy Peasy.
 ```typescript
 import { Action } from 'easy-peasy';
 
-interface TodosModel {
-  todos: Todo[];
+interface TodoModel {
+  items: Todo[];
   addTodo: Action<TodosModel, Todo>;
 }
 ```
@@ -94,7 +94,7 @@ To define a thunk you need to import the associated type from Easy Peasy.
 import { Thunk } from 'easy-peasy';
 
 interface TodosModel {
-  todos: Todo[];
+  items: Todo[];
   addTodo: Action<TodosModel, Todo>;
   saveTodo: Thunk<TodosModel, Todo>;
 }
@@ -133,8 +133,8 @@ then declare the type for the derived state.
 import { Computed } from 'easy-peasy';
 
 interface TodosModel {
-  todos: Todo[];
-  completedTodos: Computed<TodosModel, Todo[]>;
+  items: Todo[];
+  completedItems: Computed<TodosModel, Todo[]>;
   addTodo: Action<TodosModel, Todo>;
   saveTodo: Thunk<TodosModel, Todo>;
 }
@@ -168,25 +168,55 @@ more information.
 Once you have your model definition you can provide it as a type argument to the
 `createStore` function.
 
+Given that you have the following `./todos.model.ts`:
 ```typescript
-import { createStore, computed, action, thunk } from 'easy-peasy';
-import { StoreModel } from './model';
+import { action, Action, computed, Computed, thunk, Thunk } from 'easy-peasy';
 
-const store = createStore<StoreModel>({
-  todos: [],
-  completedTodos: computed((state) => state.todos.filter((todo) => todo.done)),
+interface Todo {
+  text: string;
+  done: boolean;
+}
+
+export interface c {
+  items: Todo[];
+  completedItems: Computed<TodosModel, Todo[]>;
+  addTodo: Action<TodosModel, Todo>;
+  saveTodo: Thunk<TodosModel, Todo>;
+}
+
+const todosStore: TodosModel = {
+  items: [],
+  completedItems: computed((state) => state.items.filter((todo) => todo.done)),
   addTodo: action((state, payload) => {
-    state.todos.push(payload);
+      state.todos.push(payload);
   }),
   saveTodo: thunk(async (actions, payload) => {
-    const result = await axios.post('/todos', payload);
-    actions.addTodo(result.data);
+      const result = await axios.post('/todos', payload);
+      actions.addTodo(result.data);
   }),
+};
+
+export default todosStore;
+```
+
+Your `model.ts` might look like this:
+```typescript
+import { createStore } from 'easy-peasy';
+import todosStore, { TodosModel } from './todos.model';
+
+export interface StoreModel {
+  todos: TodosModel;
+}
+
+const store = createStore<StoreModel>({
+  todos: todosStore
 });
 ```
 
 You will have noticed that all the typing information would have been displayed
 to you, with assertions that your store satisfies the `StoreModel` definition.
+
+In this case, our `StoreModel` consists of a sub-store `todos`.
 
 ## Typing the hooks
 
@@ -219,7 +249,7 @@ within your components.
 import { useStoreState } from './my-store/hooks';
 
 function Todos() {
-  const todos = useStoreState((state) => state.todos);
+  const todos = useStoreState((state) => state.todos.items);
   return (
     <ul>
       {todos.map((todo) => (
