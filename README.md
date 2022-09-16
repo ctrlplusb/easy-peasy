@@ -85,6 +85,12 @@ function TodoList() {
 
 <p>&nbsp;</p>
 
+## Examples
+
+See the [example folder](./examples) for examples using `easy-peasy`.
+
+<p>&nbsp;</p>
+
 ## Our Sponsors ❤️
 
 We have only but great appreciation to those who support this project. If you

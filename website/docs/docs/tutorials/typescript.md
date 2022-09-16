@@ -15,6 +15,8 @@ exported by Easy Peasy. We recommend that you visit the [API docs](/docs/api)
 for each type for a fuller description of the generic arguments that each type
 supports. We will be link to the appropriate docs within each section below.
 
+Like examples instead of docs? [Then look no further!](https://github.com/ctrlplusb/easy-peasy/tree/master/examples)
+
 - [Define your model](#define-your-model)
   - [State](#state)
   - [Actions](#actions)
@@ -45,7 +47,7 @@ interface Todo {
 }
 
 interface TodoModel {
-  items: Todo[];
+  todos: Todo[];
 }
 ```
 
@@ -57,7 +59,7 @@ To define an action you need to import the associated type from Easy Peasy.
 import { Action } from 'easy-peasy';
 
 interface TodoModel {
-  items: Todo[];
+  todos: Todo[];
   addTodo: Action<TodosModel, Todo>;
 }
 ```
@@ -94,7 +96,7 @@ To define a thunk you need to import the associated type from Easy Peasy.
 import { Thunk } from 'easy-peasy';
 
 interface TodosModel {
-  items: Todo[];
+  todos: Todo[];
   addTodo: Action<TodosModel, Todo>;
   saveTodo: Thunk<TodosModel, Todo>;
 }
@@ -133,8 +135,8 @@ then declare the type for the derived state.
 import { Computed } from 'easy-peasy';
 
 interface TodosModel {
-  items: Todo[];
-  completedItems: Computed<TodosModel, Todo[]>;
+  todos: Todo[];
+  completedTodos: Computed<TodosModel, Todo[]>;
   addTodo: Action<TodosModel, Todo>;
   saveTodo: Thunk<TodosModel, Todo>;
 }
@@ -168,68 +170,49 @@ more information.
 Once you have your model definition you can provide it as a type argument to the
 `createStore` function.
 
-Given that you have the following `./todos.model.ts`:
 ```typescript
-import { action, Action, computed, Computed, thunk, Thunk } from 'easy-peasy';
+import { createStore, action, Action, computed, Computed, thunk, Thunk } from 'easy-peasy';
 
 interface Todo {
   text: string;
   done: boolean;
 }
 
-export interface c {
-  items: Todo[];
-  completedItems: Computed<TodosModel, Todo[]>;
+export interface TodosModel {
+  todos: Todo[];
+  completedTodos: Computed<TodosModel, Todo[]>;
   addTodo: Action<TodosModel, Todo>;
   saveTodo: Thunk<TodosModel, Todo>;
 }
 
-const todosStore: TodosModel = {
-  items: [],
-  completedItems: computed((state) => state.items.filter((todo) => todo.done)),
+const store = createStore<TodosModel>({
+  todos: [],
+  completedTodos: computed((state) => state.todos.filter((todo) => todo.done)),
   addTodo: action((state, payload) => {
-      state.todos.push(payload);
+    state.todos.push(payload);
   }),
   saveTodo: thunk(async (actions, payload) => {
-      const result = await axios.post('/todos', payload);
-      actions.addTodo(result.data);
+    const result = await axios.post('/todos', payload);
+    actions.addTodo(result.data);
   }),
-};
-
-export default todosStore;
-```
-
-Your `model.ts` might look like this:
-```typescript
-import { createStore } from 'easy-peasy';
-import todosStore, { TodosModel } from './todos.model';
-
-export interface StoreModel {
-  todos: TodosModel;
-}
-
-const store = createStore<StoreModel>({
-  todos: todosStore
 });
 ```
 
 You will have noticed that all the typing information would have been displayed
-to you, with assertions that your store satisfies the `StoreModel` definition.
-
-In this case, our `StoreModel` consists of a sub-store `todos`.
+to you, with assertions that your store satisfies the `TodosModel` definition.
 
 ## Typing the hooks
 
-In order to avoid having to constantly provide your `StoreModel` definition to
+In order to avoid having to constantly provide your `TodosModel` definition to
 each use of the Easy Peasy hooks, we provide a utility API that allows you to
-create versions of the hooks that will have the `StoreModel` type information
+create versions of the hooks that will have the `TodosModel` type information
 baked in.
 
 ```typescript
 import { createTypedHooks } from 'easy-peasy';
-import { StoreModel } from './model';
+import { TodosModel } from './model';
 
-const typedHooks = createTypedHooks<StoreModel>();
+const typedHooks = createTypedHooks<TodosModel>();
 
 export const useStoreActions = typedHooks.useStoreActions;
 export const useStoreDispatch = typedHooks.useStoreDispatch;
@@ -268,3 +251,6 @@ assertion ensuring that you are utilizing the store correctly.
 This is by no means an exhaustive overview of the types shipped with Easy Peasy.
 We suggest that you review the API docs for the TypeScript types for a more
 complete description of each type.
+
+Take a look through the [examples](https://github.com/ctrlplusb/easy-peasy/tree/master/examples) for
+more insight.
