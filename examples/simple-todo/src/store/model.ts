@@ -9,7 +9,7 @@ import {
   ThunkOn,
 } from 'easy-peasy';
 
-interface Todo {
+export interface Todo {
   text: string;
   done: boolean;
 }

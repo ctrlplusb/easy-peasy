@@ -1,30 +1,40 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
+import { Todo } from './store/model';
 import { useStoreState, useStoreActions } from './store';
 
 const App = () => {
   const { remainingTodos, completedTodos } = useStoreState((state) => state);
-  const { toggleTodo } = useStoreActions((actions) => actions);
 
   return (
     <div>
       <h1>Todo list</h1>
       <ul>
-        {remainingTodos.map((todo, idx) => (
+        {[...remainingTodos, ...completedTodos].map((todo, idx) => (
           <li key={idx}>
-            <input type="checkbox" onChange={() => toggleTodo(todo)} />
-            {todo.text}
-          </li>
-        ))}
-        {completedTodos.map((todo, idx) => (
-          <li key={idx}>
-            <input type="checkbox" checked onChange={() => toggleTodo(todo)} />
-            <s>{todo.text}</s>
+            <TodoItem todo={todo} />
           </li>
         ))}
       </ul>
 
       <AddTodo />
     </div>
+  );
+};
+
+const TodoItem: React.FC<{ todo: Todo }> = ({ todo }) => {
+  const { toggleTodo } = useStoreActions((actions) => actions);
+
+  const Wrapper = todo.done ? 's' : Fragment;
+  return (
+    <Wrapper>
+      <input
+        name={todo.text}
+        type="checkbox"
+        checked={todo.done}
+        onChange={() => toggleTodo(todo)}
+      />
+      {todo.text}
+    </Wrapper>
   );
 };
 
