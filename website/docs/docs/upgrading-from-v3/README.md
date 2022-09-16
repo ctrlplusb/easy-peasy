@@ -85,7 +85,7 @@ const todosModel = {
   setSaving: action((state, payload) => {
     state.saving = payload;
   }),
-  unstable_effectOn(
+  onItemsChanged: unstable_effectOn(
     // Provide an array of "stateResolvers" to resolve the targeted state:
     [state => state.items],
     // Provide a handler which will execute every time the targeted state changes:
