@@ -19,9 +19,8 @@ const model: StoreModel = {};
 
 const store = createStore(model);
 
-const { useStoreState, useStoreActions, useStoreDispatch } = createTypedHooks<
-  StoreModel
->();
+const { useStoreState, useStoreActions, useStoreDispatch } =
+  createTypedHooks<StoreModel>();
 
 function MyComponent() {
   const items = useStoreState((state) => state.items);
@@ -51,7 +50,7 @@ ReactDOM.render(
 /**
  * We also support typing react-redux
  */
-const Todos: React.SFC<{ todos: string[] }> = ({ todos }) => (
+const Todos: React.FC<{ todos: string[] }> = ({ todos }) => (
   <div>Count: {todos.length}</div>
 );
 

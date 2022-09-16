@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
+    "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "jsx": "preserve",
     "strict": true,
     "baseUrl": "../..",
     "skipLibCheck": false,
     "paths": {
-      "easy-peasy": ["index.d.ts"],
+      "easy-peasy": ["index.d.ts"]
     }
   }
 }

@@ -1,93 +1,56 @@
-import {
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useReducer,
-  useRef,
-  useState,
-} from 'react';
+import { useContext, useDebugValue, useEffect, useState } from 'react';
 import EasyPeasyContext from './context';
 
-// React currently throws a warning when using useLayoutEffect on the server.
-// To get around it, we can conditionally useEffect on the server (no-op) and
-// useLayoutEffect in the browser. We need useLayoutEffect to ensure the store
-// subscription callback always has the selector from the latest render commit
-// available, otherwise a store update may happen between render and the effect,
-// which may cause missed updates; we also must ensure the store subscription
-// is created synchronously, otherwise a store update may occur before the
-// subscription is created and an inconsistent state may be observed
-const useIsomorphicLayoutEffect =
-  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+const uSESNotInitialized = () => {
+  throw new Error('uSES not initialized!');
+};
+let useSyncExternalStoreWithSelector = uSESNotInitialized;
+export const initializeUseStoreState = (fn) => {
+  useSyncExternalStoreWithSelector = fn;
+};
+
+const refEquality = (a, b) => a === b;
 
 export function createStoreStateHook(Context) {
-  return function useStoreState(mapState, equalityFn) {
-    const store = useContext(Context);
-    const mapStateRef = useRef(mapState);
-    const stateRef = useRef();
-    const mountedRef = useRef(true);
-    const subscriptionMapStateError = useRef();
-
-    const [, forceRender] = useReducer((s) => s + 1, 0);
-
-    if (
-      subscriptionMapStateError.current ||
-      mapStateRef.current !== mapState ||
-      stateRef.current === undefined
-    ) {
-      try {
-        stateRef.current = mapState(store.getState());
-      } catch (err) {
-        if (process.env.NODE_ENV === 'development') {
-          let errorMessage = `Error in useStoreState: ${err.message}.`;
-          if (subscriptionMapStateError.current) {
-            errorMessage += `\nMaybe related to:\n${subscriptionMapStateError.current.stack}`;
-          }
-          throw new Error(errorMessage);
-        }
-        throw subscriptionMapStateError.current || err;
+  return function useStoreState(mapState, equalityFn = refEquality) {
+    if (process.env.NODE_ENV !== 'production') {
+      if (!mapState) {
+        throw new Error(`You must pass a selector to useStoreState`);
+      }
+      if (typeof mapState !== 'function') {
+        throw new Error(
+          `You must pass a function as a selector to useStoreState`,
+        );
+      }
+      if (typeof equalityFn !== 'function') {
+        throw new Error(
+          `You must pass a function as an equality function to useStoreState`,
+        );
       }
     }
 
-    useIsomorphicLayoutEffect(() => {
-      mapStateRef.current = mapState;
-      subscriptionMapStateError.current = undefined;
-    });
+    const store = useContext(Context);
 
-    useIsomorphicLayoutEffect(() => {
-      const checkMapState = () => {
-        try {
-          const newState = mapStateRef.current(store.getState());
+    /*
+    function useSyncExternalStoreWithSelector<Snapshot, Selection>(
+        subscribe: (onStoreChange: () => void) => () => void,
+        getSnapshot: () => Snapshot,
+        getServerSnapshot: undefined | null | (() => Snapshot),
+        selector: (snapshot: Snapshot) => Selection,
+        isEqual?: (a: Selection, b: Selection) => boolean,
+    ): Selection;
+    */
+    const selectedState = useSyncExternalStoreWithSelector(
+      store.subscribe,
+      store.getState,
+      store.getState,
+      mapState,
+      equalityFn,
+    );
 
-          const isStateEqual =
-            typeof equalityFn === 'function'
-              ? equalityFn(stateRef.current, newState)
-              : stateRef.current === newState;
+    useDebugValue(selectedState);
 
-          if (isStateEqual) {
-            return;
-          }
-
-          stateRef.current = newState;
-        } catch (err) {
-          // see https://github.com/reduxjs/react-redux/issues/1179
-          // There is a possibility mapState will fail due to stale state or
-          // props, therefore we will just track the error and force our
-          // component to update. It should then receive the updated state
-          subscriptionMapStateError.current = err;
-        }
-        if (mountedRef.current) {
-          forceRender({});
-        }
-      };
-      const unsubscribe = store.subscribe(checkMapState);
-      checkMapState();
-      return () => {
-        mountedRef.current = false;
-        unsubscribe();
-      };
-    }, []);
-
-    return stateRef.current;
+    return selectedState;
   };
 }
 

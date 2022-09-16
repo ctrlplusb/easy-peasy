@@ -78,7 +78,7 @@ type IncludesDeep<Obj extends object, M extends any> = O.Includes<
 type StateResolver<
   Model extends object,
   StoreModel extends object,
-  Result = any
+  Result = any,
 > = (state: State<Model>, storeState: State<StoreModel>) => Result;
 
 type StateResolvers<Model extends object, StoreModel extends object> =
@@ -200,7 +200,7 @@ type ValidListenerProperties<ActionsModel extends object> = {
 
 type ListenerMapper<
   ActionsModel extends object,
-  K extends keyof ActionsModel
+  K extends keyof ActionsModel,
 > = {
   [P in K]: ActionsModel[P] extends ActionOn<any, any>
     ? ActionCreator<TargetPayload<any>>
@@ -346,7 +346,7 @@ export type State<Model extends object = {}> = RecursiveState<Model>;
 export function createStore<
   StoreModel extends object = {},
   InitialState extends undefined | object = undefined,
-  Injections extends object = {}
+  Injections extends object = {},
 >(
   model: StoreModel,
   config?: EasyPeasyConfig<InitialState, Injections>,
@@ -369,7 +369,7 @@ export function createStore<
  */
 export interface EasyPeasyConfig<
   InitialState extends undefined | object = undefined,
-  Injections extends object = {}
+  Injections extends object = {},
 > {
   compose?: typeof compose;
   devTools?: boolean;
@@ -408,7 +408,10 @@ export interface AddModelResult {
  */
 export interface Store<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    {}
+  >,
 > extends ReduxStore<State<StoreModel>> {
   addModel: <ModelSlice extends object>(
     key: string,
@@ -452,7 +455,7 @@ export interface Store<
  */
 export type Dispatch<
   StoreModel extends object = {},
-  Action extends ReduxAction = AnyAction
+  Action extends ReduxAction = AnyAction,
 > = Actions<StoreModel> & ReduxDispatch<Action>;
 
 // #endregion
@@ -476,7 +479,7 @@ interface TargetPayload<Payload> {
 
 type PayloadFromResolver<
   Resolver extends TargetResolver<any, any>,
-  Resolved = ReturnType<Resolver>
+  Resolved = ReturnType<Resolver>,
 > = Resolved extends string
   ? any
   : Resolved extends ActionOrThunkCreator<infer Payload>
@@ -523,7 +526,7 @@ export type Thunk<
   Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
-  Result = any
+  Result = any,
 > = {
   type: 'thunk';
   payload: Payload;
@@ -556,7 +559,7 @@ export function thunk<
   Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
-  Result = any
+  Result = any,
 >(
   thunk: (
     actions: Actions<Model>,
@@ -572,7 +575,7 @@ export function thunk<
 export interface ThunkOn<
   Model extends object,
   Injections = any,
-  StoreModel extends object = {}
+  StoreModel extends object = {},
 > {
   type: 'thunkOn';
 }
@@ -584,7 +587,7 @@ export function thunkOn<
   Resolver extends TargetResolver<Model, StoreModel> = TargetResolver<
     Model,
     StoreModel
-  >
+  >,
 >(
   targetResolver: Resolver,
   handler: (
@@ -642,7 +645,7 @@ export function action<Model extends object = {}, Payload = any>(
 
 export interface ActionOn<
   Model extends object = {},
-  StoreModel extends object = {}
+  StoreModel extends object = {},
 > {
   type: 'actionOn';
   result: void | State<Model>;
@@ -651,7 +654,7 @@ export interface ActionOn<
 export function actionOn<
   Model extends object,
   StoreModel extends object,
-  Resolver extends TargetResolver<Model, StoreModel>
+  Resolver extends TargetResolver<Model, StoreModel>,
 >(
   targetResolver: Resolver,
   handler: (
@@ -679,7 +682,7 @@ export function actionOn<
 export type Computed<
   Model extends object,
   Result,
-  StoreModel extends object = {}
+  StoreModel extends object = {},
 > = {
   type: 'computed';
   result: Result;
@@ -696,7 +699,7 @@ export function computed<
   Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
     Model,
     StoreModel
-  >
+  >,
 >(
   resolversOrCompFunc: Resolvers | DefaultComputationFunc<Model, Result>,
   compFunc?: Resolvers extends [AnyFunction]
@@ -756,63 +759,62 @@ export function computed<
 export type Unstable_EffectOn<
   Model extends object = {},
   StoreModel extends object = {},
-  Injections = any
+  Injections = any,
 > = {
   type: 'effectOn';
 };
 
 type DependencyResolver<State> = (state: State) => any;
 
-type Dependencies<
-  Resolvers extends StateResolvers<any, any>
-> = Resolvers extends [AnyFunction]
-  ? [ReturnType<Resolvers[0]>]
-  : Resolvers extends [AnyFunction, AnyFunction]
-  ? [ReturnType<Resolvers[0]>, ReturnType<Resolvers[1]>]
-  : Resolvers extends [AnyFunction, AnyFunction, AnyFunction]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-    ]
-  : Resolvers extends [AnyFunction, AnyFunction, AnyFunction, AnyFunction]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-      ReturnType<Resolvers[3]>,
-    ]
-  : Resolvers extends [
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-    ]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-      ReturnType<Resolvers[3]>,
-      ReturnType<Resolvers[4]>,
-    ]
-  : Resolvers extends [
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-    ]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-      ReturnType<Resolvers[3]>,
-      ReturnType<Resolvers[4]>,
-      ReturnType<Resolvers[4]>,
-    ]
-  : any[];
+type Dependencies<Resolvers extends StateResolvers<any, any>> =
+  Resolvers extends [AnyFunction]
+    ? [ReturnType<Resolvers[0]>]
+    : Resolvers extends [AnyFunction, AnyFunction]
+    ? [ReturnType<Resolvers[0]>, ReturnType<Resolvers[1]>]
+    : Resolvers extends [AnyFunction, AnyFunction, AnyFunction]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+      ]
+    : Resolvers extends [AnyFunction, AnyFunction, AnyFunction, AnyFunction]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+        ReturnType<Resolvers[3]>,
+      ]
+    : Resolvers extends [
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+      ]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+        ReturnType<Resolvers[3]>,
+        ReturnType<Resolvers[4]>,
+      ]
+    : Resolvers extends [
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+      ]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+        ReturnType<Resolvers[3]>,
+        ReturnType<Resolvers[4]>,
+        ReturnType<Resolvers[4]>,
+      ]
+    : any[];
 
 type Change<Resolvers extends StateResolvers<any, any>> = {
   prev: Dependencies<Resolvers>;
@@ -832,7 +834,7 @@ export function unstable_effectOn<
   Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
     Model,
     StoreModel
-  >
+  >,
 >(
   dependencies: Resolvers,
   effect: (
@@ -951,7 +953,7 @@ export function generic<T>(value: T): Generic<T>;
  */
 export function useStoreState<
   StoreState extends State<any> = State<{}>,
-  Result = any
+  Result = any,
 >(
   mapState: (state: StoreState) => Result,
   equalityFn?: (prev: Result, next: Result) => boolean,
@@ -975,7 +977,7 @@ export function useStoreState<
  */
 export function useStoreActions<
   StoreActions extends Actions<any> = Actions<{}>,
-  Result = any
+  Result = any,
 >(mapActions: (actions: StoreActions) => Result): Result;
 
 /**
@@ -996,7 +998,10 @@ export function useStoreActions<
  */
 export function useStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    {}
+  >,
 >(): Store<StoreModel, StoreConfig>;
 
 /**
@@ -1016,7 +1021,7 @@ export function useStore<
  * }
  */
 export function useStoreDispatch<
-  StoreModel extends object = {}
+  StoreModel extends object = {},
 >(): Dispatch<StoreModel>;
 
 /**
@@ -1065,6 +1070,7 @@ export function createTypedHooks<StoreModel extends object = {}>(): {
  */
 export class StoreProvider<StoreModel extends object = {}> extends Component<{
   store: Store<StoreModel>;
+  children?: React.ReactNode;
 }> {}
 
 // #endregion
@@ -1073,7 +1079,7 @@ export class StoreProvider<StoreModel extends object = {}> extends Component<{
 
 interface StoreModelInitializer<
   StoreModel extends object,
-  RuntimeModel extends undefined | object
+  RuntimeModel extends undefined | object,
 > {
   (runtimeModel?: RuntimeModel): StoreModel;
 }
@@ -1085,12 +1091,13 @@ export function createContextStore<
   StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
     undefined,
     Injections
-  >
+  >,
 >(
   model: StoreModel | StoreModelInitializer<StoreModel, RuntimeModel>,
   config?: StoreConfig,
 ): {
   Provider: React.FC<{
+    children?: React.ReactNode;
     runtimeModel?: RuntimeModel;
     injections?: Injections | ((previousInjections: Injections) => Injections);
   }>;
@@ -1108,7 +1115,10 @@ export function createContextStore<
 
 export function useLocalStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    {}
+  >,
 >(
   modelCreator: (prevState?: State<StoreModel>) => StoreModel,
   dependencies?: any[],
