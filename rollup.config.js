@@ -57,43 +57,7 @@ function createCommonJSConfig(input, output) {
   };
 }
 
-function createIIFEConfig(input, output, globalName) {
-  return {
-    input,
-    output: {
-      sourcemap: true,
-      file: output,
-      format: 'iife',
-      exports: 'named',
-      name: globalName,
-      globals: {
-        react: 'React',
-        '@babel/runtime/helpers/objectSpread2': '_objectSpread',
-        redux: 'Redux',
-        'redux-thunk': 'reduxThunk',
-        immer: 'immer',
-        equal: 'fast-deep-equal/es6',
-      },
-    },
-    external,
-    plugins: [
-      resolve({ extensions }),
-      babel({
-        extensions,
-        plugins: [
-          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
-        ],
-        runtimeHelpers: true,
-        sourceMaps: true,
-        inputSourceMap: true,
-      }),
-      sizeSnapshot(),
-    ],
-  };
-}
-
 export default [
   createESMConfig('src/index.js', 'dist/index.js'),
   createCommonJSConfig('src/index.js', 'dist/index.cjs.js'),
-  createIIFEConfig('src/index.js', 'dist/index.iife.js', 'easyPeasy'),
 ];

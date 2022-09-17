@@ -39,18 +39,17 @@ npm install easy-peasy
 
 <p>&nbsp;</p>
 
-## Fly like an eagle
+## Fly like an eagle 🦅
 
 **Create your store**
 
 ```javascript
 const store = createStore({
-  todos: {
-    items: ['Create store', 'Wrap application', 'Use store'],
-    add: action((state, payload) => {
-      state.items.push(payload);
-    }),
-  },
+  todos: ['Create store', 'Wrap application', 'Use store'],
+
+  addTodo: action((state, payload) => {
+    state.todos.push(payload);
+  }),
 });
 ```
 
@@ -70,14 +69,14 @@ function App() {
 
 ```javascript
 function TodoList() {
-  const todos = useStoreState((state) => state.todos.items);
-  const add = useStoreActions((actions) => actions.todos.add);
+  const todos = useStoreState((state) => state.todos);
+  const addTodo = useStoreActions((actions) => actions.addTodo);
   return (
     <div>
       {todos.map((todo, idx) => (
         <div key={idx}>{todo}</div>
       ))}
-      <AddTodo onAdd={add} />
+      <AddTodo onAdd={addTodo} />
     </div>
   );
 }
@@ -87,7 +86,30 @@ function TodoList() {
 
 ## Examples
 
-See the [example folder](./examples) for examples using `easy-peasy`.
+See the [example folder](./examples) for more examples of how to use `easy-peasy`.
+
+<p>&nbsp;</p>
+
+## Core Team 🛠
+
+<table>
+  <tr>
+  <td>
+    <a href="https://github.com/jmyrland">
+      <img src="https://avatars.githubusercontent.com/u/837651?v=5" width="100px;" alt=""/>
+      <br />
+      <sub><b>Jørn A. Myrland</b></sub>
+    </a>
+  </td>
+  <td>
+    <a href="https://github.com/ctrlplusb">
+      <img src="https://avatars.githubusercontent.com/u/12164768?v=4" width="100px;" alt=""/>
+      <br />
+      <sub><b>Sean Matheson</b></sub>
+    </a>
+  </td>
+  </tr>
+</table>
 
 <p>&nbsp;</p>
 

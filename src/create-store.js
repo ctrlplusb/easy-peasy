@@ -24,7 +24,7 @@ export function createStore(model, options = {}) {
     devTools = process.env.NODE_ENV !== 'production',
     disableImmer = false,
     enhancers = [],
-    initialState = {},
+    initialState = undefined,
     injections = {},
     middleware = [],
     mockActions = false,
@@ -79,7 +79,7 @@ export function createStore(model, options = {}) {
         })
       : reduxCompose);
 
-  bindStoreInternals(initialState);
+  bindStoreInternals(initialState || {});
 
   const easyPeasyMiddleware = [
     createComputedPropertiesMiddleware(_r),
@@ -160,6 +160,7 @@ export function createStore(model, options = {}) {
     getActions: () => _r._i._aC,
     getListeners: () => _r._i._lAC,
     getMockedActions: () => [...mockedActions],
+    getServerState: initialState,
     persist: {
       clear: persistor.clear,
       flush: persistor.flush,

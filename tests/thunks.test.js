@@ -1,7 +1,9 @@
 import { action, createStore, thunk, reducer } from '../src';
 
 const resolveAfter = (data, ms) =>
-  new Promise((resolve) => setTimeout(() => resolve(data), ms));
+  new Promise((resolve) => {
+    setTimeout(() => resolve(data), ms);
+  });
 
 const trackActionsMiddleware = () => {
   const middleware = () => (next) => (_action) => {
@@ -162,7 +164,7 @@ test('dispatch an action via redux dispatch', async () => {
         dispatch({ type: 'INCREMENT' });
       }),
     },
-    counter: reducer((state = 0, incomingAction) => {
+    counter: reducer((state = 0, incomingAction = {}) => {
       switch (incomingAction.type) {
         case 'INCREMENT':
           return state + 1;
