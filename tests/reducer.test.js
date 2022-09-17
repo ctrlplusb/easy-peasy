@@ -3,7 +3,7 @@ import { action, createStore, reducer } from '../src';
 it('basic', () => {
   // ARRANGE
   const store = createStore({
-    counter: reducer((state = 1, _action) => {
+    counter: reducer((state = 1, _action = {}) => {
       if (_action.type === 'INCREMENT') {
         return state + 1;
       }
@@ -36,7 +36,7 @@ it('nested', () => {
   // ARRANGE
   const store = createStore({
     stuff: {
-      counter: reducer((state = 1, _action) => {
+      counter: reducer((state = 1, _action = {}) => {
         if (_action.type === 'INCREMENT') {
           return state + 1;
         }
@@ -59,7 +59,7 @@ it('nested', () => {
 it('no-op', () => {
   // ARRANGE
   const store = createStore({
-    counter: reducer((state = 1, _action) => {
+    counter: reducer((state = 1, _action = {}) => {
       if (_action.type === 'INCREMENT') {
         return state + 1;
       }

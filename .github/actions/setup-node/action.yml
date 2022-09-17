@@ -1,0 +1,10 @@
+name: Setup Node.js
+description: A composite action to setup the required Node.js version.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 14.x
+        cache: 'yarn'

@@ -1,6 +1,9 @@
 import { action, createStore, thunk } from '../../src';
 
-const tick = () => new Promise((resolve) => setTimeout(resolve, 1));
+const tick = () =>
+  new Promise((resolve) => {
+    setTimeout(resolve, 1);
+  });
 
 const todosModel = {
   items: {},

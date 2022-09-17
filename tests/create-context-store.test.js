@@ -11,11 +11,7 @@ const Counter = createContextStore({
 
 function CountDisplayUseStore() {
   const store = Counter.useStore();
-  return (
-    <>
-      <div data-testid="count">{store.getState().count}</div>
-    </>
-  );
+  return <div data-testid="count">{store.getState().count}</div>;
 }
 
 function CountDisplay() {
@@ -162,6 +158,7 @@ it('injections can be updated', () => {
     },
   );
 
+  // eslint-disable-next-line react/prop-types
   function Foo({ updater }) {
     const foo = Counter.useStoreActions((actions) => actions.foo);
     React.useEffect(() => {
