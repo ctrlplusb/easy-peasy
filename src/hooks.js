@@ -43,7 +43,7 @@ export function createStoreStateHook(Context) {
     const selectedState = useSyncExternalStoreWithSelector(
       store.subscribe,
       store.getState,
-      store.getState,
+      store.getServerState || store.getState,
       mapState,
       equalityFn,
     );
