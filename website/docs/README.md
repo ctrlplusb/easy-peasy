@@ -89,6 +89,27 @@ function TodoList() {
   <source src="./assets/screencast.mp4" type="video/mp4">
 </video>
 
+<h2 class="subtitle">Core Team</h2>
+
+<table>
+  <tr>
+  <td>
+    <a href="https://github.com/jmyrland">
+      <img src="https://avatars.githubusercontent.com/u/837651?v=5" width="100px;" alt="Jørn A. Myrland"/>
+      <br />
+      <sub><b>Jørn A. Myrland</b></sub>
+    </a>
+  </td>
+  <td>
+    <a href="https://github.com/ctrlplusb">
+      <img src="https://avatars.githubusercontent.com/u/12164768?v=4" width="100px;" alt="Sean Matheson"/>
+      <br />
+      <sub><b>Sean Matheson</b></sub>
+    </a>
+  </td>
+  </tr>
+</table>
+
 <h2 class="subtitle">Our Sponsors ❤️</h2>
 
 We have only but great appreciation to those who support this project. If you
