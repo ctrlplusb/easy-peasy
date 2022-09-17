@@ -45,6 +45,7 @@
     "lint": "eslint src",
     "prepublish": "yarn run build",
     "test": "jest",
+    "test:source": "jest --modulePathIgnorePatterns=typescript.test.js",
     "test:coverage": "yarn run test -- --coverage",
     "test:coverage:deploy": "yarn run test:coverage && codecov",
     "prepare": "husky install"
