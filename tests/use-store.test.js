@@ -9,11 +9,11 @@ test('returns the store instance', () => {
     foo: 'bar',
   });
 
-  const Consumer = () => {
+  function Consumer() {
     const actual = useStore();
     expect(actual).toBe(store);
     return null;
-  };
+  }
 
   // ACT
   render(

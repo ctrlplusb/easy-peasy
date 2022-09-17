@@ -1,5 +1,10 @@
 import { action, createStore, thunk, actionOn, thunkOn } from '../src';
 
+const wait = (time = 18) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
+
 it('listening to an action, firing an action', () => {
   // ARRANGE
   const math = {
@@ -319,7 +324,7 @@ it('thunk listening to multiple actions', async () => {
   store.getActions().actionTarget('action payload');
 
   // ASSERT
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await wait(10);
   expect(thunkSpy).toHaveBeenCalledTimes(1);
   expect(thunkSpy).toHaveBeenCalledWith(
     expect.anything(),
@@ -335,7 +340,7 @@ it('thunk listening to multiple actions', async () => {
 
   // ACT
   await store.getActions().thunkTarget('thunk payload');
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await wait(10);
 
   // ASSERT
   expect(thunkSpy).toHaveBeenCalledTimes(2);

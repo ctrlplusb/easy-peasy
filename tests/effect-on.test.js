@@ -7,7 +7,10 @@ import {
   actionOn,
 } from '../src';
 
-const wait = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+const wait = (time = 18) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
 
 const trackActionsMiddleware = () => {
   const middleware = () => (next) => (_action) => {

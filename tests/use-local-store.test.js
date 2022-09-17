@@ -137,11 +137,9 @@ test('with config', () => {
         }),
       }),
       [count],
-      () => {
-        return {
-          middleware: [customMiddleware],
-        };
-      },
+      () => ({
+        middleware: [customMiddleware],
+      }),
     );
     return (
       <>
@@ -231,7 +229,7 @@ test('provides the prevState every time the store is recreated', () => {
   // ARRANGE
   let prevState;
 
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line no-shadow, react/prop-types
   function CountDisplay({ count }) {
     useLocalStore(
       (_prevState) => {
@@ -272,12 +270,9 @@ test('updates the store if a dependency changes', () => {
   // ARRANGE
   let currentState;
 
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line no-shadow, react/prop-types
   function CountDisplay({ count }) {
-    [ currentState ] = useLocalStore(
-      () => ({ count }),
-      [count],
-    );
+    [currentState] = useLocalStore(() => ({ count }), [count]);
     return null;
   }
 

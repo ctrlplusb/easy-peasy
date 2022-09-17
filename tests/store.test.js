@@ -511,7 +511,7 @@ it('disableImmer - nested reducer', () => {
   const store = createStore(
     {
       stuff: {
-        counter: reducer((state = 1, _action) => {
+        counter: reducer((state = 1, _action = {}) => {
           if (_action.type === 'INCREMENT') {
             return state + 1;
           }
