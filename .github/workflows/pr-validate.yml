@@ -1,0 +1,21 @@
+name: PR Validate
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  code-quality:
+    name: Code Quality
+    strategy:
+      matrix:
+        command:
+          - lint
+          - test:coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/prepare-application
+      - shell: bash
+        run: yarn ${{ matrix.command }}
