@@ -23,7 +23,17 @@
     "url": "https://github.com/ctrlplusb/easy-peasy.git"
   },
   "homepage": "https://easy-peasy.dev",
-  "author": "Sean Matheson <sean@ctrlplusb.com>",
+  "contributors": [
+    {
+      "name": "Sean Matheson",
+      "email": "sean@ctrlplusb.com",
+      "url": "https://twitter.com/controlplusb"
+    },
+    {
+      "name": "Jørn André Myrland",
+      "url": "https://twitter.com/myrlandnu"
+    }
+  ],
   "keywords": [
     "react",
     "redux",
