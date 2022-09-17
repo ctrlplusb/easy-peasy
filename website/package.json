@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vuepress dev docs",
     "build": "vuepress build docs",
-    "now-build": "vuepress build docs",
     "deploy": "vercel --prod"
   },
   "devDependencies": {
