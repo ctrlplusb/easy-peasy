@@ -15,6 +15,8 @@ exported by Easy Peasy. We recommend that you visit the [API docs](/docs/api)
 for each type for a fuller description of the generic arguments that each type
 supports. We will be link to the appropriate docs within each section below.
 
+Like examples instead of docs? [Then look no further!](https://github.com/ctrlplusb/easy-peasy/tree/master/examples)
+
 - [Define your model](#define-your-model)
   - [State](#state)
   - [Actions](#actions)
@@ -44,7 +46,7 @@ interface Todo {
   done: boolean;
 }
 
-interface StoreModel {
+interface TodoModel {
   todos: Todo[];
 }
 ```
@@ -56,7 +58,7 @@ To define an action you need to import the associated type from Easy Peasy.
 ```typescript
 import { Action } from 'easy-peasy';
 
-interface TodosModel {
+interface TodoModel {
   todos: Todo[];
   addTodo: Action<TodosModel, Todo>;
 }
@@ -169,10 +171,21 @@ Once you have your model definition you can provide it as a type argument to the
 `createStore` function.
 
 ```typescript
-import { createStore, computed, action, thunk } from 'easy-peasy';
-import { StoreModel } from './model';
+import { createStore, action, Action, computed, Computed, thunk, Thunk } from 'easy-peasy';
 
-const store = createStore<StoreModel>({
+interface Todo {
+  text: string;
+  done: boolean;
+}
+
+export interface TodosModel {
+  todos: Todo[];
+  completedTodos: Computed<TodosModel, Todo[]>;
+  addTodo: Action<TodosModel, Todo>;
+  saveTodo: Thunk<TodosModel, Todo>;
+}
+
+const store = createStore<TodosModel>({
   todos: [],
   completedTodos: computed((state) => state.todos.filter((todo) => todo.done)),
   addTodo: action((state, payload) => {
@@ -186,20 +199,20 @@ const store = createStore<StoreModel>({
 ```
 
 You will have noticed that all the typing information would have been displayed
-to you, with assertions that your store satisfies the `StoreModel` definition.
+to you, with assertions that your store satisfies the `TodosModel` definition.
 
 ## Typing the hooks
 
-In order to avoid having to constantly provide your `StoreModel` definition to
+In order to avoid having to constantly provide your `TodosModel` definition to
 each use of the Easy Peasy hooks, we provide a utility API that allows you to
-create versions of the hooks that will have the `StoreModel` type information
+create versions of the hooks that will have the `TodosModel` type information
 baked in.
 
 ```typescript
 import { createTypedHooks } from 'easy-peasy';
-import { StoreModel } from './model';
+import { TodosModel } from './model';
 
-const typedHooks = createTypedHooks<StoreModel>();
+const typedHooks = createTypedHooks<TodosModel>();
 
 export const useStoreActions = typedHooks.useStoreActions;
 export const useStoreDispatch = typedHooks.useStoreDispatch;
@@ -219,7 +232,7 @@ within your components.
 import { useStoreState } from './my-store/hooks';
 
 function Todos() {
-  const todos = useStoreState((state) => state.todos);
+  const todos = useStoreState((state) => state.todos.items);
   return (
     <ul>
       {todos.map((todo) => (
@@ -238,3 +251,6 @@ assertion ensuring that you are utilizing the store correctly.
 This is by no means an exhaustive overview of the types shipped with Easy Peasy.
 We suggest that you review the API docs for the TypeScript types for a more
 complete description of each type.
+
+Take a look through the [examples](https://github.com/ctrlplusb/easy-peasy/tree/master/examples) for
+more insight.

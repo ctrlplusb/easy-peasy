@@ -84,6 +84,12 @@ function TodoList() {
 
 <p>&nbsp;</p>
 
+## Examples
+
+See the [example folder](./examples) for more examples of how to use `easy-peasy`.
+
+<p>&nbsp;</p>
+
 ## Core Team 🛠
 
 <table>
