@@ -2,7 +2,7 @@
 
 - [Simple todo app](./simple-todo/)
   ([Open in codesandbox](https://codesandbox.io/s/fnidh1))
-- Kanban (todo)
+- [Kanban](./kanban/)
 - Next.js (todo)
 - React Native (todo)
 
