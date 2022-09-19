@@ -21,3 +21,5 @@ You can start editing the page by modifying `pages/index.tsx`. The page auto-upd
 The `easy-peasy` store & models are located in the `src/store` folder.
 The `main.tsx` file wraps the `<App />` component with the `<StoreProvider>`, so all child components can access the
 hooks exposed from the `store/index.ts`.
+
+[Session storage persistance](https://easy-peasy.vercel.app/docs/api/persist.html) is used for this app, setup in the `store/index.ts`.
