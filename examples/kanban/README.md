@@ -1,4 +1,4 @@
-# Kanban example
+# Kanban example ([View codesandbox](https://codesandbox.io/s/5zdk6r))
 
 Kanban example of `react` and `easy-peasy`.
 

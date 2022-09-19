@@ -1,4 +1,4 @@
-# Simple todo example ([Open in codesandbox](https://codesandbox.io/s/fnidh1))
+# Simple todo example ([View codesandbox](https://codesandbox.io/s/fnidh1))
 
 The simplest example of `react` and `easy-peasy`.
 

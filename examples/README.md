@@ -1,8 +1,8 @@
 # Examples with `easy-peasy`
 
-- [Simple todo app](./simple-todo/)
-  ([Open in codesandbox](https://codesandbox.io/s/fnidh1))
-- [Kanban](./kanban/)
+- [Simple todo app](./simple-todo/) [vite, react, TS]
+  ([View codesandbox](https://codesandbox.io/s/fnidh1))
+- [Kanban](./kanban/) [vite, react, TS] ([View codesandbox](https://codesandbox.io/s/5zdk6r))
 - Next.js (todo)
 - React Native (todo)
 
