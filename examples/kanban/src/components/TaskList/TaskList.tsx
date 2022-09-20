@@ -8,9 +8,11 @@ const TaskList: React.FC<{ list: keyof StoreModel }> = ({ list }) => {
 
   return (
     <div className="p-4 md:w-1/3">
-      <h1 className="font-bold">{state.name}</h1>
+      <h1 id={`${list}-heading`} className="font-bold">
+        {state.name}
+      </h1>
       <div className="flex flex-col h-full py-4 p-2 rounded-md shadow-md bg-slate-50 ">
-        <ul className="space-y-4">
+        <ul aria-labelledby={`${list}-heading`} className="space-y-4">
           {state.tasks.map((task) => (
             <TaskView key={task.id} list={list} task={task} />
           ))}

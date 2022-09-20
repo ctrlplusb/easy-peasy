@@ -5,6 +5,7 @@
     "dev": "vite --port 3000",
     "build": "tsc && vite build",
     "serve": "vite preview",
+    "test": "vitest",
     "lint:fix": "eslint ./src --ext .jsx,.js,.ts,.tsx --quiet --fix --ignore-path ./.gitignore",
     "lint:format": "prettier  --loglevel warn --write \"./**/*.{js,jsx,ts,tsx,css,md,json}\" ",
     "lint": "yarn lint:format && yarn lint:fix ",
@@ -17,6 +18,9 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^14.4.3",
     "@types/react": "^18.0.20",
     "@types/react-dom": "^18.0.6",
     "@typescript-eslint/eslint-plugin": "^5.10.2",
@@ -35,7 +39,8 @@
     "prettier": "^2.5.1",
     "tailwindcss": "^3.1.8",
     "typescript": "^4.5.5",
-    "vite": "^3.1.1"
+    "vite": "^3.1.1",
+    "vitest": "^0.23.4"
   },
   "pre-commit": "lint",
   "license": "MIT"

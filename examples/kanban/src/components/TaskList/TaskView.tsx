@@ -13,15 +13,27 @@ const TaskView: React.FC<{ task: Task; list: keyof StoreModel }> = ({ task, list
 
       <div className="flex">
         {canRegressTasks && (
-          <button className="mr-auto" onClick={() => regressTask(task)}>
+          <button
+            className="mr-auto"
+            aria-label={`Regress "${task.name}"`}
+            onClick={() => regressTask(task)}
+          >
             ⏮️
           </button>
         )}
-        <button className="text-xs" onClick={() => removeTask(task)}>
+        <button
+          className="text-xs"
+          aria-label={`Remove "${task.name}"`}
+          onClick={() => removeTask(task)}
+        >
           ❌
         </button>
         {canProgressTasks && (
-          <button className="ml-auto" onClick={() => progressTask(task)}>
+          <button
+            className="ml-auto"
+            aria-label={`Progress "${task.name}"`}
+            onClick={() => progressTask(task)}
+          >
             ⏭️
           </button>
         )}

@@ -6,6 +6,8 @@ Kanban example of `react` and `easy-peasy`.
 
 This is a `Vite + React + Typescript + Eslint + Prettier` example based on [this template](https://github.com/TheSwordBreaker/vite-reactts-eslint-prettier).
 
+The example also includes tests using `vitest`, `@testing-library/react` & `@testing-library/user-event`.
+
 ## Getting Started
 
 First, run the development server:
@@ -23,3 +25,16 @@ The `main.tsx` file wraps the `<App />` component with the `<StoreProvider>`, so
 hooks exposed from the `store/index.ts`.
 
 [Session storage persistance](https://easy-peasy.vercel.app/docs/api/persist.html) is used for this app, setup in the `store/index.ts`.
+
+## Testing
+
+This example is using the `vitest` engine, but the same principles & consepts can also be applied for the `jest` engine.
+
+Execute the tests by running
+
+```bash
+yarn test
+```
+
+- See `store/model.test.ts` for an example of how to test models.
+- See `components/App.test.tsx` for an example of how to test views. (Utilizing `utils/test-utils.tsx` to setup each test case)

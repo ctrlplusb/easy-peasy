@@ -3,7 +3,8 @@
 - [Simple todo app](./simple-todo/) [vite, react, TS]
   ([View codesandbox](https://codesandbox.io/s/fnidh1))
 - [Simple todo app (Next)](./nextjs-todo/) [Next.js, TS]
-- [Kanban](./kanban/) [vite, react, TS] ([View codesandbox](https://codesandbox.io/s/5zdk6r))
+- [Kanban](./kanban/) [vite, react, TS, vitest, testing-library]
+  ([View codesandbox](https://codesandbox.io/s/5zdk6r))
 - React Native (todo)
 
 ## Missing an example?
