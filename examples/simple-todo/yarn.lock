@@ -813,10 +813,8 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-easy-peasy@5.1.0:
+"easy-peasy@file:../..":
   version "5.1.0"
-  resolved "https://registry.yarnpkg.com/easy-peasy/-/easy-peasy-5.1.0.tgz#5fbd3a2d4803ef982b42083be47badf553227341"
-  integrity sha512-Gd5jzTRrWrE6r59014GXTzpcq5abJ5AMGxc4fzd9sM8PCy18evzxVF9MYlkkzdTnUI/Rbvf0sQW50ev8DXyNjw==
   dependencies:
     "@babel/runtime" "^7.17.2"
     fast-deep-equal "^3.1.3"
