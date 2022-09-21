@@ -37,4 +37,4 @@ yarn test
 ```
 
 - See `store/model.test.ts` for an example of how to test models.
-- See `components/App.test.tsx` for an example of how to test views. (Utilizing `utils/test-utils.tsx` to setup each test case)
+- See `components/**/*.test.tsx` for an example of how to test views. (Utilizing `utils/test-utils.tsx` to setup each test case)
