@@ -7,22 +7,17 @@ It is possible to configure Easy Peasy so to be connected to your Reactotron ins
 Firstly, ensure you have a Reactotron configuration similar to.
 
 ```javascript
-// reactotron-config.js
+// reactotron.js
 
 import Reactotron from "reactotron-react-native";
 import { reactotronRedux } from "reactotron-redux";
 
-const reactotronConfig = {
-  initiate: () => {
-    Reactotron.configure()
-      .useReactNative()
-      .use(reactotronRedux())
-      .connect();
-  },
-  createEnhancer: () => Reactotron.createEnhancer()
-};
+const reactron = Reactotron.configure()
+  .useReactNative()
+  .use(reactotronRedux())
+  .connect();
 
-export default reactotronConfig;
+export default reactron;
 ```
 
 Then update the manner in which you create your Easy Peasy store.
@@ -36,8 +31,7 @@ import model from "./model";
 let storeEnhancers = [];
 
 if (__DEV__) {
-  const reactotron = require("../reactotron-config").default;
-  reactotron.initiate();
+  const reactotron = require("./reactotron").default;
   storeEnhancers = [...storeEnhancers, reactotron.createEnhancer()];
 }
 
