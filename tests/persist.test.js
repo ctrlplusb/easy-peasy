@@ -1114,7 +1114,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 1,
   });
 
-  await wait(20);
+  await wait(17);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1122,7 +1122,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 2,
   });
 
-  await wait(20);
+  await wait(17);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1130,7 +1130,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 3,
   });
 
-  await wait(20);
+  await wait(17);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1138,7 +1138,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 4,
   });
 
-  await wait(20);
+  await wait(16);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1146,7 +1146,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 5,
   });
 
-  await wait(20);
+  await wait(17);
 
   // Now we have waited 100ms, so the storage should have persisted the first
   // change by now
@@ -1154,11 +1154,11 @@ test("multiple changes don't cause concurrent persist operations", async () => {
 
   // It would then fire the last change (i.e. the counter=5 change), which
   // would take 80ms to persist in the configured storage engine
-  await wait(20);
+  await wait(17);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
-  await wait(20);
+  await wait(17);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
-  await wait(20);
+  await wait(16);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
   await wait(40);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(5);

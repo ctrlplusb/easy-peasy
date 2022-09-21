@@ -144,8 +144,10 @@ test('throws an error if state mapping fails', () => {
   });
 
   // ASSERT
+  // expect either "Cannot read property 'text' of undefined" or "Cannot read properties of undefined (reading 'text')"
+  expect(getByTestId('error').textContent).toMatch("'text'");
   expect(getByTestId('error').textContent).toMatch(
-    "Cannot read property 'text' of undefined",
+    /Cannot read [property|properties](.+)of undefined/i,
   );
 });
 
@@ -177,8 +179,10 @@ test('throws an error for an invalid subscription only update', () => {
   });
 
   // ASSERT
+  // expect either "Cannot read property 'text' of undefined" or "Cannot read properties of undefined (reading 'text')"
+  expect(getByTestId('error').textContent).toMatch("'text'");
   expect(getByTestId('error').textContent).toMatch(
-    "Cannot read property 'text' of undefined",
+    /Cannot read [property|properties](.+)of undefined/i,
   );
 });
 
