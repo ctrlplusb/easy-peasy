@@ -3,7 +3,7 @@
 // older versions of React (16/17), so we are utilsing a shim provided by the
 // React team which will ensure backwards compatibility;
 // eslint-disable-next-line import/no-unresolved
-import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector';
+import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/with-selector';
 
 import { initializeUseStoreState } from './hooks';
 
