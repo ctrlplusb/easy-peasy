@@ -203,7 +203,7 @@ const model = {
 
 > They are available within every other API that utilizes/exposes state
 
-### Be careful when destructuring an computed property out of state
+### Be careful when destructuring a computed property out of state
 
 Say you have a computed property defined in your model like below:
 
@@ -240,7 +240,7 @@ const storeModel = {
   },
 
   users: {
-    // ❌ isLoggedIn cannot be destructured safely in this case as it solely depends on external state
+    // ❌ isLoggedIn cannot be destructured safely in this case as it on external part of state
     isLoggedIn: computed(
       [(_, storeState) => storeState.session.user],
       (user) => user.current != null
