@@ -247,9 +247,9 @@ const storeModel = {
     ),
   },
 
-  accounts: {
-    // ❌ isLoggedIn cannot be destructured safely in this case as it depends on external data
-    isLoggedIn: computed(() => Math.random() > 0.5),
+  randomGenerator: {
+    // ❌ next cannot be destructured safely in this case as it depends on external data
+    next: computed(() => Math.random() > 0.5),
   },
 };
 ```
