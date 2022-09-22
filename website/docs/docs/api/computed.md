@@ -203,9 +203,9 @@ const model = {
 
 > They are available within every other API that utilizes/exposes state
 
-### Computed properties break when destructuring a computed property out of state
+### Be careful when destructuring a computed property out of state
 
-Say you had a computed property defined in your model like below.
+Say you have a computed property defined in your model like below:
 
 ```javascript
 const storeModel = {
@@ -216,8 +216,7 @@ const storeModel = {
 };
 ```
 
-If you destructure the computed property when accessing it in your component,
-like below, it will not work.
+It is very convenient to use object destructuring to access it in a component:
 
 ```javascript
 function LoggedInBadge() {
@@ -226,17 +225,40 @@ function LoggedInBadge() {
 }
 ```
 
-This is because computed properties are in actual fact
-[getter properties](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/get).
-If you destructure the property you break the getter mechanism. Therefore you
-may not receive updates to your computed property based on when the state that
-your computed property depends on updates.
+While the above example is fine, it is important to remember that computed
+properties are evaluated lazily. If the object returned by the mapper function
+does not change, the re-render **will not** be triggered. This can happen if your
+computed property depends on some external data, e.g. a different part of state or
+user functions:
 
-The resolution to this is to instead resolve the computed property directly.
+```javascript
+const storeModel = {
+  session: {
+    user: null,
+    // ✅ isLoggedIn can be destructured safely in this case
+    isLoggedIn: computed((state) => state.user != null),
+  },
+
+  users: {
+    // ❌ isLoggedIn cannot be destructured safely in this case as it on external part of state
+    isLoggedIn: computed(
+      [(_, storeState) => storeState.session.user],
+      (user) => user.current != null
+    ),
+  },
+
+  randomGenerator: {
+    // ❌ next cannot be destructured safely in this case as it depends on external data
+    next: computed(() => Math.random() > 0.5),
+  },
+};
+```
+
+The resolution to this is to instead resolve the computed property directly:
 
 ```javascript
 function LoggedInBadge() {
-  const isLoggedIn = useStoreState((state) => state.session.isLoggedIn);
+  const isLoggedIn = useStoreState((state) => state.users.isLoggedIn);
   return isLoggedIn ? <LoggedInSvg /> : <LoggedOutSvg />;
 }
 ```
