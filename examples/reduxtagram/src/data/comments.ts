@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/camelcase */
 const comments = {
   BAhvZrRwcfu: [
     {
@@ -37,8 +36,7 @@ const comments = {
     },
     {
       id: '9198734485',
-      text:
-        "I like baby pancakes but gluten free please!! I'll bring the coffee!! See you in 6 days!!!!!! 😝😛😝♥️",
+      text: "I like baby pancakes but gluten free please!! I'll bring the coffee!! See you in 6 days!!!!!! 😝😛😝♥️",
       user: 'terzisn',
     },
     {
@@ -63,8 +61,7 @@ const comments = {
     },
     {
       id: '4831566499',
-      text:
-        '@gobananna I just made a batch and put in in a FIFO bottle. Keeps in the fridge for a few days.',
+      text: '@gobananna I just made a batch and put in in a FIFO bottle. Keeps in the fridge for a few days.',
       user: 'wesbos',
     },
     {
@@ -86,8 +83,7 @@ const comments = {
     },
     {
       id: '6325185448',
-      text:
-        "I've never caught your podcast. Have one right? Btw - they don't have a Canary pillow? 😝",
+      text: "I've never caught your podcast. Have one right? Btw - they don't have a Canary pillow? 😝",
       user: 'henrihelvetica',
     },
     {
@@ -102,8 +98,7 @@ const comments = {
     },
     {
       id: '1232637418',
-      text:
-        "@axcdnt that is where I put all the junk. I'll have to clean that side too @henrihelvetica no podcast yet! @pmgllc ohh yeah! @alexbaumgertner yep - the main one is 4K - I'm loving it",
+      text: "@axcdnt that is where I put all the junk. I'll have to clean that side too @henrihelvetica no podcast yet! @pmgllc ohh yeah! @alexbaumgertner yep - the main one is 4K - I'm loving it",
       user: 'wesbos',
     },
     {
@@ -113,8 +108,7 @@ const comments = {
     },
     {
       id: '4098289457',
-      text:
-        '@wesbos is that the Dell 4k? The MacBook Pro powers it well? I also have a Retina™ / x1 setup as well. Very handy.',
+      text: '@wesbos is that the Dell 4k? The MacBook Pro powers it well? I also have a Retina™ / x1 setup as well. Very handy.',
       user: 'henrihelvetica',
     },
     {
@@ -138,8 +132,7 @@ const comments = {
     },
     {
       id: '0887817764',
-      text:
-        'Nope @pathiebert! She has too much teeth now (8) so that would definitely be her first cavity 😉',
+      text: 'Nope @pathiebert! She has too much teeth now (8) so that would definitely be her first cavity 😉',
       user: 'kaitbos',
     },
   ],
@@ -170,8 +163,7 @@ const comments = {
     },
     {
       id: '8877172440',
-      text:
-        'real live paper magazine? woah haha. flex box is awesome though, could rage quit without it',
+      text: 'real live paper magazine? woah haha. flex box is awesome though, could rage quit without it',
       user: 'tjholowaychuk2',
     },
     {
@@ -220,8 +212,7 @@ const comments = {
     },
     {
       id: '3616984787',
-      text:
-        'And what are you using for XLR mix adapter? I found a big price jump between $55 range and $170 range.',
+      text: 'And what are you using for XLR mix adapter? I found a big price jump between $55 range and $170 range.',
       user: 'pmgllc',
     },
     {
@@ -318,8 +309,7 @@ const comments = {
     },
     {
       id: '0899794473',
-      text:
-        "@courtneyeveline I know! My friend gave it to her and I wanted a matching one but only Lux can pull it off. She's so fancy 😉",
+      text: "@courtneyeveline I know! My friend gave it to her and I wanted a matching one but only Lux can pull it off. She's so fancy 😉",
       user: 'kaitbos',
     },
     {
@@ -356,8 +346,7 @@ const comments = {
   B3eiIwcYV: [
     {
       id: '5168831760',
-      text:
-        "If you get in the mood for authentic Italian pizza, check out @backspaceaustin - it's👌🏻",
+      text: "If you get in the mood for authentic Italian pizza, check out @backspaceaustin - it's👌🏻",
       user: 'dessie.ann',
     },
     {

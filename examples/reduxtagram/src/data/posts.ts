@@ -24,8 +24,7 @@ const posts = [
     src: 'https://picsum.photos/400/400/?image=46',
   },
   {
-    caption:
-      "New Stickers just came in. I'll do another mailing in a few weeks if you want some. #javascript",
+    caption: "New Stickers just came in. I'll do another mailing in a few weeks if you want some. #javascript",
     likes: 66,
     id: '-hZh6IQcfN',
     src: 'https://picsum.photos/400/400/?image=48',
@@ -49,8 +48,7 @@ const posts = [
     src: 'https://picsum.photos/400/400/?image=2',
   },
   {
-    caption:
-      '2015 can be summed up with one baby and a many lines of code. And sometimes a coding baby. 👶🏼⌨',
+    caption: '2015 can be summed up with one baby and a many lines of code. And sometimes a coding baby. 👶🏼⌨',
     likes: 62,
     id: '_4jHytwcUA',
     src: 'https://picsum.photos/400/400/?image=53',
@@ -98,8 +96,7 @@ const posts = [
     src: 'https://picsum.photos/400/400/?image=65',
   },
   {
-    caption:
-      'Some serious hardware meet JavaScript hacks going down this week at hackeryou. Excited for demo day!',
+    caption: 'Some serious hardware meet JavaScript hacks going down this week at hackeryou. Excited for demo day!',
     likes: 57,
     id: '_A2r0aQcfD',
     src: 'https://picsum.photos/400/400/?image=7',
@@ -141,8 +138,7 @@ const posts = [
     src: 'https://picsum.photos/400/400/?image=49',
   },
   {
-    caption:
-      "I'm in Austin for a conference and doing some training. Enjoying some local brew with my baby.",
+    caption: "I'm in Austin for a conference and doing some training. Enjoying some local brew with my baby.",
     likes: 82,
     id: '-FpTyHQcau',
     src: 'https://picsum.photos/400/400/?image=62',
