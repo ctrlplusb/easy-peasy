@@ -148,7 +148,7 @@
       "**/?(*.)+(spec|test).[jt]s?(x)"
     ],
     "testPathIgnorePatterns": [
-      "<rootDir>/(coverage|dist|node_modules|tools)/"
+      "<rootDir>/(coverage|dist|node_modules|tools|examples)/"
     ]
   },
   "eslintConfig": {

@@ -1,0 +1,39 @@
+html {
+  font-size: 10px;
+  font-family: sans-serif;
+}
+
+p {
+  font-size: 1.6rem;
+  line-height: 1.5;
+}
+
+h1 {
+  font-family: billabong, 'billabongregular', serif;
+  text-align: center;
+  font-weight: 100;
+  font-size: 13rem;
+  margin: 2rem 0;
+  letter-spacing: -1px;
+  text-shadow: 0 4px 0 rgba(18, 86, 136, 0.11);
+}
+
+h1 a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+h1 a:focus {
+  outline: 0;
+}
+
+@font-face {
+  font-family: 'billabongregular';
+  src: url('../assets/fonts/billabong-webfont.eot');
+  src: url('../assets/fonts/billabong-webfont.eot?#iefix') format('embedded-opentype'),
+    url('../assets/fonts/billabong-webfont.woff') format('woff'),
+    url('../assets/fonts/billabong-webfont.ttf') format('truetype'),
+    url('../assets/fonts/billabong-webfont.svg#billabongregular') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
