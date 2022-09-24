@@ -201,8 +201,8 @@ const store = createStore<TodosModel>({
     state.todos.push(payload);
   }),
   saveTodo: thunk(async (actions, payload) => {
-    const result = await axios.post('/todos', payload);
-    actions.addTodo(result.data);
+    await axios.post('/todos', payload);
+    actions.addTodo(payload);
   }),
 });
 ```
@@ -260,6 +260,18 @@ assertion ensuring that you are utilizing the store correctly.
 Let's refactor our [thunk](/docs/api/thunk.html) from earlier so that the
 `todosService` is injected via our [store](/docs/api/store.html).
 
+Let's refactor our code, to use a `todoService` that encapsulates all server
+interaction. We want to define a service like this:
+
+```ts
+// services/todoService.ts
+
+export const save = (todo: string): Promise<void> => {
+  const result = await axios.post('/todos', payload);
+  console.log('Todo saved!, results:' result);
+}
+```
+
 ### Defining injections and injecting them into store
 
 Firstly, let's define the injections, their type, and update the code used to
@@ -289,7 +301,7 @@ interface.
 
 ```typescript
 import { Injections } from '../store';
-//          👆import the injections type
+//          👆 import the injections type
 
 export interface TodosModel {
   items: string[];
