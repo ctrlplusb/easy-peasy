@@ -257,14 +257,12 @@ assertion ensuring that you are utilizing the store correctly.
 
 ## Using typed injections
 
-Let's refactor our [thunk](/docs/api/thunk.html) from earlier so that the
-`todosService` is injected via our [store](/docs/api/store.html).
-
 Let's refactor our code, to use a `todoService` that encapsulates all server
-interaction. We want to define a service like this:
+interaction. We want to define a service like this and then reference this in
+our `saveTodo`-thunk:
 
 ```ts
-// services/todoService.ts
+// src/services/todoService.ts
 
 export const save = (todo: string): Promise<void> => {
   const result = await axios.post('/todos', payload);
