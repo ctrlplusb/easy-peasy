@@ -1,9 +1,8 @@
-# Reduxtagram
+# Reduxtagram ([View sandbox](https://codesandbox.io/s/ztuxzk))
 
 A simple React + [Easy Peasy](https://easy-peasy.now.sh/) (Redux) implementation inspired from [Learn Redux course](https://learnredux.com/).
 
 This project uses [Vite](https://vitejs.dev) and [Vitest](https://vitest.dev) to run, build and test the application.
-
 
 ## Getting started
 
@@ -16,7 +15,7 @@ yarn dev
 ```
 
 Runs the app in the development mode.<br />
-Open [http://localhost:5173/](http://localhost:5173/) to view it in the browser.
+Open [http://localhost:3000/](http://localhost:3000/) to view it in the browser.
 
 The page will reload if you make edits.<br />
 
@@ -45,4 +44,4 @@ yarn run preview
 
 ## Learn More
 
-To learn more about [Easy Peasy](https://easy-peasy.now.sh/), check out the [documentation](https://easy-peasy.now.sh/).
+To learn more about [Easy Peasy](https://easy-peasy.dev), check out the [documentation](https://easy-peasy.dev/docs/introduction/).

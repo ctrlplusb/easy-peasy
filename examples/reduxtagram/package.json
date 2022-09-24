@@ -6,9 +6,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc && vite build",
-    "dev": "vite",
+    "dev": "vite --port 3000",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "lint": "eslint . --ext .ts,.tsx"
   },
   "dependencies": {
     "@types/react-transition-group": "^4.4.5",
