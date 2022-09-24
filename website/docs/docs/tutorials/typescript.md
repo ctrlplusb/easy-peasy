@@ -15,7 +15,8 @@ exported by Easy Peasy. We recommend that you visit the [API docs](/docs/api)
 for each type for a fuller description of the generic arguments that each type
 supports. We will be link to the appropriate docs within each section below.
 
-Like examples instead of docs? [Then look no further!](https://github.com/ctrlplusb/easy-peasy/tree/master/examples)
+Like examples instead of docs?
+[Then look no further!](https://github.com/ctrlplusb/easy-peasy/tree/master/examples)
 
 - [Define your model](#define-your-model)
   - [State](#state)
@@ -25,6 +26,8 @@ Like examples instead of docs? [Then look no further!](https://github.com/ctrlpl
 - [Create your store](#create-your-store)
 - [Typing the hooks](#typing-the-hooks)
   - [Using the typed hooks](#using-the-typed-hooks)
+- [Using typed injections](#using-typed-injections)
+  - [Using the typed injections](#typing-injections-on-our-thunk)
 - [Final Notes](#final-notes)
 
 ## Define your model
@@ -82,7 +85,7 @@ You need to provide two generic arguments to an `Action`.
 If you wish to make your payload an optional value you can use a union.
 
 ```typescript
-Action<TodosModel, Todo | undefined>
+Action<TodosModel, Todo | undefined>;
 ```
 
 See the the [API Docs for this type](/docs/typescript-api/action.html) for more
@@ -120,7 +123,7 @@ You need to provide two generic arguments to a `Thunk`.
 If you wish to make your payload an optional value you can use a union.
 
 ```typescript
-Thunk<TodosModel, Todo | undefined>
+Thunk<TodosModel, Todo | undefined>;
 ```
 
 See the the [API Docs for this type](/docs/typescript-api/thunk.html) for more
@@ -159,7 +162,7 @@ You need to provide two generic arguments to a `Computed` property.
 If you wish to make the computed value optional you can use a union.
 
 ```typescript
-Computed<TodosModel, Todo[] | undefined>
+Computed<TodosModel, Todo[] | undefined>;
 ```
 
 See the the [API Docs for this type](/docs/typescript-api/computed.html) for
@@ -171,7 +174,15 @@ Once you have your model definition you can provide it as a type argument to the
 `createStore` function.
 
 ```typescript
-import { createStore, action, Action, computed, Computed, thunk, Thunk } from 'easy-peasy';
+import {
+  createStore,
+  action,
+  Action,
+  computed,
+  Computed,
+  thunk,
+  Thunk,
+} from 'easy-peasy';
 
 interface Todo {
   text: string;
@@ -192,8 +203,8 @@ const store = createStore<TodosModel>({
     state.todos.push(payload);
   }),
   saveTodo: thunk(async (actions, payload) => {
-    const result = await axios.post('/todos', payload);
-    actions.addTodo(result.data);
+    await axios.post('/todos', payload);
+    actions.addTodo(payload);
   }),
 });
 ```
@@ -246,11 +257,95 @@ function Todos() {
 You will have noted a fully typed experience, with autocompletion and type
 assertion ensuring that you are utilizing the store correctly.
 
+## Using typed injections
+
+Let's refactor our code, to use a `todoService` that encapsulates all server
+interaction. We want to define a service like this and then reference this in
+our `saveTodo`-thunk:
+
+```ts
+// src/services/todoService.ts
+
+export const save = (todo: string): Promise<void> => {
+  const result = await axios.post('/todos', payload);
+  console.log('Todo saved!, results:' result);
+}
+```
+
+### Defining injections and injecting them into store
+
+Firstly, let's define the injections, their type, and update the code used to
+create our [store](/docs/api/store.html).
+
+```typescript
+// src/store/index.ts
+
+import * as todosService from '../services/todos-service';
+
+const injections = {
+  todosService,
+};
+
+export type Injections = typeof injections;
+
+const store = createStore(model, {
+  // 👇 provide injections to our store
+  injections,
+});
+```
+
+### Typing injections on our thunk
+
+Then we will update the [thunk](/docs/api/thunk.html) definition on our model
+interface.
+
+```typescript
+import { Injections } from '../store';
+//          👆 import the injections type
+
+export interface TodosModel {
+  items: string[];
+  addTodo: Action<TodosModel, string>;
+  saveTodo: Thunk<TodosModel, string, Injections>; // 👈 provide the type
+}
+```
+
+### Refactoring thunk implementation to use injections
+
+We can then refactor our [thunk](/docs/api/thunk.html) implementation.
+
+```typescript
+const todosModel: TodosModel = {
+  items: [],
+  addTodo: action((state, payload) => {
+    state.items.push(payload);
+  }),
+  saveTodo: thunk(async (actions, payload, { injections }) => {
+    const { todosService } = injections; // 👈 destructure the injections
+    await todosService.save(payload);
+    actions.addTodo(payload);
+  }),
+};
+```
+
+Again you should have noted all the typing information being available.
+
+<div class="screenshot">
+  <img src="../../assets/typescript-tutorial/typed-injections-imp.png" />
+  <span class="caption">Typing info available using injections</span>
+</div>
+
+## Demo Application
+
+You can view the progress of our demo application
+[here](https://codesandbox.io/s/easy-peasy-typescript-tutorial-typed-injections-forked-5gkoyz?file=/src/store/index.ts)
+
 ## Final Notes
 
 This is by no means an exhaustive overview of the types shipped with Easy Peasy.
 We suggest that you review the API docs for the TypeScript types for a more
 complete description of each type.
 
-Take a look through the [examples](https://github.com/ctrlplusb/easy-peasy/tree/master/examples) for
+Take a look through the
+[examples](https://github.com/ctrlplusb/easy-peasy/tree/master/examples) for
 more insight.
