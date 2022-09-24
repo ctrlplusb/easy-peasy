@@ -26,6 +26,8 @@ Like examples instead of docs?
 - [Create your store](#create-your-store)
 - [Typing the hooks](#typing-the-hooks)
   - [Using the typed hooks](#using-the-typed-hooks)
+- [Using typed injections](#using-typed-injections)
+  - [Using the typed injections](#typing-injections-on-our-thunk)
 - [Final Notes](#final-notes)
 
 ## Define your model
