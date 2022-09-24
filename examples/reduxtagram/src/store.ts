@@ -4,7 +4,7 @@ import posts from '@/data/posts';
 import { storeModel } from '@/model';
 
 const store = createStore(storeModel, {
-  devTools: import.meta.env.NODE_ENV === 'development',
+  devTools: import.meta.env.DEV ? { name: 'This is a test' } : false,
   initialState: { commentsModel: { comments }, postsModel: { posts } },
 });
 

@@ -372,7 +372,7 @@ export interface EasyPeasyConfig<
   Injections extends object = {},
 > {
   compose?: typeof compose;
-  devTools?: boolean;
+  devTools?: boolean | object;
   disableImmer?: boolean;
   enhancers?: StoreEnhancer[];
   initialState?: InitialState;
