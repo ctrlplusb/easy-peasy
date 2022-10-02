@@ -51,6 +51,12 @@ The `reducer` function is described below.
 
       Any payload that was provided to the action.
 
+  - `config` (Object)
+
+    The config object that was provided to the action when it was dispatched. 
+    - `immer` (Boolean)
+      Whether to use `immer` to update the state. Defaults to `true`.
+
 ## Example
 
 ```javascript

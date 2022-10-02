@@ -25,6 +25,11 @@ onAddTodo: actionOn(
   // handler:
   (state, target) => {
     state.auditLog.push(`Added a todo: ${target.payload}`);
+  },
+  // optional config:
+  {
+    // whether to use immer to update the state. Defaults to true.
+    immer: true
   }
 )
 ```

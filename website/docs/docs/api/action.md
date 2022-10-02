@@ -48,6 +48,13 @@ An `action` is a function that is described below.
 
     The payload, if any, that was provided to the
     [action](/docs/api/action.html) when it was dispatched.
+  
+  - `config` (Object)
+
+    The config object that was provided to the
+    [action](/docs/api/action.html) when it was dispatched. 
+    - `immer` (Boolean)
+      Whether to use `immer` to update the state. Defaults to `true`.
 
 ## Tutorial
 
