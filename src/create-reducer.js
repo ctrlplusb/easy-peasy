@@ -15,7 +15,7 @@ export default function createReducer(disableImmer, _aRD, _cR, _cP) {
         action,
         actionReducer,
         actionReducer.def.meta.parent,
-        actionReducer.def.config
+        actionReducer.def.config,
       );
     }
     return state;
@@ -23,14 +23,14 @@ export default function createReducer(disableImmer, _aRD, _cR, _cP) {
 
   const reducerForCustomReducers = (state, action) =>
     _cR.reduce(
-      (acc, { parentPath, key, reducer }) =>
+      (acc, { parentPath, key, reducer, config }) =>
         simpleProduce(parentPath, acc, (draft) => {
           draft[key] = reducer(
             isDraft(draft[key]) ? original(draft[key]) : draft[key],
             action,
           );
           return draft;
-        }),
+        }, config),
       state,
     );
 

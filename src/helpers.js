@@ -78,7 +78,8 @@ export const thunk = (fn) => ({
   fn,
 });
 
-export const reducer = (fn) => ({
+export const reducer = (fn, config) => ({
   [reducerSymbol]: true,
   fn,
+  config
 });
