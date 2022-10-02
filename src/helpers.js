@@ -17,10 +17,11 @@ export const debug = (state) => {
   return state;
 };
 
-export const actionOn = (targetResolver, fn) => ({
+export const actionOn = (targetResolver, fn, config) => ({
   [actionOnSymbol]: true,
   fn,
   targetResolver,
+  config
 });
 
 export const action = (fn, config) => ({

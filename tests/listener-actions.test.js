@@ -356,3 +356,44 @@ it('thunk listening to multiple actions', async () => {
     expect.anything(),
   );
 });
+
+describe('disabling immer via configs', () => {
+  it('listening to an action, firing an action with immer disabled', () => {
+    // ARRANGE
+    const math = {
+      sum: 0,
+      add: action((state, payload) => {
+        state.sum += payload;
+      }),
+    };
+    const audit = {
+      logs: [],
+      onMathAdd: actionOn(
+        (_, storeActions) => storeActions.math.add,
+        (state, target) => {
+          expect(target.type).toBe('@action.math.add');
+          expect(target.payload).toBe(10);
+          expect(target.result).toBeUndefined();
+          expect(target.error).toBeUndefined();
+          expect(target.resolvedTargets).toEqual([target.type]);
+          state.logs.push(`Added ${target.payload}`);
+        },
+        { immer: false },
+      ),
+    };
+    const store = createStore({
+      math,
+      audit,
+    });
+
+    // ACT
+    store.getActions().math.add(10);
+
+    // ASSERT
+    expect(store.getState()).toEqual({
+      "math": {
+        "sum": 10
+      }
+    });
+  });
+});
