@@ -5,6 +5,7 @@ export function createActionCreator(def, _r) {
     const action = {
       type: def.meta.type,
       payload,
+      config: def.config,
     };
     if (def[actionOnSymbol] && def.meta.resolvedTargets) {
       payload.resolvedTargets = [...def.meta.resolvedTargets];

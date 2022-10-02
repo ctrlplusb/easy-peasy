@@ -23,9 +23,10 @@ export const actionOn = (targetResolver, fn) => ({
   targetResolver,
 });
 
-export const action = (fn) => ({
+export const action = (fn, config) => ({
   [actionSymbol]: true,
   fn,
+  config
 });
 
 const defaultStateResolvers = [(state) => state];
