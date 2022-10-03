@@ -644,7 +644,7 @@ interface Config {
  * });
  */
 export function action<Model extends object = {}, Payload = any>(
-  action: (state: State<Model>, payload: Payload, config: Config) => void | State<Model>,
+  action: (state: State<Model>, payload: Payload, config?: Config) => void | State<Model>,
 ): Action<Model, Payload>;
 
 // #endregion
@@ -893,7 +893,7 @@ export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
  *   })
  * });
  */
-export function reducer<State>(state: ReduxReducer<State>, config: Config): Reducer<State>;
+export function reducer<State>(state: ReduxReducer<State>, config?: Config): Reducer<State>;
 
 // #endregion
 
