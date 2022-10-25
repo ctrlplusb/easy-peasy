@@ -84,9 +84,10 @@ function TodoList() {
 
 <p>&nbsp;</p>
 
-## Examples
+## Examples 📚
 
-See the [example folder](./examples) for more examples of how to use `easy-peasy`.
+See the [example folder](./examples) for more examples of how to use
+`easy-peasy`.
 
 <p>&nbsp;</p>
 
