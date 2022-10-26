@@ -24,12 +24,15 @@ underlying Redux store.
   rehydrating the store. You can read more about this within the
   [persist](/docs/api/persist.html) docs.
 
-- `devTools` (boolean, _optional_, default=false)
+- `devTools` (boolean | Object, _optional_, default=true)
 
-  Setting this to `true` will enable the
-  [Redux Dev Tools Extension](https://github.com/zalmoxisus/redux-devtools-extension).
+  Setting this to `false` will disable the Redux Dev Tools Extension.
 
-  > Note: this will be enabled by default if your
+  If you need to
+  [configure Redux Dev Tools with custom parameters](https://github.com/zalmoxisus/redux-devtools-extension/blob/master/docs/API/Arguments.md),
+  you can do so by passing in an object.
+
+  > Note: dev tools will be enabled by default if your
   > `process.env.NODE_ENV !== 'production'`.
 
 - `disableImmer` (boolean, _optional_, default=false)

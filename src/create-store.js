@@ -69,6 +69,8 @@ export function createStore(model, options = {}) {
     return undefined;
   };
 
+  const devToolConfig = devTools === true ? {} : devTools;
+
   const composeEnhancers =
     compose ||
     (devTools &&
@@ -76,6 +78,7 @@ export function createStore(model, options = {}) {
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
           name: storeName,
+          ...devToolConfig,
         })
       : reduxCompose);
 
