@@ -56,6 +56,8 @@ The `reducer` function is described below.
     The config object that was provided to the action when it was dispatched. 
     - `immer` (Boolean)
       Whether to use `immer` to update the state. Defaults to `true`.
+      
+      You may want to consider disabling immer when dealing with a large/deep data structure within your state. Immer does unfortunately have an overhead as it wraps data in a Proxy solution for the mutation based updates to work. We would suggest only using this escape hatch if you are noticing any performance degradation.
 
 ## Example
 
