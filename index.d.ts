@@ -619,9 +619,9 @@ export type Action<Model extends object, Payload = void> = {
   result: void | State<Model>;
 };
 
-//generate js doc comment for Config including param immer
+
 /**
-  * @param immer - If true, the action will be wrapped in an immer produce call. Otherwise, the action will update the state directly.
+  * @param {boolean} [immer=true] - If true, the action will be wrapped in an immer produce call. Otherwise, the action will update the state directly.
  **/
 interface Config {
   immer?: boolean;
