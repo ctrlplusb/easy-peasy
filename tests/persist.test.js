@@ -1109,12 +1109,14 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     },
   );
 
+  const DELAY = 10;
+
   // ACT + ASSERTS
   store.getActions().change({
     counter: 1,
   });
 
-  await wait(20);
+  await wait(DELAY);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1122,7 +1124,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 2,
   });
 
-  await wait(20);
+  await wait(DELAY);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1130,7 +1132,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 3,
   });
 
-  await wait(20);
+  await wait(DELAY);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1138,7 +1140,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 4,
   });
 
-  await wait(20);
+  await wait(DELAY);
 
   expect(memoryStorage.store['[EasyPeasyStore][0]']).toBeUndefined();
 
@@ -1146,21 +1148,28 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     counter: 5,
   });
 
-  await wait(20);
+  await wait(DELAY * 6);
 
   // Now we have waited 100ms, so the storage should have persisted the first
-  // change by now
+  // change approximately 20ms ago
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
 
   // It would then fire the last change (i.e. the counter=5 change), which
-  // would take 80ms to persist in the configured storage engine
-  await wait(20);
+  // would take ~80ms (60ms from now) to persist in the configured storage engine
+  await wait(DELAY); // +30ms from last
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
-  await wait(20);
+  await wait(DELAY); // +40ms
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
-  await wait(20);
-  expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
-  await wait(40);
+
+  await wait(DELAY); // +50ms
+  // Cross-platform differences make this a little wishy-washy, and counter
+  // may be 1 or 5 here (usually still 1). As long its not 2, 3, or 4
+  expect([1, 5]).toContain(memoryStorage.store['[EasyPeasyStore][0]'].counter);
+
+  await wait(DELAY); // +60ms
+  expect([1, 5]).toContain(memoryStorage.store['[EasyPeasyStore][0]'].counter);
+
+  await wait(DELAY * 6); // +120ms, should 100% be 5 by now, regardless of env
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(5);
 });
 
