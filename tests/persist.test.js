@@ -11,6 +11,7 @@ import {
   useStoreRehydrated,
   createContextStore,
 } from '../src';
+import { mockConsole } from './utils';
 
 const wait = (time = 18) =>
   new Promise((resolve) => {
@@ -71,13 +72,16 @@ const sharedMakeStore = (
     storeConfig,
   );
 
+let restoreConsole = null;
 beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
+  restoreConsole = mockConsole(['warn']);
 });
 
 afterEach(() => {
   process.env.NODE_ENV = 'test';
+  restoreConsole();
 });
 
 test('default storage', async () => {

@@ -6,6 +6,7 @@ import {
   thunkOn,
   actionOn,
 } from '../src';
+import { mockConsole } from './utils';
 
 const wait = (time = 18) =>
   new Promise((resolve) => {
@@ -399,6 +400,8 @@ describe('errors', () => {
     const trackActions = trackActionsMiddleware();
     const store = createStore(model, { middleware: [trackActions] });
 
+    const restoreConsole = mockConsole(['error']);
+
     // ACT
     try {
       store.getActions().nested.setString('two');
@@ -425,6 +428,12 @@ describe('errors', () => {
       },
       { type: '@thunk.nested.doAsync(start)', payload: 'two' },
     ]);
+
+    // Verify that the error is logged to the console.
+    // eslint-disable-next-line no-console
+    expect(console.error).toHaveBeenCalledWith(err);
+
+    restoreConsole();
   });
 });
 
