@@ -33,7 +33,7 @@ export function createEffectsMiddleware(_r) {
 const logEffectError = (err) => {
   // As users can't get a handle on effects we need to report the error
   // eslint-disable-next-line no-console
-  console.log(err);
+  console.error(err);
 };
 
 export function createEffectHandler(def, _r, injections, _aC) {
