@@ -59,7 +59,6 @@ type StoreModel = OneThroughFifteen & {
   addAllTheThings: Computed<StoreModel, number>;
   onStateChange: Unstable_EffectOn<StoreModel>;
   nestedModel: NestedModel;
-  addTooManyThings: Computed<StoreModel, number>;
 };
 
 const storeModel: StoreModel = {
@@ -193,28 +192,4 @@ const storeModel: StoreModel = {
       },
     ),
   },
-  addTooManyThings: computed(
-    // typings:expect-error
-    [
-      (state) => state.one,
-      (state) => state.two,
-      (state) => state.three,
-      (state) => state.four,
-      (state) => state.five,
-      (state) => state.six,
-      (state) => state.seven,
-      (state) => state.eight,
-      (state) => state.nine,
-      (state) => state.ten,
-      (state) => state.eleven,
-      (state) => state.twelve,
-      (state) => state.thirteen,
-      (state) => state.fourteen,
-      (state) => state.fifteen,
-      (state) => state.fifteen, // 👈 too many resolvers! 💥
-    ],
-    (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) => {
-      return a + b + c + d + e + f + g + h + i + j + k + l + m + n + o;
-    },
-  ),
 };
