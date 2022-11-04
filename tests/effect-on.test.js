@@ -234,35 +234,6 @@ test('getStoreState is exposed in helpers', async () => {
   });
 });
 
-test('getActions is exposed in helpers', () => {
-  // ARRANGE
-  const store = createStore({
-    fired: false,
-    todos: [],
-    addTodo: action((state, payload) => {
-      state.todos.push(payload);
-    }),
-    setFired: action((state, payload) => {
-      state.fired = payload;
-    }),
-    onTodosChanged: unstable_effectOn(
-      [(state) => state.todos],
-      (_actions, _target, { getActions }) => {
-        getActions().setFired(true);
-      },
-    ),
-  });
-
-  // ASSERT
-  expect(store.getState().fired).toBe(false);
-
-  // ACT
-  store.getActions().addTodo('add onEffect api');
-
-  // ASSERT
-  expect(store.getState().fired).toBe(true);
-});
-
 test('meta values are exposed in helpers', async () => {
   // ARRANGE
   let actualMeta;
