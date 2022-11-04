@@ -11,10 +11,11 @@ import {
   useStoreRehydrated,
   createContextStore,
 } from '../src';
+import { mockConsole } from './utils';
 
 const wait = (time = 18) =>
   new Promise((resolve) => {
-    setTimeout(() => resolve(), time);
+    setTimeout(resolve, time);
   });
 
 const createMemoryStorage = (
@@ -50,7 +51,11 @@ const createMemoryStorage = (
   };
 };
 
-const makeStore = (config = {}, model, storeConfig) =>
+const sharedMakeStore = (
+  config = {},
+  model = undefined,
+  storeConfig = undefined,
+) =>
   createStore(
     persist(
       model || {
@@ -60,27 +65,28 @@ const makeStore = (config = {}, model, storeConfig) =>
           street: 'oxford rd',
           city: 'london',
         },
-        change: action((_, payload) => {
-          return payload;
-        }),
+        change: action((_, payload) => payload),
       },
       config,
     ),
     storeConfig,
   );
 
+let restoreConsole = null;
 beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
+  restoreConsole = mockConsole(['warn']);
 });
 
 afterEach(() => {
   process.env.NODE_ENV = 'test';
+  restoreConsole();
 });
 
 test('default storage', async () => {
   // ARRANGE
-  const store = makeStore();
+  const store = sharedMakeStore();
 
   // ACT
   store.getActions().change({
@@ -94,7 +100,7 @@ test('default storage', async () => {
 
   await store.persist.flush();
 
-  const rehydratedStore = makeStore();
+  const rehydratedStore = sharedMakeStore();
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -114,7 +120,7 @@ test('local storage', async () => {
   const persistConfig = {
     storage: 'localStorage',
   };
-  const store = makeStore(persistConfig);
+  const store = sharedMakeStore(persistConfig);
 
   // ACT
   store.getActions().change({
@@ -127,7 +133,7 @@ test('local storage', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore(persistConfig);
+  const rehydratedStore = sharedMakeStore(persistConfig);
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -146,7 +152,7 @@ test('session storage', async () => {
   const persistConfig = {
     storage: 'sessionStorage',
   };
-  const store = makeStore(persistConfig);
+  const store = sharedMakeStore(persistConfig);
 
   // ACT
   store.getActions().change({
@@ -159,7 +165,7 @@ test('session storage', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore(persistConfig);
+  const rehydratedStore = sharedMakeStore(persistConfig);
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -179,7 +185,7 @@ test('invalid storage', async () => {
   const persistConfig = {
     storage: 'invalidStorage',
   };
-  const store = makeStore(persistConfig);
+  const store = sharedMakeStore(persistConfig);
 
   // ACT
   store.getActions().change({
@@ -192,7 +198,7 @@ test('invalid storage', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore(persistConfig);
+  const rehydratedStore = sharedMakeStore(persistConfig);
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -210,7 +216,7 @@ test('custom sync storage', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = { storage: memoryStorage };
-  const store = makeStore(persistConfig);
+  const store = sharedMakeStore(persistConfig);
 
   // ACT
   store.getActions().change({
@@ -223,7 +229,7 @@ test('custom sync storage', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore(persistConfig);
+  const rehydratedStore = sharedMakeStore(persistConfig);
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -241,7 +247,7 @@ test('allow', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = { storage: memoryStorage, allow: ['msg'] };
-  const store = makeStore(persistConfig);
+  const store = sharedMakeStore(persistConfig);
 
   // ACT
   store.getActions().change({
@@ -254,7 +260,7 @@ test('allow', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore(persistConfig);
+  const rehydratedStore = sharedMakeStore(persistConfig);
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -272,7 +278,7 @@ test('deny', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
   const persistConfig = { storage: memoryStorage, deny: ['counter'] };
-  const store = makeStore(persistConfig);
+  const store = sharedMakeStore(persistConfig);
 
   // ACT
   store.getActions().change({
@@ -285,7 +291,7 @@ test('deny', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore(persistConfig);
+  const rehydratedStore = sharedMakeStore(persistConfig);
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -399,7 +405,7 @@ test('overwrite', async () => {
     allow: ['msg'],
     mergeStrategy: 'overwrite',
   };
-  const store = makeStore(persistConfig);
+  const store = sharedMakeStore(persistConfig);
 
   // ACT
   store.getActions().change({
@@ -412,7 +418,7 @@ test('overwrite', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore(persistConfig);
+  const rehydratedStore = sharedMakeStore(persistConfig);
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -582,7 +588,7 @@ test('mergeDeep with conflicting model structure', async () => {
 test('asynchronous storage', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
-  const store = makeStore({ storage: memoryStorage });
+  const store = sharedMakeStore({ storage: memoryStorage });
 
   // ACT
   store.getActions().change({
@@ -595,7 +601,7 @@ test('asynchronous storage', async () => {
   });
 
   await store.persist.flush();
-  const rehydratedStore = makeStore({ storage: memoryStorage });
+  const rehydratedStore = sharedMakeStore({ storage: memoryStorage });
   await rehydratedStore.persist.resolveRehydration();
 
   // ASSERT
@@ -612,7 +618,7 @@ test('asynchronous storage', async () => {
 test('clear', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
-  const store = makeStore({ storage: memoryStorage });
+  const store = sharedMakeStore({ storage: memoryStorage });
 
   // ACT
   store.getActions().change({
@@ -674,9 +680,7 @@ test('transformers', async () => {
         {
           one: null,
           two: null,
-          change: action((_, payload) => {
-            return payload;
-          }),
+          change: action((_, payload) => payload),
         },
         {
           storage: memoryStorage,
@@ -716,21 +720,13 @@ test('transformers', async () => {
 test('transformers order', async () => {
   // ARRANGE
   const setTransformer = createTransform(
-    (data) => {
-      return [...data];
-    },
-    (data) => {
-      return new Set(data);
-    },
+    (data) => [...data],
+    (data) => new Set(data),
   );
 
   const jsonTransformer = createTransform(
-    (data) => {
-      return JSON.stringify(data);
-    },
-    (data) => {
-      return JSON.parse(data);
-    },
+    (data) => JSON.stringify(data),
+    (data) => JSON.parse(data),
   );
 
   const memoryStorage = createMemoryStorage();
@@ -741,9 +737,7 @@ test('transformers order', async () => {
         {
           one: null,
           two: null,
-          change: action((_, payload) => {
-            return payload;
-          }),
+          change: action((_, payload) => payload),
         },
         {
           storage: memoryStorage,
@@ -786,8 +780,8 @@ test('multiple stores', async () => {
   const persistConfig = {
     storage: memoryStorage,
   };
-  const store1 = makeStore(persistConfig, undefined, { name: 'Store1' });
-  const store2 = makeStore(persistConfig, undefined, { name: 'Store2' });
+  const store1 = sharedMakeStore(persistConfig, undefined, { name: 'Store1' });
+  const store2 = sharedMakeStore(persistConfig, undefined, { name: 'Store2' });
 
   // ACT
   store1.getActions().change({
@@ -809,11 +803,11 @@ test('multiple stores', async () => {
   });
   await store2.persist.flush();
 
-  const rehydratedStore1 = makeStore(persistConfig, undefined, {
+  const rehydratedStore1 = sharedMakeStore(persistConfig, undefined, {
     name: 'Store1',
   });
   await rehydratedStore1.persist.resolveRehydration();
-  const rehydratedStore2 = makeStore(persistConfig, undefined, {
+  const rehydratedStore2 = sharedMakeStore(persistConfig, undefined, {
     name: 'Store2',
   });
   await rehydratedStore2.persist.resolveRehydration();
@@ -840,10 +834,10 @@ test('multiple stores', async () => {
 test('useStoreRehydrated', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
-  const store = makeStore({
+  const store = sharedMakeStore({
     storage: memoryStorage,
   });
-  const App = () => {
+  function App() {
     const rehydrated = useStoreRehydrated();
     return (
       <div>
@@ -851,7 +845,7 @@ test('useStoreRehydrated', async () => {
         {rehydrated ? <div>Loaded</div> : <p>Loading...</p>}
       </div>
     );
-  };
+  }
   const wrapper = render(
     <StoreProvider store={store}>
       <App />
@@ -875,7 +869,7 @@ test('useStoreRehydrated', async () => {
 test('useStoreRehydrated + createContextStore', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
-  const store = makeStore({
+  const store = sharedMakeStore({
     storage: memoryStorage,
   });
 
@@ -883,7 +877,7 @@ test('useStoreRehydrated + createContextStore', async () => {
     foo: 'bar',
   });
 
-  const App = () => {
+  function App() {
     const rehydrated = MyContextStore.useStoreRehydrated();
     return (
       <div>
@@ -891,7 +885,7 @@ test('useStoreRehydrated + createContextStore', async () => {
         {rehydrated ? <div>Loaded</div> : <p>Loading...</p>}
       </div>
     );
-  };
+  }
 
   const wrapper = render(
     <MyContextStore.Provider>
@@ -964,7 +958,7 @@ test('computed properties', async () => {
 test('flush', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
-  const store = makeStore({ storage: memoryStorage });
+  const store = sharedMakeStore({ storage: memoryStorage });
 
   // ACT
   store.getActions().change({
@@ -1106,7 +1100,7 @@ test("multiple changes don't cause concurrent persist operations", async () => {
     asyncTime: 80,
   });
 
-  const store = makeStore(
+  const store = sharedMakeStore(
     {
       storage: memoryStorage,
     },
@@ -1170,11 +1164,11 @@ test("multiple changes don't cause concurrent persist operations", async () => {
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
   await wait(20);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(1);
-  await wait(30);
+  await wait(40);
   expect(memoryStorage.store['[EasyPeasyStore][0]'].counter).toBe(5);
 });
 
-test.only('store version number change ignores persisted state', async () => {
+test('store version number change ignores persisted state', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
 
@@ -1185,7 +1179,7 @@ test.only('store version number change ignores persisted state', async () => {
     }),
   };
 
-  const store = makeStore({ storage: memoryStorage }, model, {
+  const store = sharedMakeStore({ storage: memoryStorage }, model, {
     version: 1,
   });
 
@@ -1199,7 +1193,7 @@ test.only('store version number change ignores persisted state', async () => {
   });
 
   // ACT
-  const storeVersion2 = makeStore({ storage: memoryStorage }, model, {
+  const storeVersion2 = sharedMakeStore({ storage: memoryStorage }, model, {
     version: 2,
   });
   await storeVersion2.persist.resolveRehydration();
@@ -1210,7 +1204,7 @@ test.only('store version number change ignores persisted state', async () => {
   });
 
   // ACT
-  const storeVersion1 = makeStore({ storage: memoryStorage }, model, {
+  const storeVersion1 = sharedMakeStore({ storage: memoryStorage }, model, {
     version: 1,
   });
   await storeVersion1.persist.resolveRehydration();
@@ -1221,7 +1215,7 @@ test.only('store version number change ignores persisted state', async () => {
   });
 });
 
-test.only('mergeDeepDocs', async () => {
+test('mergeDeepDocs', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
     '[EasyPeasyStore][0]': {
@@ -1236,7 +1230,7 @@ test.only('mergeDeepDocs', async () => {
     },
   });
 
-  const store = makeStore(
+  const store = sharedMakeStore(
     { storage: memoryStorage },
     {
       animal: 'dolphin',

@@ -1,5 +1,3 @@
-/* eslint-disable no-shadow */
-
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { createContextStore, action, thunk } from '../src';
@@ -13,11 +11,7 @@ const Counter = createContextStore({
 
 function CountDisplayUseStore() {
   const store = Counter.useStore();
-  return (
-    <>
-      <div data-testid="count">{store.getState().count}</div>
-    </>
-  );
+  return <div data-testid="count">{store.getState().count}</div>;
 }
 
 function CountDisplay() {
@@ -34,31 +28,31 @@ function CountDisplay() {
 }
 
 it('single consumer', () => {
-  // arrange
+  // ARRANGE
   const app = (
     <Counter.Provider>
       <CountDisplay />
     </Counter.Provider>
   );
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
 
   const count = getByTestId('count');
   const button = getByTestId('button');
 
-  // assert
+  // ASSERT
   expect(count.firstChild.textContent).toBe('0');
 
-  // act
+  // ACT
   fireEvent.click(button);
 
-  // assert
+  // ASSERT
   expect(count.firstChild.textContent).toBe('1');
 });
 
 it('multiple consumers', async () => {
-  // arrange
+  // ARRANGE
   const app = (
     <Counter.Provider>
       <CountDisplay />
@@ -66,42 +60,44 @@ it('multiple consumers', async () => {
     </Counter.Provider>
   );
 
-  // act
+  // ACT
   const { findAllByTestId } = render(app);
 
   const count = await findAllByTestId('count');
   const button = await findAllByTestId('button');
 
-  // assert
+  // ASSERT
   expect(count[0].firstChild.textContent).toBe('0');
   expect(count[1].firstChild.textContent).toBe('0');
 
-  // act
+  // ACT
   fireEvent.click(button[0]);
 
-  // assert
+  // ASSERT
   expect(count[0].firstChild.textContent).toBe('1');
   expect(count[1].firstChild.textContent).toBe('1');
 });
 
 it('useStore hook', () => {
-  // arrange
+  // ARRANGE
   const app = (
     <Counter.Provider>
       <CountDisplayUseStore />
     </Counter.Provider>
   );
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
   const count = getByTestId('count');
 
-  // assert
+  // ASSERT
   expect(count.firstChild.textContent).toBe('0');
 });
 
+/* eslint-disable no-shadow */
+
 it('with initial data', () => {
-  // arrange
+  // ARRANGE
   const Counter = createContextStore((data) => ({
     count: data.count || 0,
     inc: action((state) => {
@@ -128,24 +124,24 @@ it('with initial data', () => {
     </Counter.Provider>
   );
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
 
   const count = getByTestId('count');
   const button = getByTestId('button');
 
-  // assert
+  // ASSERT
   expect(count.firstChild.textContent).toBe('1');
 
-  // act
+  // ACT
   fireEvent.click(button);
 
-  // assert
+  // ASSERT
   expect(count.firstChild.textContent).toBe('2');
 });
 
 it('injections can be updated', () => {
-  // arrange
+  // ARRANGE
   let actualInjections = null;
 
   const Counter = createContextStore(
@@ -162,6 +158,7 @@ it('injections can be updated', () => {
     },
   );
 
+  // eslint-disable-next-line react/prop-types
   function Foo({ updater }) {
     const foo = Counter.useStoreActions((actions) => actions.foo);
     React.useEffect(() => {
@@ -170,23 +167,23 @@ it('injections can be updated', () => {
     return null;
   }
 
-  // act
+  // ACT
   const { rerender } = render(
     <Counter.Provider>
       <Foo updater={1} />
     </Counter.Provider>,
   );
 
-  // assert
+  // ASSERT
   expect(actualInjections.foo).toBe('initial');
 
-  // act
+  // ACT
   rerender(
     <Counter.Provider injections={{ foo: 'updated' }}>
       <Foo updater={2} />
     </Counter.Provider>,
   );
 
-  // assert
+  // ASSERT
   expect(actualInjections.foo).toBe('updated');
 });

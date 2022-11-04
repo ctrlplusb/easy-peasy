@@ -7,23 +7,23 @@ import { renderToString } from 'react-dom/server';
 import { createStore, useStoreState, StoreProvider } from '../src';
 
 test('works', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     count: 0,
   });
-  const Count = () => {
+  function Count() {
     const count = useStoreState((state) => state.count);
     return <span>{count}</span>;
-  };
+  }
   const app = (
     <StoreProvider store={store}>
       <Count />
     </StoreProvider>
   );
 
-  // act
+  // ACT
   const actual = renderToString(app);
 
-  // assert
+  // ASSERT
   expect(actual).toEqual('<span>0</span>');
 });

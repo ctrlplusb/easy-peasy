@@ -1,0 +1,11 @@
+name: Prepare Application
+description: A composite action to prepare the library.
+
+runs:
+  using: composite
+  steps:
+    - uses: ./.github/actions/setup-node
+
+    - name: Install Dependencies
+      shell: bash
+      run: yarn install --frozen-lockfile

@@ -1,33 +1,66 @@
-import memoizerific from 'memoizerific';
-import { get } from './lib';
+import equal from 'fast-deep-equal/es6';
+import { areInputsEqual } from './lib';
 
-export function createComputedPropertyBinder(
-  parentPath,
-  key,
-  definition,
-  _computedState,
-  references,
-) {
-  const memoisedResultFn = memoizerific(1)(definition.fn);
+export function createComputedPropertyBinder(parentPath, key, def, _r) {
+  let runOnce = false;
+  let prevInputs = [];
+  let prevValue;
+  let prevStoreState;
+
+  let performingEqualityCheck = false;
+
+  const areEqual = (a, b) => {
+    performingEqualityCheck = true;
+    const result = equal(a, b);
+    performingEqualityCheck = false;
+    return result;
+  };
+
   return function createComputedProperty(parentState, storeState) {
     Object.defineProperty(parentState, key, {
       configurable: true,
       enumerable: true,
       get: () => {
-        const state = get(parentPath, storeState);
-        const inputs = definition.stateResolvers.map((resolver) =>
-          resolver(state, storeState),
+        if (performingEqualityCheck) {
+          return prevValue;
+        }
+
+        const inputs = def.stateResolvers.map((resolver) =>
+          resolver(parentState, storeState),
         );
-        return memoisedResultFn(...inputs);
+        if (
+          runOnce &&
+          (storeState === prevStoreState ||
+            areInputsEqual(inputs, prevInputs) ||
+            // We don't want computed properties resolved every time an action
+            // is handled by the reducer. They need to remain lazy, only being
+            // computed when used by a component or getState call;
+            (_r._i._cS.isInReducer &&
+              // This is to account for strange errors that may occur via immer;
+              new Error().stack.match(/shallowCopy/gi) !== null))
+        ) {
+          return prevValue;
+        }
+
+        const newValue = def.fn(...inputs);
+        if (!areEqual(newValue, prevValue)) {
+          prevValue = newValue;
+        }
+
+        prevInputs = inputs;
+        prevStoreState = storeState;
+        runOnce = true;
+        return prevValue;
       },
     });
   };
 }
 
-export function createComputedPropertiesMiddleware(references) {
-  return (store) => (next) => (action) => {
-    references.internals._computedState.currentState = store.getState();
-    references.internals._computedState.isInReducer = true;
-    return next(action);
+export function createComputedPropertiesMiddleware(_r) {
+  return () => (next) => (action) => {
+    _r._i._cS.isInReducer = true;
+    const result = next(action);
+    _r._i._cS.isInReducer = false;
+    return result;
   };
 }

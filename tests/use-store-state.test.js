@@ -46,7 +46,7 @@ afterEach(() => {
 });
 
 test('zombie children case is handled', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     items: {
       a: { name: 'A' },
@@ -89,21 +89,21 @@ test('zombie children case is handled', () => {
     </StoreProvider>
   );
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
 
-  // assert
+  // ASSERT
   expect(getByTestId('items').innerHTML).toBe('ABC');
 
-  // act
+  // ACT
   fireEvent.click(getByTestId('delete'));
 
-  // assert
+  // ASSERT
   expect(getByTestId('items').innerHTML).toBe('AC');
 });
 
 test('throws an error if state mapping fails', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     todo: { text: 'foo' },
     remove: action((state) => {
@@ -136,21 +136,23 @@ test('throws an error if state mapping fails', () => {
     </StoreProvider>,
   );
 
-  // act
+  // ACT
   act(() => {
     // multiple store updates should be idempotent
     fireEvent.click(getByTestId('remove'));
     fireEvent.click(getByTestId('remove'));
   });
 
-  // assert
+  // ASSERT
+  // expect either "Cannot read property 'text' of undefined" or "Cannot read properties of undefined (reading 'text')"
+  expect(getByTestId('error').textContent).toMatch("'text'");
   expect(getByTestId('error').textContent).toMatch(
-    "Cannot read property 'text' of undefined",
+    /Cannot read [property|properties](.+)of undefined/i,
   );
 });
 
 test('throws an error for an invalid subscription only update', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     todo: { text: 'foo' },
     remove: action((state) => {
@@ -171,19 +173,21 @@ test('throws an error for an invalid subscription only update', () => {
     </StoreProvider>,
   );
 
-  // act
+  // ACT
   act(() => {
     store.getActions().remove();
   });
 
-  // assert
+  // ASSERT
+  // expect either "Cannot read property 'text' of undefined" or "Cannot read properties of undefined (reading 'text')"
+  expect(getByTestId('error').textContent).toMatch("'text'");
   expect(getByTestId('error').textContent).toMatch(
-    "Cannot read property 'text' of undefined",
+    /Cannot read [property|properties](.+)of undefined/i,
   );
 });
 
 test('does not throw if state is removed', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     todos: {
       1: { text: 'write some tests' },
@@ -229,18 +233,18 @@ test('does not throw if state is removed', () => {
 
   const { getByTestId, rerender } = render(app);
 
-  // act
+  // ACT
   fireEvent.click(getByTestId('remove'));
 
-  // act
+  // ACT
   rerender(app);
 
-  // assert
+  // ASSERT
   expect(getByTestId('todo').textContent).toEqual('ensure hooks work');
 });
 
 test('multiple hooks receive state update in same render cycle', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     items: [],
     count: computed((state) => state.items.length),
@@ -269,24 +273,24 @@ test('multiple hooks receive state update in same render cycle', () => {
     </StoreProvider>,
   );
 
-  // assert
+  // ASSERT
   expect(renderSpy).toHaveBeenCalledTimes(1);
   expect(getByTestId('items').textContent).toBe('');
   expect(getByTestId('count').textContent).toBe('0');
 
-  // act
+  // ACT
   act(() => {
     store.getActions().fetch();
   });
 
-  // assert
+  // ASSERT
   expect(renderSpy).toHaveBeenCalledTimes(2);
   expect(getByTestId('items').textContent).toBe('foo');
   expect(getByTestId('count').textContent).toBe('1');
 });
 
 test('equality function', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     count: 1,
     firstName: null,
@@ -324,27 +328,27 @@ test('equality function', () => {
     </StoreProvider>,
   );
 
-  // assert
+  // ASSERT
   expect(renderSpy).toHaveBeenCalledTimes(1);
   expect(getByTestId('count').textContent).toBe('1');
   expect(getByTestId('name').textContent).toBe('');
 
-  // act
+  // ACT
   act(() => {
     store.getActions().updateFirstName('joel');
   });
 
-  // assert
+  // ASSERT
   expect(renderSpy).toHaveBeenCalledTimes(2);
   expect(getByTestId('count').textContent).toBe('1');
   expect(getByTestId('name').textContent).toBe('joel');
 
-  // act
+  // ACT
   act(() => {
     store.getActions().updateLastName('moss');
   });
 
-  // assert
+  // ASSERT
   expect(renderSpy).toHaveBeenCalledTimes(2);
   expect(getByTestId('name').textContent).toBe('joel');
 });

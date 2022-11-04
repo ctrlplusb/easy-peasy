@@ -1,55 +1,42 @@
 import { get } from './lib';
 
-export function createListenerMiddleware(references) {
+export function createListenerMiddleware(_r) {
   return () => (next) => (action) => {
     const result = next(action);
     if (
       action &&
-      references.internals._listenerActionMap[action.type] &&
-      references.internals._listenerActionMap[action.type].length > 0
+      _r._i._lAM[action.type] &&
+      _r._i._lAM[action.type].length > 0
     ) {
-      const sourceAction = references.internals._actionCreatorDict[action.type];
-      references.internals._listenerActionMap[action.type].forEach(
-        (actionCreator) => {
-          actionCreator({
-            type: sourceAction
-              ? sourceAction.definition.meta.type
-              : action.type,
-            payload: action.payload,
-            error: action.error,
-            result: action.result,
-          });
-        },
-      );
+      const sourceAction = _r._i._aCD[action.type];
+      _r._i._lAM[action.type].forEach((actionCreator) => {
+        actionCreator({
+          type: sourceAction ? sourceAction.def.meta.type : action.type,
+          payload: action.payload,
+          error: action.error,
+          result: action.result,
+        });
+      });
     }
     return result;
   };
 }
 
-export function bindListenerDefinitions(
-  listenerDefinitions,
-  _actionCreators,
-  _actionCreatorDict,
-  _listenerActionMap,
-) {
-  listenerDefinitions.forEach((definition) => {
-    const targets = definition.targetResolver(
-      get(definition.meta.parent, _actionCreators),
-      _actionCreators,
-    );
+export function bindListenerdefs(listenerdefs, _aC, _aCD, _lAM) {
+  listenerdefs.forEach((def) => {
+    const targets = def.targetResolver(get(def.meta.parent, _aC), _aC);
 
     const targetTypes = (Array.isArray(targets) ? targets : [targets]).reduce(
       (acc, target) => {
         if (
           typeof target === 'function' &&
-          target.definition.meta.type &&
-          _actionCreatorDict[target.definition.meta.type]
+          target.def.meta.type &&
+          _aCD[target.def.meta.type]
         ) {
-          if (target.definition.meta.successType) {
-            acc.push(target.definition.meta.successType);
-            // acc.push(target.definition.meta.failType);
+          if (target.def.meta.successType) {
+            acc.push(target.def.meta.successType);
           } else {
-            acc.push(target.definition.meta.type);
+            acc.push(target.def.meta.type);
           }
         } else if (typeof target === 'string') {
           acc.push(target);
@@ -59,12 +46,12 @@ export function bindListenerDefinitions(
       [],
     );
 
-    definition.meta.resolvedTargets = targetTypes;
+    def.meta.resolvedTargets = targetTypes;
 
     targetTypes.forEach((targetType) => {
-      const listenerReg = _listenerActionMap[targetType] || [];
-      listenerReg.push(_actionCreatorDict[definition.meta.type]);
-      _listenerActionMap[targetType] = listenerReg;
+      const listenerReg = _lAM[targetType] || [];
+      listenerReg.push(_aCD[def.meta.type]);
+      _lAM[targetType] = listenerReg;
     });
   });
 }

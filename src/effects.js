@@ -1,28 +1,28 @@
 import { get, isPromise } from './lib';
 
-export function createEffectsMiddleware(references) {
+export function createEffectsMiddleware(_r) {
   return (store) => (next) => (action) => {
-    if (references.internals._effects.length === 0) {
+    if (_r._i._e.length === 0) {
       return next(action);
     }
     const prevState = store.getState();
     const result = next(action);
     const nextState = store.getState();
     if (prevState !== nextState) {
-      references.internals._effects.forEach((definition) => {
-        const prevLocal = get(definition.meta.parent, prevState);
-        const nextLocal = get(definition.meta.parent, nextState);
-        const prevDependencies = definition.dependencyResolvers.map(
-          (resolver) => resolver(prevLocal, prevState),
+      _r._i._e.forEach((def) => {
+        const prevLocal = get(def.meta.parent, prevState);
+        const nextLocal = get(def.meta.parent, nextState);
+        const prevDependencies = def.dependencyResolvers.map((resolver) =>
+          resolver(prevLocal, prevState),
         );
-        const nextDependencies = definition.dependencyResolvers.map(
-          (resolver) => resolver(nextLocal, nextState),
+        const nextDependencies = def.dependencyResolvers.map((resolver) =>
+          resolver(nextLocal, nextState),
         );
-        const hasChanged = prevDependencies.some((dependency, idx) => {
-          return dependency !== nextDependencies[idx];
-        });
+        const hasChanged = prevDependencies.some(
+          (dependency, idx) => dependency !== nextDependencies[idx],
+        );
         if (hasChanged) {
-          definition.actionCreator(prevDependencies, nextDependencies, action);
+          def.actionCreator(prevDependencies, nextDependencies, action);
         }
       });
     }
@@ -33,30 +33,25 @@ export function createEffectsMiddleware(references) {
 const logEffectError = (err) => {
   // As users can't get a handle on effects we need to report the error
   // eslint-disable-next-line no-console
-  console.log(err);
+  console.error(err);
 };
 
-export function createEffectHandler(
-  definition,
-  references,
-  injections,
-  _actionCreators,
-) {
-  const actions = get(definition.meta.parent, _actionCreators);
+export function createEffectHandler(def, _r, injections, _aC) {
+  const actions = get(def.meta.parent, _aC);
 
   let dispose;
 
   return (change) => {
     const helpers = {
-      dispatch: references.dispatch,
-      getState: () => get(definition.meta.parent, references.getState()),
-      getStoreActions: () => _actionCreators,
-      getStoreState: references.getState,
+      dispatch: _r.dispatch,
+      getState: () => get(def.meta.parent, _r.getState()),
+      getStoreActions: () => _aC,
+      getStoreState: _r.getState,
       injections,
       meta: {
-        key: definition.meta.actionName,
-        parent: definition.meta.parent,
-        path: definition.meta.path,
+        key: def.meta.actionName,
+        parent: def.meta.parent,
+        path: def.meta.path,
       },
     };
 
@@ -68,7 +63,7 @@ export function createEffectHandler(
       }
     }
 
-    const effectResult = definition.fn(actions, change, helpers);
+    const effectResult = def.fn(actions, change, helpers);
 
     if (isPromise(effectResult)) {
       return effectResult.then((resolved) => {
@@ -78,7 +73,7 @@ export function createEffectHandler(
             // Doing so would provide inconsistent behaviour around their execution.
             // eslint-disable-next-line no-console
             console.warn(
-              '[easy-peasy] You have an effect which is asynchronously resolving a dispose function. This is considered an anti-pattern. Please read the API documentation for more information.',
+              '[easy-peasy] Effect is asynchronously resolving a dispose fn.',
             );
           }
         }
@@ -95,29 +90,27 @@ export function createEffectHandler(
 
 const logEffectEventListenerError = (type, err) => {
   // eslint-disable-next-line no-console
-  console.log(`An error occurred in a listener for ${type}`);
+  console.log(`Error in ${type}`);
   // eslint-disable-next-line no-console
   console.log(err);
 };
 
-const handleEventDispatchErrors = (type, dispatcher) => (...args) => {
-  try {
-    const result = dispatcher(...args);
-    if (isPromise(result)) {
-      result.catch((err) => {
-        logEffectEventListenerError(type, err);
-      });
+const handleEventDispatchErrors =
+  (type, dispatcher) =>
+  (...args) => {
+    try {
+      const result = dispatcher(...args);
+      if (isPromise(result)) {
+        result.catch((err) => {
+          logEffectEventListenerError(type, err);
+        });
+      }
+    } catch (err) {
+      logEffectEventListenerError(type, err);
     }
-  } catch (err) {
-    logEffectEventListenerError(type, err);
-  }
-};
+  };
 
-export function createEffectActionsCreator(
-  definition,
-  references,
-  effectHandler,
-) {
+export function createEffectActionsCreator(def, _r, effectHandler) {
   const actionCreator = (previousDependencies, nextDependencies, action) => {
     const change = {
       prev: previousDependencies,
@@ -125,20 +118,18 @@ export function createEffectActionsCreator(
       action,
     };
 
-    const dispatchStart = handleEventDispatchErrors(
-      definition.meta.startType,
-      () =>
-        references.dispatch({
-          type: definition.meta.startType,
-          change,
-        }),
+    const dispatchStart = handleEventDispatchErrors(def.meta.startType, () =>
+      _r.dispatch({
+        type: def.meta.startType,
+        change,
+      }),
     );
 
     const dispatchSuccess = handleEventDispatchErrors(
-      definition.meta.successType,
+      def.meta.successType,
       () =>
-        references.dispatch({
-          type: definition.meta.successType,
+        _r.dispatch({
+          type: def.meta.successType,
           change,
         }),
     );
@@ -146,7 +137,7 @@ export function createEffectActionsCreator(
     dispatchStart();
 
     try {
-      const result = references.dispatch(() => effectHandler(change));
+      const result = _r.dispatch(() => effectHandler(change));
 
       if (isPromise(result)) {
         return result.then((resolved) => {
@@ -161,12 +152,15 @@ export function createEffectActionsCreator(
     } catch (err) {
       logEffectError(err);
     }
+
+    return undefined;
   };
 
-  actionCreator.type = definition.meta.type;
-  actionCreator.startType = definition.meta.startType;
-  actionCreator.successType = definition.meta.successType;
-  actionCreator.failType = definition.meta.failType;
+  actionCreator.type = def.meta.type;
+  actionCreator.startType = def.meta.startType;
+  actionCreator.successType = def.meta.successType;
+  actionCreator.failType = def.meta.failType;
 
   return actionCreator;
 }
+

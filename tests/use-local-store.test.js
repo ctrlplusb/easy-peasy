@@ -20,27 +20,27 @@ function CountDisplay() {
 }
 
 test('used in component', () => {
-  // arrange
+  // ARRANGE
   const app = <CountDisplay />;
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
 
   const count = getByTestId('count');
   const button = getByTestId('button');
 
-  // assert
+  // ASSERT
   expect(count.textContent).toBe('0');
 
-  // act
+  // ACT
   fireEvent.click(button);
 
-  // assert
+  // ASSERT
   expect(count.textContent).toBe('1');
 });
 
 test('multiple instances', async () => {
-  // arrange
+  // ARRANGE
   const app = (
     <>
       <CountDisplay />
@@ -48,33 +48,33 @@ test('multiple instances', async () => {
     </>
   );
 
-  // act
+  // ACT
   const { findAllByTestId } = render(app);
 
   const count = await findAllByTestId('count');
   const button = await findAllByTestId('button');
 
-  // assert
+  // ASSERT
   expect(count[0].textContent).toBe('0');
   expect(count[1].textContent).toBe('0');
 
-  // act
+  // ACT
   fireEvent.click(button[0]);
 
-  // assert
+  // ASSERT
   expect(count[0].textContent).toBe('1');
   expect(count[1].textContent).toBe('0');
 
-  // act
+  // ACT
   fireEvent.click(button[1]);
 
-  // assert
+  // ASSERT
   expect(count[0].textContent).toBe('1');
   expect(count[1].textContent).toBe('1');
 });
 
 test('with external data', () => {
-  // arrange
+  // ARRANGE
 
   // eslint-disable-next-line no-shadow,react/prop-types
   function CountDisplay({ count }) {
@@ -99,19 +99,19 @@ test('with external data', () => {
 
   const app = <CountDisplay count={1} />;
 
-  // act
+  // ACT
   const { getByTestId } = render(app);
 
   const count = getByTestId('count');
   const button = getByTestId('button');
 
-  // assert
+  // ASSERT
   expect(count.textContent).toBe('1');
 
-  // act
+  // ACT
   fireEvent.click(button);
 
-  // assert
+  // ASSERT
   expect(count.textContent).toBe('2');
 });
 
@@ -120,7 +120,7 @@ test('with config', () => {
   const logs = [];
 
   const customMiddleware = () => (next) => (_action) => {
-    // assert
+    // ASSERT
     logs.push(_action.type);
     next(_action);
   };
@@ -137,11 +137,9 @@ test('with config', () => {
         }),
       }),
       [count],
-      () => {
-        return {
-          middleware: [customMiddleware],
-        };
-      },
+      () => ({
+        middleware: [customMiddleware],
+      }),
     );
     return (
       <>
@@ -231,7 +229,7 @@ test('provides the prevState every time the store is recreated', () => {
   // ARRANGE
   let prevState;
 
-  // eslint-disable-next-line no-shadow
+  // eslint-disable-next-line no-shadow, react/prop-types
   function CountDisplay({ count }) {
     useLocalStore(
       (_prevState) => {
@@ -265,5 +263,40 @@ test('provides the prevState every time the store is recreated', () => {
   // ASSERT
   expect(prevState).toEqual({
     count: 100,
+  });
+});
+
+test('updates the store if a dependency changes', () => {
+  // ARRANGE
+  let currentState;
+
+  // eslint-disable-next-line no-shadow, react/prop-types
+  function CountDisplay({ count }) {
+    [currentState] = useLocalStore(() => ({ count }), [count]);
+    return null;
+  }
+
+  // ACT
+  const { rerender } = render(<CountDisplay count={1} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 1,
+  });
+
+  // ACT
+  rerender(<CountDisplay count={100} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 100,
+  });
+
+  // ACT
+  rerender(<CountDisplay count={200} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 200,
   });
 });

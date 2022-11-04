@@ -15,13 +15,13 @@ const todosModel = {
 };
 
 it('state gets updated', () => {
-  // arrange
+  // ARRANGE
   const todo = { id: 1, text: 'foo' };
   const store = createStore(todosModel);
 
-  // act
+  // ACT
   store.getActions().add(todo);
 
-  // assert
+  // ASSERT
   expect(store.getState().items).toEqual({ [todo.id]: todo });
 });

@@ -1,51 +1,18 @@
-import {
-  createTypedHooks,
-  useStoreActions,
-  useStoreDispatch,
-  useStoreState,
-  useStoreRehydrated,
-  useStore,
-} from './hooks';
-import createStore from './create-store';
-import createContextStore from './create-context-store';
-import createTransform from './create-transform';
-import StoreProvider from './provider';
-import useLocalStore from './use-local-store';
-import {
-  action,
-  actionOn,
-  computed,
-  debug,
-  generic,
-  memo,
-  persist,
-  reducer,
-  thunk,
-  thunkOn,
-  unstable_effectOn,
-} from './helpers';
+// React 18 requires the use of the useSyncExternalStore hook for external
+// stores to hook into its concurrent features. We want to continue supporting
+// older versions of React (16/17), so we are utilsing a shim provided by the
+// React team which will ensure backwards compatibility;
+// eslint-disable-next-line import/no-unresolved
+import { useSyncExternalStoreWithSelector } from 'use-sync-external-store/shim/with-selector';
 
-export {
-  action,
-  actionOn,
-  computed,
-  createContextStore,
-  createStore,
-  createTransform,
-  createTypedHooks,
-  debug,
-  generic,
-  memo,
-  persist,
-  reducer,
-  StoreProvider,
-  thunk,
-  thunkOn,
-  unstable_effectOn,
-  useLocalStore,
-  useStoreActions,
-  useStoreDispatch,
-  useStoreState,
-  useStoreRehydrated,
-  useStore,
-};
+import { initializeUseStoreState } from './hooks';
+
+initializeUseStoreState(useSyncExternalStoreWithSelector);
+
+export * from './hooks';
+export * from './create-store';
+export * from './create-context-store';
+export * from './create-transform';
+export * from './provider';
+export * from './use-local-store';
+export * from './helpers';

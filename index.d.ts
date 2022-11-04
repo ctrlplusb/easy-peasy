@@ -1,5 +1,3 @@
-/// <reference types="symbol-observable" />
-
 import { Component } from 'react';
 import {
   AnyAction,
@@ -80,7 +78,7 @@ type IncludesDeep<Obj extends object, M extends any> = O.Includes<
 type StateResolver<
   Model extends object,
   StoreModel extends object,
-  Result = any
+  Result = any,
 > = (state: State<Model>, storeState: State<StoreModel>) => Result;
 
 type StateResolvers<Model extends object, StoreModel extends object> =
@@ -149,6 +147,7 @@ type ActionOrThunkCreator<Payload = void, Result = void> =
 
 type Helpers<Model extends object, StoreModel extends object, Injections> = {
   dispatch: Dispatch<StoreModel>;
+  fail: AnyFunction;
   getState: () => State<Model>;
   getStoreActions: () => Actions<StoreModel>;
   getStoreState: () => State<StoreModel>;
@@ -158,11 +157,30 @@ type Helpers<Model extends object, StoreModel extends object, Injections> = {
 
 // #region Helpers
 
+/**
+ * This utility will pull the state within an action out of the Proxy form into
+ * a natural form, allowing you to console.log or inspect it.
+ *
+ * @param state - The action state
+ *
+ * @example
+ *
+ * ```typescript
+ * import { debug, action } from 'easy-peasy';
+ *
+ * const model = {
+ *   todos: [],
+ *   addTodo: action((state, payload) => {
+ *     console.log(debug(state));
+ *     state.todos.push(payload);
+ *     console.log(debug(state));
+ *   })
+ * }
+ * ```
+ */
 export function debug<StateDraft extends object = {}>(
   state: StateDraft,
 ): StateDraft;
-
-export function memo<Fn extends Function = any>(fn: Fn, cacheSize: number): Fn;
 
 // #endregion
 
@@ -182,7 +200,7 @@ type ValidListenerProperties<ActionsModel extends object> = {
 
 type ListenerMapper<
   ActionsModel extends object,
-  K extends keyof ActionsModel
+  K extends keyof ActionsModel,
 > = {
   [P in K]: ActionsModel[P] extends ActionOn<any, any>
     ? ActionCreator<TargetPayload<any>>
@@ -199,7 +217,7 @@ type RecursiveListeners<ActionsModel extends object> = ListenerMapper<
 >;
 
 /**
- * Filters a model into a type that represents the listeners actions/thunks
+ * Filters a model into a type that represents the listener actions/thunks
  *
  * @example
  *
@@ -241,11 +259,20 @@ type RecursiveActions<ActionsModel extends object> = ActionMapper<
 >;
 
 /**
- * Filters a model into a type that represents the action/thunk creators
+ * Filters a model into a type that represents the action/thunk creators.
  *
  * @example
  *
- * type OnlyActions = Actions<Model>;
+ * ```typescript
+ * import { Actions, useStoreActions } from 'easy-peasy';
+ * import { StoreModel } from './my-store';
+ *
+ * function MyComponent() {
+ *   const doSomething = useStoreActions(
+ *    (actions: Actions<StoreModel>) => actions.doSomething
+ *   );
+ * }
+ * ```
  */
 export type Actions<Model extends object = {}> = RecursiveActions<Model>;
 
@@ -282,7 +309,14 @@ type RecursiveState<Model extends object> = StateMapper<
  *
  * @example
  *
- * type StateOnly = State<Model>;
+ * ```typescript
+ * import { State, useStoreState } from 'easy-peasy';
+ * import { StoreModel } from './my-store';
+ *
+ * function MyComponent() {
+ *   const stuff = useStoreState((state: State<StoreModel>) => state.stuff);
+ * }
+ * ```
  */
 export type State<Model extends object = {}> = RecursiveState<Model>;
 
@@ -293,7 +327,7 @@ export type State<Model extends object = {}> = RecursiveState<Model>;
 /**
  * Creates a store.
  *
- * https://easy-peasy.now.sh/docs/api/create-store.html
+ * https://easy-peasy.dev/docs/api/create-store.html
  *
  * @example
  *
@@ -312,21 +346,33 @@ export type State<Model extends object = {}> = RecursiveState<Model>;
 export function createStore<
   StoreModel extends object = {},
   InitialState extends undefined | object = undefined,
-  Injections extends object = {}
+  Injections extends object = {},
 >(
   model: StoreModel,
   config?: EasyPeasyConfig<InitialState, Injections>,
 ): Store<StoreModel, EasyPeasyConfig<InitialState, Injections>>;
 
 /**
- * Configuration interface for the createStore
+ * Configuration interface for stores.
+ *
+ * @example
+ *
+ * ```typescript
+ * import { createStore } from 'easy-peasy';
+ * import model from './my-model';
+ *
+ * const store = createStore(model, {
+ *   devTools: false,
+ *   name: 'MyConfiguredStore',
+ * });
+ * ```
  */
 export interface EasyPeasyConfig<
   InitialState extends undefined | object = undefined,
-  Injections extends object = {}
+  Injections extends object = {},
 > {
   compose?: typeof compose;
-  devTools?: boolean;
+  devTools?: boolean | object;
   disableImmer?: boolean;
   enhancers?: StoreEnhancer[];
   initialState?: InitialState;
@@ -348,18 +394,24 @@ export interface AddModelResult {
 }
 
 /**
- * Represents a Redux store, enhanced by easy peasy.
+ * An Easy Peasy store. This is essentially a Redux store with additional enhanced
+ * APIs attached.
  *
  * @example
  *
+ * ```typescript
  * import { Store } from 'easy-peasy';
  * import { StoreModel } from './store';
  *
- * type EnhancedReduxStore = Store<StoreModel>;
+ * type MyEasyPeasyStore = Store<StoreModel>;
+ * ```
  */
 export interface Store<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    {}
+  >,
 > extends ReduxStore<State<StoreModel>> {
   addModel: <ModelSlice extends object>(
     key: string,
@@ -403,7 +455,7 @@ export interface Store<
  */
 export type Dispatch<
   StoreModel extends object = {},
-  Action extends ReduxAction = AnyAction
+  Action extends ReduxAction = AnyAction,
 > = Actions<StoreModel> & ReduxDispatch<Action>;
 
 // #endregion
@@ -427,7 +479,7 @@ interface TargetPayload<Payload> {
 
 type PayloadFromResolver<
   Resolver extends TargetResolver<any, any>,
-  Resolved = ReturnType<Resolver>
+  Resolved = ReturnType<Resolver>,
 > = Resolved extends string
   ? any
   : Resolved extends ActionOrThunkCreator<infer Payload>
@@ -452,7 +504,7 @@ type Meta = {
 /**
  * Declares a thunk against your model type definition.
  *
- * https://easy-peasy.now.sh/docs/typescript-api/thunk.html
+ * https://easy-peasy.dev/docs/typescript-api/thunk.html
  *
  * @param Model - The model that the thunk is being bound to.
  * @param Payload - The type of the payload expected. Set to undefined if none.
@@ -474,7 +526,7 @@ export type Thunk<
   Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
-  Result = any
+  Result = any,
 > = {
   type: 'thunk';
   payload: Payload;
@@ -487,7 +539,7 @@ export type Thunk<
  * Thunks are typically used to encapsulate side effects and are able to
  * dispatch other actions.
  *
- * https://easy-peasy.now.sh/docs/api/thunk.html
+ * https://easy-peasy.dev/docs/api/thunk.html
  *
  * @example
  *
@@ -507,19 +559,12 @@ export function thunk<
   Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
-  Result = any
+  Result = any,
 >(
   thunk: (
     actions: Actions<Model>,
     payload: Payload,
-    helpers: {
-      dispatch: Dispatch<StoreModel>;
-      getState: () => State<Model>;
-      getStoreActions: () => Actions<StoreModel>;
-      getStoreState: () => State<StoreModel>;
-      injections: Injections;
-      meta: Meta;
-    },
+    helpers: Helpers<Model, StoreModel, Injections>,
   ) => Result,
 ): Thunk<Model, Payload, Injections, StoreModel, Result>;
 
@@ -530,7 +575,7 @@ export function thunk<
 export interface ThunkOn<
   Model extends object,
   Injections = any,
-  StoreModel extends object = {}
+  StoreModel extends object = {},
 > {
   type: 'thunkOn';
 }
@@ -542,7 +587,7 @@ export function thunkOn<
   Resolver extends TargetResolver<Model, StoreModel> = TargetResolver<
     Model,
     StoreModel
-  >
+  >,
 >(
   targetResolver: Resolver,
   handler: (
@@ -577,7 +622,7 @@ export type Action<Model extends object, Payload = void> = {
 /**
  * Declares an action.
  *
- * https://easy-peasy.now.sh/docs/api/action
+ * https://easy-peasy.dev/docs/api/action
  *
  * @example
  *
@@ -585,7 +630,7 @@ export type Action<Model extends object, Payload = void> = {
  *
  * const store = createStore({
  *   count: 0,
- *   increment: action((state)) => {
+ *   increment: action((state) => {
  *    state.count += 1;
  *   })
  * });
@@ -600,7 +645,7 @@ export function action<Model extends object = {}, Payload = any>(
 
 export interface ActionOn<
   Model extends object = {},
-  StoreModel extends object = {}
+  StoreModel extends object = {},
 > {
   type: 'actionOn';
   result: void | State<Model>;
@@ -609,7 +654,7 @@ export interface ActionOn<
 export function actionOn<
   Model extends object,
   StoreModel extends object,
-  Resolver extends TargetResolver<Model, StoreModel>
+  Resolver extends TargetResolver<Model, StoreModel>,
 >(
   targetResolver: Resolver,
   handler: (
@@ -637,7 +682,7 @@ export function actionOn<
 export type Computed<
   Model extends object,
   Result,
-  StoreModel extends object = {}
+  StoreModel extends object = {},
 > = {
   type: 'computed';
   result: Result;
@@ -654,7 +699,7 @@ export function computed<
   Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
     Model,
     StoreModel
-  >
+  >,
 >(
   resolversOrCompFunc: Resolvers | DefaultComputationFunc<Model, Result>,
   compFunc?: Resolvers extends [AnyFunction]
@@ -714,63 +759,62 @@ export function computed<
 export type Unstable_EffectOn<
   Model extends object = {},
   StoreModel extends object = {},
-  Injections = any
+  Injections = any,
 > = {
   type: 'effectOn';
 };
 
 type DependencyResolver<State> = (state: State) => any;
 
-type Dependencies<
-  Resolvers extends StateResolvers<any, any>
-> = Resolvers extends [AnyFunction]
-  ? [ReturnType<Resolvers[0]>]
-  : Resolvers extends [AnyFunction, AnyFunction]
-  ? [ReturnType<Resolvers[0]>, ReturnType<Resolvers[1]>]
-  : Resolvers extends [AnyFunction, AnyFunction, AnyFunction]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-    ]
-  : Resolvers extends [AnyFunction, AnyFunction, AnyFunction, AnyFunction]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-      ReturnType<Resolvers[3]>,
-    ]
-  : Resolvers extends [
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-    ]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-      ReturnType<Resolvers[3]>,
-      ReturnType<Resolvers[4]>,
-    ]
-  : Resolvers extends [
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-      AnyFunction,
-    ]
-  ? [
-      ReturnType<Resolvers[0]>,
-      ReturnType<Resolvers[1]>,
-      ReturnType<Resolvers[2]>,
-      ReturnType<Resolvers[3]>,
-      ReturnType<Resolvers[4]>,
-      ReturnType<Resolvers[4]>,
-    ]
-  : any[];
+type Dependencies<Resolvers extends StateResolvers<any, any>> =
+  Resolvers extends [AnyFunction]
+    ? [ReturnType<Resolvers[0]>]
+    : Resolvers extends [AnyFunction, AnyFunction]
+    ? [ReturnType<Resolvers[0]>, ReturnType<Resolvers[1]>]
+    : Resolvers extends [AnyFunction, AnyFunction, AnyFunction]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+      ]
+    : Resolvers extends [AnyFunction, AnyFunction, AnyFunction, AnyFunction]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+        ReturnType<Resolvers[3]>,
+      ]
+    : Resolvers extends [
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+      ]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+        ReturnType<Resolvers[3]>,
+        ReturnType<Resolvers[4]>,
+      ]
+    : Resolvers extends [
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+        AnyFunction,
+      ]
+    ? [
+        ReturnType<Resolvers[0]>,
+        ReturnType<Resolvers[1]>,
+        ReturnType<Resolvers[2]>,
+        ReturnType<Resolvers[3]>,
+        ReturnType<Resolvers[4]>,
+        ReturnType<Resolvers[4]>,
+      ]
+    : any[];
 
 type Change<Resolvers extends StateResolvers<any, any>> = {
   prev: Dependencies<Resolvers>;
@@ -790,14 +834,14 @@ export function unstable_effectOn<
   Resolvers extends StateResolvers<Model, StoreModel> = StateResolvers<
     Model,
     StoreModel
-  >
+  >,
 >(
   dependencies: Resolvers,
   effect: (
     actions: Actions<Model>,
     change: Change<Resolvers>,
     helpers: Helpers<Model, StoreModel, Injections>,
-  ) => undefined | Dispose,
+  ) => undefined | void | Dispose,
 ): Unstable_EffectOn<Model, StoreModel, Injections>;
 
 // #endregion
@@ -893,7 +937,7 @@ export function generic<T>(value: T): Generic<T>;
 /**
  * A React Hook allowing you to use state within your component.
  *
- * https://easy-peasy.now.sh/docs/api/use-store-state.html
+ * https://easy-peasy.dev/docs/api/use-store-state.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -909,7 +953,7 @@ export function generic<T>(value: T): Generic<T>;
  */
 export function useStoreState<
   StoreState extends State<any> = State<{}>,
-  Result = any
+  Result = any,
 >(
   mapState: (state: StoreState) => Result,
   equalityFn?: (prev: Result, next: Result) => boolean,
@@ -918,7 +962,7 @@ export function useStoreState<
 /**
  * A React Hook allowing you to use actions within your component.
  *
- * https://easy-peasy.now.sh/docs/api/use-store-actions.html
+ * https://easy-peasy.dev/docs/api/use-store-actions.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -933,13 +977,13 @@ export function useStoreState<
  */
 export function useStoreActions<
   StoreActions extends Actions<any> = Actions<{}>,
-  Result = any
+  Result = any,
 >(mapActions: (actions: StoreActions) => Result): Result;
 
 /**
  * A react hook that returns the store instance.
  *
- * https://easy-peasy.now.sh/docs/api/use-store.html
+ * https://easy-peasy.dev/docs/api/use-store.html
  *
  * Note: you can create a pre-typed version of this hook via "createTypedHooks"
  *
@@ -954,7 +998,10 @@ export function useStoreActions<
  */
 export function useStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    {}
+  >,
 >(): Store<StoreModel, StoreConfig>;
 
 /**
@@ -973,9 +1020,9 @@ export function useStore<
  *   return <AddTodoForm save={(todo) => dispatch({ type: 'ADD_TODO', payload: todo })} />;
  * }
  */
-export function useStoreDispatch<StoreModel extends object = {}>(): Dispatch<
-  StoreModel
->;
+export function useStoreDispatch<
+  StoreModel extends object = {},
+>(): Dispatch<StoreModel>;
 
 /**
  * A utility function used to create pre-typed hooks.
@@ -1023,6 +1070,7 @@ export function createTypedHooks<StoreModel extends object = {}>(): {
  */
 export class StoreProvider<StoreModel extends object = {}> extends Component<{
   store: Store<StoreModel>;
+  children?: React.ReactNode;
 }> {}
 
 // #endregion
@@ -1031,7 +1079,7 @@ export class StoreProvider<StoreModel extends object = {}> extends Component<{
 
 interface StoreModelInitializer<
   StoreModel extends object,
-  RuntimeModel extends undefined | object
+  RuntimeModel extends undefined | object,
 > {
   (runtimeModel?: RuntimeModel): StoreModel;
 }
@@ -1043,12 +1091,13 @@ export function createContextStore<
   StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
     undefined,
     Injections
-  >
+  >,
 >(
   model: StoreModel | StoreModelInitializer<StoreModel, RuntimeModel>,
   config?: StoreConfig,
 ): {
   Provider: React.FC<{
+    children?: React.ReactNode;
     runtimeModel?: RuntimeModel;
     injections?: Injections | ((previousInjections: Injections) => Injections);
   }>;
@@ -1066,7 +1115,10 @@ export function createContextStore<
 
 export function useLocalStore<
   StoreModel extends object = {},
-  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<undefined, {}>
+  StoreConfig extends EasyPeasyConfig<any, any> = EasyPeasyConfig<
+    undefined,
+    {}
+  >,
 >(
   modelCreator: (prevState?: State<StoreModel>) => StoreModel,
   dependencies?: any[],

@@ -4,18 +4,18 @@ import { render } from '@testing-library/react';
 import { createStore, StoreProvider, useStore } from '../src';
 
 test('returns the store instance', () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     foo: 'bar',
   });
 
-  const Consumer = () => {
+  function Consumer() {
     const actual = useStore();
     expect(actual).toBe(store);
     return null;
-  };
+  }
 
-  // act
+  // ACT
   render(
     <StoreProvider store={store}>
       <Consumer />

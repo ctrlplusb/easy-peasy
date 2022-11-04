@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { useMemoOne } from 'use-memo-one';
-import createStore from './create-store';
+import { useMemoOne } from './lib';
+import { createStore } from './create-store';
 
-export default function useLocalStore(
+export function useLocalStore(
   modelCreator,
   dependencies = [],
-  configCreator,
+  configCreator = null,
 ) {
   const storeRef = useRef();
 
@@ -27,7 +27,8 @@ export default function useLocalStore(
   const [currentState, setCurrentState] = useState(() => store.getState());
 
   useEffect(() => {
-    return store.subscribe(() => {
+    setCurrentState(store.getState());
+    store.subscribe(() => {
       const nextState = store.getState();
       if (currentState !== nextState) {
         setCurrentState(nextState);

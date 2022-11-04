@@ -1,0 +1,508 @@
+// Vitest Snapshot v1
+
+exports[`<App /> > should render correctly 1`] = `
+<div>
+  <div>
+    <div
+      class="flex flex-wrap justify-between mb-8"
+    >
+      <div
+        class="p-4 md:w-1/3"
+      >
+        <h1
+          class="font-bold"
+          id="todo-heading"
+        >
+          Todo
+        </h1>
+        <div
+          class="flex flex-col h-full py-4 p-2 rounded-md shadow-md bg-slate-50 "
+        >
+          <ul
+            aria-labelledby="todo-heading"
+            class="space-y-4"
+          >
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Explore easy-peasy
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Remove \\"Explore easy-peasy\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Explore easy-peasy\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+          </ul>
+          <div
+            class="mt-auto"
+          >
+            <form>
+              <textarea
+                aria-label="Task name for \\"Todo\\""
+                class="block w-full rounded-md mb-2"
+                placeholder="Task name"
+              />
+              <button
+                aria-label="Add task for \\"Todo\\""
+                class="w-full rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm disabled:bg-slate-300"
+                disabled=""
+                type="submit"
+              >
+                Add task
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div
+        class="p-4 md:w-1/3"
+      >
+        <h1
+          class="font-bold"
+          id="doing-heading"
+        >
+          Doing
+        </h1>
+        <div
+          class="flex flex-col h-full py-4 p-2 rounded-md shadow-md bg-slate-50 "
+        >
+          <ul
+            aria-labelledby="doing-heading"
+            class="space-y-4"
+          />
+          <div
+            class="mt-auto"
+          >
+            <form>
+              <textarea
+                aria-label="Task name for \\"Doing\\""
+                class="block w-full rounded-md mb-2"
+                placeholder="Task name"
+              />
+              <button
+                aria-label="Add task for \\"Doing\\""
+                class="w-full rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm disabled:bg-slate-300"
+                disabled=""
+                type="submit"
+              >
+                Add task
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div
+        class="p-4 md:w-1/3"
+      >
+        <h1
+          class="font-bold"
+          id="done-heading"
+        >
+          Done
+        </h1>
+        <div
+          class="flex flex-col h-full py-4 p-2 rounded-md shadow-md bg-slate-50 "
+        >
+          <ul
+            aria-labelledby="done-heading"
+            class="space-y-4"
+          />
+          <div
+            class="mt-auto"
+          >
+            <form>
+              <textarea
+                aria-label="Task name for \\"Done\\""
+                class="block w-full rounded-md mb-2"
+                placeholder="Task name"
+              />
+              <button
+                aria-label="Add task for \\"Done\\""
+                class="w-full rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm disabled:bg-slate-300"
+                disabled=""
+                type="submit"
+              >
+                Add task
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p
+      class="w-full italic font-medium text-center text-slate-400"
+    >
+      Data is persisted in the \`sessionStorage\`.
+    </p>
+  </div>
+</div>
+`;
+
+exports[`<App /> > should render correctly for multiple tasks 1`] = `
+<div>
+  <div>
+    <div
+      class="flex flex-wrap justify-between mb-8"
+    >
+      <div
+        class="p-4 md:w-1/3"
+      >
+        <h1
+          class="font-bold"
+          id="todo-heading"
+        >
+          Todo
+        </h1>
+        <div
+          class="flex flex-col h-full py-4 p-2 rounded-md shadow-md bg-slate-50 "
+        >
+          <ul
+            aria-labelledby="todo-heading"
+            class="space-y-4"
+          >
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Explore easy-peasy
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Remove \\"Explore easy-peasy\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Explore easy-peasy\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Todo 0
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Remove \\"Todo 0\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Todo 0\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Todo 1
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Remove \\"Todo 1\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Todo 1\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Todo 2
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Remove \\"Todo 2\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Todo 2\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+          </ul>
+          <div
+            class="mt-auto"
+          >
+            <form>
+              <textarea
+                aria-label="Task name for \\"Todo\\""
+                class="block w-full rounded-md mb-2"
+                placeholder="Task name"
+              />
+              <button
+                aria-label="Add task for \\"Todo\\""
+                class="w-full rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm disabled:bg-slate-300"
+                disabled=""
+                type="submit"
+              >
+                Add task
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div
+        class="p-4 md:w-1/3"
+      >
+        <h1
+          class="font-bold"
+          id="doing-heading"
+        >
+          Doing
+        </h1>
+        <div
+          class="flex flex-col h-full py-4 p-2 rounded-md shadow-md bg-slate-50 "
+        >
+          <ul
+            aria-labelledby="doing-heading"
+            class="space-y-4"
+          >
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Doing 0
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Regress \\"Doing 0\\""
+                  class="mr-auto"
+                >
+                  ⏮️
+                </button>
+                <button
+                  aria-label="Remove \\"Doing 0\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Doing 0\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Doing 1
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Regress \\"Doing 1\\""
+                  class="mr-auto"
+                >
+                  ⏮️
+                </button>
+                <button
+                  aria-label="Remove \\"Doing 1\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Doing 1\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Doing 2
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Regress \\"Doing 2\\""
+                  class="mr-auto"
+                >
+                  ⏮️
+                </button>
+                <button
+                  aria-label="Remove \\"Doing 2\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+                <button
+                  aria-label="Progress \\"Doing 2\\""
+                  class="ml-auto"
+                >
+                  ⏭️
+                </button>
+              </div>
+            </div>
+          </ul>
+          <div
+            class="mt-auto"
+          >
+            <form>
+              <textarea
+                aria-label="Task name for \\"Doing\\""
+                class="block w-full rounded-md mb-2"
+                placeholder="Task name"
+              />
+              <button
+                aria-label="Add task for \\"Doing\\""
+                class="w-full rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm disabled:bg-slate-300"
+                disabled=""
+                type="submit"
+              >
+                Add task
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <div
+        class="p-4 md:w-1/3"
+      >
+        <h1
+          class="font-bold"
+          id="done-heading"
+        >
+          Done
+        </h1>
+        <div
+          class="flex flex-col h-full py-4 p-2 rounded-md shadow-md bg-slate-50 "
+        >
+          <ul
+            aria-labelledby="done-heading"
+            class="space-y-4"
+          >
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Done 0
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Regress \\"Done 0\\""
+                  class="mr-auto"
+                >
+                  ⏮️
+                </button>
+                <button
+                  aria-label="Remove \\"Done 0\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+              </div>
+            </div>
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Done 1
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Regress \\"Done 1\\""
+                  class="mr-auto"
+                >
+                  ⏮️
+                </button>
+                <button
+                  aria-label="Remove \\"Done 1\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+              </div>
+            </div>
+            <div
+              class="relative p-4 py-2 rounded-md bg-white border border-slate-200 shadow-sm"
+            >
+              Done 2
+              <div
+                class="flex"
+              >
+                <button
+                  aria-label="Regress \\"Done 2\\""
+                  class="mr-auto"
+                >
+                  ⏮️
+                </button>
+                <button
+                  aria-label="Remove \\"Done 2\\""
+                  class="text-xs"
+                >
+                  ❌
+                </button>
+              </div>
+            </div>
+          </ul>
+          <div
+            class="mt-auto"
+          >
+            <form>
+              <textarea
+                aria-label="Task name for \\"Done\\""
+                class="block w-full rounded-md mb-2"
+                placeholder="Task name"
+              />
+              <button
+                aria-label="Add task for \\"Done\\""
+                class="w-full rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm disabled:bg-slate-300"
+                disabled=""
+                type="submit"
+              >
+                Add task
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p
+      class="w-full italic font-medium text-center text-slate-400"
+    >
+      Data is persisted in the \`sessionStorage\`.
+    </p>
+  </div>
+</div>
+`;

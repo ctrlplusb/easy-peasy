@@ -1,7 +1,9 @@
 import { action, createStore, thunk, reducer } from '../src';
 
 const resolveAfter = (data, ms) =>
-  new Promise((resolve) => setTimeout(() => resolve(data), ms));
+  new Promise((resolve) => {
+    setTimeout(() => resolve(data), ms);
+  });
 
 const trackActionsMiddleware = () => {
   const middleware = () => (next) => (_action) => {
@@ -15,7 +17,7 @@ const trackActionsMiddleware = () => {
 };
 
 test('dispatches actions to represent a succeeded thunk', () => {
-  // arrange
+  // ARRANGE
   const model = {
     foo: {
       counter: 0,
@@ -31,9 +33,9 @@ test('dispatches actions to represent a succeeded thunk', () => {
   const trackActions = trackActionsMiddleware();
   const store = createStore(model, { middleware: [trackActions] });
   const payload = 'hello';
-  // act
+  // ACT
   const actualResult = store.getActions().foo.doSomething(payload);
-  // assert
+  // ASSERT
   expect(trackActions.actions).toMatchObject([
     { type: '@thunk.foo.doSomething(start)', payload },
     { type: '@action.foo.increment', payload: undefined },
@@ -48,7 +50,7 @@ test('dispatches actions to represent a succeeded thunk', () => {
 
 describe('errors', () => {
   test('dispatches actions to represent a failed thunk', async () => {
-    // arrange
+    // ARRANGE
     const err = new Error('error');
     const model = {
       foo: {
@@ -62,10 +64,10 @@ describe('errors', () => {
     const payload = 'a payload';
 
     try {
-      // act
+      // ACT
       await store.getActions().foo.doSomething(payload);
     } catch (e) {
-      // assert
+      // ASSERT
       expect(trackActions.actions).toEqual([
         { type: '@thunk.foo.doSomething(start)', payload },
         {
@@ -80,7 +82,7 @@ describe('errors', () => {
   });
 
   test('errors are thrown up through thunks', async () => {
-    // arrange
+    // ARRANGE
     const err = new Error('error');
     const model = {
       foo: {
@@ -97,10 +99,10 @@ describe('errors', () => {
     const payload = 'a payload';
 
     try {
-      // act
+      // ACT
       await store.getActions().foo.doSomething(payload);
     } catch (e) {
-      // assert
+      // ASSERT
       expect(trackActions.actions).toEqual([
         { type: '@thunk.foo.doSomething(start)', payload },
         { type: '@thunk.foo.error(start)', payload: undefined },
@@ -112,7 +114,7 @@ describe('errors', () => {
 });
 
 test('async', async () => {
-  // arrange
+  // ARRANGE
   const model = {
     session: {
       user: undefined,
@@ -135,14 +137,14 @@ test('async', async () => {
       }),
     },
   };
-  // act
+  // ACT
   const store = createStore(model);
-  // act
+  // ACT
   const result = await store.getActions().session.login({
     username: 'bob',
     password: 'foo',
   });
-  // assert
+  // ASSERT
   expect(result).toBe('resolved');
   expect(store.getState()).toEqual({
     session: {
@@ -154,7 +156,7 @@ test('async', async () => {
 });
 
 test('dispatch an action via redux dispatch', async () => {
-  // arrange
+  // ARRANGE
   const model = {
     session: {
       user: undefined,
@@ -162,7 +164,7 @@ test('dispatch an action via redux dispatch', async () => {
         dispatch({ type: 'INCREMENT' });
       }),
     },
-    counter: reducer((state = 0, incomingAction) => {
+    counter: reducer((state = 0, incomingAction = {}) => {
       switch (incomingAction.type) {
         case 'INCREMENT':
           return state + 1;
@@ -173,15 +175,15 @@ test('dispatch an action via redux dispatch', async () => {
   };
   const store = createStore(model);
 
-  // act
+  // ACT
   await store.getActions().session.login();
 
-  // assert
+  // ASSERT
   expect(store.getState().counter).toBe(1);
 });
 
 test('dispatch another branch action', async () => {
-  // arrange
+  // ARRANGE
   const model = {
     session: {
       user: undefined,
@@ -196,11 +198,11 @@ test('dispatch another branch action', async () => {
       }),
     },
   };
-  // act
+  // ACT
   const store = createStore(model);
-  // act
+  // ACT
   await store.getActions().session.login();
-  // assert
+  // ASSERT
   expect(store.getState()).toEqual({
     session: {
       user: undefined,
@@ -212,39 +214,39 @@ test('dispatch another branch action', async () => {
 });
 
 test('getState is exposed', async () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: {
       count: 1,
       doSomething: thunk((dispatch, payload, { getState }) => {
-        // assert
+        // ASSERT
         expect(getState()).toEqual({ count: 1 });
       }),
     },
   });
 
-  // act
+  // ACT
   await store.getActions().counter.doSomething();
 });
 
 test('getStoreState is exposed', async () => {
-  // arrange
+  // ARRANGE
   const store = createStore({
     counter: {
       count: 1,
       doSomething: thunk((dispatch, payload, { getStoreState }) => {
-        // assert
+        // ASSERT
         expect(getStoreState()).toEqual({ counter: { count: 1 } });
       }),
     },
   });
 
-  // act
+  // ACT
   await store.getActions().counter.doSomething();
 });
 
 test('meta values are exposed', async () => {
-  // arrange
+  // ARRANGE
   let actualMeta;
   const store = createStore({
     foo: {
@@ -254,10 +256,10 @@ test('meta values are exposed', async () => {
     },
   });
 
-  // act
+  // ACT
   await store.getActions().foo.doSomething();
 
-  // assert
+  // ASSERT
   expect(actualMeta).toEqual({
     key: 'doSomething',
     parent: ['foo'],
@@ -266,7 +268,7 @@ test('meta values are exposed', async () => {
 });
 
 test('injections are exposed', async () => {
-  // arrange
+  // ARRANGE
   const injections = { foo: 'bar' };
   let actualInjections;
   const store = createStore(
@@ -282,9 +284,9 @@ test('injections are exposed', async () => {
     },
   );
 
-  // act
+  // ACT
   await store.getActions().foo.doSomething();
 
-  // assert
+  // ASSERT
   expect(actualInjections).toEqual(injections);
 });

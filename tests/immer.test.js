@@ -13,7 +13,7 @@ test('Map and Set within a store work as expected', () => {
     }),
   });
 
-  const App = () => {
+  function App() {
     const products = useStoreState((state) => state.products);
     const productsArray = [...products];
     return (
@@ -21,7 +21,7 @@ test('Map and Set within a store work as expected', () => {
         {productsArray.length === 0 ? 'none' : productsArray.join(',')}
       </div>
     );
-  };
+  }
 
   const { getByTestId } = render(
     <StoreProvider store={store}>

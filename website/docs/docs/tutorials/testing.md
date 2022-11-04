@@ -450,9 +450,9 @@ degree of confidence that they will behave as expected.
 
 ### Utilising initialState to predefine state
 
-It is also to preload your store with some state by utilising the `initialState`
-configuration property of the store. This may help you test specific conditions
-of your component.
+It is also possible to preload your store with some state by utilising the
+`initialState` configuration property of the store. This may help you test
+specific conditions of your component.
 
 ```javascript
 test('Counter', () => {

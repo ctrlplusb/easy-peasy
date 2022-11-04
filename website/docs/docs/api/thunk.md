@@ -1,12 +1,12 @@
 # thunk
 
-Declares a [thunk](docs/api/thunk.html) action on your model. [Thunks](docs/api/thunk.html) cannot modify state directly, however, they can dispatch [actions](/docs/api/action.html) to do so.
+Declares a [thunk](/docs/api/thunk.html) action on your model. [Thunks](/docs/api/thunk.html) cannot modify state directly, however, they can dispatch [actions](/docs/api/action.html) to do so.
 
-[Thunks](docs/api/thunk.html) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
+[Thunks](/docs/api/thunk.html) are typically used to encapsulate side effects or complex workflow (e.g. `if/else` based logic) around action dispatching. They can be asynchronous or synchronous.
 
-When you use `async/await` or return a `Promise` from your [thunk](docs/api/thunk.html), Easy Peasy will wait for the asynchronous work to complete prior to firing any listeners that are targeting the [thunk](docs/api/thunk.html).
+When you use `async/await` or return a `Promise` from your [thunk](/docs/api/thunk.html), Easy Peasy will wait for the asynchronous work to complete prior to firing any listeners that are targeting the [thunk](/docs/api/thunk.html).
 
-Another interesting property of [thunks](docs/api/thunk.html) is that any value that is returned from a [thunk](docs/api/thunk.html) will be provided to the caller - i.e. where it was dispatched from. Therefore if you were using `async/await`, or returned a `Promise`, from your [thunk](docs/api/thunk.html) the caller would be able to chain off the returned `Promise` to know when the [thunk](docs/api/thunk.html) has completed execution.
+Another interesting property of [thunks](/docs/api/thunk.html) is that any value that is returned from a [thunk](/docs/api/thunk.html) will be provided to the caller - i.e. where it was dispatched from. Therefore if you were using `async/await`, or returned a `Promise`, from your [thunk](/docs/api/thunk.html) the caller would be able to chain off the returned `Promise` to know when the [thunk](/docs/api/thunk.html) has completed execution.
 
 ```javascript
 thunk(async (actions, payload) => {
@@ -37,6 +37,10 @@ thunk(async (actions, payload) => {
       - `dispatch` (Function)
 
         The Redux dispatch function, allowing you to dispatch "standard" Redux actions.
+        
+      - `fail` (Function)
+      
+        The Fail API function, allowing you to explicitly signal thunk failure, see [Debugging Thunks](/docs/api/thunk.html#debugging-thunks). You may pass your error object or any arbitrary payload to fail.  
 
       - `getState` (Function)
 
@@ -84,7 +88,7 @@ To enable a [thunk](/docs/api/thunk.html) to be asynchronous simply use `async/a
 ```javascript
 const todosModel = {
   todos: [],
-  savedTodo: action((state, payload) => {
+  addTodo: action((state, payload) => {
     state.todos.push(payload);
   }),
   //     👇 our asynchronous thunk makes use of async/await
@@ -139,6 +143,8 @@ Dispatching these actions results in the following benefits:
 2. Enables listeners to be attached to specific [thunk](/docs/api/thunk.html) states (i.e. *started*, *completed*, or *failed*)
 
 Using the [Redux Dev Tools](https://github.com/zalmoxisus/redux-devtools-extension) extension you will be able see your dispatched [thunks](/docs/api/thunk.html) as they flow through each of their states. You will also see the payload that was provided to the [thunk](/docs/api/thunk.html).
+
+> Note: The `start` and `success` actions will dispatch automatically. To trigger the `fail` action, call `helpers.fail(error)` within your thunk. In addition to the thunk's payload, this action will receive the argument you pass to `fail()`, which can be any arbitrary data useful for your debugging.
 
 <img src="../../assets/devtools-thunk.png" />
 

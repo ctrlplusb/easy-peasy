@@ -1,83 +1,72 @@
 import { thunkOnSymbol } from './constants';
 import { get, isPromise } from './lib';
 
-export function createThunkHandler(
-  definition,
-  references,
-  injections,
-  _actionCreators,
-) {
+export function createThunkHandler(def, _r, injections, _aC) {
   return (payload, fail) => {
     const helpers = {
-      dispatch: references.dispatch,
+      dispatch: _r.dispatch,
       fail,
-      getState: () => get(definition.meta.parent, references.getState()),
-      getStoreActions: () => _actionCreators,
-      getStoreState: references.getState,
+      getState: () => get(def.meta.parent, _r.getState()),
+      getStoreActions: () => _aC,
+      getStoreState: _r.getState,
       injections,
       meta: {
-        key: definition.meta.actionName,
-        parent: definition.meta.parent,
-        path: definition.meta.path,
+        key: def.meta.actionName,
+        parent: def.meta.parent,
+        path: def.meta.path,
       },
     };
-    if (definition[thunkOnSymbol] && definition.meta.resolvedTargets) {
-      payload.resolvedTargets = [...definition.meta.resolvedTargets];
+    if (def[thunkOnSymbol] && def.meta.resolvedTargets) {
+      payload.resolvedTargets = [...def.meta.resolvedTargets];
     }
-    return definition.fn(
-      get(definition.meta.parent, _actionCreators),
-      payload,
-      helpers,
-    );
+    return def.fn(get(def.meta.parent, _aC), payload, helpers);
   };
 }
 
 const logThunkEventListenerError = (type, err) => {
   // eslint-disable-next-line no-console
-  console.log(`An error occurred in a listener for ${type}`);
+  console.log(`Error in ${type}`);
   // eslint-disable-next-line no-console
   console.log(err);
 };
 
-const handleEventDispatchErrors = (type, dispatcher) => (...args) => {
-  try {
-    const result = dispatcher(...args);
-    if (isPromise(result)) {
-      result.catch((err) => {
-        logThunkEventListenerError(type, err);
-      });
+const handleEventDispatchErrors =
+  (type, dispatcher) =>
+  (...args) => {
+    try {
+      const result = dispatcher(...args);
+      if (isPromise(result)) {
+        result.catch((err) => {
+          logThunkEventListenerError(type, err);
+        });
+      }
+    } catch (err) {
+      logThunkEventListenerError(type, err);
     }
-  } catch (err) {
-    logThunkEventListenerError(type, err);
-  }
-};
+  };
 
-export function createThunkActionsCreator(definition, references) {
+export function createThunkActionsCreator(def, _r) {
   const actionCreator = (payload) => {
-    const dispatchStart = handleEventDispatchErrors(
-      definition.meta.startType,
-      () =>
-        references.dispatch({
-          type: definition.meta.startType,
-          payload,
-        }),
+    const dispatchStart = handleEventDispatchErrors(def.meta.startType, () =>
+      _r.dispatch({
+        type: def.meta.startType,
+        payload,
+      }),
     );
 
-    const dispatchFail = handleEventDispatchErrors(
-      definition.meta.failType,
-      (err) =>
-        references.dispatch({
-          type: definition.meta.failType,
-          payload,
-          error: err,
-        }),
+    const dispatchFail = handleEventDispatchErrors(def.meta.failType, (err) =>
+      _r.dispatch({
+        type: def.meta.failType,
+        payload,
+        error: err,
+      }),
     );
 
     const dispatchSuccess = handleEventDispatchErrors(
-      definition.meta.successType,
+      def.meta.successType,
       (result) =>
-        references.dispatch({
-          type: definition.meta.successType,
+        _r.dispatch({
+          type: def.meta.successType,
           payload,
           result,
         }),
@@ -91,9 +80,7 @@ export function createThunkActionsCreator(definition, references) {
       failure = _failure;
     };
 
-    const result = references.dispatch(() =>
-      definition.thunkHandler(payload, fail),
-    );
+    const result = _r.dispatch(() => def.thunkHandler(payload, fail));
 
     if (isPromise(result)) {
       return result.then((resolved) => {
@@ -115,10 +102,10 @@ export function createThunkActionsCreator(definition, references) {
     return result;
   };
 
-  actionCreator.type = definition.meta.type;
-  actionCreator.successType = definition.meta.successType;
-  actionCreator.failType = definition.meta.failType;
-  actionCreator.startType = definition.meta.startType;
+  actionCreator.type = def.meta.type;
+  actionCreator.successType = def.meta.successType;
+  actionCreator.failType = def.meta.failType;
+  actionCreator.startType = def.meta.startType;
 
   return actionCreator;
 }

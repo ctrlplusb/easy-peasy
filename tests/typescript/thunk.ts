@@ -50,7 +50,6 @@ const model: StoreModel = {
     }),
     empty: thunk(() => {}),
     optionalPayloadThunk: thunk((actions, payload) => {
-      // typings:expect-error
       const foo = payload?.foo.substr(0, 3);
       if (payload == null) {
         return;

@@ -13,13 +13,13 @@ state requirements\* for React applications.
   - [Modifying the state](#modifying-the-state)
   - [Scoping Actions](#scoping-actions)
   - [Bad Practices](#bad-practices)
-    - [1. Don't destructure the `state` argument](#1dot-dont-destructure-the-state-argument)
-    - [2. Don't execute any side effects within your action](#2dot-dont-execute-any-side-effects-within-your-action)
+    - [1. Don't destructure the `state` argument](#1-dont-destructure-the-state-argument)
+    - [2. Don't execute any side effects within your action](#2-dont-execute-any-side-effects-within-your-action)
 - [Creating a Store](#creating-a-store)
   - [Some fun facts about the store](#some-fun-facts-about-the-store)
-    - [1. It's a Redux store](#1dot-its-a-redux-store)
-    - [2. It's a Redux store](#2dot-its-a-redux-store)
-    - [3. It's not just a Redux store](#3dot-its-not-just-a-redux-store)
+    - [1. It's a Redux store](#1-its-a-redux-store)
+    - [2. It's a Redux store](#2-its-a-redux-store)
+    - [3. It's not just a Redux store](#3-its-not-just-a-redux-store)
 - [Connecting the Store](#connecting-the-store)
 - [Using the Store](#using-the-store)
   - [The `useStoreState` hook](#the-usestorestate-hook)
@@ -29,18 +29,17 @@ state requirements\* for React applications.
   - [Defining thunks](#defining-thunks)
   - [Dispatching thunks](#dispatching-thunks)
   - [Some interesting information about thunks](#some-interesting-information-about-thunks)
-    - [1. You should handle errors within your thunk](#1dot-you-should-handle-errors-within-your-thunk)
-    - [2. Thunks can also be synchronous](#2dot-thunks-can-also-be-synchronous)
-    - [3. Thunks can also dispatch other thunks](#3dot-thunks-can-also-dispatch-other-thunks)
-    - [4. Thunks can access the store state](#4dot-thunks-can-access-the-store-state)
-    - [5. You can return data out of a thunk](#5dot-you-can-return-data-out-of-a-thunk)
+    - [1. You should handle errors within your thunk](#1-you-should-handle-errors-within-your-thunk)
+    - [2. Thunks can also be synchronous](#2-thunks-can-also-be-synchronous)
+    - [3. Thunks can also dispatch other thunks](#3-thunks-can-also-dispatch-other-thunks)
+    - [4. Thunks can access the store state](#4-thunks-can-access-the-store-state)
+    - [5. You can return data out of a thunk](#5-you-can-return-data-out-of-a-thunk)
 - [Computed Properties](#computed-properties)
   - [Defining a computed property](#defining-a-computed-property)
   - [Further insights into computed properties](#further-insights-into-computed-properties)
-    - [1. They are hyper optimized](#1dot-they-are-hyper-optimized)
-    - [2. You can make them accept runtime arguments](#2dot-you-can-make-them-accept-runtime-arguments)
-    - [3. Only use them to derive state, not execute side effects](#3dot-only-use-them-to-derive-state-not-execute-side-effects)
-- [State Persistence](#state-persistence)
+    - [1. They are hyper optimized](#1-they-are-hyper-optimized)
+    - [2. You can make them accept runtime arguments](#2-you-can-make-them-accept-runtime-arguments)
+    - [3. Only use them to derive state, not execute side effects](#3-only-use-them-to-derive-state-not-execute-side-effects)
 
 ## Introducing the Model
 
@@ -132,7 +131,7 @@ the `state` argument would be:
 
 The second argument to actions, the `payload`, will be the value that was
 provided to the action when it was dispatched. If no value was provided to the
-action when it was dispatched then they `payload` will be `undefined`.
+action when it was dispatched, then the `payload` will be `undefined`.
 
 ### Modifying the state
 
@@ -394,7 +393,7 @@ if (prevState !== nextState) {
 If the newly resolved state is not equal to the previously resolved state your
 component will be re-rendered, receiving the new state.
 
-With this in mind it is important to take care not to create a selector that
+With this in mind, it is important to take care not to create a selector that
 will return a value which will always break strict equality checking.
 
 ```javascript
@@ -421,7 +420,7 @@ resolved object/array values and therefore our component will re-render for any
 update to our store.
 
 Please avoid pitfalls such as above. If you need to derive different forms of
-state then we recommend either using computed properties (will be introduced
+state, then we recommend either using computed properties (will be introduced
 later), or to pull out the individual pieces of state within your component and
 then derive the new state directly within your component's render.
 
@@ -714,18 +713,18 @@ const model = {
 
 Whilst this can be helpful, we lose some of our performance characteristics as
 Easy Peasy will only cache the returned function, not the products that the
-function will resolve. To help address any performance issues that you may
-identify with this we include a [`memo`](/docs/api/memo.html) utility.
+function will resolve. To help address this you can use a memoization library of
+your choice to memoize the internal function.
 
 ```javascript
-import { memo } from 'easy-peasy';
+import memoizerific from 'memoizerific';
 
 const model = {
   products: [],
   getById: computed((state) => {
-    // Wrap the returned function with memo
+    // Wrap the returned function with your memoize library of choice
     //      👇
-    return memo(
+    return memoizerific(50)(
       (id) => state.products.find((product) => product.id === id),
       1000, // 👈 declare the size of the cache
     );
@@ -742,10 +741,4 @@ computed(state => {
   // 👇 side effects in computed properites are bad, m'kay
   return fetch('/todos').then(response => response.json());
 }),
-```
-
-## State Persistence
-
-```
-
 ```
