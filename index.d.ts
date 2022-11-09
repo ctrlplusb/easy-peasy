@@ -301,7 +301,7 @@ type StateMapper<StateModel extends object> = {
 };
 
 type FilterActionTypes<Model extends object> = {
-  [K in keyof Model as Model[K] extends ActionTypes ? never : K]: Model[K]
+  [K in keyof Model as Model[K] extends ActionTypes ? never : K]: Model[K];
 };
 
 type RecursiveState<Model extends object> = StateMapper<
@@ -544,7 +544,7 @@ export type Thunk<
  * Allows the Thunk & Computed type aliases to "capture" the un-used type parameters in a bivariant position
  * so they can't cause any assignability issues, but are still "real" from TypeScript's perspective
  */
-type BivariantCapture<T> = { bivariant(m: T): void }['bivariant']
+type BivariantCapture<T> = { bivariant(m: T): void }['bivariant'];
 declare const ModelTypeMarker: unique symbol;
 declare const InjectionsTypeMarker: unique symbol;
 declare const StoreModelTypeMarker: unique symbol;
