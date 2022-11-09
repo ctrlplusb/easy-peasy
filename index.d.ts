@@ -535,7 +535,14 @@ export type Thunk<
   type: 'thunk';
   payload: Payload;
   result: Result;
+  [ModelTypeMarker]?: Model;
+  [InjectionsTypeMarker]?: Injections;
+  [StoreModelTypeMarker]?: StoreModel;
 };
+
+declare const ModelTypeMarker: unique symbol;
+declare const InjectionsTypeMarker: unique symbol;
+declare const StoreModelTypeMarker: unique symbol;
 
 /**
  * Declares an thunk against your model.
@@ -690,6 +697,8 @@ export type Computed<
 > = {
   type: 'computed';
   result: Result;
+  [ModelTypeMarker]?: Model;
+  [StoreModelTypeMarker]?: StoreModel;
 };
 
 type DefaultComputationFunc<Model extends object, Result> = (
