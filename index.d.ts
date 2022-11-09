@@ -535,11 +535,16 @@ export type Thunk<
   type: 'thunk';
   payload: Payload;
   result: Result;
-  [ModelTypeMarker]?: Model;
-  [InjectionsTypeMarker]?: Injections;
-  [StoreModelTypeMarker]?: StoreModel;
+  [ModelTypeMarker]?: BivariantCapture<Model>;
+  [InjectionsTypeMarker]?: BivariantCapture<Injections>;
+  [StoreModelTypeMarker]?: BivariantCapture<StoreModel>;
 };
 
+/**
+ * Allows the Thunk & Computed type aliases to "capture" the un-used type parameters in a bivariant position
+ * so they can't cause any assignability issues, but are still "real" from TypeScript's perspective
+ */
+type BivariantCapture<T> = { bivariant(m: T): void }['bivariant']
 declare const ModelTypeMarker: unique symbol;
 declare const InjectionsTypeMarker: unique symbol;
 declare const StoreModelTypeMarker: unique symbol;
@@ -697,8 +702,8 @@ export type Computed<
 > = {
   type: 'computed';
   result: Result;
-  [ModelTypeMarker]?: Model;
-  [StoreModelTypeMarker]?: StoreModel;
+  [ModelTypeMarker]?: BivariantCapture<Model>;
+  [StoreModelTypeMarker]?: BivariantCapture<StoreModel>;
 };
 
 type DefaultComputationFunc<Model extends object, Result> = (
