@@ -525,29 +525,17 @@ type Meta = {
  *   addTodo: Thunk<TodosModel, string>;
  * }
  */
-export type Thunk<
+export interface Thunk<
   Model extends object,
   Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
   Result = any,
-> = {
+> {
   type: 'thunk';
   payload: Payload;
   result: Result;
-  [ModelTypeMarker]?: BivariantCapture<Model>;
-  [InjectionsTypeMarker]?: BivariantCapture<Injections>;
-  [StoreModelTypeMarker]?: BivariantCapture<StoreModel>;
-};
-
-/**
- * Allows the Thunk & Computed type aliases to "capture" the un-used type parameters in a bivariant position
- * so they can't cause any assignability issues, but are still "real" from TypeScript's perspective
- */
-type BivariantCapture<T> = { bivariant(m: T): void }['bivariant'];
-declare const ModelTypeMarker: unique symbol;
-declare const InjectionsTypeMarker: unique symbol;
-declare const StoreModelTypeMarker: unique symbol;
+}
 
 /**
  * Declares an thunk against your model.
@@ -695,16 +683,14 @@ export function actionOn<
  *   totalPrice: Computed<Model, number>;
  * }
  */
-export type Computed<
+export interface Computed<
   Model extends object,
   Result,
   StoreModel extends object = {},
-> = {
+> {
   type: 'computed';
   result: Result;
-  [ModelTypeMarker]?: BivariantCapture<Model>;
-  [StoreModelTypeMarker]?: BivariantCapture<StoreModel>;
-};
+}
 
 type DefaultComputationFunc<Model extends object, Result> = (
   state: State<Model>,
