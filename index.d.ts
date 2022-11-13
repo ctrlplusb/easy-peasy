@@ -301,7 +301,7 @@ type StateMapper<StateModel extends object> = {
 };
 
 type FilterActionTypes<Model extends object> = {
-  [K in keyof Model as Model[K] extends ActionTypes ? never : K]: Model[K]
+  [K in keyof Model as Model[K] extends ActionTypes ? never : K]: Model[K];
 };
 
 type RecursiveState<Model extends object> = StateMapper<
@@ -525,17 +525,17 @@ type Meta = {
  *   addTodo: Thunk<TodosModel, string>;
  * }
  */
-export type Thunk<
+export interface Thunk<
   Model extends object,
   Payload = undefined,
   Injections = any,
   StoreModel extends object = {},
   Result = any,
-> = {
+> {
   type: 'thunk';
   payload: Payload;
   result: Result;
-};
+}
 
 /**
  * Declares an thunk against your model.
@@ -683,14 +683,14 @@ export function actionOn<
  *   totalPrice: Computed<Model, number>;
  * }
  */
-export type Computed<
+export interface Computed<
   Model extends object,
   Result,
   StoreModel extends object = {},
-> = {
+> {
   type: 'computed';
   result: Result;
-};
+}
 
 type DefaultComputationFunc<Model extends object, Result> = (
   state: State<Model>,
