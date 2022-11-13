@@ -94,6 +94,13 @@ function TodoList() {
 <table>
   <tr>
   <td>
+    <a href="https://github.com/no-stack-dub-sack">
+      <img src="https://avatars.githubusercontent.com/u/18563015?v=4" width="100px;" alt=""/>
+      <br />
+      <sub><b>Peter Weinberg</b></sub>
+    </a>
+  </td>
+  <td>
     <a href="https://github.com/jmyrland">
       <img src="https://avatars.githubusercontent.com/u/837651?v=5" width="100px;" alt="Jørn A. Myrland"/>
       <br />
