@@ -23,9 +23,7 @@ type IModelAStoreModel<TStore extends ISomeOtherModel> = IModelA<TStore> &
 // of IModelAStoreModel (thus it is just passing`any` to`IModelAStoreModel`)
 interface IModelBStoreModel extends IModelAStoreModel<any> {}
 
-// ❌ Fails here 👇
-// > Interface 'IStoreModel' cannot simultaneously extend types 'IModelAStoreModel<IStoreModel>' and 'IModelBStoreModel'.
-// >   Named property 'commitSomething' of types 'IModelAStoreModel<IStoreModel>' and 'IModelBStoreModel' are not identical.
+// IStoreModel should be allowed to extend both IModelAStoreModel & IModelBStoreModel
 interface IStoreModel
   extends IModelAStoreModel<IStoreModel>,
     IModelBStoreModel {}
