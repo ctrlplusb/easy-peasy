@@ -8,15 +8,15 @@ export function createEffectsMiddleware(_r) {
     const prevState = store.getState();
     const result = next(action);
     const nextState = store.getState();
-    _r._i._e.forEach((def) => {
-      const prevLocal = get(def.meta.parent, prevState);
-      const nextLocal = get(def.meta.parent, nextState);
-      if (prevLocal !== nextLocal) {
+    if (prevState !== nextState) {
+      _r._i._e.forEach((def) => {
+        const prevLocal = get(def.meta.parent, prevState);
+        const nextLocal = get(def.meta.parent, nextState);
         const prevDependencies = def.dependencyResolvers.map((resolver) =>
-          resolver(prevLocal),
+          resolver(prevLocal, prevState),
         );
         const nextDependencies = def.dependencyResolvers.map((resolver) =>
-          resolver(nextLocal),
+          resolver(nextLocal, nextState),
         );
         const hasChanged = prevDependencies.some(
           (dependency, idx) => dependency !== nextDependencies[idx],
@@ -24,8 +24,8 @@ export function createEffectsMiddleware(_r) {
         if (hasChanged) {
           def.actionCreator(prevDependencies, nextDependencies, action);
         }
-      }
-    });
+      });
+    }
     return result;
   };
 }
@@ -163,3 +163,4 @@ export function createEffectActionsCreator(def, _r, effectHandler) {
 
   return actionCreator;
 }
+
