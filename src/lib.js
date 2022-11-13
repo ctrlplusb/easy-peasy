@@ -86,8 +86,8 @@ export function set(path, target, value) {
 }
 
 export function createSimpleProduce(disableImmer = false) {
-  return function simpleProduce(path, state, fn) {
-    if (disableImmer) {
+  return function simpleProduce(path, state, fn, config) {
+    if ((config && 'immer' in config) ? config?.immer === false : disableImmer) {
       const current = get(path, state);
       const next = fn(current);
       if (current !== next) {

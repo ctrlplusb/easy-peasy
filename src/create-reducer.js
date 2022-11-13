@@ -4,8 +4,8 @@ import { createSimpleProduce, get } from './lib';
 export default function createReducer(disableImmer, _aRD, _cR, _cP) {
   const simpleProduce = createSimpleProduce(disableImmer);
 
-  const runActionReducerAtPath = (state, action, actionReducer, path) =>
-    simpleProduce(path, state, (draft) => actionReducer(draft, action.payload));
+  const runActionReducerAtPath = (state, action, actionReducer, path, config) =>
+    simpleProduce(path, state, (draft) => actionReducer(draft, action.payload), config);
 
   const reducerForActions = (state, action) => {
     const actionReducer = _aRD[action.type];
@@ -15,6 +15,7 @@ export default function createReducer(disableImmer, _aRD, _cR, _cP) {
         action,
         actionReducer,
         actionReducer.def.meta.parent,
+        actionReducer.def.config,
       );
     }
     return state;
@@ -22,14 +23,14 @@ export default function createReducer(disableImmer, _aRD, _cR, _cP) {
 
   const reducerForCustomReducers = (state, action) =>
     _cR.reduce(
-      (acc, { parentPath, key, reducer }) =>
+      (acc, { parentPath, key, reducer, config }) =>
         simpleProduce(parentPath, acc, (draft) => {
           draft[key] = reducer(
             isDraft(draft[key]) ? original(draft[key]) : draft[key],
             action,
           );
           return draft;
-        }),
+        }, config),
       state,
     );
 

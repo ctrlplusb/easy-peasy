@@ -158,7 +158,7 @@ export default function extractDataFromModel(
           bindComputedProperty(parent, _dS);
           _cP.push({ key, parentPath, bindComputedProperty });
         } else if (value[reducerSymbol]) {
-          _cR.push({ key, parentPath, reducer: value.fn });
+          _cR.push({ key, parentPath, reducer: value.fn, config: value.config });
         } else if (value[effectOnSymbol]) {
           const def = { ...value };
 

@@ -17,15 +17,17 @@ export const debug = (state) => {
   return state;
 };
 
-export const actionOn = (targetResolver, fn) => ({
+export const actionOn = (targetResolver, fn, config) => ({
   [actionOnSymbol]: true,
   fn,
   targetResolver,
+  config
 });
 
-export const action = (fn) => ({
+export const action = (fn, config) => ({
   [actionSymbol]: true,
   fn,
+  config
 });
 
 const defaultStateResolvers = [(state) => state];
@@ -77,7 +79,8 @@ export const thunk = (fn) => ({
   fn,
 });
 
-export const reducer = (fn) => ({
+export const reducer = (fn, config) => ({
   [reducerSymbol]: true,
   fn,
+  config
 });
