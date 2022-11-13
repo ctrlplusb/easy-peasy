@@ -300,8 +300,12 @@ type StateMapper<StateModel extends object> = {
     : StateModel[P];
 };
 
+type FilterActionTypes<Model extends object> = {
+  [K in keyof Model as Model[K] extends ActionTypes ? never : K]: Model[K]
+};
+
 type RecursiveState<Model extends object> = StateMapper<
-  O.Filter<Model, ActionTypes>
+  FilterActionTypes<Model>
 >;
 
 /**
