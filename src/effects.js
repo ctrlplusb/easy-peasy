@@ -1,4 +1,4 @@
-import { get, isPromise } from './lib';
+import { get, handleEventDispatchErrors, isPromise } from './lib';
 
 export function createEffectsMiddleware(_r) {
   return (store) => (next) => (action) => {
@@ -86,28 +86,6 @@ export function createEffectHandler(def, _r, injections, _aC) {
     return undefined;
   };
 }
-
-const logEffectEventListenerError = (type, err) => {
-  // eslint-disable-next-line no-console
-  console.log(`Error in ${type}`);
-  // eslint-disable-next-line no-console
-  console.log(err);
-};
-
-const handleEventDispatchErrors =
-  (type, dispatcher) =>
-  (...args) => {
-    try {
-      const result = dispatcher(...args);
-      if (isPromise(result)) {
-        result.catch((err) => {
-          logEffectEventListenerError(type, err);
-        });
-      }
-    } catch (err) {
-      logEffectEventListenerError(type, err);
-    }
-  };
 
 export function createEffectActionsCreator(def, _r, effectHandler) {
   const actionCreator = (previousDependencies, nextDependencies, action) => {
