@@ -26,7 +26,6 @@ export default function extractDataFromModel(
   const _aCD = {};
   const _aC = {};
   const _aRD = {};
-  const actionThunks = {};
   const _cP = [];
   const _cR = [];
   const _e = [];
@@ -125,9 +124,6 @@ export default function extractDataFromModel(
           // Create the function that will handle, i.e. be executed, when
           // the thunk action is created/dispatched
           def.thunkHandler = createThunkHandler(def, _r, injections, _aC);
-
-          // Register the thunk handler
-          set(path, actionThunks, def.thunkHandler);
 
           // Create the "action creator" function
           def.actionCreator = createThunkActionsCreator(def, _r);
