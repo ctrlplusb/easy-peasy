@@ -1,5 +1,15 @@
-import { action, Action, computed, Computed, thunk, Thunk } from 'easy-peasy';
+import {
+  action,
+  Action,
+  computed,
+  Computed,
+  thunk,
+  Thunk,
+  unstable_effectOn,
+  Unstable_EffectOn,
+} from 'easy-peasy';
 
+type MyModelEffectOn = Unstable_EffectOn<MyModel>;
 type MyModelAction<TPayload = void> = Action<MyModel, TPayload>;
 type MyModelComputed<TResult> = Computed<MyModel, TResult>;
 type MyModelThunk<TPayload = undefined, TResult = any> = Thunk<
@@ -24,6 +34,8 @@ interface MyModel {
   setMyState: MyModelAction<string>;
 
   myThunk: MyModelThunk<MyThunkPayload, boolean>;
+
+  myEffectOn: MyModelEffectOn;
 }
 
 const myModel: MyModel = {
@@ -44,4 +56,11 @@ const myModel: MyModel = {
     // some kind of await
     return true;
   }),
+
+  myEffectOn: unstable_effectOn(
+    [(state) => state.myState.value],
+    (actions, change) => {
+      // do something
+    },
+  ),
 };
