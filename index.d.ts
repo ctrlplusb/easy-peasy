@@ -698,13 +698,13 @@ export function computed<
 
 // #region EffectOn
 
-export type Unstable_EffectOn<
+export interface Unstable_EffectOn<
   Model extends object = {},
   StoreModel extends object = {},
   Injections = any,
-> = {
+> {
   type: 'effectOn';
-};
+}
 
 type Change<Resolvers extends StateResolvers<any, any>> = {
   prev: ExtractReturnTypes<Resolvers>;
