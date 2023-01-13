@@ -48,15 +48,17 @@ An `action` is a function that is described below.
 
     The payload, if any, that was provided to the
     [action](/docs/api/action.html) when it was dispatched.
-  
-  - `config` (Object)
 
-    The config object that was provided to the
-    [action](/docs/api/action.html) when it was dispatched. 
-    - `immer` (Boolean)
-      Whether to use `immer` to update the state. Defaults to `true`.
-      
-      You may want to consider disabling immer when dealing with a large/deep data structure within your state. Immer does unfortunately have an overhead as it wraps data in a Proxy solution for the mutation based updates to work. We would suggest only using this escape hatch if you are noticing any performance degradation.
+- `config` (Object)
+
+  An optional object to configure the [action](/docs/api/action.html).
+
+  - `immer` (Boolean) Whether to use `immer` to update the state. Defaults to
+    `true`. You may want to consider disabling immer when dealing with a
+    large/deep data structure within your state. Immer does unfortunately have
+    an overhead as it wraps data in a Proxy solution for the mutation based
+    updates to work. We would suggest only using this escape hatch if you are
+    noticing any performance degradation.
 
 ## Tutorial
 
@@ -83,12 +85,45 @@ immutable updates.
 To get around this you can use the [debug](/docs/api/debug.html) utility.
 
 ```javascript
-import { debug } from 'easy-peasy';
+import { action, debug } from 'easy-peasy';
 
 const model = {
   myAction: action((state, payload) => {
     console.log(debug(state));
   }),
+};
+```
+
+### Disabling Immer
+
+When dealing with a large/deep data structures within your state, you may want
+to consider disabling Immer for the [actions](/docs/api/action.html) that update them. Immer does
+unfortunately have an overhead as it wraps data in a Proxy solution for the
+mutation based updates to work. We would suggest only using this escape hatch if
+you are noticing any performance degradation.
+
+When disabling Immer, you need to explicitly return `state` from your [action](/docs/api/action.html) and
+manage immutability yourself:
+
+```javascript
+import { action } from 'easy-peasy';
+
+const model = {
+  bigData: {/*...*/}, // 👈 arbitrarily large / nested data structure
+  updateBigData: action(
+    (state, payload) => {
+      return {
+        ...state,
+        bigData: {
+          ...state.bigData,
+          ...payload,
+        },
+      };
+    },
+    {
+      immer: false,
+    }
+  ),
 };
 ```
 
