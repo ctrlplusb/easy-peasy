@@ -358,7 +358,42 @@ it('thunk listening to multiple actions', async () => {
 });
 
 describe('disabling immer via configs', () => {
-  it('listening to an action, firing an action with immer disabled', () => {
+  it('listening to an action, firing an action with immer disabled, not returning state does not work', () => {
+    // ARRANGE
+    const math = {
+      sum: 0,
+      add: action((state, payload) => {
+        state.sum += payload;
+      }),
+    };
+    const audit = {
+      logs: [],
+      onMathAdd: actionOn(
+        (_, storeActions) => storeActions.math.add,
+        (state, target) => {
+          state.logs.push(`Added ${target.payload}`);
+        },
+        { immer: false },
+      ),
+    };
+    const store = createStore({
+      math,
+      audit,
+    });
+
+    // ACT
+    store.getActions().math.add(10);
+
+    // ASSERT
+    expect(store.getState()).toEqual({
+      math: {
+        sum: 10
+      },
+      audit: undefined
+    });
+  });
+
+  it('listening to an action, firing an action with immer disabled, returning state works', () => {
     // ARRANGE
     const math = {
       sum: 0,
@@ -376,11 +411,16 @@ describe('disabling immer via configs', () => {
           expect(target.result).toBeUndefined();
           expect(target.error).toBeUndefined();
           expect(target.resolvedTargets).toEqual([target.type]);
-          state.logs.push(`Added ${target.payload}`);
+
+          return {
+            ...state,
+            logs: [...state.logs, `Added ${target.payload}`]
+          }
         },
         { immer: false },
       ),
     };
+
     const store = createStore({
       math,
       audit,
@@ -391,8 +431,11 @@ describe('disabling immer via configs', () => {
 
     // ASSERT
     expect(store.getState()).toEqual({
-      "math": {
-        "sum": 10
+      math: {
+        sum: 10
+      },
+      audit: {
+        logs: ["Added 10"]
       }
     });
   });

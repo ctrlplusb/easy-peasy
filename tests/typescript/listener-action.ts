@@ -116,3 +116,14 @@ const valid7: ActionOn<ListeningModel> = actionOn(
     state.logs.push(target.payload);
   },
 );
+
+const valid8: ActionOn<ListeningModel> = actionOn(
+  (actions) => [actions.doActionString],
+  (state, target) => ({
+    ...state,
+    logs: [...state.logs, target.payload]
+  }),
+  {
+    immer: false
+  }
+);
