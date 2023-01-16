@@ -6,40 +6,42 @@ state requirements\* for React applications.
 
 > \* don't quote me on that 😅
 
-- [Introducing the Model](#introducing-the-model)
-- [State](#state)
-- [Actions](#actions)
-  - [Arguments](#arguments)
-  - [Modifying the state](#modifying-the-state)
-  - [Scoping Actions](#scoping-actions)
-  - [Bad Practices](#bad-practices)
-    - [1. Don't destructure the `state` argument](#1-dont-destructure-the-state-argument)
-    - [2. Don't execute any side effects within your action](#2-dont-execute-any-side-effects-within-your-action)
-- [Creating a Store](#creating-a-store)
-  - [Some fun facts about the store](#some-fun-facts-about-the-store)
-    - [1. It's a Redux store](#1-its-a-redux-store)
-    - [2. It's a Redux store](#2-its-a-redux-store)
-    - [3. It's not just a Redux store](#3-its-not-just-a-redux-store)
-- [Connecting the Store](#connecting-the-store)
-- [Using the Store](#using-the-store)
-  - [The `useStoreState` hook](#the-usestorestate-hook)
-    - [Important note on selector optimization](#important-note-on-selector-optimization)
-  - [The `useStoreActions` hook](#the-usestoreactions-hook)
-- [Thunks](#thunks)
-  - [Defining thunks](#defining-thunks)
-  - [Dispatching thunks](#dispatching-thunks)
-  - [Some interesting information about thunks](#some-interesting-information-about-thunks)
-    - [1. You should handle errors within your thunk](#1-you-should-handle-errors-within-your-thunk)
-    - [2. Thunks can also be synchronous](#2-thunks-can-also-be-synchronous)
-    - [3. Thunks can also dispatch other thunks](#3-thunks-can-also-dispatch-other-thunks)
-    - [4. Thunks can access the store state](#4-thunks-can-access-the-store-state)
-    - [5. You can return data out of a thunk](#5-you-can-return-data-out-of-a-thunk)
-- [Computed Properties](#computed-properties)
-  - [Defining a computed property](#defining-a-computed-property)
-  - [Further insights into computed properties](#further-insights-into-computed-properties)
-    - [1. They are hyper optimized](#1-they-are-hyper-optimized)
-    - [2. You can make them accept runtime arguments](#2-you-can-make-them-accept-runtime-arguments)
-    - [3. Only use them to derive state, not execute side effects](#3-only-use-them-to-derive-state-not-execute-side-effects)
+- [Primary API](#primary-api)
+  - [Introducing the Model](#introducing-the-model)
+  - [State](#state)
+    - [State type restrictions](#state-type-restrictions)
+  - [Actions](#actions)
+    - [Arguments](#arguments)
+    - [Modifying the state](#modifying-the-state)
+    - [Scoping Actions](#scoping-actions)
+    - [Bad Practices](#bad-practices)
+      - [1. Don't destructure the `state` argument](#1-dont-destructure-the-state-argument)
+      - [2. Don't execute any side effects within your action](#2-dont-execute-any-side-effects-within-your-action)
+  - [Creating a Store](#creating-a-store)
+    - [Some fun facts about the store](#some-fun-facts-about-the-store)
+      - [1. It's a Redux store](#1-its-a-redux-store)
+      - [2. It's a Redux store](#2-its-a-redux-store)
+      - [3. It's not just a Redux store](#3-its-not-just-a-redux-store)
+  - [Connecting the Store](#connecting-the-store)
+  - [Using the Store](#using-the-store)
+    - [The `useStoreState` hook](#the-usestorestate-hook)
+      - [Important note on selector optimization](#important-note-on-selector-optimization)
+    - [The `useStoreActions` hook](#the-usestoreactions-hook)
+  - [Thunks](#thunks)
+    - [Defining thunks](#defining-thunks)
+    - [Dispatching thunks](#dispatching-thunks)
+    - [Some interesting information about thunks](#some-interesting-information-about-thunks)
+      - [1. You should handle errors within your thunk](#1-you-should-handle-errors-within-your-thunk)
+      - [2. Thunks can also be synchronous](#2-thunks-can-also-be-synchronous)
+      - [3. Thunks can also dispatch other thunks](#3-thunks-can-also-dispatch-other-thunks)
+      - [4. Thunks can access the store state](#4-thunks-can-access-the-store-state)
+      - [5. You can return data out of a thunk](#5-you-can-return-data-out-of-a-thunk)
+  - [Computed Properties](#computed-properties)
+    - [Defining a computed property](#defining-a-computed-property)
+    - [Further insights into computed properties](#further-insights-into-computed-properties)
+      - [1. They are hyper optimized](#1-they-are-hyper-optimized)
+      - [2. You can make them accept runtime arguments](#2-you-can-make-them-accept-runtime-arguments)
+      - [3. Only use them to derive state, not execute side effects](#3-only-use-them-to-derive-state-not-execute-side-effects)
 
 ## Introducing the Model
 
@@ -98,6 +100,21 @@ const model = {
   userSession: userSessionModel,
 };
 ```
+
+### State type restrictions
+
+Using plain objects as state is recommended, as it has been battle tested &
+proven to be stable.
+
+If you however want to use complex types as part of your state, you need to
+consider the following:
+
+- To support `class` instances, you need to ensure that the `class` is
+  [compatible with `immer`](https://immerjs.github.io/immer/complex-objects/).
+- To use `Map` or `Set` within your state,
+  [you need to enable it](/docs/introduction/browser-support.html#supporting-map-or-set-within-your-state).
+
+⚠️ Using complex types within the state may lead to unknown side effects.
 
 ## Actions
 
