@@ -96,7 +96,7 @@ const model = {
 
 ### Disabling Immer
 
-When dealing with a large/deep data structures within your state, you may want
+When dealing with large/deeply nested data structures within your state, you may want
 to consider disabling Immer for the [actions](/docs/api/action.html) that update them. Immer does
 unfortunately have an overhead as it wraps data in a Proxy solution for the
 mutation based updates to work. We would suggest only using this escape hatch if
@@ -109,7 +109,7 @@ manage immutability yourself:
 import { action } from 'easy-peasy';
 
 const model = {
-  bigData: {/*...*/}, // 👈 arbitrarily large / nested data structure
+  bigData: {/*...*/}, // 👈 arbitrarily large/deeply nested data
   updateBigData: action(
     (state, payload) => {
       return {
