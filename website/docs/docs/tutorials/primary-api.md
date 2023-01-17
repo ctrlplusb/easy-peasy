@@ -103,10 +103,10 @@ const model = {
 
 ### State type restrictions
 
-Using plain objects as state is recommended, as it has been battle tested &
+Using plain objects as state is recommended, as it has been battle tested and
 proven to be stable.
 
-If you however want to use complex types as part of your state, you need to
+If you, however, want to use complex types as part of your state, you need to
 consider the following:
 
 - To support `class` instances, you need to ensure that the `class` is
