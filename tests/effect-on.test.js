@@ -138,6 +138,34 @@ test('it receives the local actions', () => {
   expect(store.getState().fired).toBe(true);
 });
 
+test('it receives the local actions for nested model', () => {
+  // ARRANGE
+  const store = createStore({
+    nested: {
+      fired: false,
+      todos: [],
+      onTodosChanged: unstable_effectOn([(state) => state.todos], (actions) => {
+        actions.setFired(true);
+      }),
+      addTodo: action((state, payload) => {
+        state.todos.push(payload);
+      }),
+      setFired: action((state, payload) => {
+        state.fired = payload;
+      }),
+    }
+  });
+
+  // ASSERT
+  expect(store.getState().nested.fired).toBe(false);
+
+  // ACT
+  store.getActions().nested.addTodo('add onEffect api');
+
+  // ASSERT
+  expect(store.getState().nested.fired).toBe(true);
+});
+
 test('change argument is as expected', () => {
   // ARRANGE
   let actualChange;
