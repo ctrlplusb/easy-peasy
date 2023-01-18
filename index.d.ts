@@ -593,9 +593,8 @@ export type Action<Model extends object, Payload = void> = {
   result: void | State<Model>;
 };
 
-
 /**
-  * @param {boolean} [immer=true] - If true, the action will be wrapped in an immer produce call. Otherwise, the action will update the state directly.
+ * @param {boolean} [immer=true] - If true, the action will be wrapped in an immer produce call. Otherwise, the action will update the state directly.
  **/
 interface Config {
   immer?: boolean;
@@ -618,7 +617,8 @@ interface Config {
  * });
  */
 export function action<Model extends object = {}, Payload = any>(
-  action: (state: State<Model>, payload: Payload, config?: Config) => void | State<Model>,
+  action: (state: State<Model>, payload: Payload) => void | State<Model>,
+  config?: Config,
 ): Action<Model, Payload>;
 
 // #endregion
@@ -774,7 +774,10 @@ export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
  *   })
  * });
  */
-export function reducer<State>(state: ReduxReducer<State>, config?: Config): Reducer<State>;
+export function reducer<State>(
+  reducer: ReduxReducer<State>,
+  config?: Config,
+): Reducer<State>;
 
 // #endregion
 

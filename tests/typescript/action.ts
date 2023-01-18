@@ -12,9 +12,12 @@ interface Model {
 
 const todos: TodosModel = {
   items: [],
-  add: action((state, payload) => {
-    state.items.push(payload);
-  }),
+  add: action(
+    (state, payload) => {
+      state.items.push(payload);
+    },
+    { immer: true },
+  ),
   clear: action((state) => {
     state.items = [];
   }),
