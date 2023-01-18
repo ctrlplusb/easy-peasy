@@ -50,6 +50,7 @@
     "prepublish": "yarn run build",
     "test": "jest",
     "test:source": "jest --modulePathIgnorePatterns=typescript.test.js",
+    "test:source:watch": "yarn test:source -- --watch",
     "test:coverage": "yarn run test -- --coverage",
     "test:coverage:deploy": "yarn run test:coverage && codecov",
     "prepare": "husky install"

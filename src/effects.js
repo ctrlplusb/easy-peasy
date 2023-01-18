@@ -37,8 +37,6 @@ const logEffectError = (err) => {
 };
 
 export function createEffectHandler(def, _r, injections, _aC) {
-  const actions = get(def.meta.parent, _aC);
-
   let dispose;
 
   return (change) => {
@@ -63,6 +61,7 @@ export function createEffectHandler(def, _r, injections, _aC) {
       }
     }
 
+    const actions = get(def.meta.parent, _aC);
     const effectResult = def.fn(actions, change, helpers);
 
     if (isPromise(effectResult)) {
@@ -163,4 +162,3 @@ export function createEffectActionsCreator(def, _r, effectHandler) {
 
   return actionCreator;
 }
-
