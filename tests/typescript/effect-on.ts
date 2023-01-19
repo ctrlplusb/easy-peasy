@@ -1,10 +1,4 @@
-import {
-  createStore,
-  Unstable_EffectOn,
-  unstable_effectOn,
-  Action,
-  action,
-} from 'easy-peasy';
+import { createStore, EffectOn, effectOn, Action, action } from 'easy-peasy';
 
 interface Injections {
   doSomething: () => Promise<void>;
@@ -14,7 +8,7 @@ interface TodosModel {
   items: { id: number; text: string }[];
   foo: string;
   setFoo: Action<TodosModel, string>;
-  onStateChanged: Unstable_EffectOn<TodosModel, StoreModel, Injections>;
+  onStateChanged: EffectOn<TodosModel, StoreModel, Injections>;
 }
 
 interface StoreModel {
@@ -28,7 +22,7 @@ const todosModel: TodosModel = {
   setFoo: action((state, payload) => {
     state.foo = payload;
   }),
-  onStateChanged: unstable_effectOn(
+  onStateChanged: effectOn(
     [
       (state) => state.items,
       (state) => state.foo,

@@ -5,11 +5,11 @@ import {
   Computed,
   thunk,
   Thunk,
-  unstable_effectOn,
-  Unstable_EffectOn,
+  effectOn,
+  EffectOn,
 } from 'easy-peasy';
 
-type MyModelEffectOn = Unstable_EffectOn<MyModel>;
+type MyModelEffectOn = EffectOn<MyModel>;
 type MyModelAction<TPayload = void> = Action<MyModel, TPayload>;
 type MyModelComputed<TResult> = Computed<MyModel, TResult>;
 type MyModelThunk<TPayload = undefined, TResult = any> = Thunk<
@@ -57,10 +57,7 @@ const myModel: MyModel = {
     return true;
   }),
 
-  myEffectOn: unstable_effectOn(
-    [(state) => state.myState.value],
-    (actions, change) => {
-      // do something
-    },
-  ),
+  myEffectOn: effectOn([(state) => state.myState.value], (actions, change) => {
+    // do something
+  }),
 };

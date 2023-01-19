@@ -1,7 +1,7 @@
 import {
   createStore,
   action,
-  unstable_effectOn,
+  effectOn,
   thunk,
   thunkOn,
   actionOn,
@@ -36,7 +36,7 @@ test('fires when the dependencies change', () => {
     addTodo: action((state, payload) => {
       state.todos.push(payload);
     }),
-    onTodosChanged: unstable_effectOn(
+    onTodosChanged: effectOn(
       [(state) => state.todos, (state) => state.foo],
       () => {
         fired = true;
@@ -45,7 +45,7 @@ test('fires when the dependencies change', () => {
   });
 
   // ACT
-  store.getActions().addTodo('add unstable_effectOn api');
+  store.getActions().addTodo('add effectOn api');
 
   // ASSERT
   expect(fired).toBe(true);
@@ -69,7 +69,7 @@ test('does not fire when the dependencies have not changed', () => {
     setFoo: action((state, payload) => {
       state.foo = payload;
     }),
-    onTodosChanged: unstable_effectOn([(state) => state.todos], () => {
+    onTodosChanged: effectOn([(state) => state.todos], () => {
       fired = true;
     }),
   });
@@ -89,7 +89,7 @@ test('fires when store dependency changes', () => {
       setFired: action((state, payload) => {
         state.fired = payload;
       }),
-      onTodosChanged: unstable_effectOn(
+      onTodosChanged: effectOn(
         [(state, storeState) => storeState.todos],
         (actions) => {
           actions.setFired(true);
@@ -123,7 +123,7 @@ test('it receives the local actions', () => {
     setFired: action((state, payload) => {
       state.fired = payload;
     }),
-    onTodosChanged: unstable_effectOn([(state) => state.todos], (actions) => {
+    onTodosChanged: effectOn([(state) => state.todos], (actions) => {
       actions.setFired(true);
     }),
   });
@@ -144,7 +144,7 @@ test('it receives the local actions for nested model', () => {
     nested: {
       fired: false,
       todos: [],
-      onTodosChanged: unstable_effectOn([(state) => state.todos], (actions) => {
+      onTodosChanged: effectOn([(state) => state.todos], (actions) => {
         actions.setFired(true);
       }),
       addTodo: action((state, payload) => {
@@ -153,7 +153,7 @@ test('it receives the local actions for nested model', () => {
       setFired: action((state, payload) => {
         state.fired = payload;
       }),
-    }
+    },
   });
 
   // ASSERT
@@ -184,12 +184,9 @@ test('change argument is as expected', () => {
         actions.setTwo(target.payload);
       },
     ),
-    onStateChanged: unstable_effectOn(
-      [(state) => state.two],
-      (actions, change) => {
-        actualChange = change;
-      },
-    ),
+    onStateChanged: effectOn([(state) => state.two], (actions, change) => {
+      actualChange = change;
+    }),
   });
 
   // ACT
@@ -216,7 +213,7 @@ test('getState is exposed in helpers', async () => {
       setString: action((state, payload) => {
         state.string = payload;
       }),
-      onStateChanged: unstable_effectOn(
+      onStateChanged: effectOn(
         [(state) => state.string],
         (actions, change, { getState }) => {
           actualState = getState();
@@ -245,7 +242,7 @@ test('getStoreState is exposed in helpers', async () => {
       setString: action((state, payload) => {
         state.string = payload;
       }),
-      onStateChanged: unstable_effectOn(
+      onStateChanged: effectOn(
         [(state) => state.string],
         (actions, change, { getStoreState }) => {
           actualStoreState = getStoreState();
@@ -276,7 +273,7 @@ test('meta values are exposed in helpers', async () => {
       setString: action((state, payload) => {
         state.string = payload;
       }),
-      onStateChanged: unstable_effectOn(
+      onStateChanged: effectOn(
         [(state) => state.string],
         (actions, change, { meta }) => {
           actualMeta = meta;
@@ -308,7 +305,7 @@ test('injections are exposed in helpers', async () => {
         setString: action((state, payload) => {
           state.string = payload;
         }),
-        onStateChanged: unstable_effectOn(
+        onStateChanged: effectOn(
           [(state) => state.string],
           (actions, change, helpers) => {
             actualInjections = helpers.injections;
@@ -338,7 +335,7 @@ test('dispatch is exposed in helpers', async () => {
       setString: action((state, payload) => {
         state.string = payload;
       }),
-      onStateChanged: unstable_effectOn(
+      onStateChanged: effectOn(
         [(state) => state.string],
         (actions, change, helpers) => {
           actualDispatch = helpers.dispatch;
@@ -363,7 +360,7 @@ test('getStoreActions are exposed in helpers', async () => {
       setString: action((state, payload) => {
         state.string = payload;
       }),
-      onStateChanged: unstable_effectOn(
+      onStateChanged: effectOn(
         [(state) => state.string],
         (actions, change, helpers) => {
           helpers.getStoreActions().nested.setString('three');
@@ -391,12 +388,9 @@ test('dispatches actions to represent a succeeded effect', () => {
       setNumber: action((state, payload) => {
         state.number = payload;
       }),
-      onStateChanged: unstable_effectOn(
-        [(state) => state.string],
-        (actions) => {
-          actions.setNumber(2);
-        },
-      ),
+      onStateChanged: effectOn([(state) => state.string], (actions) => {
+        actions.setNumber(2);
+      }),
     },
   };
   const trackActions = trackActionsMiddleware();
@@ -448,7 +442,7 @@ describe('errors', () => {
         doAsync: thunk(() => {
           throw err;
         }),
-        onStateChanged: unstable_effectOn(
+        onStateChanged: effectOn(
           [(state) => state.string],
           async (actions, change) => {
             await actions.doAsync(change.action.payload);
@@ -504,7 +498,7 @@ test('effects cannot be targetted by actionOn', async () => {
       setString: action((state, payload) => {
         state.string = payload;
       }),
-      onStateChanged: unstable_effectOn([(state) => state.string], () => {
+      onStateChanged: effectOn([(state) => state.string], () => {
         // do nothing
       }),
       invalidActionOn: actionOn(
@@ -535,7 +529,7 @@ test('effects cannot be targetted by thunkOn', async () => {
       setString: action((state, payload) => {
         state.string = payload;
       }),
-      onStateChanged: unstable_effectOn([(state) => state.string], () => {
+      onStateChanged: effectOn([(state) => state.string], () => {
         // do nothing
       }),
       invalidThunkOn: actionOn(
@@ -567,7 +561,7 @@ test('synchronous effect with synchronous dispose executes as expected', () => {
     setFoo: action((state, payload) => {
       state.foo = payload;
     }),
-    onFooChange: unstable_effectOn([(state) => state.foo], () => {
+    onFooChange: effectOn([(state) => state.foo], () => {
       executionId += 1;
       executions.push({ id: executionId, type: 'effect' });
       return () => {
@@ -601,7 +595,7 @@ test('synchronous effect with asynchronous dispose executes as expected', async 
     setFoo: action((state, payload) => {
       state.foo = payload;
     }),
-    onFooChange: unstable_effectOn([(state) => state.foo], () => {
+    onFooChange: effectOn([(state) => state.foo], () => {
       executionId += 1;
       const id = executionId;
       executions.push({ id, type: 'effect' });

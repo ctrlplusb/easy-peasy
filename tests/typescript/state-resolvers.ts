@@ -3,8 +3,8 @@ import {
   Action,
   computed,
   Computed,
-  unstable_effectOn,
-  Unstable_EffectOn,
+  effectOn,
+  EffectOn,
 } from 'easy-peasy';
 
 type OneThroughFifteen = {
@@ -51,13 +51,13 @@ type ActionPayload<T extends string> = {
 type NestedModel = SixteenThroughThirty & {
   setState: Action<NestedModel, ActionPayload<keyof SixteenThroughThirty>>;
   addAllTheThings: Computed<NestedModel, number, StoreModel>;
-  onStateChange: Unstable_EffectOn<NestedModel, StoreModel>;
+  onStateChange: EffectOn<NestedModel, StoreModel>;
 };
 
 type StoreModel = OneThroughFifteen & {
   setState: Action<StoreModel, ActionPayload<keyof OneThroughFifteen>>;
   addAllTheThings: Computed<StoreModel, number>;
-  onStateChange: Unstable_EffectOn<StoreModel>;
+  onStateChange: EffectOn<StoreModel>;
   nestedModel: NestedModel;
 };
 
@@ -102,7 +102,7 @@ const storeModel: StoreModel = {
       return a + b + c + d + e + f + g + h + i + j + k + l + m + n + o;
     },
   ),
-  onStateChange: unstable_effectOn(
+  onStateChange: effectOn(
     [
       (state) => state.one,
       (state) => state.two,
@@ -167,7 +167,7 @@ const storeModel: StoreModel = {
         return a + b + c + d + e + f + g + h + i + j + k + l + m + n + o;
       },
     ),
-    onStateChange: unstable_effectOn(
+    onStateChange: effectOn(
       [
         (state) => state.sixteen,
         (state) => state.seventeen,
