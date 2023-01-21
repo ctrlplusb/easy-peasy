@@ -52,12 +52,6 @@ Closes #451 Closes #439
 
 ### Adds new `effectOn` model API
 
-> **\*Note:** this is an experimental API. We are pre-releasing it to allow for
-> early feedback. The API is subject to breaking changes with any release of
-> Easy Peasy. As such we have prefixed the API with "unstable*", much like React
-> does with its experimental APIs. Once the API has stabilised the "unstable*"
-> prefix will be removed and semver based releases will be respected.\*
-
 Allows you to declare an effect within your model which will execute every time
 the targeted state changes.
 
