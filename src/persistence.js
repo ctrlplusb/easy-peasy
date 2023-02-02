@@ -57,7 +57,7 @@ function createStorageWrapper(storage, transformers = []) {
     if (transformers.length > 0 && data != null && typeof data === 'object') {
       Object.keys(data).forEach((key) => {
         data[key] = transformers.reduce(
-          (acc, cur) => cur.in(acc, key),
+          (acc, cur) => cur.in(acc, key, data),
           data[key],
         );
       });
@@ -80,7 +80,7 @@ function createStorageWrapper(storage, transformers = []) {
     ) {
       Object.keys(result).forEach((key) => {
         result[key] = outTransformers.reduce(
-          (acc, cur) => cur.out(acc, key),
+          (acc, cur) => cur.out(acc, key, result),
           result[key],
         );
       });

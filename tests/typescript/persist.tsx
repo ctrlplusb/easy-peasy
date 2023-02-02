@@ -38,7 +38,7 @@ createTransform(
   (data, key) => `${key}foo`,
 );
 
-createTransform((data, key) => `${key}foo`);
+createTransform((data, key, fullState) => `${key}foo`);
 
 createTransform(undefined, (data, key) => `${key}foo`, {
   whitelist: ['foo'],

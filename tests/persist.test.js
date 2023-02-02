@@ -645,12 +645,14 @@ test('clear', async () => {
 test('transformers', async () => {
   // ARRANGE
   const upperCaseTransformer = createTransform(
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "item one", "two": "item two"})
       return data.toUpperCase();
     },
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "_ITEM ONE_", "two": "item two"})
       return data.toLowerCase();
     },
     {
@@ -659,12 +661,14 @@ test('transformers', async () => {
   );
 
   const padTransformer = createTransform(
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "item one", "two": "item two"})
       return `_${data}_`;
     },
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "_ITEM ONE_", "two": "item two"})
       return data.substr(1, data.length - 2);
     },
     {

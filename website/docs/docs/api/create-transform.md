@@ -14,11 +14,11 @@ This helper has been directly copied from [`redux-persist`](https://github.com/r
 
 The function accepts the following arguments:
 
-  - `inbound` (data: any, key: string) => any; *optional*
+  - `inbound` (data: any, key: string, fullState: any) => any; *optional*
 
     This function will be executed against data prior to it being persisted by the configured storage engine.
-  
-  - `outbound` (data: any, key: string) => any; *optional*
+
+  - `outbound` (data: any, key: string, fullState: any) => any; *optional*
 
     This function will be executed against data prior after it is extracted from the configured storage engine.
 
@@ -29,7 +29,7 @@ The function accepts the following arguments:
      - `whitelist` Array&lt;string&gt;; *optional*
 
        The data keys that this transformer would apply to.
-     
+
      - `blacklist` Array&lt;string&gt;; *optional*
 
        The data keys that this transformer would not apply to.

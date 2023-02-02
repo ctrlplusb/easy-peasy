@@ -1032,8 +1032,8 @@ export interface PersistStorage {
 }
 
 export interface Transformer {
-  in?: (data: any, key: string) => any;
-  out?: (data: any, key: string) => any;
+  in?: (data: any, key: string, fullState?: any) => any;
+  out?: (data: any, key: string, fullState?: any) => any;
 }
 
 export interface PersistConfig<Model extends object> {
@@ -1050,8 +1050,8 @@ export interface TransformConfig {
 }
 
 export function createTransform(
-  inbound?: (data: any, key: string) => any,
-  outbound?: (data: any, key: string) => any,
+  inbound?: (data: any, key: string, fullState?: any) => any,
+  outbound?: (data: any, key: string, fullState?: any) => any,
   config?: TransformConfig,
 ): Transformer;
 
