@@ -774,6 +774,48 @@ test('transformers order', async () => {
   });
 });
 
+test('migrations', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore][0]': {
+      foo: "foo-updated",
+      migrationConfict: "error"
+    },
+  });
+
+  const makeStore = () =>
+    createStore(
+      persist(
+        {
+          foo: {
+            bar: "bar",
+          },
+          bar: "bar",
+        },
+        {
+          storage: memoryStorage,
+          migrations: {
+            migrationVersion: 1,
+
+            0: (state) => {
+              state.foo = { bar: state.foo }
+            },
+            1: (state) => {
+              delete state.migrationConfict;
+            },
+          }
+        },
+      ),
+    );
+
+  const store = makeStore();
+  await store.persist.resolveRehydration();
+
+  // ASSERT
+  expect(store.getState().foo.bar).toBe('foo-updated')
+  expect(store.getState().migrationConfict).toBeUndefined();
+})
+
 test('multiple stores', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
