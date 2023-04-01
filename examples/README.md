@@ -5,7 +5,7 @@
 - [Simple todo app (Next)](./nextjs-todo/) [Next.js, TS]
 - [Kanban](./kanban/) [vite, react, TS, vitest, testing-library]
   ([View codesandbox](https://codesandbox.io/s/5zdk6r))
-- React Native (todo)
+- [React Native todo app](./react-native-todo/)
 - [Reduxstagram](./reduxtagram/)
   ([View sandbox](https://codesandbox.io/s/ztuxzk))
 
