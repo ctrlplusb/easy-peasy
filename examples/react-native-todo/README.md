@@ -6,19 +6,21 @@ Store model copied (and modified) from [simple-todo](../simple-todo)
 
 ## Getting Started
 
+> Ensure that you have a working [development environment](https://reactnative.dev/docs/environment-setup?guide=native).
+
 First, install the dependencies:
 
 ```bash
 yarn
 ```
 
-iOS (tested)
+iOS
 
 ```bash
 yarn ios
 ```
 
-Android (not tested)
+Android
 
 ```bash
 yarn android
