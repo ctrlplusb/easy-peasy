@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-computed-key */
 import { migrate } from '../src/migrations';
 
 test('leaves an object untouched if there are no migrations pending', () => {
@@ -11,7 +10,7 @@ test('leaves an object untouched if there are no migrations pending', () => {
     {
       migrationVersion: 1,
 
-      [1]: (state) => {
+      1: (state) => {
         state.value = 'modified';
       },
     },
@@ -26,13 +25,12 @@ test('applies a migration if there is one pending', () => {
   // ARRANGE
   const result = migrate(
     {
-      _migrationVersion: 0,
       value: 'untouched',
     },
     {
       migrationVersion: 1,
 
-      [1]: (state) => {
+      1: (state) => {
         state.value = 'modified';
       },
     },
@@ -51,22 +49,22 @@ test('applies many migrations if there are many pending', () => {
     {
       migrationVersion: 4,
 
-      [0]: (state) => {
+      0: (state) => {
         state.zero = true;
       },
-      [1]: (state) => {
+      1: (state) => {
         state.one = true;
       },
-      [2]: (state) => {
+      2: (state) => {
         state.two = true;
       },
-      [3]: (state) => {
+      3: (state) => {
         state.three = true;
       },
-      [4]: (state) => {
+      4: (state) => {
         state.four = true;
       },
-      [5]: (state) => {
+      5: (state) => {
         state.five = true;
       },
     },
@@ -92,7 +90,7 @@ test('throws an error if there is no valid version', () => {
       {
         migrationVersion: 1,
 
-        [1]: (state) => {
+        1: (state) => {
           state.zero = true;
         },
       },
@@ -111,7 +109,7 @@ test('throws an error if there is no valid migration', () => {
       {
         migrationVersion: 1,
 
-        [0]: (state) => {
+        0: (state) => {
           state.zero = true;
         },
       },
@@ -129,7 +127,7 @@ test('guarantees that the version number ends up correct', () => {
     },
     {
       migrationVersion: 1,
-      [1]: (state) => {
+      1: (state) => {
         state.value = 'modified';
         state._migrationVersion = 5;
       },

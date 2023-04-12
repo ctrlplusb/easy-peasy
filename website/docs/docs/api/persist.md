@@ -1,8 +1,8 @@
 # persist
 
-This helper allows you to persist your store state, and subsequently rehydrate
-the store state when the store is recreated (e.g. on page refresh, new browser
-tab, etc).
+This helper allows you to persist your store state, perform migrations, and
+subsequently rehydrate the store state when the store is recreated (e.g. on page
+refresh, new browser tab, etc).
 
 By default it uses the browser's
 [`sessionStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage),
@@ -17,6 +17,8 @@ or provide a custom storage engine.
   - [Configuring your store to persist](#configuring-your-store-to-persist)
   - [Rehydrating your store](#rehydrating-your-store)
   - [Managing model updates](#managing-model-updates)
+  - [Migrations](#migrations)
+  - [Forced updates via `version`](#forced-updates-via-version)
 - [Advanced Tutorial](#advanced-tutorial)
   - [Merge Strategies](#merge-strategies)
     - [mergeDeep](#mergedeep)
@@ -69,9 +71,26 @@ Below is the API of the `persist` helper function.
     Please see the [docs](#merge-strategies) below for a full insight and
     understanding of the various options and their respective implications.
 
+  - `migrations` (Object, _optional_)
+
+    This config is used to transform persisted store state from one representation to another. This object is keyed by version numbers, with migration functions attached to each version. A `migrationVersion` is also required for this object, to specify which version to target.
+
+    ```ts
+    persist(
+      {...},
+      {
+        migrations: {
+          migrationVersion: 2,
+          1: (state) => { ... },
+          2: (state) => { ... },
+        },
+      }
+    );
+    ```
+
   - `transformers` (Array&lt;Transformer&gt;, _optional_)
 
-    Transformers are use to apply operations to your data during prior it being
+    Transformers are used to apply operations to your data prior to it being
     persisted or hydrated.
 
     One use case for a transformer is to handle data that can't be parsed to a
@@ -246,16 +265,84 @@ have persisted state based on a previous version of your store model. The user's
 persisted state may not align with that of your new store model, which could
 result in errors when a component tries to consume/update the store.
 
-Easy Peasy does its best to try and minimize / alleviate this risk. By default
-the persist API utilizes the `mergeDeep` strategy (you can read more above merge
-strategies further below). The `mergeDeep` strategy attempts to perform an
-optimistic merge of the persisted state against the store model. Where it finds
-that the persisted state is missing keys that are present in the store model, it
-will ensure to use the respective state from the store model. It will also
-verify the types of data at each key. If there is a misalignment (ignoring
-`null` or `undefined`) then it will opt for using the data from the store model
-instead as this generally indicates that the respective state has been
-refactored.
+Easy Peasy does its best to try and minimize / alleviate this risk by providing
+two ways for managing updates: migrations and store version updates.
+
+### Migrations
+
+[Similar to `redux-persist`](https://github.com/rt2zz/redux-persist#migrations),
+the persist API provides a mechanism for migrating persisted state across store
+updates via the `migrations` configuration object.
+
+**Example**
+
+Imagine a store model that has a property called `session`, and a recent
+requirements change necessitates that `session` be renamed to `userSession` for
+specificity reasons. Without a migration, if `session` was previously deployed
+to users and persisted, when the `userSession` change is released their
+application will break due to the mismatch between `session` and `userSession`
+as retrieved from local storage.
+
+In order to mitigate we can add a state migration:
+
+```ts
+persist(
+  {
+    userSession: true,
+  },
+  {
+    migrations: {
+      migrationVersion: 1, // 👈 set the latest migration version
+
+      1: (state) => {
+        state.userSession = state.session; // 👈 update new prop with old value from local storage
+        delete state.session; // and then delete, as it is no longer used
+      },
+    },
+  },
+);
+```
+
+If this property changes in the future, we can add another migration:
+
+```ts
+persist(
+  {
+    domainSession: true, // 👈 model has changed
+  },
+  {
+    migrations: {
+      migrationVersion: 2, // 👈 update to the latest version
+
+      1: (state) => {
+        state.userSession = state.session;
+        delete state.session;
+      },
+
+      2: (state) => {
+        state.domainSession = state.userSession;
+        delete state.userSession;
+      },
+    },
+  },
+);
+```
+
+### Forced updates via `version`
+
+If migrations are insufficient (which can often be the case after a major state
+refactor has taken place), the persist API also provides a means to "force
+update" the store via `version`.
+
+By default the persist API utilizes the `mergeDeep` strategy (you can read more
+above merge strategies further below). The `mergeDeep` strategy attempts to
+perform an optimistic merge of the persisted state against the store model.
+Where it finds that the persisted state is missing keys that are present in the
+store model, it will ensure to use the respective state from the store model. It
+will also verify the types of data at each key. If there is a misalignment
+(ignoring `null` or `undefined`) then it will opt for using the data from the
+store model instead as this generally indicates that the respective state has
+been refactored.
 
 Whilst the `mergeDeep` strategy is fairly robust and should be able to cater for
 a wide variety of model updates, it can't provide a 100% guarantee that a valid

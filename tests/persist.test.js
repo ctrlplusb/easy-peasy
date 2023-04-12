@@ -795,12 +795,12 @@ test('migrations', async () => {
         {
           storage: memoryStorage,
           migrations: {
-            migrationVersion: 1,
+            migrationVersion: 2,
 
-            0: (state) => {
+            1: (state) => {
               state.foo = { bar: state.foo }
             },
-            1: (state) => {
+            2: (state) => {
               delete state.migrationConfict;
             },
           }

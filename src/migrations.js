@@ -6,7 +6,7 @@ export const migrate = (
 ) => {
   setAutoFreeze(false);
 
-  let version = data._migrationVersion ?? -1;
+  let version = data._migrationVersion ?? 0;
   const toVersion = migrations.migrationVersion
 
   if (typeof version !== "number" || typeof toVersion !== 'number') {
