@@ -6,10 +6,10 @@ export const migrate = (
 ) => {
   setAutoFreeze(false);
 
-  let version = data._migrationVersion || -1;
+  let version = data._migrationVersion ?? -1;
   const toVersion = migrations.migrationVersion
 
-  if (typeof toVersion !== 'number') {
+  if (typeof version !== "number" || typeof toVersion !== 'number') {
     throw new Error('No migration version found');
   }
 
