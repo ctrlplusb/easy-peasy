@@ -778,8 +778,8 @@ test('migrations', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage({
     '[EasyPeasyStore][0]': {
-      foo: "foo-updated",
-      migrationConfict: "error"
+      session: "session",
+      user: "User Name",
     },
   });
 
@@ -787,10 +787,10 @@ test('migrations', async () => {
     createStore(
       persist(
         {
-          foo: {
-            bar: "bar",
+          user: {
+            name: null,
+            session: null
           },
-          bar: "bar",
         },
         {
           storage: memoryStorage,
@@ -798,10 +798,13 @@ test('migrations', async () => {
             migrationVersion: 2,
 
             1: (state) => {
-              state.foo = { bar: state.foo }
+              state.user = { name: state.user }
+              state.userSession = state.session;
+              delete state.session;
             },
             2: (state) => {
-              delete state.migrationConfict;
+              state.user.session = state.userSession;
+              delete state.userSession;
             },
           }
         },
@@ -812,8 +815,10 @@ test('migrations', async () => {
   await store.persist.resolveRehydration();
 
   // ASSERT
-  expect(store.getState().foo.bar).toBe('foo-updated')
-  expect(store.getState().migrationConfict).toBeUndefined();
+  expect(store.getState().user.name).toBe('User Name')
+  expect(store.getState().user.session).toBe('session')
+  expect(store.getState().session).toBeUndefined();
+  expect(store.getState().userSession).toBeUndefined();
 })
 
 test('multiple stores', async () => {

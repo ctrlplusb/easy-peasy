@@ -80,6 +80,35 @@ test('applies many migrations if there are many pending', () => {
   expect(result._migrationVersion).toBe(4);
 });
 
+test('applies migrations and deletes old values', () => {
+  // ARRANGE
+  const result = migrate(
+    {
+      _migrationVersion: 0,
+      session: "session",
+    },
+    {
+      migrationVersion: 2,
+
+      1: (state) => {
+        state.userSession = state.session;
+        delete state.session;
+      },
+
+      2: (state) => {
+        state.domainSession = state.userSession;
+        delete state.userSession;
+      },
+    },
+  );
+
+  // ASSERT
+  expect(result.session).toBe(undefined);
+  expect(result.userSession).toBe(undefined);
+  expect(result.domainSession).toBe('session');
+  expect(result._migrationVersion).toBe(2);
+});
+
 test('throws an error if there is no valid version', () => {
   // ARRANGE
   expect(() => {
