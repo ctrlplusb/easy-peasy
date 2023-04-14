@@ -73,7 +73,10 @@ Below is the API of the `persist` helper function.
 
   - `migrations` (Object, _optional_)
 
-    This config is used to transform persisted store state from one representation to another. This object is keyed by version numbers, with migration functions attached to each version. A `migrationVersion` is also required for this object, to specify which version to target.
+    This config is used to transform persisted store state from one
+    representation to another. This object is keyed by version numbers, with
+    migration functions attached to each version. A `migrationVersion` is also
+    required for this object, to specify which version to target.
 
     ```ts
     persist(
@@ -265,8 +268,22 @@ have persisted state based on a previous version of your store model. The user's
 persisted state may not align with that of your new store model, which could
 result in errors when a component tries to consume/update the store.
 
-Easy Peasy does its best to try and minimize / alleviate this risk by providing
-two ways for managing updates: migrations and store version updates.
+By default the persist API utilizes the mergeDeep strategy (you can read more
+about merge strategies further below). The mergeDeep strategy attempts to
+perform an optimistic merge of the persisted state against the store model.
+Where it finds that the persisted state is missing keys that are present in the
+store model, it will ensure to use the respective state from the store model. It
+will also verify the types of data at each key. If there is a misalignment
+(ignoring null or undefined) then it will opt for using the data from the store
+model instead as this generally indicates that the respective state has been
+refactored.
+
+Whilst the mergeDeep strategy is fairly robust and should be able to cater for a
+wide variety of model updates, it can't provide a 100% guarantee that a valid
+state structure will be resolved.
+
+Therefore, when dealing with production applications, we recommend that you
+consider removing this risk by using one of the two options described below:
 
 ### Migrations
 
@@ -328,28 +345,16 @@ persist(
 );
 ```
 
+Well-written migrations should obviate the need for merge strategies and render
+them no-ops. Note, however, that merge strategies are still applied and
+unexpected behavior may occur during rehydration as a result of non-exhaustive
+migrations.
+
 ### Forced updates via `version`
 
 If migrations are insufficient (which can often be the case after a major state
 refactor has taken place), the persist API also provides a means to "force
-update" the store via `version`.
-
-By default the persist API utilizes the `mergeDeep` strategy (you can read more
-above merge strategies further below). The `mergeDeep` strategy attempts to
-perform an optimistic merge of the persisted state against the store model.
-Where it finds that the persisted state is missing keys that are present in the
-store model, it will ensure to use the respective state from the store model. It
-will also verify the types of data at each key. If there is a misalignment
-(ignoring `null` or `undefined`) then it will opt for using the data from the
-store model instead as this generally indicates that the respective state has
-been refactored.
-
-Whilst the `mergeDeep` strategy is fairly robust and should be able to cater for
-a wide variety of model updates, it can't provide a 100% guarantee that a valid
-state structure will be resolved.
-
-Therefore, when dealing with production applications, we recommend that you
-consider removing this risk. You can do so by utilizing the `version`
+update" the store via version. You can do so by utilizing the `version`
 configuration property that is available on the store config.
 
 ```javascript
