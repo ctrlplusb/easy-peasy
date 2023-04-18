@@ -1,4 +1,5 @@
 import { clone, get, isPlainObject, isPromise, set, pSeries } from './lib';
+import { migrate } from './migrations';
 
 const noopStorage = {
   getItem: () => undefined,
@@ -32,7 +33,7 @@ const getBrowerStorage = (storageName) => {
 const localStorage = getBrowerStorage('localStorage');
 const sessionStorage = getBrowerStorage('sessionStorage');
 
-function createStorageWrapper(storage, transformers = []) {
+function createStorageWrapper(storage, transformers = [], migrations = {}) {
   if (storage == null) {
     storage = sessionStorage();
   }
@@ -69,10 +70,14 @@ function createStorageWrapper(storage, transformers = []) {
   };
 
   const deserialize = (data) => {
-    const result =
+    const storageData =
       storage === localStorage() || storage === sessionStorage()
         ? JSON.parse(data).data
         : data;
+
+    const hasMigrations = Object.keys(migrations).length > 0;
+    const result = hasMigrations ? migrate(storageData, migrations) : storageData;
+
     if (
       outTransformers.length > 0 &&
       result != null &&
@@ -117,6 +122,7 @@ export function extractPersistConfig(path, persistdef = {}) {
       storage: createStorageWrapper(
         persistdef.storage,
         persistdef.transformers,
+        persistdef.migrations,
       ),
     },
   };

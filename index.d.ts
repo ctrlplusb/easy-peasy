@@ -1040,6 +1040,10 @@ export interface PersistConfig<Model extends object> {
   allow?: Array<keyof Model>;
   deny?: Array<keyof Model>;
   mergeStrategy?: 'mergeDeep' | 'mergeShallow' | 'overwrite';
+  migrations?: {
+    migrationVersion: number;
+    [key: number]: (state: Partial<Model & { [key: string | number]: any }>) => void;
+  }
   storage?: 'localStorage' | 'sessionStorage' | PersistStorage;
   transformers?: Array<Transformer>;
 }
