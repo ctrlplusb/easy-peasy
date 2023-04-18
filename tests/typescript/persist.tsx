@@ -24,6 +24,22 @@ const model = persist(
 
 `${model.foo}baz`;
 
+persist(
+  {
+    foo: 'bar',
+  },
+  {
+    migrations: {
+      migrationVersion: 1,
+
+      1: (state) => {
+        state.foo = 'bar';
+        delete state.migrationConflict
+      }
+    },
+  },
+);
+
 createTransform(
   (data, key) => `${key}foo`,
   (data, key) => `${key}foo`,
@@ -38,7 +54,7 @@ createTransform(
   (data, key) => `${key}foo`,
 );
 
-createTransform((data, key) => `${key}foo`);
+createTransform((data, key, fullState) => `${key}foo`);
 
 createTransform(undefined, (data, key) => `${key}foo`, {
   whitelist: ['foo'],

@@ -163,7 +163,6 @@ export function createStore(model, options = {}) {
     getActions: () => _r._i._aC,
     getListeners: () => _r._i._lAC,
     getMockedActions: () => [...mockedActions],
-    getServerState: initialState,
     persist: {
       clear: persistor.clear,
       flush: persistor.flush,

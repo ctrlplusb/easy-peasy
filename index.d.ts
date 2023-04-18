@@ -1032,14 +1032,18 @@ export interface PersistStorage {
 }
 
 export interface Transformer {
-  in?: (data: any, key: string) => any;
-  out?: (data: any, key: string) => any;
+  in?: (data: any, key: string, fullState?: any) => any;
+  out?: (data: any, key: string, fullState?: any) => any;
 }
 
 export interface PersistConfig<Model extends object> {
   allow?: Array<keyof Model>;
   deny?: Array<keyof Model>;
   mergeStrategy?: 'mergeDeep' | 'mergeShallow' | 'overwrite';
+  migrations?: {
+    migrationVersion: number;
+    [key: number]: (state: Partial<Model & { [key: string | number]: any }>) => void;
+  }
   storage?: 'localStorage' | 'sessionStorage' | PersistStorage;
   transformers?: Array<Transformer>;
 }
@@ -1050,8 +1054,8 @@ export interface TransformConfig {
 }
 
 export function createTransform(
-  inbound?: (data: any, key: string) => any,
-  outbound?: (data: any, key: string) => any,
+  inbound?: (data: any, key: string, fullState?: any) => any,
+  outbound?: (data: any, key: string, fullState?: any) => any,
   config?: TransformConfig,
 ): Transformer;
 

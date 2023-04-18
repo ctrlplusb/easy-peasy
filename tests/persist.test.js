@@ -645,12 +645,14 @@ test('clear', async () => {
 test('transformers', async () => {
   // ARRANGE
   const upperCaseTransformer = createTransform(
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "item one", "two": "item two"})
       return data.toUpperCase();
     },
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "_ITEM ONE_", "two": "item two"})
       return data.toLowerCase();
     },
     {
@@ -659,12 +661,14 @@ test('transformers', async () => {
   );
 
   const padTransformer = createTransform(
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "item one", "two": "item two"})
       return `_${data}_`;
     },
-    (data, key) => {
+    (data, key, fullState) => {
       expect(key).toBe('one');
+      expect(fullState).toEqual({"one": "_ITEM ONE_", "two": "item two"})
       return data.substr(1, data.length - 2);
     },
     {
@@ -773,6 +777,103 @@ test('transformers order', async () => {
     two: new Set([3, 4]),
   });
 });
+
+test('migrations', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore][0]': {
+      session: "session",
+      user: "User Name",
+    },
+  });
+
+  const makeStore = () =>
+    createStore(
+      persist(
+        {
+          user: {
+            name: null,
+            session: null
+          },
+        },
+        {
+          storage: memoryStorage,
+          migrations: {
+            migrationVersion: 2,
+
+            1: (state) => {
+              state.user = { name: state.user }
+              state.userSession = state.session;
+              delete state.session;
+            },
+            2: (state) => {
+              state.user.session = state.userSession;
+              delete state.userSession;
+            },
+          }
+        },
+      ),
+    );
+
+  const store = makeStore();
+  await store.persist.resolveRehydration();
+
+  // ASSERT
+  expect(store.getState().user.name).toBe('User Name')
+  expect(store.getState().user.session).toBe('session')
+  expect(store.getState().session).toBeUndefined();
+  expect(store.getState().userSession).toBeUndefined();
+})
+
+test('partially applied migrations', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore][0]': {
+      user: {
+        name: "User Name",
+      },
+      userSession: "session",
+      _migrationVersion: 1,
+    },
+  });
+
+  const makeStore = () =>
+    createStore(
+      persist(
+        {
+          user: {
+            name: null,
+            session: null
+          },
+        },
+        {
+          storage: memoryStorage,
+          migrations: {
+            migrationVersion: 2,
+
+            1: (state) => {
+              state.user = { name: state.user }
+              state.userSession = state.session;
+              delete state.session;
+            },
+            2: (state) => {
+              state.user.session = state.userSession;
+              delete state.userSession;
+            },
+          }
+        },
+      ),
+    );
+
+  const store = makeStore();
+  await store.persist.resolveRehydration();
+
+  // ASSERT
+  expect(store.getState().user.name).toBe('User Name')
+  expect(store.getState().user.session).toBe('session')
+  expect(store.getState().session).toBeUndefined();
+  expect(store.getState().userSession).toBeUndefined();
+})
 
 test('multiple stores', async () => {
   // ARRANGE
