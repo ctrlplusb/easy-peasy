@@ -821,6 +821,56 @@ test('migrations', async () => {
   expect(store.getState().userSession).toBeUndefined();
 })
 
+test('partially applied migrations', async () => {
+  // ARRANGE
+  const memoryStorage = createMemoryStorage({
+    '[EasyPeasyStore][0]': {
+      user: {
+        name: "User Name",
+      },
+      userSession: "session",
+      _migrationVersion: 1,
+    },
+  });
+
+  const makeStore = () =>
+    createStore(
+      persist(
+        {
+          user: {
+            name: null,
+            session: null
+          },
+        },
+        {
+          storage: memoryStorage,
+          migrations: {
+            migrationVersion: 2,
+
+            1: (state) => {
+              state.user = { name: state.user }
+              state.userSession = state.session;
+              delete state.session;
+            },
+            2: (state) => {
+              state.user.session = state.userSession;
+              delete state.userSession;
+            },
+          }
+        },
+      ),
+    );
+
+  const store = makeStore();
+  await store.persist.resolveRehydration();
+
+  // ASSERT
+  expect(store.getState().user.name).toBe('User Name')
+  expect(store.getState().user.session).toBe('session')
+  expect(store.getState().session).toBeUndefined();
+  expect(store.getState().userSession).toBeUndefined();
+})
+
 test('multiple stores', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
