@@ -21,13 +21,13 @@ export const actionOn = (targetResolver, fn, config) => ({
   [actionOnSymbol]: true,
   fn,
   targetResolver,
-  config
+  config,
 });
 
 export const action = (fn, config) => ({
   [actionSymbol]: true,
   fn,
-  config
+  config,
 });
 
 const defaultStateResolvers = [(state) => state];
@@ -47,7 +47,7 @@ export const computed = (fnOrStateResolvers, fn) => {
   };
 };
 
-export function unstable_effectOn(dependencyResolvers, fn) {
+export function effectOn(dependencyResolvers, fn) {
   return {
     [effectOnSymbol]: true,
     dependencyResolvers,
@@ -82,5 +82,5 @@ export const thunk = (fn) => ({
 export const reducer = (fn, config) => ({
   [reducerSymbol]: true,
   fn,
-  config
+  config,
 });

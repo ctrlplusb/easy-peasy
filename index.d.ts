@@ -94,7 +94,7 @@ type ActionListenerTypes = ActionOn<any, any> | ThunkOn<any, any, any>;
 type ActionTypes =
   | ActionEmitterTypes
   | ActionListenerTypes
-  | Unstable_EffectOn<any, any, any>;
+  | EffectOn<any, any, any>;
 
 interface ActionCreator<Payload = void> {
   (payload: Payload): void;
@@ -698,7 +698,7 @@ export function computed<
 
 // #region EffectOn
 
-export interface Unstable_EffectOn<
+export interface EffectOn<
   Model extends object = {},
   StoreModel extends object = {},
   Injections = any,
@@ -717,7 +717,7 @@ type Change<Resolvers extends StateResolvers<any, any>> = {
 
 export type Dispose = () => any;
 
-export function unstable_effectOn<
+export function effectOn<
   Model extends object = {},
   StoreModel extends object = {},
   Injections = any,
@@ -732,7 +732,7 @@ export function unstable_effectOn<
     change: Change<Resolvers>,
     helpers: Helpers<Model, StoreModel, Injections>,
   ) => undefined | void | Dispose,
-): Unstable_EffectOn<Model, StoreModel, Injections>;
+): EffectOn<Model, StoreModel, Injections>;
 
 // #endregion
 

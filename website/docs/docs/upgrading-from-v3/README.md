@@ -50,21 +50,15 @@ for more information on this API.
 
 Closes #451 Closes #439
 
-### Adds new `unstable_effectOn` model API
-
-> **\*Note:** this is an experimental API. We are pre-releasing it to allow for
-> early feedback. The API is subject to breaking changes with any release of
-> Easy Peasy. As such we have prefixed the API with "unstable*", much like React
-> does with its experimental APIs. Once the API has stabilised the "unstable*"
-> prefix will be removed and semver based releases will be respected.\*
+### Adds new `effectOn` model API
 
 Allows you to declare an effect within your model which will execute every time
 the targeted state changes.
 
-Two arguments are provided to unstable_effectOn; namely the `stateResolvers` and
-the `handler`. The `stateResolvers` are an array of functions which should
-resolve the target state that should be tracked. When the tracked state changes
-the `handler` function is executed.
+Two arguments are provided to effectOn; namely the `stateResolvers` and the
+`handler`. The `stateResolvers` are an array of functions which should resolve
+the target state that should be tracked. When the tracked state changes the
+`handler` function is executed.
 
 The `handler` can be _asynchronous_ or _synchronous_. It receives the store
 actions, a `change` object containing the `prev` values for the targeted state
@@ -77,7 +71,7 @@ be executed prior to the next execution of the `handler`. This can be useful in
 performing things like API call cancellation etc.
 
 ```javascript
-import { unstable_effectOn } from 'easy-peasy';
+import { effectOn } from 'easy-peasy';
 
 const todosModel = {
   items: [],
@@ -85,17 +79,17 @@ const todosModel = {
   setSaving: action((state, payload) => {
     state.saving = payload;
   }),
-  onItemsChanged: unstable_effectOn(
+  onItemsChanged: effectOn(
     // Provide an array of "stateResolvers" to resolve the targeted state:
-    [state => state.items],
+    [(state) => state.items],
     // Provide a handler which will execute every time the targeted state changes:
     async (actions, change) => {
       const [items] = change.current;
       actions.setSaving(true);
       await todosService.save(items);
       actions.setSaving(false);
-    }
-  )
+    },
+  ),
 };
 ```
 

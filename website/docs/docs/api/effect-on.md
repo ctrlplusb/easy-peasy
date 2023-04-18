@@ -4,24 +4,19 @@ Allows you to declare an effect within your model which will execute every time
 the targeted state changes. Think of it as a thunk that automatically fires when
 specific state changes.
 
-> **\*Note:** this is an experimental API. We are pre-releasing it to allow for
-> early feedback. The API is subject to breaking changes with any release of
-> Easy Peasy. As such we have prefixed the API with "unstable*", much like React
-> does with its experimental APIs. Once the API has stabilised the "unstable*"
-> prefix will be removed and semver based releases will be respected.\*
-
-- [API](#api)
-  - [Arguments](#arguments)
-- [Tutorial](#tutorial)
-  - [Introduction](#introduction)
-  - [Execution behaviour](#execution-behaviour)
-  - [How state changes are determined](#how-state-changes-are-determined)
-  - [Utilising a dispose function](#utilising-a-dispose-function)
-- [Limitations](#limitations)
+- [effectOn](#effecton)
+  - [API](#api)
+    - [Arguments](#arguments)
+  - [Tutorial](#tutorial)
+    - [Introduction](#introduction)
+    - [Execution behaviour](#execution-behaviour)
+    - [How state changes are determined](#how-state-changes-are-determined)
+    - [Utilising a dispose function](#utilising-a-dispose-function)
+  - [Limitations](#limitations)
 
 ## API
 
-The `unstable_effectOn` function is described below.
+The `effectOn` function is described below.
 
 ### Arguments
 
@@ -149,10 +144,10 @@ The `unstable_effectOn` function is described below.
 
 ### Introduction
 
-Two arguments are provided to [unstable_effectOn](/docs/api/effect-on.html);
-namely the `stateResolvers` and the `handler`. The `stateResolvers` are an array
-of functions which should resolve the target state that should be tracked. When
-the tracked state changes the `handler` function is executed..
+Two arguments are provided to [effectOn](/docs/api/effect-on.html); namely the
+`stateResolvers` and the `handler`. The `stateResolvers` are an array of
+functions which should resolve the target state that should be tracked. When the
+tracked state changes the `handler` function is executed..
 
 The `handler` can be _asynchronous_ or _synchronous_. It receives the
 [store](/docs/api/store.html) actions, a `change` object containing the `prev`
@@ -165,7 +160,7 @@ be executed prior to the next execution of the `handler`. This can be useful in
 performing things like API call cancellation etc.
 
 ```javascript
-import { unstable_effectOn } from 'easy-peasy';
+import { effectOn } from 'easy-peasy';
 
 const todosModel = {
   items: [],
@@ -173,7 +168,7 @@ const todosModel = {
   setSaving: action((state, payload) => {
     state.saving = payload;
   }),
-  unstable_effectOn(
+  effectOn(
     // Provide an array of "stateResolvers" to resolve the targeted state:
     [state => state.items],
     // Provide a handler which will execute every time the targeted state changes:
@@ -244,7 +239,7 @@ Instead you should resolve each piece of state individually:
 const myModel = {
   one: 'one',
   two: 'two',
-  unstable_effectOn(
+  effectOn(
     [
       // 👍
       (state) => state.one,
@@ -265,11 +260,11 @@ effect execution has not yet completed. This provides a mechanism by which you
 can clean up resource hooks or cancel API calls.
 
 ```javascript
-import { unstable_effectOn } from 'easy-peasy';
+import { effectOn } from 'easy-peasy';
 
 const todosModel = {
   items: [],
-  unstable_effectOn(
+  effectOn(
     [state => state.items],
     (actions, change) => {
       const [items] = change.current;
@@ -290,7 +285,7 @@ possible should a new effect execution begin. The example below illustrates the
 anti-pattern of resolving the `dispose` asynchronously.
 
 ```javascript
-unstable_effectOn(
+effectOn(
   [(state) => state.items],
   // We are using async/await, therefore our dispose is now resolved
   // asynchronously via the implicitly returned Promise.

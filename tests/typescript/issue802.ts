@@ -1,11 +1,6 @@
-import {
-  Unstable_EffectOn,
-  unstable_effectOn,
-  Action,
-  action,
-} from 'easy-peasy';
+import { EffectOn, effectOn, Action, action } from 'easy-peasy';
 
-type AppEffectOn<TModel extends object> = Unstable_EffectOn<
+type AppEffectOn<TModel extends object> = EffectOn<
   TModel,
   StoreModel,
   Injections
@@ -41,12 +36,9 @@ const model: StoreModel = {
     sayHelloTo: action((state, payload) => {
       state.name = payload;
     }),
-    onStateChanged: unstable_effectOn(
-      [(state) => state.name],
-      (_, __, helpers) => {
-        console.log(`Hello, ${helpers.getState().name}`);
-      },
-    ),
+    onStateChanged: effectOn([(state) => state.name], (_, __, helpers) => {
+      console.log(`Hello, ${helpers.getState().name}`);
+    }),
   },
   todos: {
     items: [],
@@ -54,7 +46,7 @@ const model: StoreModel = {
     setFoo: action((state, payload) => {
       state.foo = payload;
     }),
-    onStateChanged: unstable_effectOn(
+    onStateChanged: effectOn(
       [
         (state) => state.items,
         (state) => state.foo,
