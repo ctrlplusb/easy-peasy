@@ -27,7 +27,6 @@ module.exports = {
       { text: 'Docs', link: '/docs/introduction/' },
       { text: 'v3', link: 'https://easy-peasy-v3.vercel.app/' },
       { text: 'v4', link: 'https://easy-peasy-v4.vercel.app/' },
-      { text: 'v5', link: 'https://easy-peasy-v5.vercel.app/' },
     ],
 
     sidebarDepth: 0,
