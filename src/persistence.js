@@ -1,3 +1,4 @@
+import timingMethod from './utils/timingMethod';
 import { clone, get, isPlainObject, isPromise, set, pSeries } from './lib';
 import { migrate } from './migrations';
 
@@ -76,7 +77,9 @@ function createStorageWrapper(storage, transformers = [], migrations = {}) {
         : data;
 
     const hasMigrations = Object.keys(migrations).length > 0;
-    const result = hasMigrations ? migrate(storageData, migrations) : storageData;
+    const result = hasMigrations
+      ? migrate(storageData, migrations)
+      : storageData;
 
     if (
       outTransformers.length > 0 &&
@@ -168,13 +171,6 @@ export function createPersistor(persistKey, _r) {
   let persistPromise = Promise.resolve();
   let isPersisting = false;
   let nextPersistOperation;
-
-  const timingMethod =
-    typeof window === 'undefined'
-      ? (fn) => fn()
-      : window.requestIdleCallback != null
-      ? window.requestIdleCallback
-      : window.requestAnimationFrame;
 
   const persist = (nextState) => {
     if (_r._i._persistenceConfig.length === 0) {

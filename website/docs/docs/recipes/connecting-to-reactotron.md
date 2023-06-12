@@ -30,12 +30,6 @@ Then update the manner in which you create your Easy Peasy store.
 import { createStore } from 'easy-peasy';
 import model from './model';
 
-// There might be an issue causing `setItem` not being called correctly
-// for iOS devices using React Native. The solution for this is currently
-// to remove the implemenation of `requestIdleCallback`.
-// Read this issue for more information: https://github.com/ctrlplusb/easy-peasy/issues/599
-window.requestIdleCallback = null;
-
 let storeEnhancers = [];
 
 if (__DEV__) {
