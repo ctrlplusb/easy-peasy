@@ -1,4 +1,3 @@
-import timingMethod from './utils/timingMethod';
 import { clone, get, isPlainObject, isPromise, set, pSeries } from './lib';
 import { migrate } from './migrations';
 
@@ -171,6 +170,15 @@ export function createPersistor(persistKey, _r) {
   let persistPromise = Promise.resolve();
   let isPersisting = false;
   let nextPersistOperation;
+
+  const timingMethod =
+    typeof window === 'undefined'
+      ? (fn) => fn()
+      : window.requestIdleCallback != null
+      ? // We need to wrap requestIdleCallback, because it doesn't work without
+        // a second parameter on iOS with ReactNative
+        (fn) => window.requestIdleCallback(fn, { timeout: 0 })
+      : window.requestAnimationFrame;
 
   const persist = (nextState) => {
     if (_r._i._persistenceConfig.length === 0) {
