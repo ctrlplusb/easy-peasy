@@ -1,7 +1,7 @@
 import path from 'path';
 import babel from 'rollup-plugin-babel';
 import resolve from 'rollup-plugin-node-resolve';
-import { sizeSnapshot } from 'rollup-plugin-size-snapshot';
+import analyze from 'rollup-plugin-analyzer';
 import pkg from './package.json';
 
 const babelRuntimeVersion = pkg.dependencies['@babel/runtime'].replace(
@@ -31,7 +31,7 @@ function createESMConfig(input, output) {
         sourceMaps: true,
         inputSourceMap: true,
       }),
-      sizeSnapshot(),
+      analyze({ summaryOnly: true }),
     ],
   };
 }
@@ -52,7 +52,7 @@ function createCommonJSConfig(input, output) {
         sourceMaps: true,
         inputSourceMap: true,
       }),
-      sizeSnapshot(),
+      analyze({ summaryOnly: true }),
     ],
   };
 }
