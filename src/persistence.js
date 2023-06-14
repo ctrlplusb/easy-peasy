@@ -76,7 +76,9 @@ function createStorageWrapper(storage, transformers = [], migrations = {}) {
         : data;
 
     const hasMigrations = Object.keys(migrations).length > 0;
-    const result = hasMigrations ? migrate(storageData, migrations) : storageData;
+    const result = hasMigrations
+      ? migrate(storageData, migrations)
+      : storageData;
 
     if (
       outTransformers.length > 0 &&
@@ -173,7 +175,9 @@ export function createPersistor(persistKey, _r) {
     typeof window === 'undefined'
       ? (fn) => fn()
       : window.requestIdleCallback != null
-      ? window.requestIdleCallback
+      ? // We need to wrap requestIdleCallback, because it doesn't work without
+        // a second parameter on iOS with ReactNative
+        (fn) => window.requestIdleCallback(fn, { timeout: 0 })
       : window.requestAnimationFrame;
 
   const persist = (nextState) => {
