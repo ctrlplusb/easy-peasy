@@ -54,8 +54,7 @@ type Model = {
 
 type ModelActions = Actions<Model>;
 
-// @ts-ignore
-const store = createStore<Model>({});
+const store = createStore<Model>({} as any);
 
 store.getActions().push();
 store.getActions().pop();
@@ -64,75 +63,75 @@ store.getActions().thunkImp(null);
 
 const assert = {} as ModelActions;
 
-// typings:expect-error
+// @ts-expect-error
 assert.stateObject;
-// typings:expect-error
+// @ts-expect-error
 assert.stateMap;
-// typings:expect-error
+// @ts-expect-error
 assert.nestedNoActions;
-// typings:expect-error
+// @ts-expect-error
 assert.stateArray;
-// typings:expect-error
+// @ts-expect-error
 assert.stateBoolean;
-// typings:expect-error
+// @ts-expect-error
 assert.stateDate;
-// typings:expect-error
+// @ts-expect-error
 assert.stateNull;
-// typings:expect-error
+// @ts-expect-error
 assert.stateNumber;
-// typings:expect-error
+// @ts-expect-error
 assert.stateRegExp;
-// typings:expect-error
+// @ts-expect-error
 assert.stateString;
-// typings:expect-error
+// @ts-expect-error
 assert.stateUndefined;
-// typings:expect-error
+// @ts-expect-error
 assert.stateUnion;
-// typings:expect-error
+// @ts-expect-error
 assert.reducerImp;
-// typings:expect-error
+// @ts-expect-error
 assert.reducerImp;
-// typings:expect-error
+// @ts-expect-error
 assert.computedImp;
 assert.actionImp(1);
 assert.actionNoPayload();
 assert.thunkImp('foo').then(() => 'zing');
-// typings:expect-error
+// @ts-expect-error
 assert.onAction({
   payload: 'foo',
   type: 'foo',
   resolvedTargets: ['foo'],
 });
-// typings:expect-error
+// @ts-expect-error
 assert.onThunk({
   payload: 'foo',
   type: 'foo',
   resolvedTargets: ['foo'],
 });
 
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateArray;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateBoolean;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateDate;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateNull;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateNumber;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateRegExp;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateString;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateUndefined;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.stateUnion;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.reducerImp;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.reducerImp;
-// typings:expect-error
+// @ts-expect-error
 assert.nested.computedImp;
 assert.nested.actionImp(1);
 assert.nested.actionNoPayload();

@@ -12,6 +12,7 @@ jobs:
       matrix:
         command:
           - lint
+          - dtslint
           - test:coverage
     runs-on: ubuntu-latest
     steps:

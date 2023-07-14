@@ -52,17 +52,17 @@ store.getActions().doActionVoid();
 store.getActions().doAction(true);
 store.dispatch.doAction(true);
 
-// typings:expect-error
+// @ts-expect-error
 store.getActions().doAction(1);
-// typings:expect-error
+// @ts-expect-error
 store.dispatch.doAction(1);
 
 store.getActions().doThunk(1);
 store.dispatch.doThunk(1);
 
-// typings:expect-error
+// @ts-expect-error
 store.getActions().doThunk(true);
-// typings:expect-error
+// @ts-expect-error
 store.dispatch.doThunk(true);
 
 store.getMockedActions()[0].type;
@@ -73,11 +73,11 @@ store.persist.clear().then(() => undefined);
 store.persist.flush().then(() => undefined);
 store.persist.resolveRehydration().then(() => undefined);
 
-// typings:expect-error
+// @ts-expect-error
 store.addModel();
-// typings:expect-error
+// @ts-expect-error
 store.addModel('bar');
-// typings:expect-error
+// @ts-expect-error
 store.addModel('bar', true);
 
 const addModelResult = store.addModel('foo', {});

@@ -30,9 +30,9 @@ const model: Model = {
 const store = createStore(model);
 
 store.dispatch.todos.add('foo');
-// typings:expect-error
+// @ts-expect-error
 store.dispatch.todos.add(1);
-// typings:expect-error
+// @ts-expect-error
 store.dispatch.todos.add();
 
 store.dispatch.todos.clear();
