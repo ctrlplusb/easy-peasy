@@ -489,10 +489,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-easy-peasy@5.2.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/easy-peasy/-/easy-peasy-5.2.0.tgz#aee9a06d4bf72aa1e20442d5019306a552f350a0"
-  integrity sha512-QHRRJTsF15ZLK5vLcCLDF3A7sMrE4+7S/8ggZempfMbXX3xNsH2R3HVA+Xo5rZA65Rg8Zf5X6fflEMGuzfgwTw==
+easy-peasy@6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/easy-peasy/-/easy-peasy-6.0.0.tgz#5ae71f7cc52c77764f9bc5a8df8469fd7a5c20a8"
+  integrity sha512-thU1pJmeWcE7Zy14Wzfq8V5zpje4I39RSRYpqepXRKxDh4AfTMa/P6+ylA+iEdiMN4plhloVyzD0yGsHBPxofA==
   dependencies:
     "@babel/runtime" "^7.17.2"
     fast-deep-equal "^3.1.3"
@@ -1765,9 +1765,9 @@ which@^2.0.1:
     isexe "^2.0.0"
 
 word-wrap@^1.2.3:
-  version "1.2.3"
-  resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.3.tgz#610636f6b1f703891bd34771ccb17fb93b47079c"
-  integrity sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/word-wrap/-/word-wrap-1.2.4.tgz#cb4b50ec9aca570abd1f52f33cd45b6c61739a9f"
+  integrity sha512-2V81OA4ugVo5pRo46hAoD2ivUJx8jXmWXfUkY4KFNw0hEptvN0QfH3K4nHiwzGeKl5rFKedV48QVoqYavy4YpA==
 
 wrappy@1:
   version "1.0.2"
