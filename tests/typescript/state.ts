@@ -156,17 +156,17 @@ assert.nested.reducerImp + 10;
  * Action Types
  */
 
-// typings:expect-error
+// @ts-expect-error
 assert.actionImp(1);
-// typings:expect-error
+// @ts-expect-error
 assert.thunkImp('foo');
-// typings:expect-error
+// @ts-expect-error
 assert.onAction({
   payload: 'foo',
   type: 'foo',
   resolvedTargets: ['foo'],
 });
-// typings:expect-error
+// @ts-expect-error
 assert.onThunk({
   payload: 'foo',
   type: 'foo',

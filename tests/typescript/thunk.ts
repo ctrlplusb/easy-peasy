@@ -71,22 +71,22 @@ store.getActions().audit.optionalPayloadThunk();
 store.getActions().audit.optionalPayloadThunk({ foo: 'bar' });
 store.getActions().audit.optionalPayloadThunkTwo();
 store.getActions().audit.optionalPayloadThunkTwo({ foo: 'bar' });
-// typings:expect-error
+// @ts-expect-error
 store.getActions().audit.optionalPayloadThunkThree();
 store.getActions().audit.optionalPayloadThunkThree(null);
 store.getActions().audit.optionalPayloadThunkThree({ foo: 'bar' });
-// typings:expect-error
+// @ts-expect-error
 store.getActions().audit.optionalPayloadThunk(1);
 store.getActions().audit.syncThunk().toUpperCase();
 store
   .getActions()
   .audit.log('foo')
   .then((result) => result + 1);
-// typings:expect-error
+// @ts-expect-error
 store.getActions().audit.log(1);
-// typings:expect-error
+// @ts-expect-error
 store.getActions().audit.log();
 
 store.getActions().audit.empty();
-// typings:expect-error
+// @ts-expect-error
 store.getActions().audit.empty('foo');

@@ -1,3 +1,4 @@
+import * as React from 'react';
 import { createTransform, persist, useStoreRehydrated } from 'easy-peasy';
 
 persist({

@@ -14,8 +14,7 @@ interface StoreModel {
   addTodo: Action<StoreModel, string>;
 }
 
-// @ts-ignore
-const model: StoreModel = {};
+const model: StoreModel = {} as any;
 
 const store = createStore(model);
 

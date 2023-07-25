@@ -89,7 +89,7 @@ function TestDispatch() {
 </CounterWithCustomRuntimeModel.Provider>;
 
 <CounterWithCustomRuntimeModel.Provider
-  // typings:expect-error
+  // @ts-expect-error
   runtimeModel={{ count: 'foo' }}
 >
   <CountDisplay />
@@ -102,7 +102,7 @@ function TestDispatch() {
 </CounterWithInjections.Provider>;
 
 <CounterWithInjections.Provider
-  // typings:expect-error
+  // @ts-expect-error
   injections={{ foo: 1 }}
 >
   <CountDisplay />

@@ -1,11 +1,16 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
-    "jsx": "preserve",
-    "strict": true,
+    "module": "commonjs",
+    "lib": ["es2017", "dom"],
+    "jsx": "react",
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "types": [],
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": "../..",
-    "skipLibCheck": false,
     "paths": {
       "easy-peasy": ["index.d.ts"]
     }

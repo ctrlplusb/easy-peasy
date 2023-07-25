@@ -47,10 +47,10 @@
     "build": "rollup -c",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "lint": "eslint --fix --ext .ts,.js src tests",
+    "dtslint": "dtslint tests/typescript --expectOnly",
     "prepublish": "yarn run build",
     "test": "jest",
-    "test:source": "jest --modulePathIgnorePatterns=typescript.test.js",
-    "test:source:watch": "yarn test:source -- --watch",
+    "test:watch": "jest --watch",
     "test:coverage": "yarn run test -- --coverage",
     "test:coverage:deploy": "yarn run test:coverage && codecov",
     "prepare": "husky install"
@@ -102,6 +102,7 @@
     "@babel/preset-react": "^7.22.5",
     "@babel/preset-typescript": "^7.22.5",
     "@babel/register": "^7.22.5",
+    "@definitelytyped/dtslint": "^0.0.163",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^14.0.0",
     "@testing-library/react-hooks": "^8.0.1",
@@ -137,8 +138,7 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "shallowequal": "^1.1.0",
     "title-case": "^3.0.3",
-    "typescript": "5.1.6",
-    "typings-tester": "^0.3.2"
+    "typescript": "5.1.6"
   },
   "jest": {
     "collectCoverageFrom": [

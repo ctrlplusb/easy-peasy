@@ -1000,7 +1000,7 @@ const model: StoreModel = {
 const store = createStore(model);
 
 store.getState().one.deep.deeper.deepest.one;
-// typings:expect-error
+// @ts-expect-error
 store.getState().one.deep.deeper.deepest.two;
 // ❗️ This has hit our maximum depth level for mapping out state, therefore
 //    the action still exists on the type where you would expect it not to

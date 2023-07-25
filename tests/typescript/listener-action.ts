@@ -34,7 +34,7 @@ const valid1: ActionOn<ListeningModel, StoreModel> = actionOn(
 const invalid1: ActionOn<ListeningModel> = actionOn(
   (actions) => actions.doActionNumber,
   (state, target) => {
-    // typings:expect-error
+    // @ts-expect-error
     state.logs.push(target.payload);
   },
 );
@@ -49,7 +49,7 @@ const valid2: ActionOn<ListeningModel> = actionOn(
 const invalid2: ActionOn<ListeningModel> = actionOn(
   (actions) => actions.doThunkNumber,
   (state, target) => {
-    // typings:expect-error
+    // @ts-expect-error
     state.logs.push(target.payload);
   },
 );
@@ -62,7 +62,7 @@ const valid3: ActionOn<ListeningModel> = actionOn(
 );
 
 const invalid3: ActionOn<ListeningModel> = actionOn(
-  // typings:expect-error
+  // @ts-expect-error
   () => 1,
   (state, target) => {
     state.logs.push(target.payload);
@@ -70,7 +70,7 @@ const invalid3: ActionOn<ListeningModel> = actionOn(
 );
 
 const invalid4: ActionOn<ListeningModel> = actionOn(
-  // typings:expect-error
+  // @ts-expect-error
   () => undefined,
   (state, target) => {
     state.logs.push(target.payload);
@@ -87,7 +87,7 @@ const valid4: ActionOn<ListeningModel> = actionOn(
 const invalid5: ActionOn<ListeningModel> = actionOn(
   (actions) => [actions.doActionString, actions.doThunkNumber],
   (state, target) => {
-    // typings:expect-error
+    // @ts-expect-error
     state.logs.push(target.payload);
   },
 );

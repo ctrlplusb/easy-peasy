@@ -24,7 +24,7 @@ const valid1: ThunkOn<Model> = thunkOn(
 const invalid1: ThunkOn<Model> = thunkOn(
   (actions) => actions.doActionNumber,
   (actions, target) => {
-    // typings:expect-error
+    // @ts-expect-error
     actions.log(target.payload);
   },
 );
@@ -39,7 +39,7 @@ const valid2: ThunkOn<Model> = thunkOn(
 const invalid2: ThunkOn<Model> = thunkOn(
   (actions) => actions.doThunkNumber,
   (actions, target) => {
-    // typings:expect-error
+    // @ts-expect-error
     actions.log(target.payload);
   },
 );
@@ -52,7 +52,7 @@ const valid3: ThunkOn<Model> = thunkOn(
 );
 
 const invalid3: ThunkOn<Model> = thunkOn(
-  // typings:expect-error
+  // @ts-expect-error
   () => 1,
   (actions, target) => {
     actions.log(target.payload);
@@ -60,7 +60,7 @@ const invalid3: ThunkOn<Model> = thunkOn(
 );
 
 const invalid4: ThunkOn<Model> = thunkOn(
-  // typings:expect-error
+  // @ts-expect-error
   () => undefined,
   (actions, target) => {
     actions.log(target.payload);
@@ -83,7 +83,7 @@ const valid4: ThunkOn<Model> = thunkOn(
 const invalid5: ThunkOn<Model> = thunkOn(
   (actions) => [actions.doActionString, actions.doThunkNumber],
   (actions, target) => {
-    // typings:expect-error
+    // @ts-expect-error
     actions.log(target.payload);
   },
 );

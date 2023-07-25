@@ -72,7 +72,7 @@ const makeSimpleModel = <T>(initialValue: T): SimpleModel<T> => {
     theset: action((state, payload) => {
       state.count = 1;
       state.thevalue = payload;
-      // typings:expect-error
+      // @ts-expect-error
       state.theset();
     }),
   };
