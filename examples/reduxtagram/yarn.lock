@@ -864,10 +864,10 @@ dom-helpers@^5.0.1:
     "@babel/runtime" "^7.8.7"
     csstype "^3.0.2"
 
-easy-peasy@^5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/easy-peasy/-/easy-peasy-5.1.0.tgz#5fbd3a2d4803ef982b42083be47badf553227341"
-  integrity sha512-Gd5jzTRrWrE6r59014GXTzpcq5abJ5AMGxc4fzd9sM8PCy18evzxVF9MYlkkzdTnUI/Rbvf0sQW50ev8DXyNjw==
+easy-peasy@^6.0.0:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/easy-peasy/-/easy-peasy-6.0.1.tgz#f8975194a8eeea65b0df753e3c04c05c0919d73f"
+  integrity sha512-++JP4m57HPNM9AbED/QDJLoYK0VwZAFFqh59GaAiTfpm/GB+5gBV3KIwhohTqG3GZoG2+5tlz52mkHfhyMmNpw==
   dependencies:
     "@babel/runtime" "^7.17.2"
     fast-deep-equal "^3.1.3"
