@@ -105,7 +105,6 @@
     "@definitelytyped/dtslint": "^0.0.163",
     "@testing-library/jest-dom": "^5.16.2",
     "@testing-library/react": "^14.0.0",
-    "@testing-library/react-hooks": "^8.0.1",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@types/react-redux": "^7.1.25",
