@@ -49,6 +49,7 @@
     "lint": "eslint --fix --ext .ts,.js src tests",
     "dtslint": "dtslint tests/typescript --expectOnly",
     "prepublish": "yarn run build",
+    "prepublishOnly": "yarn",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "yarn run test -- --coverage",
