@@ -1,6 +1,6 @@
 {
   "name": "easy-peasy",
-  "version": "6.0.1",
+  "version": "6.0.2",
   "description": "Vegetarian friendly state for React",
   "license": "MIT",
   "main": "dist/index.cjs.js",
@@ -49,6 +49,7 @@
     "lint": "eslint --fix --ext .ts,.js src tests",
     "dtslint": "dtslint tests/typescript --expectOnly",
     "prepublish": "yarn run build",
+    "prepublishOnly": "yarn",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "yarn run test -- --coverage",
