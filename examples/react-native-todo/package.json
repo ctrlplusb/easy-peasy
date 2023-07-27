@@ -10,7 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "easy-peasy": "^5.2.0",
+    "easy-peasy": "^6.0.0",
     "react": "18.2.0",
     "react-native": "0.71.4"
   },
