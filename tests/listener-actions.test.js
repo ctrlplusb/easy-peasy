@@ -121,6 +121,10 @@ it('listening to a successful or failed thunk, firing an action', async () => {
           helpers.fail('💩');
           return undefined;
         }
+        if (payload === 8) {
+          helpers.fail();
+          return undefined;
+        }
         return 'foo';
       }),
     },
@@ -162,6 +166,20 @@ it('listening to a successful or failed thunk, firing an action', async () => {
   expect(actualTarget.result).toBeUndefined();
   expect(actualTarget.error).toBe('💩');
   expect(store.getState().audit.logs).toEqual(['Added 10', 'Failed to add 7']);
+
+  // ACT
+  await store.getActions().math.add(8);
+
+  // ASSERT
+  expect(actualTarget.type).toBe('@thunk.math.add(fail)');
+  expect(actualTarget.payload).toBe(8);
+  expect(actualTarget.result).toBeUndefined();
+  expect(actualTarget.error).toStrictEqual(new Error());
+  expect(store.getState().audit.logs).toEqual([
+    'Added 10',
+    'Failed to add 7',
+    'Failed to add 8',
+  ]);
 });
 
 it('listening to a failed thunk', async () => {

@@ -77,7 +77,7 @@ export function createThunkActionsCreator(def, _r) {
     let failure = null;
 
     const fail = (_failure) => {
-      failure = _failure;
+      failure = _failure || new Error();
     };
 
     const result = _r.dispatch(() => def.thunkHandler(payload, fail));
