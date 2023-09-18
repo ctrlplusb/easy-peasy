@@ -9,6 +9,7 @@ interface TodosModel {
   foo: string;
   setFoo: Action<TodosModel, string>;
   onStateChanged: EffectOn<TodosModel, StoreModel, Injections>;
+  onStateChangedAsync: EffectOn<TodosModel, StoreModel, Injections>;
 }
 
 interface StoreModel {
@@ -49,6 +50,13 @@ const todosModel: TodosModel = {
       helpers.meta.parent[0].toLowerCase();
       helpers.meta.path[0].toLowerCase();
 
+      return () => console.log('dispose');
+    },
+  ),
+  onStateChangedAsync: effectOn(
+    [(state) => state.items],
+    // Should not generate error for async effect
+    async (actions, change, helpers) => {
       return () => console.log('dispose');
     },
   ),

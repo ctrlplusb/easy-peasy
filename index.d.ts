@@ -731,7 +731,7 @@ export function effectOn<
     actions: Actions<Model>,
     change: Change<Resolvers>,
     helpers: Helpers<Model, StoreModel, Injections>,
-  ) => undefined | void | Dispose,
+  ) => undefined | void | Dispose | Promise<Dispose>,
 ): EffectOn<Model, StoreModel, Injections>;
 
 // #endregion
@@ -1042,8 +1042,10 @@ export interface PersistConfig<Model extends object> {
   mergeStrategy?: 'mergeDeep' | 'mergeShallow' | 'overwrite';
   migrations?: {
     migrationVersion: number;
-    [key: number]: (state: Partial<Model & { [key: string | number]: any }>) => void;
-  }
+    [key: number]: (
+      state: Partial<Model & { [key: string | number]: any }>,
+    ) => void;
+  };
   storage?: 'localStorage' | 'sessionStorage' | PersistStorage;
   transformers?: Array<Transformer>;
 }
