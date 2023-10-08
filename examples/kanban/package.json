@@ -34,7 +34,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
-    "postcss": "^8.4.16",
+    "postcss": "^8.4.31",
     "pre-commit": "^1.2.2",
     "prettier": "^2.5.1",
     "tailwindcss": "^3.1.8",
