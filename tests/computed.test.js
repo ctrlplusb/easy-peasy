@@ -619,3 +619,56 @@ test('computed properties operate against their original store state', () => {
   expect(stateAtAPointInTime.count).toBe(1);
   expect(store.getState().count).toBe(2);
 });
+
+test('issue #873: computed properties without state resolvers update when they have dependencies that depend on store state', () => {
+  // ARRANGE
+  const store = createStore({
+    foo: {
+      status: 'Ok',
+      setStatus: action((state, payload) => {
+        state.status = payload;
+      })
+    },
+    bar: {
+      status: 'Ok',
+      setStatus: action((state, payload) => {
+        state.status = payload;
+      })
+    },
+    baz: {
+      errorMessage: computed(
+        [
+          (_, storeState) => storeState.foo.status,
+          (_, storeState) => storeState.bar.status
+        ],
+        (fooStatus, barStatus) => {
+          if (fooStatus === 'Error' || barStatus === 'Error') {
+            return 'Uh oh, error in app!';
+          }
+
+          return '';
+        }
+      ),
+      hasError: computed((state) => Boolean(state.errorMessage))
+    }
+  });
+
+  let state = store.getState();
+
+  // ASSERT
+  expect(state.foo.status).toBe('Ok');
+  expect(state.bar.status).toBe('Ok');
+  expect(state.baz.errorMessage).toBe('');
+  expect(state.baz.hasError).toBe(false);
+
+  // ACT
+  store.getActions().foo.setStatus('Error');
+
+  state = store.getState();
+
+  // ASSERT
+  expect(state.foo.status).toBe('Error');
+  expect(state.bar.status).toBe('Ok');
+  expect(state.baz.errorMessage).toBe('Uh oh, error in app!');
+  expect(state.baz.hasError).toBe(true); // would have failed before #874
+});
