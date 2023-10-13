@@ -150,7 +150,6 @@ export default function extractDataFromModel(
         } else if (value[computedSymbol]) {
           const parent = get(parentPath, _dS);
           const bindComputedProperty = createComputedPropertyBinder(
-            parentPath,
             key,
             value,
             _r,
@@ -158,7 +157,12 @@ export default function extractDataFromModel(
           bindComputedProperty(parent, _dS);
           _cP.push({ key, parentPath, bindComputedProperty });
         } else if (value[reducerSymbol]) {
-          _cR.push({ key, parentPath, reducer: value.fn, config: value.config });
+          _cR.push({
+            key,
+            parentPath,
+            reducer: value.fn,
+            config: value.config,
+          });
         } else if (value[effectOnSymbol]) {
           const def = { ...value };
 

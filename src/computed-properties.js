@@ -1,8 +1,8 @@
 import equal from 'fast-deep-equal/es6';
 import { areInputsEqual } from './lib';
 
-export function createComputedPropertyBinder(parentPath, key, def, _r) {
-  let runOnce = false;
+export function createComputedPropertyBinder(key, def, _r) {
+  let hasRunOnce = false;
   let prevInputs = [];
   let prevValue;
   let prevStoreState;
@@ -28,10 +28,11 @@ export function createComputedPropertyBinder(parentPath, key, def, _r) {
         const inputs = def.stateResolvers.map((resolver) =>
           resolver(parentState, storeState),
         );
+
         if (
-          runOnce &&
-          (storeState === prevStoreState ||
-            areInputsEqual(inputs, prevInputs) ||
+          hasRunOnce &&
+          ((storeState === prevStoreState &&
+            areInputsEqual(inputs, prevInputs)) ||
             // We don't want computed properties resolved every time an action
             // is handled by the reducer. They need to remain lazy, only being
             // computed when used by a component or getState call;
@@ -49,7 +50,7 @@ export function createComputedPropertyBinder(parentPath, key, def, _r) {
 
         prevInputs = inputs;
         prevStoreState = storeState;
-        runOnce = true;
+        hasRunOnce = true;
         return prevValue;
       },
     });
