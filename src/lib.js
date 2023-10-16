@@ -212,3 +212,25 @@ export function useMemoOne(
 
   return cache.result;
 }
+
+const logEventListenerError = (type, err) => {
+  // eslint-disable-next-line no-console
+  console.log(`Error in ${type}`);
+  // eslint-disable-next-line no-console
+  console.log(err);
+};
+
+export const handleEventDispatchErrors =
+  (type, dispatcher) =>
+  (...args) => {
+    try {
+      const result = dispatcher(...args);
+      if (isPromise(result)) {
+        result.catch((err) => {
+          logEventListenerError(type, err);
+        });
+      }
+    } catch (err) {
+      logEventListenerError(type, err);
+    }
+  };

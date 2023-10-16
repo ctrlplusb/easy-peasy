@@ -7,7 +7,7 @@ const noopStorage = {
   removeItem: () => undefined,
 };
 
-const getBrowerStorage = (storageName) => {
+const getBrowserStorage = (storageName) => {
   let storageCache;
   return () => {
     if (!storageCache) {
@@ -30,8 +30,8 @@ const getBrowerStorage = (storageName) => {
   };
 };
 
-const localStorage = getBrowerStorage('localStorage');
-const sessionStorage = getBrowerStorage('sessionStorage');
+const localStorage = getBrowserStorage('localStorage');
+const sessionStorage = getBrowserStorage('sessionStorage');
 
 function createStorageWrapper(storage, transformers = [], migrations = {}) {
   if (storage == null) {
