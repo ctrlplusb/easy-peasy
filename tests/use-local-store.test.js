@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, act } from '@testing-library/react';
 import { useLocalStore, action } from '../src';
 
 function CountDisplay() {
@@ -298,5 +298,54 @@ test('updates the store if a dependency changes', () => {
   // ASSERT
   expect(currentState).toEqual({
     count: 200,
+  });
+});
+
+test('stops propagating state update when dependencies change', () => {
+  // ARRANGE
+  let currentState;
+  let currentActions;
+
+  // eslint-disable-next-line no-shadow, react/prop-types
+  function CountDisplay({ version }) {
+    [currentState, currentActions] = useLocalStore(() => ({
+      count: 0,
+      up: action((state) => {
+        state.count = 137;
+      })
+    }), [version]);
+    return null;
+  }
+
+  // ACT
+  const { rerender } = render(<CountDisplay version={1} />);
+
+  // capture action from *current* model instance
+  const {up} = currentActions;
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 0,
+  });
+
+  // ACT
+  rerender(<CountDisplay version={2} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 0,
+  });
+
+  // invoke "old" action – since we re-rendered the model it should be no-op
+  act(() => {
+    up();
+  });
+
+  // ACT
+  rerender(<CountDisplay version={2} />);
+
+  // ASSERT
+  expect(currentState).toEqual({
+    count: 0,
   });
 });

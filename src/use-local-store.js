@@ -28,7 +28,7 @@ export function useLocalStore(
 
   useEffect(() => {
     setCurrentState(store.getState());
-    store.subscribe(() => {
+    return store.subscribe(() => {
       const nextState = store.getState();
       if (currentState !== nextState) {
         setCurrentState(nextState);
