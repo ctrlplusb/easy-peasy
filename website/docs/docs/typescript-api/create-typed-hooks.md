@@ -11,7 +11,7 @@ import { StoreModel } from './model';
 
 const { useStoreActions, useStoreState, useStoreDispatch, useStore } = createTypedHooks<StoreModel>();
 
-export default {
+export {
   useStoreActions,
   useStoreState,
   useStoreDispatch,
