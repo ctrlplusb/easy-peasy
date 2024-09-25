@@ -132,7 +132,7 @@
     "react-redux": "^8.0.2",
     "react-test-renderer": "^18.2.0",
     "rimraf": "^5.0.1",
-    "rollup": "^2.67.1",
+    "rollup": "^3.29.5",
     "rollup-plugin-analyzer": "^4.0.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-node-resolve": "^5.2.0",
