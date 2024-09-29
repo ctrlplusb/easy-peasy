@@ -1,7 +1,7 @@
 # Alternatives
 
 We aren't suggesting that Easy Peasy is _the_ state management solution for
-React. It's just one of the options. State management is a certainly a tricky
+React. It's just one of the options. State management is certainly a tricky
 subject within the React eco system. There are a variety of options available to
 you. We don't want to encourage unhealthy competition and truly appreciate the
 various options available to the community. We therefore believe it is our
