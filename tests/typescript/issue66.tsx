@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { render } from 'react-dom';
 import { action, Action, createStore } from 'easy-peasy';
+import { createRoot } from 'react-dom/client';
 
 interface CartModel {
   products?: string[] | null;
@@ -26,4 +26,5 @@ const App = () => {
   return <h1>test</h1>;
 };
 
-render(<App />, document.getElementById('app'));
+const root = createRoot(document.getElementById('app')!);
+root.render(<App />);

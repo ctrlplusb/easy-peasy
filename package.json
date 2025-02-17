@@ -47,7 +47,7 @@
     "build": "rollup -c",
     "clean": "rimraf ./dist && rimraf ./coverage",
     "lint": "eslint --fix --ext .ts,.js src tests",
-    "dtslint": "dtslint tests/typescript --expectOnly",
+    "dtslint": "dtslint --expectOnly --localTs node_modules/typescript/lib  tests/typescript",
     "prepublish": "yarn run build",
     "prepublishOnly": "yarn",
     "test": "jest",
