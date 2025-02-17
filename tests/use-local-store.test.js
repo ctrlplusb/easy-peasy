@@ -1,5 +1,5 @@
-import React from 'react';
-import { render, fireEvent, act } from '@testing-library/react';
+import React, { act } from 'react';
+import { render, fireEvent } from '@testing-library/react';
 import { useLocalStore, action } from '../src';
 
 function CountDisplay() {

@@ -1,8 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable react/prop-types */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import React, { act } from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
 import {

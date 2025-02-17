@@ -10,14 +10,14 @@
   },
   "dependencies": {
     "easy-peasy": "^6.0.0",
-    "next": "14.2.21",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "next": "15.1.7",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
   },
   "devDependencies": {
     "@types/node": "18.7.18",
-    "@types/react": "18.0.20",
-    "@types/react-dom": "18.0.6",
+    "@types/react": "19.0.9",
+    "@types/react-dom": "19.0.3",
     "eslint": "8.23.1",
     "eslint-config-next": "12.3.0",
     "typescript": "4.8.3"
