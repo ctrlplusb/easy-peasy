@@ -1,7 +1,6 @@
 /* eslint-disable react/prop-types */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import React, { act } from 'react';
 import { produce } from 'immer';
 import { render } from '@testing-library/react';
 import {

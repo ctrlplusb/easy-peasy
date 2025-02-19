@@ -1,7 +1,6 @@
 import './lib/enable-immer-map-set';
-import React from 'react';
+import React, { act } from 'react';
 import { render } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
 import { createStore, action, StoreProvider, useStoreState } from '../src';
 
 test('Map and Set within a store work as expected', () => {

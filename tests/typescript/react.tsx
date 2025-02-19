@@ -8,6 +8,7 @@ import {
   createTypedHooks,
 } from 'easy-peasy';
 import { connect } from 'react-redux';
+import { createRoot } from 'react-dom/client';
 
 interface StoreModel {
   items: Array<string>;
@@ -39,11 +40,11 @@ function MyComponent() {
   );
 }
 
-ReactDOM.render(
+const root = createRoot(document.createElement('div'));
+root.render(
   <StoreProvider store={store}>
     <MyComponent />
   </StoreProvider>,
-  document.createElement('div'),
 );
 
 /**

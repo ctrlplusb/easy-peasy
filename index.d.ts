@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import {
-  AnyAction,
+  UnknownAction,
   compose,
   Dispatch as ReduxDispatch,
   Middleware,
@@ -11,7 +11,7 @@ import {
 } from 'redux';
 import { O } from 'ts-toolbelt';
 
-export type ReduxAction = AnyAction;
+export type ReduxAction = UnknownAction;
 
 /**
  * Picks only the keys of a certain type
@@ -429,7 +429,7 @@ export interface Store<
  */
 export type Dispatch<
   StoreModel extends object = {},
-  Action extends ReduxAction = AnyAction,
+  Action extends ReduxAction = UnknownAction,
 > = Actions<StoreModel> & ReduxDispatch<Action>;
 
 // #endregion
@@ -751,7 +751,7 @@ export function effectOn<
  *   router: Reducer<ReactRouterState>;
  * }
  */
-export type Reducer<State = any, Action extends ReduxAction = AnyAction> = {
+export type Reducer<State = any, Action extends ReduxAction = UnknownAction> = {
   type: 'reducer';
   result: State;
 };

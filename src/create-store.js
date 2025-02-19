@@ -1,9 +1,9 @@
 import {
   applyMiddleware,
   compose as reduxCompose,
-  createStore as reduxCreateStore,
+  legacy_createStore as reduxCreateStore,
 } from 'redux';
-import reduxThunk from 'redux-thunk';
+import { thunk } from 'redux-thunk';
 import * as helpers from './helpers';
 import createReducer from './create-reducer';
 import extractDataFromModel from './extract-data-from-model';
@@ -87,7 +87,7 @@ export function createStore(model, options = {}) {
   const easyPeasyMiddleware = [
     createComputedPropertiesMiddleware(_r),
     ...middleware,
-    reduxThunk,
+    thunk,
     createListenerMiddleware(_r),
     createEffectsMiddleware(_r),
     persistMiddleware,
