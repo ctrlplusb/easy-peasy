@@ -28,7 +28,7 @@ thunk(async (actions, payload) => {
 
     - `payload` (any)
 
-      If a payload was provided to the thunk when it was dispatch it will be available via this argument.
+      If a payload was provided to the thunk when it was dispatched it will be available via this argument.
 
     - `helpers` (Object)
 
