@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "easy-peasy": "^6.0.0",
-    "next": "15.1.7",
+    "next": "16.1.5",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
