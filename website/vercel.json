@@ -1,5 +1,5 @@
 {
-  "buildCommand": "yarn build",
+  "buildCommand": "NODE_OPTIONS=--openssl-legacy-provider yarn build",
   "outputDirectory": "docs/.vuepress/dist",
   "framework": null
 }
