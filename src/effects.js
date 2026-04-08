@@ -32,7 +32,7 @@ export function createEffectsMiddleware(_r) {
 
 const logEffectError = (err) => {
   // As users can't get a handle on effects we need to report the error
-  // eslint-disable-next-line no-console
+   
   console.error(err);
 };
 
@@ -70,7 +70,7 @@ export function createEffectHandler(def, _r, injections, _aC) {
           if (process.env.NODE_ENV !== 'production') {
             // Dispose functions are not allowed to be resolved asynchronously.
             // Doing so would provide inconsistent behaviour around their execution.
-            // eslint-disable-next-line no-console
+             
             console.warn(
               '[easy-peasy] Effect is asynchronously resolving a dispose fn.',
             );

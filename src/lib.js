@@ -145,7 +145,7 @@ const pReduce = (iterable, reducer, initialValue) =>
 
       Promise.all([total, element.value])
         .then((value) =>
-          // eslint-disable-next-line no-plusplus
+           
           next(reducer(value[0], value[1], index++)),
         )
         .catch((err) => reject(err));
@@ -214,9 +214,9 @@ export function useMemoOne(
 }
 
 const logEventListenerError = (type, err) => {
-  // eslint-disable-next-line no-console
+   
   console.log(`Error in ${type}`);
-  // eslint-disable-next-line no-console
+   
   console.log(err);
 };
 

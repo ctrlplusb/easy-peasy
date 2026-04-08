@@ -141,22 +141,24 @@ test('state with no actions', () => {
   });
 });
 
-test('allows custom middleware', (done) => {
-  // ARRANGE
-  const customMiddleware = () => (next) => (_action) => {
-    // ASSERT
-    expect(_action.type).toEqual('@action.doFoo');
-    next(_action);
-    done();
-  };
-  // ACT
-  const store = createStore(
-    {
-      doFoo: action(() => {}),
-    },
-    { middleware: [customMiddleware] },
-  );
-  store.getActions().doFoo();
+test('allows custom middleware', () => {
+  return new Promise((resolve) => {
+    // ARRANGE
+    const customMiddleware = () => (next) => (_action) => {
+      // ASSERT
+      expect(_action.type).toEqual('@action.doFoo');
+      next(_action);
+      resolve();
+    };
+    // ACT
+    const store = createStore(
+      {
+        doFoo: action(() => {}),
+      },
+      { middleware: [customMiddleware] },
+    );
+    store.getActions().doFoo();
+  });
 });
 
 test('allows custom middleware with mockActions=true', () => {

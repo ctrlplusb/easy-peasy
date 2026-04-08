@@ -483,7 +483,7 @@ describe('errors', () => {
     ]);
 
     // Verify that the error is logged to the console.
-    // eslint-disable-next-line no-console
+     
     expect(console.error).toHaveBeenCalledWith(err);
 
     restoreConsole();

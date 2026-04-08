@@ -1,5 +1,5 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable react/prop-types */
+ 
+ 
 
 import React, { act } from 'react';
 import { render, fireEvent } from '@testing-library/react';
@@ -14,11 +14,11 @@ import {
 } from '../src';
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
 });
 
 afterEach(() => {
-  jest.useRealTimers();
+  vi.useRealTimers();
 });
 
 test('exposes dispatch', () => {
@@ -84,8 +84,8 @@ test('store subscribe is only called once', () => {
       state.count += 1;
     }),
   });
-  jest.spyOn(store, 'subscribe');
-  const renderSpy = jest.fn();
+  vi.spyOn(store, 'subscribe');
+  const renderSpy = vi.fn();
   function Counter() {
     const count = useStoreState((state) => state.count);
     renderSpy();
@@ -122,7 +122,7 @@ test('store is unsubscribed on unmount', () => {
       state.count += 1;
     }),
   });
-  const unsubscribeSpy = jest.fn();
+  const unsubscribeSpy = vi.fn();
   store.subscribe = () => unsubscribeSpy;
   function Counter() {
     const count = useStoreState((state) => state.count);
@@ -162,7 +162,7 @@ describe('direct form', () => {
         state.count += 1;
       }),
     });
-    const renderSpy = jest.fn();
+    const renderSpy = vi.fn();
     function Counter() {
       const count = useStoreState((state) => state.count);
       const inc = useStoreActions((actions) => actions.inc);
@@ -205,7 +205,7 @@ describe('direct form', () => {
         state.somethingElse = payload;
       }),
     });
-    const renderSpy = jest.fn();
+    const renderSpy = vi.fn();
     function Counter() {
       const count = useStoreState((state) => state.count);
       renderSpy();

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Easy Peasy (v6.1.0) is a React state management library built on Redux + Immer. Source is JavaScript with handwritten TypeScript definitions in `index.d.ts`.
+Easy Peasy (v6.1.1) is a React state management library built on Redux + Immer. Source is JavaScript with handwritten TypeScript definitions in `index.d.ts`.
 
 ## Commands
 
@@ -12,7 +12,7 @@ Easy Peasy (v6.1.0) is a React state management library built on Redux + Immer. 
 yarn install              # Install dependencies
 yarn build                # Rollup build (ESM + CJS → dist/)
 yarn lint                 # ESLint with auto-fix
-yarn test                 # Jest (jsdom)
+yarn test                 # Vitest (jsdom)
 yarn test -- tests/actions.test.js          # Single test file
 yarn test -- --testNamePattern="some test"  # Single test by name
 yarn test:watch           # Watch mode
@@ -40,13 +40,13 @@ Computed properties → user middleware → Redux Thunk → listeners → effect
 
 ### Type definitions
 
-All TypeScript types live in the root `index.d.ts` (not generated — hand-maintained). Uses `ts-toolbelt` for advanced type manipulation. Type tests are in `tests/typescript/` and run via `dtslint`.
+All TypeScript types live in the root `index.d.ts` (not generated — hand-maintained). Uses `ts-toolbelt` for advanced type manipulation. Type tests are in `tests/typescript/` and run via `tsc --noEmit`.
 
 ## Conventions
 
-- Node >= 14 (`.nvmrc` specifies 14), Yarn for package management
-- Babel transpiles source; no TypeScript compiler for source code
-- Tests use `@testing-library/react` and Jest with jsdom
-- ESLint extends airbnb + prettier
+- Node >= 18 (`.nvmrc` specifies 18), Yarn for package management
+- Babel transpiles source (classic JSX transform); no TypeScript compiler for source code
+- Tests use `@testing-library/react` and Vitest with jsdom
+- ESLint 9 flat config (`eslint.config.js`) with prettier
 - Husky pre-commit hooks run lint and tests
 - Immer configured with `autoFreeze: false` for mixed mutability

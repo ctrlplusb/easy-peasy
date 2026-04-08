@@ -3,8 +3,8 @@ import { createStore } from '../src';
 test('redux dev tools disabled', () => {
   // ARRANGE
   const model = { foo: 'bar' };
-  const composeStub = jest.fn();
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
+  const composeStub = vi.fn();
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = vi.fn(() => composeStub);
 
   // ACT
   createStore(model, {
@@ -18,8 +18,8 @@ test('redux dev tools disabled', () => {
 test('redux dev tools enabled by default', () => {
   // ARRANGE
   const model = { foo: 'bar' };
-  const composeStub = jest.fn();
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
+  const composeStub = vi.fn();
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = vi.fn(() => composeStub);
 
   // ACT
   createStore(model);
@@ -35,8 +35,8 @@ test('redux dev tools enabled by default', () => {
 test('redux dev tools supports custom store name', () => {
   // ARRANGE
   const model = { foo: 'bar' };
-  const composeStub = jest.fn();
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
+  const composeStub = vi.fn();
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = vi.fn(() => composeStub);
 
   // ACT
   createStore(model, {
@@ -54,8 +54,8 @@ test('redux dev tools supports custom store name', () => {
 test('redux dev tools supports enabling debug trace', () => {
   // arrange
   const model = { foo: 'bar' };
-  const composeStub = jest.fn();
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = jest.fn(() => composeStub);
+  const composeStub = vi.fn();
+  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ = vi.fn(() => composeStub);
 
   // act
   createStore(model, {

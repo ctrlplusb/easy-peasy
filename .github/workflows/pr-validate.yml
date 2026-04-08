@@ -13,10 +13,21 @@ jobs:
         command:
           - lint
           - dtslint
-          - test:coverage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/prepare
       - shell: bash
         run: yarn ${{ matrix.command }}
+
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/prepare
+      - shell: bash
+        run: yarn test:coverage
+      - uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: false

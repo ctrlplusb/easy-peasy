@@ -94,7 +94,7 @@ it('useStore hook', () => {
   expect(count.firstChild.textContent).toBe('0');
 });
 
-/* eslint-disable no-shadow */
+ 
 
 it('with initial data', () => {
   // ARRANGE
@@ -158,7 +158,7 @@ it('injections can be updated', () => {
     },
   );
 
-  // eslint-disable-next-line react/prop-types
+   
   function Foo({ updater }) {
     const foo = Counter.useStoreActions((actions) => actions.foo);
     React.useEffect(() => {

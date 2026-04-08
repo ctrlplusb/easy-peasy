@@ -1080,7 +1080,7 @@ test('flush', async () => {
 test('dynamic model with sync storage', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage();
-  // eslint-disable-next-line no-shadow
+   
   const makeStore = () =>
     createStore({
       todos: persist(
@@ -1136,7 +1136,7 @@ test('dynamic model with sync storage', async () => {
 test('dynamic model with async storage', async () => {
   // ARRANGE
   const memoryStorage = createMemoryStorage(undefined, { async: true });
-  // eslint-disable-next-line no-shadow
+   
   const makeStore = () =>
     createStore({
       todos: persist(
