@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -37,7 +37,7 @@ class ErrorBoundary extends React.Component {
 let restoreConsole;
 
 beforeEach(() => {
-  jest.useFakeTimers();
+  vi.useFakeTimers();
   restoreConsole = mockConsole();
 });
 
@@ -253,7 +253,7 @@ test('multiple hooks receive state update in same render cycle', () => {
     }),
   });
 
-  const renderSpy = jest.fn();
+  const renderSpy = vi.fn();
 
   function App() {
     const items = useStoreState((state) => state.items);
@@ -303,7 +303,7 @@ test('equality function', () => {
     }),
   });
 
-  const renderSpy = jest.fn();
+  const renderSpy = vi.fn();
 
   function App() {
     const { count, firstName } = useStoreState(

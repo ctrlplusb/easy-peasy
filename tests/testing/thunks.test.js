@@ -22,7 +22,7 @@ describe('without mocking actions', () => {
     // ARRANGE
     const todo = { id: 1, text: 'Test my store' };
     const mockTodosService = {
-      fetchById: jest.fn(() => Promise.resolve(todo)),
+      fetchById: vi.fn(() => Promise.resolve(todo)),
     };
     const store = createStore(todosModel, {
       injections: { todosService: mockTodosService },
@@ -65,7 +65,7 @@ describe('with mocking actions', () => {
     // ARRANGE
     const todo = { id: 1, text: 'Test my store' };
     const mockTodosService = {
-      fetchById: jest.fn(() => Promise.resolve(todo)),
+      fetchById: vi.fn(() => Promise.resolve(todo)),
     };
     const store = createStore(todosModel, {
       injections: { todosService: mockTodosService },

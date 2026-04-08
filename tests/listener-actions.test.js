@@ -39,40 +39,42 @@ it('listening to an action, firing an action', () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
-it('listening to an action, firing a thunk', (done) => {
-  // ARRANGE
-  const math = {
-    sum: 0,
-    add: action((state, payload) => {
-      state.sum += payload;
-    }),
-  };
-  const audit = {
-    logs: [],
-    add: action((state, payload) => {
-      // ASSERT
-      expect(payload).toBe('Added 10');
-      done();
-    }),
-    onMathAdd: thunkOn(
-      (_, storeActions) => storeActions.math.add,
-      (actions, target) => {
-        expect(target.type).toBe('@action.math.add');
-        expect(target.payload).toBe(10);
-        expect(target.result).toBeUndefined();
-        expect(target.error).toBeUndefined();
-        expect(target.resolvedTargets).toEqual([target.type]);
-        actions.add(`Added ${target.payload}`);
-      },
-    ),
-  };
-  const store = createStore({
-    math,
-    audit,
-  });
+it('listening to an action, firing a thunk', () => {
+  return new Promise((resolve) => {
+    // ARRANGE
+    const math = {
+      sum: 0,
+      add: action((state, payload) => {
+        state.sum += payload;
+      }),
+    };
+    const audit = {
+      logs: [],
+      add: action((state, payload) => {
+        // ASSERT
+        expect(payload).toBe('Added 10');
+        resolve();
+      }),
+      onMathAdd: thunkOn(
+        (_, storeActions) => storeActions.math.add,
+        (actions, target) => {
+          expect(target.type).toBe('@action.math.add');
+          expect(target.payload).toBe(10);
+          expect(target.result).toBeUndefined();
+          expect(target.error).toBeUndefined();
+          expect(target.resolvedTargets).toEqual([target.type]);
+          actions.add(`Added ${target.payload}`);
+        },
+      ),
+    };
+    const store = createStore({
+      math,
+      audit,
+    });
 
-  // ACT
-  store.getActions().math.add(10);
+    // ACT
+    store.getActions().math.add(10);
+  });
 });
 
 it('listening to a successful thunk, firing an action', async () => {
@@ -220,35 +222,37 @@ it('listening to a failed thunk', async () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
-it('listening to a thunk, firing a thunk', (done) => {
-  // ARRANGE
-  const math = {
-    sum: 0,
-    add: thunk(() => {
-      // do nothing
-    }),
-  };
-  const audit = {
-    logs: [],
-    add: action((state, payload) => {
-      // ASSERT
-      expect(payload).toEqual('Added 10');
-      done();
-    }),
-    onMathAdd: thunkOn(
-      (_, storeActions) => storeActions.math.add,
-      (actions, target) => {
-        actions.add(`Added ${target.payload}`);
-      },
-    ),
-  };
-  const store = createStore({
-    math,
-    audit,
-  });
+it('listening to a thunk, firing a thunk', () => {
+  return new Promise((resolve) => {
+    // ARRANGE
+    const math = {
+      sum: 0,
+      add: thunk(() => {
+        // do nothing
+      }),
+    };
+    const audit = {
+      logs: [],
+      add: action((state, payload) => {
+        // ASSERT
+        expect(payload).toEqual('Added 10');
+        resolve();
+      }),
+      onMathAdd: thunkOn(
+        (_, storeActions) => storeActions.math.add,
+        (actions, target) => {
+          actions.add(`Added ${target.payload}`);
+        },
+      ),
+    };
+    const store = createStore({
+      math,
+      audit,
+    });
 
-  // ACT
-  store.getActions().math.add(10);
+    // ACT
+    store.getActions().math.add(10);
+  });
 });
 
 it('listening to a string, firing an action', async () => {
@@ -273,28 +277,30 @@ it('listening to a string, firing an action', async () => {
   expect(store.getState().audit.logs).toEqual(['Added 10']);
 });
 
-it('listening to an string, firing a thunk', (done) => {
-  // ARRANGE
-  const audit = {
-    logs: [],
-    add: action((state, payload) => {
-      // ASSERT
-      expect(payload).toBe('Added 10');
-      done();
-    }),
-    onMathAdd: thunkOn(
-      () => 'MATH_ADD',
-      (actions, target) => {
-        actions.add(`Added ${target.payload}`);
-      },
-    ),
-  };
-  const store = createStore({
-    audit,
-  });
+it('listening to an string, firing a thunk', () => {
+  return new Promise((resolve) => {
+    // ARRANGE
+    const audit = {
+      logs: [],
+      add: action((state, payload) => {
+        // ASSERT
+        expect(payload).toBe('Added 10');
+        resolve();
+      }),
+      onMathAdd: thunkOn(
+        () => 'MATH_ADD',
+        (actions, target) => {
+          actions.add(`Added ${target.payload}`);
+        },
+      ),
+    };
+    const store = createStore({
+      audit,
+    });
 
-  // ACT
-  store.dispatch({ type: 'MATH_ADD', payload: 10 });
+    // ACT
+    store.dispatch({ type: 'MATH_ADD', payload: 10 });
+  });
 });
 
 it('action listening to multiple actions', async () => {
@@ -326,7 +332,7 @@ it('action listening to multiple actions', async () => {
 
 it('thunk listening to multiple actions', async () => {
   // ARRANGE
-  const thunkSpy = jest.fn();
+  const thunkSpy = vi.fn();
   const model = {
     logs: [],
     actionTarget: action(() => {}),

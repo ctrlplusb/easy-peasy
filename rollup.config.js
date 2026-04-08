@@ -1,13 +1,6 @@
 import path from 'path';
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
-import analyze from 'rollup-plugin-analyzer';
-import pkg from './package.json';
-
-const babelRuntimeVersion = pkg.dependencies['@babel/runtime'].replace(
-  /^[^0-9]*/,
-  '',
-);
+import { babel } from '@rollup/plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
 
 const { root } = path.parse(process.cwd());
 
@@ -24,14 +17,10 @@ function createESMConfig(input, output) {
       resolve({ extensions }),
       babel({
         extensions,
-        plugins: [
-          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
-        ],
-        runtimeHelpers: true,
+        babelHelpers: 'bundled',
         sourceMaps: true,
         inputSourceMap: true,
       }),
-      analyze({ summaryOnly: true }),
     ],
   };
 }
@@ -45,14 +34,10 @@ function createCommonJSConfig(input, output) {
       resolve({ extensions }),
       babel({
         extensions,
-        plugins: [
-          ['@babel/plugin-transform-runtime', { version: babelRuntimeVersion }],
-        ],
-        runtimeHelpers: true,
+        babelHelpers: 'bundled',
         sourceMaps: true,
         inputSourceMap: true,
       }),
-      analyze({ summaryOnly: true }),
     ],
   };
 }

@@ -45,7 +45,7 @@ function createStorageWrapper(storage, transformers = [], migrations = {}) {
       storage = sessionStorage();
     } else {
       if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
+         
         console.warn(`Invalid storage provider`);
       }
       storage = noopStorage;

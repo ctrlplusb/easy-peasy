@@ -76,7 +76,7 @@ test('multiple instances', async () => {
 test('with external data', () => {
   // ARRANGE
 
-  // eslint-disable-next-line no-shadow,react/prop-types
+   
   function CountDisplay({ count }) {
     const [state, actions] = useLocalStore(
       () => ({
@@ -127,7 +127,7 @@ test('with config', () => {
 
   // ACT
 
-  // eslint-disable-next-line no-shadow,react/prop-types
+   
   function CountDisplay({ count }) {
     const [state, actions] = useLocalStore(
       () => ({
@@ -164,7 +164,7 @@ test('returns the store', () => {
   // ARRANGE
   let actualStore;
 
-  // eslint-disable-next-line no-shadow
+   
   function CountDisplay() {
     const [, , store] = useLocalStore(() => ({
       count: 0,
@@ -188,7 +188,7 @@ test('provides the prevState and prevConfig every time the config is recreated',
   let prevState;
   let prevConfig;
 
-  // eslint-disable-next-line no-shadow,react/prop-types
+   
   function CountDisplay({ count }) {
     useLocalStore(
       () => ({
@@ -229,7 +229,7 @@ test('provides the prevState every time the store is recreated', () => {
   // ARRANGE
   let prevState;
 
-  // eslint-disable-next-line no-shadow, react/prop-types
+   
   function CountDisplay({ count }) {
     useLocalStore(
       (_prevState) => {
@@ -270,7 +270,7 @@ test('updates the store if a dependency changes', () => {
   // ARRANGE
   let currentState;
 
-  // eslint-disable-next-line no-shadow, react/prop-types
+   
   function CountDisplay({ count }) {
     [currentState] = useLocalStore(() => ({ count }), [count]);
     return null;
@@ -306,7 +306,7 @@ test('stops propagating state update when dependencies change', () => {
   let currentState;
   let currentActions;
 
-  // eslint-disable-next-line no-shadow, react/prop-types
+   
   function CountDisplay({ version }) {
     [currentState, currentActions] = useLocalStore(() => ({
       count: 0,

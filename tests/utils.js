@@ -3,7 +3,7 @@ const defaultKeys = ['log', 'warn', 'error'];
 export const mockConsole = (methodsToMock = defaultKeys) => {
   const originalConsole = { ...console };
   methodsToMock.forEach((key) => {
-    global.console[key] = jest.fn();
+    global.console[key] = vi.fn();
   });
   // Return function to restore console
   const restore = () => {
