@@ -6,7 +6,7 @@ series [How to Contribute to an Open Source Project on GitHub][egghead]
 ## Project setup
 
 1.  Fork and clone the repo
-2.  Ensure you have a modern version of Node (>= 14) and Yarn installed
+2.  Ensure you have Node >= 18 and Yarn installed
 3.  Run `yarn install` to install the project's dependencies
 4.  Create a branch for your PR with `git checkout -b <category>/<your-branch-name>`, e.g. `fix/some-bug`
 
@@ -62,30 +62,35 @@ for the cool new feature
 
 ## Linting & Testing
 
-ESLint and our test suite will be run before every commit. Any violations of fixable ESLint rules will be fixed automatically, however any un-fixable rule violations or failing tests will cause will cause the commit to be rejected.
+ESLint and Vitest will be run before every commit via a Husky pre-commit hook. Any violations of fixable ESLint rules will be fixed automatically, however any un-fixable rule violations or failing tests will cause the commit to be rejected.
 
 You can run the tests or ESLint manually at any time with the following commands:
 
-```powershell
-# run tests on source code only
-yarn test:source
-
-# run all tests, including TypeScript compilation tests
-# this is only required if changes have been made to TypeScript types
+```bash
+# run tests
 yarn test
+
+# run tests in watch mode
+yarn test:watch
+
+# run tests with coverage report
+yarn test:coverage
 
 # run eslint on source code and test files
 yarn lint
+
+# run TypeScript type tests
+yarn dtslint
 ```
 
 ## Types / TypeScript Tests
 
 If your PR introduces changes to the easy-peasy API, please update `index.d.ts` to reflect those changes.
 
-You can confirm that all of the current TypeScript compilation tests still pass by running:
+You can confirm that all of the current TypeScript type tests still pass by running:
 
 ```
-yarn test
+yarn dtslint
 ```
 
 Depending on the change you've introduced, it may make sense to modify or add new TypeScript tests, which can be found [here](tests/typescript/).
