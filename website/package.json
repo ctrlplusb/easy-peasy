@@ -1,12 +1,11 @@
 {
   "private": true,
   "engines": {
-    "node": "14.x"
+    "node": "24.x"
   },
   "scripts": {
     "dev": "vuepress dev docs",
-    "build": "vuepress build docs",
-    "deploy": "vercel --prod"
+    "build": "vuepress build docs"
   },
   "devDependencies": {
     "@vuepress/plugin-google-analytics": "^1.9.9",
