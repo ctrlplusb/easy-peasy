@@ -96,13 +96,6 @@ export function createSimpleProduce(disableImmer = false) {
     }
     if (!easyPeasyImmer) {
       easyPeasyImmer = new Immer({
-        // We need to ensure that we disable proxies if they aren't available
-        // on the environment. Users need to ensure that they use the enableES5
-        // feature of immer.
-        useProxies:
-          typeof Proxy !== 'undefined' &&
-          typeof Proxy.revocable !== 'undefined' &&
-          typeof Reflect !== 'undefined',
         // Autofreezing breaks easy-peasy, we need a mixed version of immutability
         // and mutability in order to apply updates to our computed properties
         autoFreeze: false,

@@ -19,16 +19,13 @@
       "import": "./dist/server.js",
       "require": "./dist/server.cjs.js"
     },
-    "./map-set-support": "./map-set-support.js",
-    "./proxy-polyfill": "./proxy-polyfill.js"
+    "./map-set-support": "./map-set-support.js"
   },
   "files": [
     "dist",
     "src",
     "index.d.ts",
     "server.d.ts",
-    "proxy-polyfill.js",
-    "proxy-polyfill.d.ts",
     "map-set-support.js",
     "map-set-support.d.ts"
   ],
@@ -100,7 +97,7 @@
   },
   "dependencies": {
     "fast-deep-equal": "^3.1.3",
-    "immer": "^9.0.21",
+    "immer": "^11.1.4",
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
     "ts-toolbelt": "^9.6.0"
