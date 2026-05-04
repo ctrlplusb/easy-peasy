@@ -10,14 +10,14 @@ const extensions = ['.js'];
 
 const useClientBanner = `'use client';`;
 
-function createESMConfig(input, output) {
+function createESMConfig(input, output, { banner = useClientBanner } = {}) {
   return {
     input,
     output: {
       sourcemap: true,
       file: output,
       format: 'esm',
-      banner: useClientBanner,
+      banner,
     },
     external,
     plugins: [
@@ -32,7 +32,7 @@ function createESMConfig(input, output) {
   };
 }
 
-function createCommonJSConfig(input, output) {
+function createCommonJSConfig(input, output, { banner = useClientBanner } = {}) {
   return {
     input,
     output: {
@@ -40,7 +40,7 @@ function createCommonJSConfig(input, output) {
       file: output,
       format: 'cjs',
       exports: 'named',
-      banner: useClientBanner,
+      banner,
     },
     external,
     plugins: [
@@ -58,4 +58,6 @@ function createCommonJSConfig(input, output) {
 export default [
   createESMConfig('src/index.js', 'dist/index.js'),
   createCommonJSConfig('src/index.js', 'dist/index.cjs.js'),
+  createESMConfig('src/server.js', 'dist/server.js', { banner: '' }),
+  createCommonJSConfig('src/server.js', 'dist/server.cjs.js', { banner: '' }),
 ];

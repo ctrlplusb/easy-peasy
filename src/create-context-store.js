@@ -10,7 +10,7 @@ import {
   createStoreTransitionHook,
 } from './hooks';
 import { createStore } from './create-store';
-import { useMemoOne } from './lib';
+import { useMemoOne } from './use-memo-one';
 
 export function createContextStore(model, config = {}) {
   // We create a mutable injections reference to allow updating it

@@ -1,5 +1,5 @@
 import { useRef, useSyncExternalStore } from 'react';
-import { useMemoOne } from './lib';
+import { useMemoOne } from './use-memo-one';
 import { createStore } from './create-store';
 
 export function useLocalStore(
