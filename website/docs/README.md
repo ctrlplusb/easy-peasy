@@ -7,6 +7,16 @@ pageClass: homepage
 </p>
 <h1 class="title" align="center">Vegetarian friendly state for React</h1>
 
+<div class="beta-banner">
+  <strong>v7 Beta:</strong> this release modernises Easy Peasy around React 19's
+  concurrent primitives. The public store/model API is unchanged from v6 and
+  the library is feature-complete, but the v7 line is still in beta — APIs may
+  shift in response to feedback before the stable release. See the
+  <a href="/docs/upgrading-from-v6/">v6 → v7 upgrade guide</a> for details, or
+  view the <a href="https://easy-peasy-v6.vercel.app/">v6 docs</a> for the
+  current stable release.
+</div>
+
 <p>Easy Peasy is an abstraction of Redux, providing a reimagined API that focuses on <strong>developer experience</strong>. It allows you to <strong>quickly</strong> and <strong>easily</strong> manage your state, whilst leveraging the strong <strong>architectural guarantees</strong> and extensive <strong>eco-system</strong> that Redux has to offer.</p>
 
 <div style="display: flex;">
@@ -81,13 +91,6 @@ function TodoList() {
   );
 }
 ```
-
-<h2 class="subtitle">OS Awards Nominee</h2>
-<p>Easy Peasy was nominated under the "Productivity Booster" category. The following screencast will be presented during the awards ceremony at the React Summit 2020 conference.</p>
-
-<video class="screencast" controls>
-  <source src="./assets/screencast.mp4" type="video/mp4">
-</video>
 
 <h2 class="subtitle">Core Team</h2>
 

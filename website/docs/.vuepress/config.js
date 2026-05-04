@@ -25,8 +25,6 @@ module.exports = {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/docs/introduction/' },
-      { text: 'v3', link: 'https://easy-peasy-v3.vercel.app/' },
-      { text: 'v4', link: 'https://easy-peasy-v4.vercel.app/' },
       { text: 'v6', link: 'https://easy-peasy-v6.vercel.app/' },
     ],
 
