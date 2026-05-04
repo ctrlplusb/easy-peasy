@@ -44,10 +44,12 @@ pageClass: homepage
   </div>
 </div>
 
-All of this comes via a single dependency install.
+All of this comes via a single dependency install. While v7 is in beta it is
+published under the `beta` dist-tag — the `latest` tag will move to v7 once the
+stable release ships.
 
 ```bash
-npm install easy-peasy
+npm install easy-peasy@beta
 ```
 
 <h2 class="subtitle">Fly like an eagle</h2>
