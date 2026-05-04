@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import Link from 'next/link';
 
 import Counter from './Counter';
@@ -9,7 +10,9 @@ function Page({ title, linkTo }) {
     <div>
       <h1>{title}</h1>
       <Counter />
-      <Shop />
+      <Suspense fallback={<div style={{ margin: '2rem' }}>Loading basket...</div>}>
+        <Shop />
+      </Suspense>
       <Inventory />
       <Link href={linkTo}>{linkTo === '/' ? '/index' : linkTo}</Link>
 

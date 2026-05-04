@@ -13,16 +13,16 @@
   },
   "dependencies": {
     "@types/react-transition-group": "^4.4.5",
-    "easy-peasy": "^6.0.0",
+    "easy-peasy": "^7.0.0-beta.1",
     "nanoid": "^5.0.9",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-router-dom": "^6.4.1",
     "react-transition-group": "^4.4.5"
   },
   "devDependencies": {
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
     "@vitejs/plugin-react": "^2.1.0",
