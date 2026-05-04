@@ -195,64 +195,71 @@ has completed prior to rendering the components within your application that
 will access the rehydrated state.
 
 To aid with this we expose a
-[`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook. This hook will
-return `true` when the rehydration process has completed, otherwise it will
-return `false`.
+[`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook. The hook
+**suspends** while rehydration is in flight, so any subtree that depends on
+rehydrated state can be gated behind a
+[`<Suspense>`](https://react.dev/reference/react/Suspense) boundary. React will
+display the fallback until rehydration completes, at which point the real
+content renders.
 
-Using this hook you could for example show a loading indicator in place of the
-components that will depend on the rehydrated state.
-
-This allows for a partial application render, providing the user with some
-perceived performance, as you could render the skeleton of the application in
-the interim.
+> **v7 breaking change:** in v6 and earlier this hook returned `false` during
+> rehydration and `true` once complete, and call sites typically rendered
+> `isRehydrated ? <Main /> : <Loading />`. In v7 the hook suspends instead, so
+> the same gate is now expressed via `<Suspense fallback={<Loading />}>`. See
+> the [v6 → v7 migration guide](/docs/upgrading-from-v6/) for the upgrade
+> path.
 
 ```javascript
+import { Suspense } from 'react';
 import { useStoreRehydrated } from 'easy-peasy';
 
 const store = createStore(persist(model));
 
-function App() {
-  const isRehydrated = useStoreRehydrated();
-  return (
-    <div>
-      <Header />
-      {isRehydrated ? <Main /> : <div>Loading...</div>}
-      <Footer />
-    </div>
-  );
+function Main() {
+  useStoreRehydrated();
+  return <App />;
 }
 
-ReactDOM.render(
-  <StoreProvider store={store}>
-    <App />
-  </StoreProvider>,
-  document.getElementById('app'),
-);
+function Root() {
+  return (
+    <StoreProvider store={store}>
+      <Header />
+      <Suspense fallback={<div>Loading...</div>}>
+        <Main />
+      </Suspense>
+      <Footer />
+    </StoreProvider>
+  );
+}
 ```
 
-In the example above, the `<Main />` content will not render until our store has
-been successfully updated with the rehydration state.
+In the example above, the `<Main />` subtree suspends until our store has been
+successfully updated with the rehydrated state.
 
 Alternatively you could create a simple component to wrap your entire
 application, ensuring that state rehydration has completed prior to rendering
 it.
 
 ```javascript
+import { Suspense } from 'react';
 import { useStoreRehydrated } from 'easy-peasy';
 
 function WaitForStateRehydration({ children }) {
-  const isRehydrated = useStoreRehydrated();
-  return isRehydrated ? children : null;
+  useStoreRehydrated();
+  return children;
 }
 
-ReactDOM.render(
-  <StoreProvider store={store}>
-    <WaitForStateRehydration>
-      <App />
-    </WaitForStateRehydration>
-  </StoreProvider>,
-  document.getElementById('app'),
-);
+function Root() {
+  return (
+    <StoreProvider store={store}>
+      <Suspense fallback={<div>Loading...</div>}>
+        <WaitForStateRehydration>
+          <App />
+        </WaitForStateRehydration>
+      </Suspense>
+    </StoreProvider>
+  );
+}
 ```
 
 Ultimately, as shown, the `useStoreRehydrated` hook provides a lot of

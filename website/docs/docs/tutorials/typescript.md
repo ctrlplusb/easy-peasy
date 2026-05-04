@@ -228,9 +228,21 @@ const typedHooks = createTypedHooks<TodosModel>();
 export const useStoreActions = typedHooks.useStoreActions;
 export const useStoreDispatch = typedHooks.useStoreDispatch;
 export const useStoreState = typedHooks.useStoreState;
+export const useStore = typedHooks.useStore;
+export const useStoreRehydrated = typedHooks.useStoreRehydrated;
+export const useStoreTransition = typedHooks.useStoreTransition;
+export const useStoreDeferredState = typedHooks.useStoreDeferredState;
+export const useStoreOptimistic = typedHooks.useStoreOptimistic;
 ```
 
-See the the
+`createTypedHooks` returns typed versions of every public Easy Peasy hook —
+including the React 19 concurrent hooks
+([`useStoreTransition`](/docs/api/use-store-transition.html),
+[`useStoreDeferredState`](/docs/api/use-store-deferred-state.html),
+[`useStoreOptimistic`](/docs/api/use-store-optimistic.html)) and the
+suspending [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html).
+
+See the
 [API Docs for this type](/docs/typescript-api/create-typed-hooks.html) for more
 information.
 

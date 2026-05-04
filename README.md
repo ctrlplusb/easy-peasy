@@ -9,6 +9,14 @@
 [![MIT License](https://img.shields.io/npm/l/easy-peasy.svg?style=flat-square)](http://opensource.org/licenses/MIT)
 [![Codecov](https://img.shields.io/codecov/c/github/ctrlplusb/easy-peasy.svg?style=flat-square)](https://codecov.io/github/ctrlplusb/easy-peasy)
 
+> **v7 Beta** — this release modernises Easy Peasy around React 19's concurrent
+> primitives. The public store/model API is unchanged from v6 and the library is
+> feature-complete, but the v7 line is still in beta — APIs may shift in
+> response to feedback before the stable release. See the
+> [v6 → v7 upgrade guide](https://easy-peasy.dev/docs/upgrading-from-v6/) for
+> details, or view the [v6 docs](https://easy-peasy-v6.vercel.app/) for the
+> current stable release.
+
 <p>Easy Peasy is an abstraction of Redux, providing a reimagined API that focuses on <strong>developer experience</strong>. It allows you to <strong>quickly</strong> and <strong>easily</strong> manage your state, whilst leveraging the strong <strong>architectural guarantees</strong> and extensive <strong>eco-system</strong> that Redux has to offer.</p>
 
 <ul>
@@ -30,10 +38,12 @@
 
 <p>&nbsp;</p>
 
-All of this comes via a single dependency install.
+All of this comes via a single dependency install. While v7 is in beta it is
+published under the `beta` dist-tag — the `latest` tag will move to v7 once the
+stable release ships.
 
 ```
-npm install easy-peasy
+npm install easy-peasy@beta
 ```
 
 <p>&nbsp;</p>
@@ -137,9 +147,3 @@ evolution of this library then please consider
 
 See the [official website](https://easy-peasy.dev) for tutorials, docs, recipes,
 and more.
-
-<p>&nbsp;</p>
-
-## OS Awards Nominee
-
-Easy Peasy was nominated under the "Productivity Booster" category.
