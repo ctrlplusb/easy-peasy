@@ -1,4 +1,4 @@
-import { createTypedHooks, useStoreRehydrated } from 'easy-peasy';
+import { createTypedHooks } from 'easy-peasy';
 
 import type { StoreModel } from './model';
 
@@ -7,9 +7,8 @@ export const {
   useStoreDispatch,
   useStoreState,
   useStore,
+  useStoreRehydrated,
   useStoreTransition,
   useStoreDeferredState,
   useStoreOptimistic,
 } = createTypedHooks<StoreModel>();
-
-export { useStoreRehydrated };
