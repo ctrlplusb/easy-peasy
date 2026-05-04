@@ -933,7 +933,15 @@ test('multiple stores', async () => {
 
 test('useStoreRehydrated', async () => {
   // ARRANGE
-  const memoryStorage = createMemoryStorage(undefined, { async: true });
+  let releaseGetItem;
+  const getItemPromise = new Promise((resolve) => {
+    releaseGetItem = resolve;
+  });
+  const memoryStorage = {
+    getItem: () => getItemPromise,
+    setItem: () => undefined,
+    removeItem: () => undefined,
+  };
   const store = sharedMakeStore({
     storage: memoryStorage,
   });
@@ -966,6 +974,7 @@ test('useStoreRehydrated', async () => {
 
   // ACT
   await act(async () => {
+    releaseGetItem(undefined);
     await store.persist.resolveRehydration();
   });
 
