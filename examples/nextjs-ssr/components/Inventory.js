@@ -1,3 +1,4 @@
+import React from 'react'
 import { useStoreState, useStoreActions } from 'easy-peasy'
 
 export default function Inventory() {
