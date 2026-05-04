@@ -1,5 +1,6 @@
 import { clone, get, isPlainObject, isPromise, set, pSeries } from './lib';
 import { migrate } from './migrations';
+import { runWithTransition } from './transitions';
 
 const noopStorage = {
   getItem: () => undefined,
@@ -339,7 +340,7 @@ export function rehydrateStateFromPersistIfNeeded(
     }),
   ).then(() => {
     if (rehydrating) {
-      replaceState(state);
+      runWithTransition(() => replaceState(state));
     }
   });
 }

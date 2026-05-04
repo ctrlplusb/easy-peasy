@@ -1,3 +1,8 @@
+import { startTransition } from 'react';
+import { setTransitionFn } from './transitions';
+
+setTransitionFn(startTransition);
+
 export * from './hooks';
 export * from './create-store';
 export * from './create-context-store';
