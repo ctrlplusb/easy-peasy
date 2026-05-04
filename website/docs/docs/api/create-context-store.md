@@ -129,18 +129,84 @@ properties:
 
 - `useStoreRehydrated` (Function)
 
-  A hook allowing you to access the rehydration status of the store. Only useful
-  when utilising [`persist`](/docs/api/persist.html) within your model.
+  A hook that suspends while the store is rehydrating persisted state. Only
+  useful when utilising [`persist`](/docs/api/persist.html) within your model.
+  Wrap the dependent subtree in a
+  [`<Suspense>`](https://react.dev/reference/react/Suspense) boundary.
 
   ```javascript
+  import { Suspense } from 'react';
+
+  function Main() {
+    CounterStore.useStoreRehydrated();
+    return <div>My App</div>;
+  }
+
   function App() {
-    const rehydrated = CounterStore.useStoreRehydrated();
-    return rehydrated ? <div>My App</div> : <div>Loading...</div>;
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <Main />
+      </Suspense>
+    );
   }
   ```
 
   This hook shares all the same properties and features of the global
-  [`useStoreRehydrated`](/api/docs/use-store-rehydrated.html) hook.
+  [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) hook.
+
+- `useStoreTransition` (Function)
+
+  A hook that wraps action dispatches in `startTransition` and exposes an
+  `isPending` flag.
+
+  ```javascript
+  function CountIncButton() {
+    const [increment, isPending] = CounterStore.useStoreTransition(
+      (actions) => actions.increment,
+    );
+    return (
+      <button disabled={isPending} onClick={() => increment()} type="button">
+        +
+      </button>
+    );
+  }
+  ```
+
+  This hook shares all the same properties and features of the global
+  [`useStoreTransition`](/docs/api/use-store-transition.html) hook.
+
+- `useStoreDeferredState` (Function)
+
+  A hook that returns a deferred selected state value, useful for expensive
+  selectors where stale-while-fresh is acceptable.
+
+  ```javascript
+  function CountDisplay() {
+    const count = CounterStore.useStoreDeferredState((state) => state.count);
+    return <div>{count}</div>;
+  }
+  ```
+
+  This hook shares all the same properties and features of the global
+  [`useStoreDeferredState`](/docs/api/use-store-deferred-state.html) hook.
+
+- `useStoreOptimistic` (Function)
+
+  A hook that lets a component render an optimistic value while a pending
+  action is in flight.
+
+  ```javascript
+  function Counter() {
+    const [count, addOptimistic] = CounterStore.useStoreOptimistic(
+      (state) => state.count,
+      (current, delta) => current + delta,
+    );
+    // ...
+  }
+  ```
+
+  This hook shares all the same properties and features of the global
+  [`useStoreOptimistic`](/docs/api/use-store-optimistic.html) hook.
 
 - `useStore` (Function)
 
