@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useSyncExternalStore } from 'react';
 import { useMemoOne } from './lib';
 import { createStore } from './create-store';
 
@@ -24,17 +24,11 @@ export function useLocalStore(
     return _store;
   }, dependencies);
 
-  const [currentState, setCurrentState] = useState(() => store.getState());
-
-  useEffect(() => {
-    setCurrentState(store.getState());
-    return store.subscribe(() => {
-      const nextState = store.getState();
-      if (currentState !== nextState) {
-        setCurrentState(nextState);
-      }
-    });
-  }, [store]);
+  const currentState = useSyncExternalStore(
+    store.subscribe,
+    store.getState,
+    store.getState,
+  );
 
   return [currentState, store.getActions(), store];
 }

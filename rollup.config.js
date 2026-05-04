@@ -8,10 +8,17 @@ const external = (id) => !id.startsWith('.') && !id.startsWith(root);
 
 const extensions = ['.js'];
 
+const useClientBanner = `'use client';`;
+
 function createESMConfig(input, output) {
   return {
     input,
-    output: { sourcemap: true, file: output, format: 'esm' },
+    output: {
+      sourcemap: true,
+      file: output,
+      format: 'esm',
+      banner: useClientBanner,
+    },
     external,
     plugins: [
       resolve({ extensions }),
@@ -28,7 +35,13 @@ function createESMConfig(input, output) {
 function createCommonJSConfig(input, output) {
   return {
     input,
-    output: { sourcemap: true, file: output, format: 'cjs', exports: 'named' },
+    output: {
+      sourcemap: true,
+      file: output,
+      format: 'cjs',
+      exports: 'named',
+      banner: useClientBanner,
+    },
     external,
     plugins: [
       resolve({ extensions }),
