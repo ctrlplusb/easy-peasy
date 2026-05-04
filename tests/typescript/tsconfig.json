@@ -12,7 +12,8 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "../..",
     "paths": {
-      "easy-peasy": ["index.d.ts"]
+      "easy-peasy": ["index.d.ts"],
+      "easy-peasy/server": ["server.d.ts"]
     }
   }
 }
