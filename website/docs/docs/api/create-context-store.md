@@ -391,13 +391,14 @@ const Counter = createContextStore((runtimeModel) => ({
   }),
 }));
 
-ReactDOM.render(
+import { createRoot } from 'react-dom/client';
+
+createRoot(document.querySelector('#app')).render(
   // Provide the runtime model overrides/customization as a prop
   //                                 👇
   <Counter.Provider runtimeModel={{ count: 1 }}>
     <CounterApp />
   </Counter.Provider>,
-  document.querySelector('#app'),
 );
 ```
 
@@ -409,7 +410,9 @@ If you needed you could even make the `runtimeModel` define the entire model.
 //                                      👇
 const Counter = createContextStore((runtimeModel) => runtimeModel);
 
-ReactDOM.render(
+import { createRoot } from 'react-dom/client';
+
+createRoot(document.querySelector('#app')).render(
   <Counter.Provider
     // Provide the runtime model as a prop
     //    👇
@@ -422,7 +425,6 @@ ReactDOM.render(
   >
     <CounterApp />
   </Counter.Provider>,
-  document.querySelector('#app'),
 );
 ```
 

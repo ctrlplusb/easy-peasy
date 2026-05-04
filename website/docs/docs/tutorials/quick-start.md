@@ -37,14 +37,14 @@ Surround your application with the
 [store](/docs/api/store.html) instance.
 
 ```javascript
+import { createRoot } from 'react-dom/client';
 import { StoreProvider } from 'easy-peasy';
 import { store } from './store';
 
-ReactDOM.render(
+createRoot(rootEl).render(
   <StoreProvider store={store}>
     <App />
   </StoreProvider>,
-  rootEl,
 );
 ```
 

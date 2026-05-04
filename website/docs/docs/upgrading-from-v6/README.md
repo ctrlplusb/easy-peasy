@@ -96,7 +96,7 @@ If you previously wrote a wrapper component:
 +   return children;
 + }
 
-  ReactDOM.render(
+  createRoot(document.getElementById('app')).render(
     <StoreProvider store={store}>
 +     <Suspense fallback={<div>Loading...</div>}>
         <WaitForStateRehydration>
@@ -104,7 +104,6 @@ If you previously wrote a wrapper component:
         </WaitForStateRehydration>
 +     </Suspense>
     </StoreProvider>,
-    document.getElementById('app'),
   );
 ```
 

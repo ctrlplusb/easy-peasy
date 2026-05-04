@@ -55,10 +55,11 @@ const store = createStore(model, {
   name: 'MyAwesomeStore',
 });
 
-ReactDOM.render(
+import { createRoot } from 'react-dom/client';
+
+createRoot(document.querySelector('#app')).render(
   <StoreProvider store={store}>
     <App />
   </StoreProvider>,
-  document.querySelector('#app'),
 );
 ```
