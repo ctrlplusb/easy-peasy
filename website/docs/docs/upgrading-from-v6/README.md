@@ -12,6 +12,7 @@ This guide walks you through the breaking changes and the new APIs.
 - [Breaking changes](#breaking-changes)
   - [React 19 is required](#react-19-is-required)
   - [`useStoreRehydrated` now suspends](#usestorerehydrated-now-suspends)
+  - [`easy-peasy/proxy-polyfill` subpath removed](#easy-peasyproxy-polyfill-subpath-removed)
 - [New APIs](#new-apis)
   - [`useStoreTransition`](#usestoretransition)
   - [`useStoreDeferredState`](#usestoredeferredstate)
@@ -112,6 +113,25 @@ If you previously wrote a wrapper component:
 > required a state subscription on every consumer; the Suspense pattern lets
 > React deliver the rehydrated tree in a single render once the data is ready,
 > with no flash of default state.
+
+### `easy-peasy/proxy-polyfill` subpath removed
+
+v6 shipped an `easy-peasy/proxy-polyfill` subpath which called immer's
+`enableES5()` helper to support environments without native `Proxy` (notably
+IE11). Easy Peasy v7 upgrades to immer v11, which dropped ES5 mode entirely —
+`Proxy` is now the only supported backend.
+
+If you imported the subpath:
+
+```diff
+- import 'easy-peasy/proxy-polyfill';
+```
+
+…remove the import. Every browser supported by React 19 has native `Proxy`, so
+no replacement is needed.
+
+The `easy-peasy/map-set-support` subpath (which calls `enableMapSet()`) is
+unchanged — Map/Set draft support is still opt-in in immer v11.
 
 ## New APIs
 
