@@ -37,14 +37,14 @@ Surround your application with the
 [store](/docs/api/store.html) instance.
 
 ```javascript
+import { createRoot } from 'react-dom/client';
 import { StoreProvider } from 'easy-peasy';
 import { store } from './store';
 
-ReactDOM.render(
+createRoot(rootEl).render(
   <StoreProvider store={store}>
     <App />
   </StoreProvider>,
-  rootEl,
 );
 ```
 
@@ -224,14 +224,26 @@ and use it to rehydrate your state if it exists.
 
 This process is asynchronous, but you can utilise the
 [useStoreRehydrated](/docs/api/use-store-rehydrated.html) hook to make sure the
-rehydration has completed prior to rendering your components.
+rehydration has completed prior to rendering your components. The hook
+suspends while rehydration is in flight, so wrap the dependent subtree in a
+[`<Suspense>`](https://react.dev/reference/react/Suspense) boundary.
 
 ```javascript
+import { Suspense } from 'react';
 import { useStoreRehydrated } from 'easy-peasy';
 
 const store = createStore(persist(model));
 
-function App() {
-  const isRehydrated = useStoreRehydrated();
-  return isRehydrated ? <Main /> : <div>Loading...</div>;
+function Main() {
+  useStoreRehydrated();
+  return <App />;
+}
+
+function Root() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Main />
+    </Suspense>
+  );
+}
 ```

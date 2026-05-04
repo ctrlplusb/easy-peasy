@@ -12,10 +12,6 @@ solution that includes advanced features such as derived state, API calls,
 <strong>developer tools</strong>, and fully typed experience via
 <strong>TypeScript</strong>.
 
-<video class="screencast" controls>
-  <source src="../../assets/screencast.mp4" type="video/mp4">
-</video>
-
 <p class="action">
   <a href="/docs/tutorials/quick-start.html" class="action-button">Quick Start</a>
 </p>

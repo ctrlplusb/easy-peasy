@@ -296,14 +296,14 @@ Redux store.
 For example, the `react-redux` `Provider`:
 
 ```javascript
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import store from './my-easy-peasy-store';
 
-ReactDOM.render(
+createRoot(document.getElementById('root')).render(
   <Provider store={store}>
     <App />
   </Provider>,
-  document.getElementById('root'),
 );
 ```
 
@@ -346,14 +346,14 @@ application with the [StoreProvider](/docs/api/store-provider.html) component,
 providing the store as prop.
 
 ```javascript
+import { createRoot } from 'react-dom/client';
 import { StoreProvider } from 'easy-peasy';
 import store from './my-easy-peasy-store';
 
-ReactDOM.render(
+createRoot(document.getElementById('root')).render(
   <StoreProvider store={store}>
     <App />
   </StoreProvider>,
-  document.getElementById('root'),
 );
 ```
 
@@ -469,6 +469,22 @@ Similar to the `useStoreState` hook we pass a selector function, however, now we
 are resolving an action instead of state.
 
 We can dispatch our actions with or without a `payload` argument.
+
+### Other hooks built on React 19 primitives
+
+In addition to `useStoreState` and `useStoreActions`, Easy Peasy ships hooks
+built on React 19's concurrent primitives. They are not required for everyday
+use but are handy in specific scenarios:
+
+- [`useStoreTransition`](/docs/api/use-store-transition.html) — wraps action
+  dispatches in `startTransition` and exposes an `isPending` flag.
+- [`useStoreDeferredState`](/docs/api/use-store-deferred-state.html) — like
+  `useStoreState`, but returns a deferred value for expensive selectors.
+- [`useStoreOptimistic`](/docs/api/use-store-optimistic.html) — pairs a
+  selector with `useOptimistic` so components can render an optimistic value
+  while a pending action is in flight.
+- [`useStoreRehydrated`](/docs/api/use-store-rehydrated.html) — suspends while
+  persisted state is being rehydrated.
 
 ## Thunks
 

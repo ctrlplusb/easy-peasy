@@ -1,5 +1,5 @@
 module.exports = {
-  title: 'Easy Peasy v6',
+  title: 'Easy Peasy v7',
   description: 'Vegetarian friendly state for React',
   head: [['link', { rel: 'icon', href: '/favicon.png' }]],
   plugins: [
@@ -25,8 +25,7 @@ module.exports = {
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Docs', link: '/docs/introduction/' },
-      { text: 'v3', link: 'https://easy-peasy-v3.vercel.app/' },
-      { text: 'v4', link: 'https://easy-peasy-v4.vercel.app/' },
+      { text: 'v6', link: 'https://easy-peasy-v6.vercel.app/' },
     ],
 
     sidebarDepth: 0,
@@ -66,6 +65,7 @@ module.exports = {
                 'api/store',
                 'api/create-context-store',
                 'api/use-local-store',
+                'api/easy-peasy-server',
               ],
             },
             {
@@ -87,9 +87,12 @@ module.exports = {
               title: 'Using Stores via Hooks',
               children: [
                 'api/use-store-actions',
+                'api/use-store-deferred-state',
                 'api/use-store-dispatch',
+                'api/use-store-optimistic',
                 'api/use-store-rehydrated',
                 'api/use-store-state',
+                'api/use-store-transition',
                 'api/use-store',
               ],
             },
@@ -116,6 +119,10 @@ module.exports = {
           ],
         },
         {
+          title: 'Upgrading from v6',
+          path: '/docs/upgrading-from-v6/',
+        },
+        {
           title: 'Community Extensions',
           path: '/docs/community-extensions/',
         },
@@ -129,6 +136,7 @@ module.exports = {
             'recipes/interop-with-existing-react-redux-app',
             'recipes/react-native-devtools',
             'recipes/usage-with-react-redux',
+            'recipes/usage-with-rsc-and-next-app-router',
           ],
         },
         {
