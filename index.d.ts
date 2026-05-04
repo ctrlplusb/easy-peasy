@@ -971,6 +971,38 @@ export function useStoreDeferredState<
 ): Result;
 
 /**
+ * A React Hook that combines `useStoreState` with `useOptimistic`, allowing
+ * components to optimistically update derived state during a pending action.
+ *
+ * Returns a tuple of `[optimisticState, addOptimistic]`. The optimistic value
+ * is shown until the underlying store state next changes (typically when the
+ * pending action completes), at which point it resets to reflect the real
+ * store value.
+ *
+ * Note: you can create a pre-typed version of this hook via "createTypedHooks"
+ *
+ * @example
+ *
+ * import { useStoreOptimistic, State } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const [items, addOptimistic] = useStoreOptimistic(
+ *     (state: State<StoreModel>) => state.todos.items,
+ *     (current, pending: Todo) => [...current, pending],
+ *   );
+ *   return <TodoList items={items} onAdd={addOptimistic} />;
+ * }
+ */
+export function useStoreOptimistic<
+  StoreState extends State<any> = State<{}>,
+  Result = any,
+  Optimistic = Result,
+>(
+  mapState: (state: StoreState) => Result,
+  updateFn: (current: Result, optimisticValue: Optimistic) => Result,
+): [Result, (optimisticValue: Optimistic) => void];
+
+/**
  * A utility function used to create pre-typed hooks.
  *
  * https://easypeasy.now.sh/docs/api/create-typed-hooks.html
@@ -999,6 +1031,10 @@ export function createTypedHooks<StoreModel extends object = {}>(): {
     mapState: (state: State<StoreModel>) => Result,
     equalityFn?: (prev: Result, next: Result) => boolean,
   ) => Result;
+  useStoreOptimistic: <Result, Optimistic = Result>(
+    mapState: (state: State<StoreModel>) => Result,
+    updateFn: (current: Result, optimisticValue: Optimistic) => Result,
+  ) => [Result, (optimisticValue: Optimistic) => void];
 };
 
 // #endregion
@@ -1071,6 +1107,10 @@ export function createContextStore<
     mapState: (state: State<StoreModel>) => Result,
     equalityFn?: (prev: Result, next: Result) => boolean,
   ) => Result;
+  useStoreOptimistic: <Result = any, Optimistic = Result>(
+    mapState: (state: State<StoreModel>) => Result,
+    updateFn: (current: Result, optimisticValue: Optimistic) => Result,
+  ) => [Result, (optimisticValue: Optimistic) => void];
 };
 
 export function useLocalStore<
