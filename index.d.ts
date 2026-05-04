@@ -918,6 +918,59 @@ export function useStoreDispatch<
 >(): Dispatch<StoreModel>;
 
 /**
+ * A React Hook that wraps action dispatches in `startTransition`, marking the
+ * resulting state updates as non-urgent so they do not block higher-priority
+ * updates such as user input.
+ *
+ * Returns a tuple of `[wrappedActions, isPending]`. `wrappedActions` mirrors
+ * the shape returned by the `mapActions` selector — function leaves are
+ * wrapped to dispatch within `startTransition`.
+ *
+ * Note: you can create a pre-typed version of this hook via "createTypedHooks"
+ *
+ * @example
+ *
+ * import { useStoreTransition, Actions } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const [addTodo, isPending] = useStoreTransition(
+ *     (actions: Actions<StoreModel>) => actions.todos.add,
+ *   );
+ *   return <AddTodoForm save={addTodo} pending={isPending} />;
+ * }
+ */
+export function useStoreTransition<
+  StoreActions extends Actions<any> = Actions<{}>,
+  Result = any,
+>(mapActions: (actions: StoreActions) => Result): [Result, boolean];
+
+/**
+ * A React Hook that combines `useStoreState` with `useDeferredValue`, allowing
+ * React to keep returning the previous selected value while a new value is
+ * being computed for an expensive selector.
+ *
+ * Note: you can create a pre-typed version of this hook via "createTypedHooks"
+ *
+ * @example
+ *
+ * import { useStoreDeferredState, State } from 'easy-peasy';
+ *
+ * function MyComponent() {
+ *   const results = useStoreDeferredState(
+ *     (state: State<StoreModel>) => expensiveSelect(state),
+ *   );
+ *   return <Results items={results} />;
+ * }
+ */
+export function useStoreDeferredState<
+  StoreState extends State<any> = State<{}>,
+  Result = any,
+>(
+  mapState: (state: StoreState) => Result,
+  equalityFn?: (prev: Result, next: Result) => boolean,
+): Result;
+
+/**
  * A utility function used to create pre-typed hooks.
  *
  * https://easypeasy.now.sh/docs/api/create-typed-hooks.html
@@ -939,6 +992,13 @@ export function createTypedHooks<StoreModel extends object = {}>(): {
     equalityFn?: (prev: Result, next: Result) => boolean,
   ) => Result;
   useStore: () => Store<StoreModel>;
+  useStoreTransition: <Result>(
+    mapActions: (actions: Actions<StoreModel>) => Result,
+  ) => [Result, boolean];
+  useStoreDeferredState: <Result>(
+    mapState: (state: State<StoreModel>) => Result,
+    equalityFn?: (prev: Result, next: Result) => boolean,
+  ) => Result;
 };
 
 // #endregion
@@ -1004,6 +1064,13 @@ export function createContextStore<
   ) => Result;
   useStoreDispatch: () => Dispatch<StoreModel>;
   useStoreRehydrated: () => boolean;
+  useStoreTransition: <Result = any>(
+    mapActions: (actions: Actions<StoreModel>) => Result,
+  ) => [Result, boolean];
+  useStoreDeferredState: <Result = any>(
+    mapState: (state: State<StoreModel>) => Result,
+    equalityFn?: (prev: Result, next: Result) => boolean,
+  ) => Result;
 };
 
 export function useLocalStore<
