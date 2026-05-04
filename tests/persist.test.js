@@ -937,20 +937,28 @@ test('useStoreRehydrated', async () => {
   const store = sharedMakeStore({
     storage: memoryStorage,
   });
+  function Loaded() {
+    useStoreRehydrated();
+    return <div>Loaded</div>;
+  }
   function App() {
-    const rehydrated = useStoreRehydrated();
     return (
       <div>
         <h1>App Title</h1>
-        {rehydrated ? <div>Loaded</div> : <p>Loading...</p>}
+        <React.Suspense fallback={<p>Loading...</p>}>
+          <Loaded />
+        </React.Suspense>
       </div>
     );
   }
-  const wrapper = render(
-    <StoreProvider store={store}>
-      <App />
-    </StoreProvider>,
-  );
+  let wrapper;
+  await act(async () => {
+    wrapper = render(
+      <StoreProvider store={store}>
+        <App />
+      </StoreProvider>,
+    );
+  });
 
   // ASSERT
   expect(wrapper.queryByText('Loading...')).not.toBeNull();
@@ -968,41 +976,36 @@ test('useStoreRehydrated', async () => {
 
 test('useStoreRehydrated + createContextStore', async () => {
   // ARRANGE
-  const memoryStorage = createMemoryStorage(undefined, { async: true });
-  const store = sharedMakeStore({
-    storage: memoryStorage,
-  });
-
   const MyContextStore = createContextStore({
     foo: 'bar',
   });
 
+  function Loaded() {
+    MyContextStore.useStoreRehydrated();
+    return <div>Loaded</div>;
+  }
+
   function App() {
-    const rehydrated = MyContextStore.useStoreRehydrated();
     return (
       <div>
         <h1>App Title</h1>
-        {rehydrated ? <div>Loaded</div> : <p>Loading...</p>}
+        <React.Suspense fallback={<p>Loading...</p>}>
+          <Loaded />
+        </React.Suspense>
       </div>
     );
   }
 
-  const wrapper = render(
-    <MyContextStore.Provider>
-      <App />
-    </MyContextStore.Provider>,
-  );
-
-  // ASSERT
-  expect(wrapper.queryByText('Loading...')).not.toBeNull();
-  expect(wrapper.queryByText('Loaded')).toBeNull();
-
-  // ACT
+  let wrapper;
   await act(async () => {
-    await store.persist.resolveRehydration();
+    wrapper = render(
+      <MyContextStore.Provider>
+        <App />
+      </MyContextStore.Provider>,
+    );
   });
 
-  // ASSERT
+  // ASSERT (resolves immediately for non-persisted store)
   expect(wrapper.queryByText('Loading...')).toBeNull();
   expect(wrapper.queryByText('Loaded')).not.toBeNull();
 });

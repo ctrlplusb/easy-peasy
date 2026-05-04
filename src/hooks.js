@@ -1,11 +1,11 @@
 import {
+  use,
   useContext,
   useDebugValue,
   useDeferredValue,
   useEffect,
   useMemo,
   useRef,
-  useState,
   useSyncExternalStore,
   useTransition,
 } from 'react';
@@ -200,11 +200,8 @@ export function useStore() {
 export function createStoreRehydratedHook(Context) {
   return function useStoreRehydrated() {
     const store = useContext(Context);
-    const [rehydrated, setRehydrated] = useState(false);
-    useEffect(() => {
-      store.persist.resolveRehydration().then(() => setRehydrated(true));
-    }, []);
-    return rehydrated;
+    use(store.persist.resolveRehydration());
+    return true;
   };
 }
 
