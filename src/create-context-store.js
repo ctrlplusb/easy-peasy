@@ -3,9 +3,11 @@
 import React, { createContext, useContext } from 'react';
 import {
   createStoreActionsHook,
+  createStoreDeferredStateHook,
   createStoreDispatchHook,
   createStoreStateHook,
   createStoreRehydratedHook,
+  createStoreTransitionHook,
 } from './hooks';
 import { createStore } from './create-store';
 import { useMemoOne } from './lib';
@@ -58,5 +60,7 @@ export function createContextStore(model, config = {}) {
     useStoreActions: createStoreActionsHook(StoreContext),
     useStoreDispatch: createStoreDispatchHook(StoreContext),
     useStoreRehydrated: createStoreRehydratedHook(StoreContext),
+    useStoreTransition: createStoreTransitionHook(StoreContext),
+    useStoreDeferredState: createStoreDeferredStateHook(StoreContext),
   };
 }
