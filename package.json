@@ -14,6 +14,11 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs.js"
     },
+    "./server": {
+      "types": "./server.d.ts",
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs.js"
+    },
     "./map-set-support": "./map-set-support.js",
     "./proxy-polyfill": "./proxy-polyfill.js"
   },
@@ -21,6 +26,7 @@
     "dist",
     "src",
     "index.d.ts",
+    "server.d.ts",
     "proxy-polyfill.js",
     "proxy-polyfill.d.ts",
     "map-set-support.js",
