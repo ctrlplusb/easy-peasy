@@ -78,10 +78,10 @@
     "@types/react": "^19.0.8"
   },
   "peerDependencies": {
-    "@types/react": "^18.0 || ^19.0",
-    "@types/react-dom": "^18.0 || ^19.0",
-    "react": "^18.0 || ^19.0",
-    "react-dom": "^18.0 || ^19.0",
+    "@types/react": "^19.0",
+    "@types/react-dom": "^19.0",
+    "react": "^19.0",
+    "react-dom": "^19.0",
     "react-native": ">=0.59"
   },
   "peerDependenciesMeta": {
