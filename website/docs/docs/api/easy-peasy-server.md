@@ -11,6 +11,11 @@ hooks or the `StoreProvider`**. That means you can build a store, dispatch
 actions, read state, and serialise the result on the server without pulling
 React into your bundle.
 
+> For end-to-end App Router patterns (where to put `'use client'`, how to
+> avoid the module-scope store trap, snapshot-then-hydrate), see the
+> [Usage with RSC / Next App Router](/docs/recipes/usage-with-rsc-and-next-app-router.html)
+> recipe.
+
 ## What is exported
 
 The subpath re-exports the following from the main entry:

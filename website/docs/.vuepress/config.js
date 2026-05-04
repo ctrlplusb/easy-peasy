@@ -138,6 +138,7 @@ module.exports = {
             'recipes/interop-with-existing-react-redux-app',
             'recipes/react-native-devtools',
             'recipes/usage-with-react-redux',
+            'recipes/usage-with-rsc-and-next-app-router',
           ],
         },
         {

@@ -210,7 +210,11 @@ import { createStore, action } from 'easy-peasy/server';
 ```
 
 See the [reference docs](/docs/api/easy-peasy-server.html) for more, including
-an end-to-end RSC + client-hydration example.
+an end-to-end RSC + client-hydration example. For App Router specifics —
+where to put `'use client'`, the per-request store rule, and Suspense +
+streaming behaviour — see the
+[Usage with RSC / Next App Router](/docs/recipes/usage-with-rsc-and-next-app-router.html)
+recipe.
 
 ## Internal changes worth knowing
 
