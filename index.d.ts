@@ -1024,6 +1024,7 @@ export function createTypedHooks<StoreModel extends object = {}>(): {
     equalityFn?: (prev: Result, next: Result) => boolean,
   ) => Result;
   useStore: () => Store<StoreModel>;
+  useStoreRehydrated: () => boolean;
   useStoreTransition: <Result>(
     mapActions: (actions: Actions<StoreModel>) => Result,
   ) => [Result, boolean];
