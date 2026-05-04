@@ -97,8 +97,7 @@
     "immer": "^9.0.21",
     "redux": "^5.0.1",
     "redux-thunk": "^3.1.0",
-    "ts-toolbelt": "^9.6.0",
-    "use-sync-external-store": "^1.4.0"
+    "ts-toolbelt": "^9.6.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",

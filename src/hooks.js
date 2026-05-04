@@ -1,15 +1,95 @@
-import { useContext, useDebugValue, useEffect, useState } from 'react';
+import {
+  useContext,
+  useDebugValue,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import EasyPeasyContext from './context';
 
-const useNotInitialized = () => {
-  throw new Error('uSES not initialized!');
-};
-let useSyncExternalStoreWithSelector = useNotInitialized;
-export const initializeUseStoreState = (fn) => {
-  useSyncExternalStoreWithSelector = fn;
-};
-
 const refEquality = (a, b) => a === b;
+
+function useSyncExternalStoreWithSelector(
+  subscribe,
+  getSnapshot,
+  getServerSnapshot,
+  selector,
+  isEqual,
+) {
+  const instRef = useRef(null);
+  let inst;
+  if (instRef.current === null) {
+    inst = { hasValue: false, value: null };
+    instRef.current = inst;
+  } else {
+    inst = instRef.current;
+  }
+
+  const [getSelection, getServerSelection] = useMemo(() => {
+    let hasMemo = false;
+    let memoizedSnapshot;
+    let memoizedSelection;
+    const memoizedSelector = (nextSnapshot) => {
+      if (!hasMemo) {
+        hasMemo = true;
+        memoizedSnapshot = nextSnapshot;
+        const nextSelection = selector(nextSnapshot);
+        if (isEqual !== undefined && inst.hasValue) {
+          const currentSelection = inst.value;
+          if (isEqual(currentSelection, nextSelection)) {
+            memoizedSelection = currentSelection;
+            return currentSelection;
+          }
+        }
+        memoizedSelection = nextSelection;
+        return nextSelection;
+      }
+
+      const prevSnapshot = memoizedSnapshot;
+      const prevSelection = memoizedSelection;
+
+      if (Object.is(prevSnapshot, nextSnapshot)) {
+        return prevSelection;
+      }
+
+      const nextSelection = selector(nextSnapshot);
+
+      if (isEqual !== undefined && isEqual(prevSelection, nextSelection)) {
+        memoizedSnapshot = nextSnapshot;
+        return prevSelection;
+      }
+
+      memoizedSnapshot = nextSnapshot;
+      memoizedSelection = nextSelection;
+      return nextSelection;
+    };
+
+    const getSnapshotWithSelector = () => memoizedSelector(getSnapshot());
+    const getServerSnapshotWithSelector =
+      getServerSnapshot == null
+        ? undefined
+        : () => memoizedSelector(getServerSnapshot());
+
+    return [getSnapshotWithSelector, getServerSnapshotWithSelector];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getSnapshot, getServerSnapshot, selector, isEqual]);
+
+  const value = useSyncExternalStore(
+    subscribe,
+    getSelection,
+    getServerSelection,
+  );
+
+  useEffect(() => {
+    inst.hasValue = true;
+    inst.value = value;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value]);
+
+  return value;
+}
 
 export function createStoreStateHook(Context) {
   return function useStoreState(mapState, equalityFn = refEquality) {
@@ -31,19 +111,10 @@ export function createStoreStateHook(Context) {
 
     const store = useContext(Context);
 
-    /*
-    function useSyncExternalStoreWithSelector<Snapshot, Selection>(
-        subscribe: (onStoreChange: () => void) => () => void,
-        getSnapshot: () => Snapshot,
-        getServerSnapshot: undefined | null | (() => Snapshot),
-        selector: (snapshot: Snapshot) => Selection,
-        isEqual?: (a: Selection, b: Selection) => boolean,
-    ): Selection;
-    */
     const selectedState = useSyncExternalStoreWithSelector(
       store.subscribe,
       store.getState,
-      store.getState, // getServerSnapshot = getState
+      store.getState,
       mapState,
       equalityFn,
     );
