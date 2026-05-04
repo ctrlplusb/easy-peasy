@@ -5,6 +5,7 @@ import {
   useDeferredValue,
   useEffect,
   useMemo,
+  useOptimistic,
   useRef,
   useSyncExternalStore,
   useTransition,
@@ -184,6 +185,17 @@ export function createStoreDeferredStateHook(Context) {
 export const useStoreDeferredState =
   createStoreDeferredStateHook(EasyPeasyContext);
 
+export function createStoreOptimisticHook(Context) {
+  const useStoreStateForContext = createStoreStateHook(Context);
+  return function useStoreOptimistic(mapState, updateFn) {
+    const value = useStoreStateForContext(mapState);
+    return useOptimistic(value, updateFn);
+  };
+}
+
+export const useStoreOptimistic =
+  createStoreOptimisticHook(EasyPeasyContext);
+
 export function createStoreDispatchHook(Context) {
   return function useStoreDispatch() {
     const store = useContext(Context);
@@ -216,5 +228,6 @@ export function createTypedHooks() {
     useStore,
     useStoreTransition,
     useStoreDeferredState,
+    useStoreOptimistic,
   };
 }

@@ -5,6 +5,7 @@ import {
   createStoreActionsHook,
   createStoreDeferredStateHook,
   createStoreDispatchHook,
+  createStoreOptimisticHook,
   createStoreStateHook,
   createStoreRehydratedHook,
   createStoreTransitionHook,
@@ -62,5 +63,6 @@ export function createContextStore(model, config = {}) {
     useStoreRehydrated: createStoreRehydratedHook(StoreContext),
     useStoreTransition: createStoreTransitionHook(StoreContext),
     useStoreDeferredState: createStoreDeferredStateHook(StoreContext),
+    useStoreOptimistic: createStoreOptimisticHook(StoreContext),
   };
 }
