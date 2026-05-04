@@ -1,11 +1,13 @@
 import {
   useContext,
   useDebugValue,
+  useDeferredValue,
   useEffect,
   useMemo,
   useRef,
   useState,
   useSyncExternalStore,
+  useTransition,
 } from 'react';
 import EasyPeasyContext from './context';
 
@@ -136,6 +138,52 @@ export function createStoreActionsHook(Context) {
 
 export const useStoreActions = createStoreActionsHook(EasyPeasyContext);
 
+function wrapInTransition(target, startTransition) {
+  if (typeof target === 'function') {
+    return (...args) => {
+      let result;
+      startTransition(() => {
+        result = target(...args);
+      });
+      return result;
+    };
+  }
+  if (target !== null && typeof target === 'object') {
+    const wrapped = {};
+    for (const key of Object.keys(target)) {
+      wrapped[key] = wrapInTransition(target[key], startTransition);
+    }
+    return wrapped;
+  }
+  return target;
+}
+
+export function createStoreTransitionHook(Context) {
+  return function useStoreTransition(mapActions) {
+    const store = useContext(Context);
+    const [isPending, startTransition] = useTransition();
+    const actions = mapActions(store.getActions());
+    const wrappedActions = useMemo(
+      () => wrapInTransition(actions, startTransition),
+      [actions, startTransition],
+    );
+    return [wrappedActions, isPending];
+  };
+}
+
+export const useStoreTransition = createStoreTransitionHook(EasyPeasyContext);
+
+export function createStoreDeferredStateHook(Context) {
+  const useStoreStateForContext = createStoreStateHook(Context);
+  return function useStoreDeferredState(mapState, equalityFn) {
+    const value = useStoreStateForContext(mapState, equalityFn);
+    return useDeferredValue(value);
+  };
+}
+
+export const useStoreDeferredState =
+  createStoreDeferredStateHook(EasyPeasyContext);
+
 export function createStoreDispatchHook(Context) {
   return function useStoreDispatch() {
     const store = useContext(Context);
@@ -169,5 +217,7 @@ export function createTypedHooks() {
     useStoreState,
     useStoreRehydrated,
     useStore,
+    useStoreTransition,
+    useStoreDeferredState,
   };
 }
