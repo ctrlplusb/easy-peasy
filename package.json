@@ -34,6 +34,9 @@
     "url": "https://github.com/ctrlplusb/easy-peasy.git"
   },
   "homepage": "https://easy-peasy.dev",
+  "bugs": {
+    "url": "https://github.com/ctrlplusb/easy-peasy/issues"
+  },
   "contributors": [
     {
       "name": "Sean Matheson",
